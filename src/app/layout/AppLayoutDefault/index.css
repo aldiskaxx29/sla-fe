@@ -1,0 +1,20 @@
+.my-custom-select-on .ant-select-selector {
+  background-color: #A6AEC1 !important;
+  border-radius: 24px;
+  border: none !important;
+  color: white !important;
+}
+
+.my-custom-select-off .ant-select-selector {
+  background-color: #576278 !important;
+  border-radius: 24px;
+  border: none !important;
+  color:  #C6C6C6!important
+}
+
+.my-custom-select-on .ant-select-selector .ant-select-selection-item {
+  width: 150px;
+}
+.my-custom-select-off .ant-select-selector .ant-select-selection-item {
+  width: 150px;
+}
