@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import { debounce } from "@/plugins/utils/lodash";
-import { RegionKPI } from "../../pages/Dashboard/components/QualityHealthinessMenu";
 import { bbox } from "@turf/turf";
 import "./style.css";
 
 import telkomselLogo from "@/assets/mobile-operator/telkomsel.png";
 import xlLogo from "@/assets/mobile-operator/xl.png";
+import { RegionKPI } from "@/modules/quality-healthiness/pages/QualityHealthinessPage";
 
 const source = {
   region: "region-source",
@@ -187,7 +187,26 @@ const index: React.FC<MapMapProps> = ({ filter, data, geojson }) => {
           "fill-color": [
             "case",
             ["boolean", ["feature-state", "hover"], false],
-            "#58a4a4",
+            [
+              "case",
+              ["==", ["get", "region"], "KALIMANTAN"],
+              "#d4af00",
+              [
+                "in",
+                ["get", "region"],
+                ["literal", ["SUMBAGUT", "MALUKU DAN PAPUA"]],
+              ],
+              "#990000",
+              "#2b7a78",
+            ],
+            ["==", ["get", "region"], "KALIMANTAN"],
+            "#ffff00",
+            [
+              "in",
+              ["get", "region"],
+              ["literal", ["SUMBAGUT", "MALUKU DAN PAPUA"]],
+            ],
+            "#ff0000",
             "#38a6a5",
           ],
           "fill-opacity": 0.65,
