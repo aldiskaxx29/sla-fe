@@ -263,21 +263,21 @@ function Dashboard() {
       )}
       {menu.key === "monday" && (
         <iframe
-          src="http://10.60.174.187:90/mondaymonitoring/"
+          src="/mondaymonitoring/"
           title="Monday Monitoring Dashboard"
           className="w-full min-h-[100vh]"
         />
       )}
       {menu.key === "one" && (
         <iframe
-          src="http://10.62.175.157/one/main-v2"
+          src="/one/"
           title="One Visibility Dashboard"
           className="w-full min-h-[100vh]"
         />
       )}
       {menu.key === "ticket" && (
         <iframe
-          src="http://10.60.174.187:90/ticket_quality_v3/"
+          src="/ticket/"
           title="One Visibility Dashboard"
           className="w-full min-h-[100vh]"
         />
