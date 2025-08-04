@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import { debounce } from "@/plugins/utils/lodash";
-import { RegionKPI } from "../../pages/Dashboard/components/QualityHealthinessMenu";
 import { bbox } from "@turf/turf";
 import "./style.css";
 
 import telkomselLogo from "@/assets/mobile-operator/telkomsel.png";
 import xlLogo from "@/assets/mobile-operator/xl.png";
+import { RegionKPI } from "@/modules/quality-healthiness/pages/QualityHealthinessPage";
 
 const source = {
   region: "region-source",
@@ -187,7 +187,26 @@ const index: React.FC<MapMapProps> = ({ filter, data, geojson }) => {
           "fill-color": [
             "case",
             ["boolean", ["feature-state", "hover"], false],
-            "#58a4a4",
+            [
+              "case",
+              ["==", ["get", "region"], "KALIMANTAN"],
+              "#d4af00",
+              [
+                "in",
+                ["get", "region"],
+                ["literal", ["SUMBAGUT", "MALUKU DAN PAPUA"]],
+              ],
+              "#990000",
+              "#2b7a78",
+            ],
+            ["==", ["get", "region"], "KALIMANTAN"],
+            "#ffff00",
+            [
+              "in",
+              ["get", "region"],
+              ["literal", ["SUMBAGUT", "MALUKU DAN PAPUA"]],
+            ],
+            "#ff0000",
             "#38a6a5",
           ],
           "fill-opacity": 0.65,
@@ -208,65 +227,65 @@ const index: React.FC<MapMapProps> = ({ filter, data, geojson }) => {
     }
   }, [isMapLoaded, geojson.region]);
 
-  useEffect(() => {
-    if (!isMapLoaded || !mapRef.current || !data || !geojson.region) return;
+  // useEffect(() => {
+  //   if (!isMapLoaded || !mapRef.current || !data || !geojson.region) return;
 
-    const map = mapRef.current;
+  //   const map = mapRef.current;
 
-    // Clear existing markers
-    markersRef.current.forEach((marker) => marker.remove());
-    markersRef.current = [];
+  //   // Clear existing markers
+  //   markersRef.current.forEach((marker) => marker.remove());
+  //   markersRef.current = [];
 
-    // Wait for map to be fully loaded and idle
-    const addMarkers = () => {
-      geojson.region?.features.forEach((feature: GeoJSON.Feature) => {
-        // ✅ Get centroid using turf (more accurate)
-        const center: [number, number] = [
-          feature.properties?.longitude as number,
-          feature.properties?.latitude as number,
-        ];
+  //   // Wait for map to be fully loaded and idle
+  //   const addMarkers = () => {
+  //     geojson.region?.features.forEach((feature: GeoJSON.Feature) => {
+  //       // ✅ Get centroid using turf (more accurate)
+  //       const center: [number, number] = [
+  //         feature.properties?.longitude as number,
+  //         feature.properties?.latitude as number,
+  //       ];
 
-        const regionName = (feature.properties?.region ?? "").toUpperCase();
+  //       const regionName = (feature.properties?.region ?? "").toUpperCase();
 
-        const regionData = data.find(
-          (d) => d.region.toUpperCase() === regionName
-        );
-        if (!regionData) return;
+  //       const regionData = data.find(
+  //         (d) => d.region.toUpperCase() === regionName
+  //       );
+  //       if (!regionData) return;
 
-        const winnerOperator = regionData.operator;
+  //       const winnerOperator = regionData.operator;
 
-        let logoUrl = "";
-        if (winnerOperator === "telkomsel") logoUrl = telkomselLogo;
-        if (winnerOperator === "xl") logoUrl = xlLogo;
+  //       let logoUrl = "";
+  //       if (winnerOperator === "telkomsel") logoUrl = telkomselLogo;
+  //       if (winnerOperator === "xl") logoUrl = xlLogo;
 
-        if (!logoUrl) return;
+  //       if (!logoUrl) return;
 
-        const marker = new mapboxgl.Marker({
-          element: createFlagMarker(logoUrl, "WINNER"),
-          anchor: "bottom-left",
-        })
-          .setLngLat(center)
-          .addTo(map);
+  //       const marker = new mapboxgl.Marker({
+  //         element: createFlagMarker(logoUrl, "WINNER"),
+  //         anchor: "bottom-left",
+  //       })
+  //         .setLngLat(center)
+  //         .addTo(map);
 
-        // Store marker for cleanup
-        markersRef.current.push(marker);
-      });
-    };
+  //       // Store marker for cleanup
+  //       markersRef.current.push(marker);
+  //     });
+  //   };
 
-    // Ensure map is fully loaded before adding markers
-    if (map.loaded()) {
-      // Small delay to ensure everything is rendered
-      setTimeout(addMarkers, 100);
-    } else {
-      map.once("idle", addMarkers);
-    }
+  //   // Ensure map is fully loaded before adding markers
+  //   if (map.loaded()) {
+  //     // Small delay to ensure everything is rendered
+  //     setTimeout(addMarkers, 100);
+  //   } else {
+  //     map.once("idle", addMarkers);
+  //   }
 
-    // Cleanup function
-    return () => {
-      markersRef.current.forEach((marker) => marker.remove());
-      markersRef.current = [];
-    };
-  }, [isMapLoaded, data, geojson.region]);
+  //   // Cleanup function
+  //   return () => {
+  //     markersRef.current.forEach((marker) => marker.remove());
+  //     markersRef.current = [];
+  //   };
+  // }, [isMapLoaded, data, geojson.region]);
 
   useEffect(() => {
     if (!isMapLoaded || !geojson.region) return;
