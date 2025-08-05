@@ -16,7 +16,7 @@ const DetailParameter = lazy(
 const useDashboardRouter = (): RouteObject[] => {
   return [
     {
-      path: "sla/:menuId",
+      path: ":menuId",
       element: (
         <AppRouteGuard>
           <Dashboard />

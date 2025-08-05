@@ -179,7 +179,7 @@ const TableCNOP = ({ data }) => {
     const parameter = data.parameter.toLowerCase().replace("packetloss", "pl");
 
     setLoading(false);
-    navigate(`/back-office/dashboard/cnop/${parameter}`);
+    navigate(`/dashboard/cnop/${parameter}`);
   };
 
   return (

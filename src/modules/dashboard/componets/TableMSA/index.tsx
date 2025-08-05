@@ -33,7 +33,7 @@ const TableMSA: React.FC<TableMSAProps> = ({ columns, dataSource }) => {
     const parameter = data.parameter.replace("packetloss", "pl");
 
     setLoading(false);
-    navigate(`/back-office/dashboard/msa/${parameter}`);
+    navigate(`/dashboard/msa/${parameter}`);
   };
   return (
     <div>

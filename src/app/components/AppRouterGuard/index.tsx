@@ -72,7 +72,7 @@ const AppRouteGuard = ({ children, permissible }: IAppRouteGuardProps) => {
     auth_authenticatedUser?.id &&
     (isAuthRoute || location.pathname === "/")
   ) {
-    return <Navigate to={`/back-office/${readPermissions[0]}/msa`} replace />;
+    return <Navigate to={`/msa`} replace />;
   }
 
   if (!permissible && permissible !== undefined) {

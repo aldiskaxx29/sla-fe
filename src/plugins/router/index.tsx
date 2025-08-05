@@ -49,7 +49,7 @@ const useRouter = () => {
       children: [...auth],
     },
     {
-      path: "back-office",
+      path: "",
       element: <AppLayoutDefault />,
       children: [
         ...dashboard,

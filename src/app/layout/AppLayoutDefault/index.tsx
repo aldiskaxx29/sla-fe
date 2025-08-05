@@ -33,7 +33,7 @@ const AppLayoutDefault = () => {
   const handleMenuSelect = (menu: string) => {
     setType(menu);
     console.log(menu);
-    window.location.href = `/back-office/${menu}`; // Update URL on menu click
+    window.location.href = `/${menu}`; // Update URL on menu click
   };
 
   const titleNavigation = useMemo(() => {
@@ -55,10 +55,10 @@ const AppLayoutDefault = () => {
     // { label: "Quality Healthiness", value: "network/quality" },
   ];
   const slaOpt = [
-    { label: "Achievement MSA", value: "sla/msa" },
-    { label: "Achievement CNOP", value: "sla/cnop" },
-    { label: "Reconsiliation", value: "sla/input-site" },
-    { label: "Report Reconsilation", value: "sla/report-site" },
+    { label: "Achievement MSA", value: "msa" },
+    { label: "Achievement CNOP", value: "cnop" },
+    { label: "Reconsiliation", value: "input-site" },
+    { label: "Report Reconsilation", value: "report-site" },
   ];
 
   const [open1, setOpen1] = useState(false);
