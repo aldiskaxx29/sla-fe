@@ -14,7 +14,7 @@ const ReportSite = lazy(() => import("@/modules/site/pages/ReportSitePage"));
 const useSiteRouter = (): RouteObject[] => {
   return [
     {
-      path: "sla/input-site",
+      path: "input-site",
       element: (
         <AppRouteGuard>
           <InputSite />
@@ -22,7 +22,7 @@ const useSiteRouter = (): RouteObject[] => {
       ),
     },
     {
-      path: "sla/report-site",
+      path: "report-site",
       element: (
         <AppRouteGuard>
           <ReportSite />
