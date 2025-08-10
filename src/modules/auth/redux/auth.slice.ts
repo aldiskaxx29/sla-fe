@@ -1,30 +1,66 @@
-// Redux Toolkit
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-// Constant
-import { AUTH_SLICE_INITIAL_STATE } from "../constant/auth-slice.constant";
+import { IAuthAuthenticatedUser } from "../types/auth.interface";
 
-// Interfaces
-import { IAuthAuthenticatedUser } from "../interfaces/auth.interface";
+interface AuthState {
+  auth_authenticatedUser: IAuthAuthenticatedUser | null;
+  isAuthenticated: boolean;
+}
+
+const getUserFromStorage = (): IAuthAuthenticatedUser | null => {
+  try {
+    const userData = localStorage.getItem("user_data");
+    const accessToken = localStorage.getItem("access_token");
+
+    if (userData && accessToken) {
+      const parsedData = JSON.parse(userData);
+      return {
+        ...parsedData,
+        access_token: accessToken,
+      };
+    }
+    return null;
+  } catch (error) {
+    console.error("Error parsing user data from localStorage:", error);
+    return null;
+  }
+};
+
+const AUTH_SLICE_INITIAL_STATE: AuthState = {
+  auth_authenticatedUser: getUserFromStorage(),
+  isAuthenticated: !!localStorage.getItem("access_token"),
+};
 
 const auth = createSlice({
   name: "auth",
   initialState: AUTH_SLICE_INITIAL_STATE,
   reducers: {
-    auth_SET_AUTHENTICATED_USER: (
+    authSetAuthenticatedUser: (
       state,
       { payload }: PayloadAction<IAuthAuthenticatedUser>
     ): void => {
       state.auth_authenticatedUser = payload;
+      state.isAuthenticated = true;
     },
-    auth_LOGOUT: (state) => {
-      state.auth_authenticatedUser =
-        AUTH_SLICE_INITIAL_STATE.auth_authenticatedUser;
+    authLogout: (state) => {
+      state.auth_authenticatedUser = null;
+      state.isAuthenticated = false;
+    },
+    authInitializeFromStorage: (state) => {
+      const userData = getUserFromStorage();
+      const hasToken = !!localStorage.getItem("access_token");
+
+      state.auth_authenticatedUser = userData;
+      state.isAuthenticated = hasToken;
     },
   },
 });
 
 // Mutations
-export const { auth_SET_AUTHENTICATED_USER, auth_LOGOUT } = auth.actions;
+export const {
+  authSetAuthenticatedUser,
+  authLogout,
+  authInitializeFromStorage,
+} = auth.actions;
 
 export default auth.reducer;

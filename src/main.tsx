@@ -6,6 +6,7 @@ import { Provider } from "react-redux";
 import { store } from "./plugins/redux";
 import { AppEntryPoint } from "./app/ui/index.ts";
 import { ToastContainer } from "react-toastify";
+import "mapbox-gl/dist/mapbox-gl.css";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

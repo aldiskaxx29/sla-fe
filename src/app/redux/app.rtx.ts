@@ -7,7 +7,7 @@ import type {
 } from "@reduxjs/toolkit/query";
 
 // Mutations
-import { auth_LOGOUT } from "@/modules/auth/redux/auth.slice";
+// import { auth_LOGOUT } from "@/modules/auth/redux/auth.slice";
 import { toast } from "react-toastify";
 
 const baseQuery = fetchBaseQuery({
@@ -28,7 +28,6 @@ const baseQueryWithReauth: BaseQueryFn<
   FetchBaseQueryError
 > = async (args, api, extraOptions) => {
   const result = await baseQuery(args, api, extraOptions);
-  console.log(result.error, "Pusat");
 
   if (result.error?.status && result.error?.originalStatus >= 400) {
     const { status, data } = result.error;
@@ -39,9 +38,9 @@ const baseQueryWithReauth: BaseQueryFn<
       `Request failed with status ${status}`;
     toast.error(msg);
   }
-  if (result.error?.status === 401) {
-    api.dispatch(auth_LOGOUT());
-  }
+  // if (result.error?.status === 401) {
+  //   api.dispatch(auth_LOGOUT());
+  // }
   return result;
 };
 

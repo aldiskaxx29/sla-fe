@@ -5,7 +5,7 @@ import { RouteObject } from "react-router-dom";
 import { AppRouteGuard } from "@/app/components";
 
 const QualityHealthinessPage = lazy(
-  () => import("../pages/QualityHealthinessPage")
+  () => import("@/modules/quality-healthiness/pages/QualityHealthinessPage")
 );
 const useQualityHealthinessRouter = (): RouteObject[] => {
   return [

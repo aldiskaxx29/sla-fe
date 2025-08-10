@@ -78,7 +78,7 @@ function createFlagMarker(logoUrl: string, text: string) {
   return wrapper;
 }
 
-const index: React.FC<MapMapProps> = ({ filter, data, geojson }) => {
+const Index: React.FC<MapMapProps> = ({ filter, data, geojson }) => {
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const mapWrapper = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
@@ -136,33 +136,6 @@ const index: React.FC<MapMapProps> = ({ filter, data, geojson }) => {
     resizer.observe(mapWrapper.current);
     return () => resizer.disconnect();
   }, [isMapLoaded]);
-
-  useEffect(() => {
-    if (!isMapLoaded || filter.level !== "region" || !geojson.region) return;
-
-    const regionData = geojson.region.features.find(
-      (f) =>
-        f.properties?.region.toLowerCase() ===
-        (filter.location ?? "").toLowerCase()
-    );
-
-    if (regionData) {
-      const bboxData = bbox(regionData);
-      mapRef.current!.fitBounds(
-        [bboxData[0], bboxData[1], bboxData[2], bboxData[3]],
-        {
-          padding: 24,
-        }
-      );
-    } else {
-      mapRef.current?.flyTo({
-        center: baseIndonesiaMap.center,
-        duration: 1000,
-        essential: true,
-        zoom: baseIndonesiaMap.zoom,
-      });
-    }
-  }, [isMapLoaded, filter.location, filter.level, geojson.region]);
 
   // Map Region Layer
   useEffect(() => {
@@ -413,13 +386,45 @@ const index: React.FC<MapMapProps> = ({ filter, data, geojson }) => {
       tooltip.style.opacity = "0";
     }
 
+    function onClick(e: mapboxgl.MapMouseEvent) {
+      const feature = e.features?.[0];
+      if (!feature || !geojson.region) return;
+
+      const regionName = feature.properties?.region?.toLowerCase();
+      if (!regionName) return;
+
+      const regionData = geojson.region.features.find(
+        (f) => f.properties?.region.toLowerCase() === regionName
+      );
+
+      if (regionData) {
+        const bboxData = bbox(regionData);
+        mapRef.current!.fitBounds(
+          [bboxData[0], bboxData[1], bboxData[2], bboxData[3]],
+          {
+            padding: 24,
+            duration: 1000,
+          }
+        );
+      } else {
+        mapRef.current?.flyTo({
+          center: baseIndonesiaMap.center,
+          duration: 1000,
+          essential: true,
+          zoom: baseIndonesiaMap.zoom,
+        });
+      }
+    }
+
     const map = mapRef.current!;
     map.on("mousemove", onMouseMove);
     map.on("mouseleave", layer.regionMap, onMouseLeave);
+    map.on("click", layer.regionMap, onClick);
 
     return () => {
       map.off("mousemove", onMouseMove);
       map.off("mouseleave", layer.regionMap, onMouseLeave);
+      map.off("click", layer.regionMap, onClick);
       tooltip.remove();
     };
   }, [isMapLoaded, filter.level, geojson.region]);
@@ -433,4 +438,4 @@ const index: React.FC<MapMapProps> = ({ filter, data, geojson }) => {
   );
 };
 
-export default index;
+export default Index;

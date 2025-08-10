@@ -10,10 +10,19 @@ interface TableHistoryProps {
 }
 
 const TableHistory: React.FC<TableHistoryProps> = ({ dataSource }) => {
+  const dataSourceWithKeys = useMemo(() => {
+    return (
+      dataSource?.map((item, index) => ({
+        ...item,
+        key: item.key || item.id || `row-${index}`,
+      })) || []
+    );
+  }, [dataSource]);
+
   const columns = useMemo(() => {
     if (!dataSource) return [];
 
-    // 1) Static “region” / “parameter” / etc.
+    // 1) Static "region" / "parameter" / etc.
     const baseColumns = [
       { title: "No.", dataIndex: "no", key: "no", fixed: "left" },
       {
@@ -122,10 +131,11 @@ const TableHistory: React.FC<TableHistoryProps> = ({ dataSource }) => {
   return (
     <div>
       <Table
-        dataSource={dataSource}
+        dataSource={dataSourceWithKeys}
         bordered
         pagination={{ pageSize: 1000000, hideOnSinglePage: true }}
         className="rounded-xl "
+        rowKey="key"
       >
         {columns.map((column) =>
           column.children ? (
@@ -138,24 +148,21 @@ const TableHistory: React.FC<TableHistoryProps> = ({ dataSource }) => {
             >
               {column.children.map((child) => (
                 <Column
-                  key={child.dataIndex}
+                  key={child.key || child.dataIndex} // Ensure unique keys
                   title={child.title}
                   dataIndex={child.dataIndex}
                   width="fit-content"
                   align={child.align}
-                  // onHeaderCell={() => ({
-                  //   className: "!bg-blue-pacific",
-                  // })}
                   onHeaderCell={child.onHeaderCell}
                   fixed={child.fixed}
                   onCell={(_, index) => {
-                    const isLastTwo = index >= dataSource.length - 2;
+                    const isLastTwo = index >= dataSourceWithKeys.length - 2;
                     return {
                       className: isLastTwo ? "!bg-blue-pacific !p-3" : "!p-3",
                     };
                   }}
                   render={(text, record, index) => {
-                    const isLastTwo = index >= dataSource.length - 2;
+                    const isLastTwo = index >= dataSourceWithKeys.length - 2;
                     if (isLastTwo) {
                       return (
                         <span className={`${text ? "font-bold" : ""}`}>
@@ -218,7 +225,7 @@ const TableHistory: React.FC<TableHistoryProps> = ({ dataSource }) => {
             </ColumnGroup>
           ) : (
             <Column
-              key={column.dataIndex}
+              key={column.key || column.dataIndex}
               title={column.title}
               dataIndex={column.dataIndex}
               width={column.width}
@@ -228,13 +235,13 @@ const TableHistory: React.FC<TableHistoryProps> = ({ dataSource }) => {
               fixed={column.fixed}
               align={column.align}
               onCell={(_, index) => {
-                const isLastTwo = index >= dataSource.length - 2;
+                const isLastTwo = index >= dataSourceWithKeys.length - 2;
                 return {
                   className: isLastTwo ? "!bg-blue-pacific !p-3" : "!p-3",
                 };
               }}
               render={(text, record, index) => {
-                const isLastTwo = index >= dataSource.length - 2;
+                const isLastTwo = index >= dataSourceWithKeys.length - 2;
                 if (column.dataIndex === "parameter" && !isLastTwo) {
                   return <span>{snakeToPascal_Utils(text)}</span>;
                 }

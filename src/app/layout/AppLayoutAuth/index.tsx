@@ -1,22 +1,18 @@
-// React
-
-// Components
-import {
-  //   AppBaseLayout,
-  //   AppBaseLayoutContent,
-  AppRouteWrapper,
-} from "@/app/components";
+import { AppRouteWrapper } from "@/app/components";
+import loginBg from "@/assets/login-bg.jpg";
 
 const AppLayoutAuth = () => {
-  // Hook
   return (
-    <div className="flex h-[100vh]">
-      <div className="bg-red-500 w-full h-full">&nbsp;</div>
-      <div className="w-full h-full flex justify-center items-center">
-        <div className="w-2/3">
-          <p className="text-3xl text-center my-4 font-semibold">Login Page</p>
-          <AppRouteWrapper />
-        </div>
+    <div
+      className="min-h-screen flex items-center justify-center p-4 relative"
+      style={{
+        backgroundImage: `url(${loginBg})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
+    >
+      <div className="w-full max-w-md bg-white rounded-xl shadow-2xl p-8 relative z-10">
+        <AppRouteWrapper />
       </div>
     </div>
   );

@@ -20,24 +20,24 @@ const useAuthRouter = (): RouteObject[] => {
         </AppRouteGuard>
       ),
     },
-    {
-      path: "forgot-password",
-      element: (
-        <AppRouteGuard>
-          {/* <AuthForgotPassword /> */}
-          <div>forgot pasword</div>
-        </AppRouteGuard>
-      ),
-    },
-    {
-      path: "reset-password/:token",
-      element: (
-        <AppRouteGuard>
-          {/* <AuthResetPassword /> */}
-          <div>reset password</div>
-        </AppRouteGuard>
-      ),
-    },
+    // {
+    //   path: "forgot-password",
+    //   element: (
+    //     <AppRouteGuard>
+    //       {/* <AuthForgotPassword /> */}
+    //       <div>forgot pasword</div>
+    //     </AppRouteGuard>
+    //   ),
+    // },
+    // {
+    //   path: "reset-password/:token",
+    //   element: (
+    //     <AppRouteGuard>
+    //       {/* <AuthResetPassword /> */}
+    //       <div>reset password</div>
+    //     </AppRouteGuard>
+    //   ),
+    // },
   ];
 };
 
