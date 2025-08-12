@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useSite } from "../hooks/site.hooks";
-import { AppDropdown } from "@/app/components/AppDropdown";
+import AppDropdown from "@/app/components/AppDropdown";
 import { Button, Image, Spin, Upload } from "antd";
 import xlxsIcon from "@/assets/file-spreadsheet.svg";
 import { TableReportSite } from "../components/TableReportSite";
@@ -120,32 +120,32 @@ const SitePage = () => {
         <div className="flex gap-4">
           <AppDropdown
             title="Parameter"
-            className="w-full !h-11"
             placeholder="All"
             options={filterParameter}
-            setOption={setParameter}
-          ></AppDropdown>
+            onChange={(value) => setParameter(value)}
+            value={parameter}
+          />
           <AppDropdown
             title="Month"
-            className="w-full !h-11"
             placeholder="All"
             options={filterMonth}
-            setOption={setMonth}
-          ></AppDropdown>{" "}
+            onChange={(value) => setMonth(Number(value))}
+            value={month}
+          />
           <AppDropdown
             title="Week"
-            className="w-full !h-11"
             placeholder="All"
             options={filterWeek}
-            setOption={setWeek}
-          ></AppDropdown>
+            onChange={(value) => setWeek(value)}
+            value={week}
+          />
           <AppDropdown
             title="Year"
-            className="w-full !h-11"
             placeholder="All"
             options={filterYear}
-            setOption={setYear}
-          ></AppDropdown>
+            onChange={(value) => setYear(Number(value))}
+            value={year}
+          />
           <Upload>
             <Button
               onClick={() => {}}

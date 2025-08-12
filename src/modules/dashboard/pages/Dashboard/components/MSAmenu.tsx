@@ -6,7 +6,7 @@ import xlxsIcon from "@/assets/file-spreadsheet.svg";
 import ChartMSA from "@/modules/dashboard/componets/ChartMSA";
 import { TableHistory } from "@/modules/dashboard/componets/TableHistory";
 import { TableParentChild } from "@/modules/dashboard/componets/TableParentChild";
-import { AppDropdown } from "@/app/components/AppDropdown";
+import AppDropdown from "@/app/components/AppDropdown";
 
 const MSAmenu = ({
   dataSC,
@@ -77,7 +77,7 @@ const MSAmenu = ({
         </div>
         <div className="flex justify-between items-end my-4">
           <div className="flex gap-5">
-          <div className="flex bg-green-50 px-4 py-2 rounded-xl">
+            <div className="flex bg-green-50 px-4 py-2 rounded-xl">
               <Image src={checkIcon} alt="icon" width={36} preview={false} />
               <div className="ml-2 ">
                 <p className="text-sm text-primary-1 font-bold">
@@ -92,7 +92,7 @@ const MSAmenu = ({
               <Image src={warningIcon} alt="icon" width={36} preview={false} />
               <div className="ml-2 ">
                 <p className="text-sm text-primary-1 font-bold">
-                Compliances MSA
+                  Compliances MSA
                 </p>
                 <p className="text-base text-[#4B465C] medium">6/8 Parameter</p>
                 {/* <p className="text-base text-[#4B465C] medium">100%</p> */}
@@ -102,21 +102,22 @@ const MSAmenu = ({
               <Image src={warningIcon} alt="icon" width={36} preview={false} />
               <div className="ml-2">
                 <p className="text-sm text-primary-1 font-bold">
-                Compliances SLA CNOP 3.0
+                  Compliances SLA CNOP 3.0
                 </p>
-                <p className="text-base text-[#4B465C] medium">27/33 Parameter</p>
+                <p className="text-base text-[#4B465C] medium">
+                  27/33 Parameter
+                </p>
               </div>
             </div>
-            
           </div>
           <div className="flex gap-6">
             <AppDropdown
               title="Filter Treg"
-              className="w-full !h-11"
               placeholder="All"
               options={filterOptions}
-              setOption={handletreg}
-            ></AppDropdown>
+              onChange={(value) => handletreg(value)}
+              value={treg}
+            />
             <Button
               onClick={() => {}}
               className="!h-11 !px-3 py-2.5 !border-0 !rounded-full !bg-[#EDFFFD]"

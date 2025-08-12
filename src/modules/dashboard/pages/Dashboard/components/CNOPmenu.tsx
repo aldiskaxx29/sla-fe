@@ -6,7 +6,7 @@ import ChartMSA from "@/modules/dashboard/componets/ChartMSA";
 import { TableHistoryCNOP } from "@/modules/dashboard/componets/TableHistoryCNOP";
 import { snakeToPascal_Utils } from "@/app/utils/wording.utils";
 import { TableParentChildCNOP } from "@/modules/dashboard/componets/TableParentChildCNOP";
-import { AppDropdown } from "@/app/components/AppDropdown";
+import AppDropdown from "@/app/components/AppDropdown";
 import { useMemo } from "react";
 
 const CNOPmenu = ({
@@ -126,18 +126,18 @@ const CNOPmenu = ({
           <div className="flex gap-6">
             <AppDropdown
               title="Filter Treg"
-              className="w-full !h-11"
               placeholder="All"
               options={filterOptions}
-              setOption={handletreg}
-            ></AppDropdown>
+              onChange={(value) => handletreg(value)}
+              value={treg}
+            />
             <AppDropdown
               title="Filter By"
-              className="w-full !h-11"
               placeholder="All"
               options={filterBy}
-              setOption={handlefilter}
-            ></AppDropdown>
+              onChange={(value) => handlefilter(value)}
+              value={filter}
+            />
             <Button
               onClick={() => {}}
               className="!h-11 !px-3 py-2.5 !border-0 !rounded-full !bg-[#EDFFFD]"
