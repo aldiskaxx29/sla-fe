@@ -91,6 +91,9 @@ const ModalInput = ({ open, onCancel, onSave, dataModal }) => {
           <Form.Item name="id" className="hidden">
             <Input placeholder="Masukkan Site ID" />
           </Form.Item>
+          <Form.Item name="month" className="hidden">
+            <Input placeholder="Masukkan Site ID" />
+          </Form.Item>
           <Form.Item name="week" className="hidden">
             <Input placeholder="Masukkan Site ID" />
           </Form.Item>

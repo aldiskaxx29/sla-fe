@@ -7,8 +7,8 @@ import xlxsIcon from "@/assets/file-spreadsheet.svg";
 
 const SitePage = () => {
   const [loading, setLoading] = useState(false);
-  const [week, setWeek] = useState("21");
-  const [month, setMonth] = useState("4");
+  const [week, setWeek] = useState("30");
+  const [month, setMonth] = useState("7");
   const [parameter, setParameter] = useState("packetloss 1-5% ran to core");
   const { dataSite, getSite, isLoadingSite } = useSite();
   /**

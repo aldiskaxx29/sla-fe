@@ -89,8 +89,8 @@ const LoginPage = () => {
             <input
               id="email"
               name="email"
-              type="email"
-              placeholder="Masukkan Email"
+              type="text"
+              placeholder="Masukkan Nik"
               className="h-12 rounded-lg w-full pl-10 pr-3 border border-gray-300 focus:border-blue-500 focus:outline-none"
               required
               disabled={isLoading}

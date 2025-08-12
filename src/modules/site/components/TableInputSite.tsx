@@ -365,6 +365,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
     try {
       const formData = new FormData();
       formData.append("id", payload.id);
+      formData.append("month", payload.month);
       formData.append("week", payload.week);
       formData.append("grouping_rca", payload.grouping_rca);
       formData.append("detail_rca", payload.detail_rca);
