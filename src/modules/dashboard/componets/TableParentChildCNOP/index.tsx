@@ -24,7 +24,7 @@ const TableParentChildCNOP: React.FC<TableParentChildCNOPProps> = ({
 }) => {
   const [loading, setLoading] = useState(false);
   const [detailParameter, setDetailParameter] = useState("");
-  const [dataSource, setDataSource] = useState(data);
+  // const [dataSource, setDataSource] = useState(data);
   const [injectedData, setInjectedData] = useState({});
   const [injectedChildData, setInjectedChildData] = useState({});
   const { getWitel, getCNP, getModalDetail } = useDashboard();
@@ -34,7 +34,7 @@ const TableParentChildCNOP: React.FC<TableParentChildCNOPProps> = ({
   );
 
   const dataMapping = useMemo(() => {
-    const mappingData2 = dataSource.map((data, indexParent) => {
+    const mappingData2 = data.map((data, indexParent) => {
       if (
         data.coreIndex == injectedData?.coreIndex &&
         data.parameter == injectedData?.parameter
@@ -81,7 +81,7 @@ const TableParentChildCNOP: React.FC<TableParentChildCNOPProps> = ({
     });
 
     return mappingData2;
-  }, [dataSource, injectedData, injectedChildData]);
+  }, [data, injectedData, injectedChildData]);
 
   const columns = useMemo(() => {
     if (!data) return [];
@@ -342,9 +342,9 @@ const TableParentChildCNOP: React.FC<TableParentChildCNOPProps> = ({
         if (!isExpandedNow) {
           const success = await fetchWitelData(record);
           setTimeout(async () => {
-            setDataSource(dataMapping);
+            // setDataSource(dataMapping);
             if (!success) await fetchWitelData(record);
-            setDataSource(dataMapping);
+            // setDataSource(dataMapping);
           }, 500);
         }
       }
@@ -411,7 +411,7 @@ const TableParentChildCNOP: React.FC<TableParentChildCNOPProps> = ({
 
                       let textBigger;
                       if (
-                        record.parameter?.includes("PACKETLOSS") 
+                        record.parameter?.includes("PACKETLOSS")
                         // record.parameter?.includes("LATENCY RAN TO CORE")
                       ) {
                         textBigger =

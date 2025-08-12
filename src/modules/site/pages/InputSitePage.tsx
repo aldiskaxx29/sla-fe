@@ -11,8 +11,10 @@ const SitePage = () => {
   const [month, setMonth] = useState(dayjs().format("M"));
   const [parameter, setParameter] = useState("packetloss 1-5% ran to core");
   const { dataSite, getSite, isLoadingSite } = useSite();
+  const [trigger, setTrigger] = useState(0);
 
   useEffect(() => {
+    console.log(trigger);
     if (!week || !month) return;
 
     (async () => {
@@ -24,7 +26,7 @@ const SitePage = () => {
         },
       }).unwrap();
     })();
-  }, [getSite, parameter, week, month]);
+  }, [getSite, parameter, week, month, trigger]);
 
   const optParameters = [
     { label: "Packetloss 1-5%", value: "packetloss 1-5% ran to core" },
@@ -125,6 +127,7 @@ const SitePage = () => {
                 parameter={parameter}
                 week={week}
                 month={month}
+                setTrigger={setTrigger}
               />
             )}
           </div>

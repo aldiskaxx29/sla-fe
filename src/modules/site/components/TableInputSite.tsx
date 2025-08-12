@@ -15,6 +15,7 @@ interface TableHistoryProps {
   parameter: string;
   week;
   month;
+  setTrigger: React.Dispatch<React.SetStateAction<number>>;
 }
 
 const TableInputSite: React.FC<TableHistoryProps> = ({
@@ -22,6 +23,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
   parameter,
   week,
   month,
+  setTrigger,
 }) => {
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -361,7 +363,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
   }, [parameter]);
 
   const handleSave = async (payload) => {
-    console.log('handle', payload);
+    console.log("handle", payload);
     try {
       const formData = new FormData();
       formData.append("id", payload.id);
@@ -378,13 +380,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
       await saveSite(formData).unwrap();
       setOpen(false);
       toast.success("Success Edit Rekonsiliasi");
-      await getSite({
-        query: {
-          parameter,
-          week,
-          month,
-        },
-      }).unwrap();
+      setTrigger((value) => value + 1);
     } catch (error) {
       console.log(error);
     } finally {

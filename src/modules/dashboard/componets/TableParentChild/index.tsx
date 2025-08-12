@@ -22,7 +22,7 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
 }) => {
   const [loading, setLoading] = useState(false);
   const [detailParameter, setDetailParameter] = useState("");
-  const [dataSource, setDataSource] = useState(data);
+  // const [dataSource, setDataSource] = useState(data);
   const [injectedData, setInjectedData] = useState({});
   const [injectedChildData, setInjectedChildData] = useState({});
   const { getWitel, getCNP, getModalDetail } = useDashboard();
@@ -33,7 +33,7 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
   const [filter, setFilter] = useState("by total ne");
 
   const dataMapping = useMemo(() => {
-    const mappingData2 = dataSource.map((data, indexParent) => {
+    const mappingData2 = data.map((data, indexParent) => {
       if (
         data.coreIndex == injectedData?.coreIndex &&
         data.parameter == injectedData?.parameter
@@ -80,7 +80,7 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
     });
 
     return mappingData2;
-  }, [dataSource, injectedData, injectedChildData]);
+  }, [data, injectedData, injectedChildData]);
 
   const columns = useMemo(() => {
     if (!data) return [];
@@ -145,13 +145,13 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
         render: (text, record) => {
           if (record.parameter === "PACKETLOSS RAN TO CORE") {
             // Hilangkan .00
-            return parseFloat(text).toFixed(2).endsWith('.00')
+            return parseFloat(text).toFixed(2).endsWith(".00")
               ? parseInt(text)
               : text;
           }
           return text;
-        }
-      },      
+        },
+      },
       {
         title: "SATUAN",
         key: "satuan",
@@ -465,9 +465,9 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
         if (!isExpandedNow) {
           const success = await fetchWitelData(record);
           setTimeout(async () => {
-            setDataSource(dataMapping);
+            // setDataSource(dataMapping);
             if (!success) await fetchWitelData(record);
-            setDataSource(dataMapping);
+            // setDataSource(dataMapping);
           }, 500);
         }
       }
