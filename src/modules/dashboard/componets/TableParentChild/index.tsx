@@ -1,7 +1,7 @@
 import { Image, Spin, Table } from "antd";
 import Column from "antd/es/table/Column";
 import ColumnGroup from "antd/es/table/ColumnGroup";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDashboard } from "../../hooks/dashboard.hooks";
 import { useParams } from "react-router-dom";
 
@@ -22,7 +22,7 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
 }) => {
   const [loading, setLoading] = useState(false);
   const [detailParameter, setDetailParameter] = useState("");
-  // const [dataSource, setDataSource] = useState(data);
+  const [dataSource, setDataSource] = useState([]);
   const [injectedData, setInjectedData] = useState({});
   const [injectedChildData, setInjectedChildData] = useState({});
   const { getWitel, getCNP, getModalDetail } = useDashboard();
@@ -32,8 +32,13 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
   );
   const [filter, setFilter] = useState("by total ne");
 
+  useEffect(() => {
+    if (!data) return;
+    setDataSource(data);
+  }, [data]);
+
   const dataMapping = useMemo(() => {
-    const mappingData2 = data.map((data, indexParent) => {
+    const mappingData2 = dataSource.map((data, indexParent) => {
       if (
         data.coreIndex == injectedData?.coreIndex &&
         data.parameter == injectedData?.parameter
@@ -80,7 +85,7 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
     });
 
     return mappingData2;
-  }, [data, injectedData, injectedChildData]);
+  }, [dataSource, injectedData, injectedChildData]);
 
   const columns = useMemo(() => {
     if (!data) return [];
@@ -465,9 +470,9 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
         if (!isExpandedNow) {
           const success = await fetchWitelData(record);
           setTimeout(async () => {
-            // setDataSource(dataMapping);
+            setDataSource(dataMapping);
             if (!success) await fetchWitelData(record);
-            // setDataSource(dataMapping);
+            setDataSource(dataMapping);
           }, 500);
         }
       }
