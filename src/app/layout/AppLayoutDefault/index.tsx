@@ -128,11 +128,10 @@ const AppLayoutDefault = () => {
           <div className="flex gap-4">
             <div className="text-sm flex justify-between items-center bg-[#576278] rounded-[54px] px-3 py-2">
               <Button
-                className={`${
-                  location.pathname.includes("executive")
-                    ? "!bg-[#A6AEC1]"
-                    : "!bg-[#576278]"
-                } !border-0 !rounded-4xl !shadow-none`}
+                className={`${location.pathname.includes("executive")
+                  ? "!bg-[#A6AEC1]"
+                  : "!bg-[#576278]"
+                  } !border-0 !rounded-4xl !shadow-none`}
                 onClick={() => {
                   handleMenuSelect("executive");
                 }}
@@ -168,11 +167,10 @@ const AppLayoutDefault = () => {
                 </p>
               </Button> */}
               <Button
-                className={`${
-                  location.pathname.includes("monday")
-                    ? "!bg-[#A6AEC1]"
-                    : "!bg-[#576278]"
-                } !border-0 !rounded-4xl !shadow-none`}
+                className={`${location.pathname.includes("monday")
+                  ? "!bg-[#A6AEC1]"
+                  : "!bg-[#576278]"
+                  } !border-0 !rounded-4xl !shadow-none`}
                 onClick={() => {
                   handleMenuSelect("monday");
                 }}
@@ -191,11 +189,10 @@ const AppLayoutDefault = () => {
                 ref={containerRef}
                 onMouseEnter={() => setOpen1(true)}
                 onMouseLeave={() => setOpen1(false)}
-                className={`relative inline-block px-4 py-2 rounded-full cursor-pointer ${
-                  location.pathname?.includes("network")
-                    ? "!bg-[#A6AEC1] text-white"
-                    : "!bg-[#576278] text-[#C6C6C6]"
-                }`}
+                className={`relative inline-block px-4 py-2 rounded-full cursor-pointer ${location.pathname?.includes("network")
+                  ? "!bg-[#A6AEC1] text-white"
+                  : "!bg-[#576278] text-[#C6C6C6]"
+                  }`}
               >
                 Network Performance
                 {open1 && (
@@ -203,11 +200,10 @@ const AppLayoutDefault = () => {
                     {networkOpt.map((option) => (
                       <p
                         key={option.value}
-                        className={`px-4 py-2 hover:bg-gray-500 cursor-pointer ${
-                          location.pathname?.includes(option.value)
-                            ? "!bg-[#A6AEC1] text-white"
-                            : "!bg-[#576278] text-[#C6C6C6]"
-                        }`}
+                        className={`px-4 py-2 hover:bg-gray-500 cursor-pointer ${location.pathname?.includes(option.value)
+                          ? "!bg-[#A6AEC1] text-white"
+                          : "!bg-[#576278] text-[#C6C6C6]"
+                          }`}
                         onClick={() => {
                           handleMenuSelect(option.value);
                           setOpen1(false);
@@ -224,13 +220,12 @@ const AppLayoutDefault = () => {
                 ref={containerRef}
                 onMouseEnter={() => setOpen2(true)}
                 onMouseLeave={() => setOpen2(false)}
-                className={`relative inline-block px-4 py-2 rounded-full cursor-pointer ${
-                  ["/msa", "/cnop", "/input-site", "/report-site"].includes(
-                    location.pathname
-                  )
-                    ? "!bg-[#A6AEC1] text-white"
-                    : "!bg-[#576278] text-[#C6C6C6]"
-                }`}
+                className={`relative inline-block px-4 py-2 rounded-full cursor-pointer ${["/msa", "/cnop", "/input-site", "/report-site"].includes(
+                  location.pathname
+                )
+                  ? "!bg-[#A6AEC1] text-white"
+                  : "!bg-[#576278] text-[#C6C6C6]"
+                  }`}
               >
                 SLA
                 {open2 && (
@@ -238,11 +233,10 @@ const AppLayoutDefault = () => {
                     {slaOpt.map((option) => (
                       <p
                         key={option.value}
-                        className={`px-4 py-2 hover:bg-gray-500 cursor-pointer ${
-                          location.pathname?.includes(option.value)
-                            ? "!bg-[#A6AEC1] text-white"
-                            : "!bg-[#576278] text-[#C6C6C6]"
-                        }`}
+                        className={`px-4 py-2 hover:bg-gray-500 cursor-pointer ${location.pathname?.includes(option.value)
+                          ? "!bg-[#A6AEC1] text-white"
+                          : "!bg-[#576278] text-[#C6C6C6]"
+                          }`}
                         onClick={() => {
                           handleMenuSelect(option.value);
                           setOpen2(false);
@@ -255,11 +249,10 @@ const AppLayoutDefault = () => {
                 )}
               </div>
               <Button
-                className={`${
-                  location.pathname.includes("one")
-                    ? "!bg-[#A6AEC1]"
-                    : "!bg-[#576278]"
-                } !border-0 !rounded-4xl !shadow-none`}
+                className={`${location.pathname.includes("one")
+                  ? "!bg-[#A6AEC1]"
+                  : "!bg-[#576278]"
+                  } !border-0 !rounded-4xl !shadow-none`}
                 onClick={() => {
                   handleMenuSelect("one");
                 }}
@@ -275,11 +268,10 @@ const AppLayoutDefault = () => {
                 </p>
               </Button>
               <Button
-                className={`${
-                  location.pathname.includes("ticket")
-                    ? "!bg-[#A6AEC1]"
-                    : "!bg-[#576278]"
-                } !border-0 !rounded-4xl !shadow-none`}
+                className={`${location.pathname.includes("ticket")
+                  ? "!bg-[#A6AEC1]"
+                  : "!bg-[#576278]"
+                  } !border-0 !rounded-4xl !shadow-none`}
               >
                 <p
                   className={
@@ -290,22 +282,21 @@ const AppLayoutDefault = () => {
                   onClick={() => {
                     handleMenuSelect("ticket");
                   }}
-                  // onClick={() =>
-                  //   window.open(
-                  //     "http://10.60.174.187/ticket_quality_v3/",
-                  //     "_blank"
-                  //   )
-                  // }
+                // onClick={() =>
+                //   window.open(
+                //     "http://10.60.174.187/ticket_quality_v3/",
+                //     "_blank"
+                //   )
+                // }
                 >
                   Ticket Quality
                 </p>
               </Button>
               <Button
-                className={`${
-                  location.pathname.includes("elibrary")
-                    ? "!bg-[#A6AEC1]"
-                    : "!bg-[#576278]"
-                } !border-0 !rounded-4xl !shadow-none`}
+                className={`${location.pathname.includes("elibrary")
+                  ? "!bg-[#A6AEC1]"
+                  : "!bg-[#576278]"
+                  } !border-0 !rounded-4xl !shadow-none`}
                 onClick={() => {
                   handleMenuSelect("elibrary");
                 }}
@@ -321,16 +312,15 @@ const AppLayoutDefault = () => {
                 </p>
               </Button>
               <Button
-                className={`${
-                  location.pathname.includes("dashboard-ta")
-                    ? "!bg-[#A6AEC1]"
-                    : "!bg-[#576278]"
-                } !border-0 !rounded-4xl !shadow-none`}
+                className={`${location.pathname.includes("msa")
+                  ? "!bg-[#576278]"
+                  : "!bg-[#576278]"
+                  } !border-0 !rounded-4xl !shadow-none`}
                 onClick={() => {
-                  handleMenuSelect("dashboard-ta");
+                  handleMenuSelect("msa");
                 }}
               >
-                <p
+                {/* <p
                   className={
                     location.pathname.includes("dashboard-ta")
                       ? "text-white "
@@ -338,6 +328,13 @@ const AppLayoutDefault = () => {
                   }
                 >
                   Dashboard
+                </p> */}
+                <p
+                  className={`cursor-pointer ${location.pathname.includes("dashboard-ta") ? "text-white" : "text-[#C6C6C6]"
+                    }`}
+                  onClick={() => window.open("http://10.60.174.188:8008/", "_blank")}
+                >
+                  Dashboard Ta
                 </p>
               </Button>
             </div>
@@ -357,8 +354,8 @@ const AppLayoutDefault = () => {
 
                 {/* Dropdown Menu */}
                 {profileOpen && (
-                  <div className="absolute right-0 top-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
-                    <div className="py-1">
+                  <div className="absolute right-0 top-full bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                    <div className="flex flex-col divide-y divide-gray-100">
                       {/* <div className="px-4 py-2 border-b border-gray-100">
                         <p className="text-sm font-medium text-gray-900">
                           John Doe
@@ -426,6 +423,26 @@ const AppLayoutDefault = () => {
 
                       {/* <hr className="my-1 border-gray-100" /> */}
 
+                      <button
+                        className="w-full text-left px-4 py-2 text-sm text-black hover:bg-black-50 transition-colors duration-150 cursor-pointer"
+                      >
+                        <div className="flex items-center gap-2">
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                            />
+                          </svg>
+                          User
+                        </div>
+                      </button>
                       <button
                         className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-150 cursor-pointer"
                         onClick={handleLogout}

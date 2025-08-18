@@ -312,7 +312,7 @@ const TableHistoryCNOP: React.FC<TableHistoryCNOPProps> = ({
                   );
                 }
                 if (column.dataIndex === "graph") {
-                  const upZero = Number(record.graph) > 0;
+                  const upZero = Number(record.graph) < 0;
                   const packetloss = parameter?.toLowerCase().includes("pl");
                   const notPacketloss =
                     parameter?.toLowerCase().includes("jitter") ||

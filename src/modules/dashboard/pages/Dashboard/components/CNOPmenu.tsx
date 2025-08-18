@@ -118,7 +118,7 @@ const CNOPmenu = ({
                   Compliances SLA CNOP 3.0
                 </p>
                 <p className="text-base text-[#4B465C] medium">
-                  27/33 Parameter
+                  30/33 Parameter
                 </p>
               </div>
             </div>

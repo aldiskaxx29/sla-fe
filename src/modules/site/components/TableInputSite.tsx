@@ -234,8 +234,8 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
           },
           {
             title: "UPDATE PROGRES",
-            dataIndex: "status",
-            key: "status",
+            dataIndex: "note",
+            key: "note",
             align: "center",
           },
         ],
