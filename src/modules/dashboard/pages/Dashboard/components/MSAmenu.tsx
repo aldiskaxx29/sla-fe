@@ -94,7 +94,7 @@ const MSAmenu = ({
                 <p className="text-sm text-primary-1 font-bold">
                   Compliances MSA
                 </p>
-                <p className="text-base text-[#4B465C] medium">6/8 Parameter</p>
+                <p className="text-base text-[#4B465C] medium">7/8 Parameter</p>
                 {/* <p className="text-base text-[#4B465C] medium">100%</p> */}
               </div>
             </div>
@@ -105,7 +105,7 @@ const MSAmenu = ({
                   Compliances SLA CNOP 3.0
                 </p>
                 <p className="text-base text-[#4B465C] medium">
-                  30/33 Parameter
+                  29/33 Parameter
                 </p>
               </div>
             </div>

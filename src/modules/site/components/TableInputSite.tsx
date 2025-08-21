@@ -203,8 +203,8 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
         children: [
           {
             title: "GROUP RCA",
-            dataIndex: "group_rca",
-            key: "group_rca",
+            dataIndex: "RCA",
+            key: "RCA",
             align: "center",
             search: true,
           },
@@ -436,6 +436,8 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
               {...(column.search ? getColumnSearchProps(column.dataIndex) : {})}
               render={(text, record) => {
                 const statusDouble =
+                  record.status_latency > 1 ||
+                  record.status_jitter > 1 ||
                   record.status_packetloss_15 > 1 ||
                   record.status_packetloss_5 > 1;
                 if (column.dataIndex?.startsWith("site") && statusDouble)
@@ -452,7 +454,6 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
                   return (
                     <Checkbox
                       checked={
-                        record.exclude === 2 ||
                         record.status_latency === 2 ||
                         record.status_packetloss_5 === 2 ||
                         record.status_packetloss_15 === 2 ||

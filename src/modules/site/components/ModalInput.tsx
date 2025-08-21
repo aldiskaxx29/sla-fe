@@ -44,13 +44,13 @@ const ModalInput = ({ open, onCancel, onSave, dataModal }) => {
             id: dataModal.id,
           },
         }).unwrap();
-
         const siteDetail = result as SiteDetail;
+        
         form.setFieldsValue(siteDetail);
         const parserEvidance = siteDetail.evidence
           ? JSON.parse(siteDetail?.evidence)
           : "";
-        const dataPreview = `${parserEvidance.url}`;
+        const dataPreview = `${parserEvidance[0].url}`;
         setPreview(dataPreview || "");
       } catch (error) {
         console.log(error);
@@ -129,23 +129,30 @@ const ModalInput = ({ open, onCancel, onSave, dataModal }) => {
               rules={[{ required: true, message: "Masukkan Grouping RCA" }]}
             >
               <Select placeholder="Pilih Grouping RCA">
-                <Option value="Preventive">Preventive</Option>
-                <Option value="Capacity - Last Mile">
-                  Capacity - Last Mile
+                <Option value="Cap End Site No Order">
+                  Cap End Site No Order
                 </Option>
                 <Option value="Capacity - Intermediate">
                   Capacity - Intermediate
                 </Option>
-                <Option value="Capacity - Billing">Capacity - Billing</Option>
-                <Option value="Availablibilty - Power">
-                  Availablibilty - Power
+                <Option value="Cap Under Order">Cap Under Order</Option>
+                <Option value="Cap Ada order tapi lambat">
+                  Cap Ada order tapi lambat
                 </Option>
                 <Option value="Availablibilty - Gamas">
                   Availablibilty - Gamas
                 </Option>
-                <Option value="Warranty">Warranty</Option>
-                <Option value="Quality - Telkom">Quality - Telkom</Option>
-                <Option value="Quality - TSEL">Quality - TSEL</Option>
+                <Option value="Cap LAN/Optic/CO">Cap LAN/Optic/CO</Option>
+                <Option value="Cap Hardware / Software">Cap Hardware / Software</Option>
+                <Option value="Cap Intermediate / Hub">Cap Intermediate / Hub</Option>
+                <Option value="Cap 3rd Party">Cap 3rd Party</Option>
+                <Option value="Power TSEL">Power TSEL</Option>
+                <Option value="Warranty New Link">Warranty New Link</Option>
+                <Option value="Warranty Redeploy">Warranty Redeploy</Option>
+                <Option value="Temperature TSEL">Temperature TSEL</Option>
+                <Option value="Routing TSEL">Routing TSEL</Option>
+                <Option value="Quality TSEL">Quality TSEL</Option>
+                <Option value="Issue Tower">Issue Tower</Option>
               </Select>
             </Form.Item>
           ) : (
