@@ -85,20 +85,50 @@ const TableReportSite: React.FC<TableHistoryProps> = ({
       }),
       children: [
         {
-          title: "Capacity / Warranty",
+          title: "Capacity",
           dataIndex: "sos_capacity",
           align: "center",
           key: `sos_capacity`,
+          onHeaderCell: () => ({
+            // className: "!bg-[#f67a78] !p-3",
+            className: "!bg-[#f5c3c3] !p-3 cursor-pointer",
+          }),
+        },
+        {
+          title: "Warranty",
+          dataIndex: "sos_waranty",
+          align: "center",
+          key: `sos_waranty`,
           onHeaderCell: () => ({
             // className: "!bg-[#f67a78] !p-3",
             className: "!bg-[#f5c3c3] !p-3",
           }),
         },
         {
-          title: "Power / Qual TSEL",
+          title: "Power",
           dataIndex: "sos_power",
           align: "center",
           key: `sos_power`,
+          onHeaderCell: () => ({
+            // className: "!bg-[#f67a78] !p-3",
+            className: "!bg-[#f5c3c3] !p-3",
+          }),
+        },
+        {
+          title: "Qual TSEL",
+          dataIndex: "sos_qual_tsel",
+          align: "center",
+          key: `sos_qual_tsel`,
+          onHeaderCell: () => ({
+            // className: "!bg-[#f67a78] !p-3",
+            className: "!bg-[#f5c3c3] !p-3",
+          }),
+        },
+        {
+          title: "QE",
+          dataIndex: "sos_qe",
+          align: "center",
+          key: `sos_qe`,
           onHeaderCell: () => ({
             // className: "!bg-[#f67a78] !p-3",
             className: "!bg-[#f5c3c3] !p-3",
