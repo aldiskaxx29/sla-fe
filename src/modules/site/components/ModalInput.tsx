@@ -28,6 +28,7 @@ const ModalInput = ({ open, onCancel, onSave, dataModal }) => {
         console.log("values", values);
         onSave(values);
         form.resetFields();
+        setPreview("");
       })
       .catch((info) => {
         console.log("Validate Failed:", info);
@@ -45,7 +46,7 @@ const ModalInput = ({ open, onCancel, onSave, dataModal }) => {
           },
         }).unwrap();
         const siteDetail = result as SiteDetail;
-        
+
         form.setFieldsValue(siteDetail);
         const parserEvidance = siteDetail.evidence
           ? JSON.parse(siteDetail?.evidence)
@@ -143,8 +144,12 @@ const ModalInput = ({ open, onCancel, onSave, dataModal }) => {
                   Availablibilty - Gamas
                 </Option>
                 <Option value="Cap LAN/Optic/CO">Cap LAN/Optic/CO</Option>
-                <Option value="Cap Hardware / Software">Cap Hardware / Software</Option>
-                <Option value="Cap Intermediate / Hub">Cap Intermediate / Hub</Option>
+                <Option value="Cap Hardware / Software">
+                  Cap Hardware / Software
+                </Option>
+                <Option value="Cap Intermediate / Hub">
+                  Cap Intermediate / Hub
+                </Option>
                 <Option value="Cap 3rd Party">Cap 3rd Party</Option>
                 <Option value="Power TSEL">Power TSEL</Option>
                 <Option value="Warranty New Link">Warranty New Link</Option>
