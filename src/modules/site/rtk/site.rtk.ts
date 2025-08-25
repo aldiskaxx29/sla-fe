@@ -53,6 +53,18 @@ export const siteApi = emptySplitApi.injectEndpoints({
         return response;
       },
     }),
+    clear_data_fetchData: builder.query({
+      query: (payload) => {
+        return {
+          method: "GET",
+          url: "dashboard/detail/site/profilling",
+          params: payload?.query,
+        };
+      },
+      transformResponse: (response: unknown) => {
+        return response;
+      },
+    }),
   }),
 });
 
@@ -60,5 +72,6 @@ export const {
   useLazySite_fetchDataQuery,
   useLazyReport_site_fetchDataQuery,
   useLazyDetail_site_fetchDataQuery,
+  useLazyClear_data_fetchDataQuery,
   useSave_siteMutation,
 } = siteApi;

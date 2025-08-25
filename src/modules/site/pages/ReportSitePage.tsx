@@ -162,6 +162,9 @@ const SitePage = () => {
           <TableReportSite
             dataSource={dataReportSite.data}
             parameter={parameter}
+            week={week}
+            month={month}
+            year={year}
           />
         )}
       </div>

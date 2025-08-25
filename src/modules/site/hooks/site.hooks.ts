@@ -2,6 +2,7 @@ import {
   useLazySite_fetchDataQuery,
   useLazyReport_site_fetchDataQuery,
   useLazyDetail_site_fetchDataQuery,
+  useLazyClear_data_fetchDataQuery,
   useSave_siteMutation,
 } from "../rtk/site.rtk";
 
@@ -24,6 +25,14 @@ const useSite = () => {
       isSuccess: successSaveSite,
     },
   ] = useSave_siteMutation();
+  const [
+    getClearData,
+    {
+      isLoading: isLoadingClearData,
+      data: dataClearData,
+      isSuccess: successClearData,
+    },
+  ] = useLazyClear_data_fetchDataQuery();
   return {
     getSite,
     dataSite,
@@ -38,6 +47,10 @@ const useSite = () => {
     dataSaveSite,
     isLoadingSaveSite,
     successSaveSite,
+    getClearData,
+    dataClearData,
+    isLoadingClearData,
+    successClearData,
   };
 };
 

@@ -1,21 +1,33 @@
 // Antd
-import { Checkbox, Image, Table } from "antd";
+import { Checkbox, Image, Spin, Table } from "antd";
 import ModalInput from "./ModalInput";
 import { useMemo, useState } from "react";
 import { EditOutlined } from "@ant-design/icons";
+import ModalClear from "./ModalClear";
+import { useSite } from "../hooks/site.hooks";
 
 const { Column, ColumnGroup } = Table;
 
 interface TableHistoryProps {
   dataSource: Record<string, unknown>[];
   parameter: string;
+  week: string;
+  month: string;
+  year: string;
 }
 
 const TableReportSite: React.FC<TableHistoryProps> = ({
   dataSource,
   parameter,
+  month,
+  week,
+  year,
 }) => {
   const [open, setOpen] = useState(false);
+  const [openClear, setOpenClear] = useState(false);
+  const [dataModal, setDataModal] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const { getClearData } = useSite();
 
   const columns1 = [
     {
@@ -174,9 +186,33 @@ const TableReportSite: React.FC<TableHistoryProps> = ({
   const handleSave = () => {
     console.log("Pajangan");
   };
+  const openModalClear = async (record) => {
+    try {
+      setIsLoading(true);
+      const response = await getClearData({
+        query: {
+          region: record.region_tsel,
+          parameter: parameter,
+          status_site: "clear",
+          month,
+          week,
+          year,
+        },
+      }).unwrap();
+
+      setDataModal(response?.data);
+      setOpenClear(true);
+    } catch (error) {
+      console.error("Error", error);
+      //
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="mt-8">
+      {isLoading && <Spin fullscreen tip="Sedang Memuat Data..." />}
       <Table
         dataSource={dataWithIndex}
         bordered
@@ -238,6 +274,17 @@ const TableReportSite: React.FC<TableHistoryProps> = ({
                   );
                 } else if (isLast) {
                   return <span className="!font-bold">{text}</span>;
+                } else if (column.dataIndex === "clear") {
+                  return (
+                    <div
+                      className="text-[#5546ff] font-bold cursor-pointer"
+                      onClick={() => {
+                        openModalClear(record);
+                      }}
+                    >
+                      {text}
+                    </div>
+                  );
                 }
                 return text;
               }}
@@ -249,6 +296,14 @@ const TableReportSite: React.FC<TableHistoryProps> = ({
         open={open}
         onCancel={() => setOpen(false)}
         onSave={handleSave}
+      />
+      <ModalClear
+        open={openClear}
+        data={dataModal}
+        parameter={parameter}
+        onCancel={() => {
+          setOpenClear(false);
+        }}
       />
     </div>
   );
