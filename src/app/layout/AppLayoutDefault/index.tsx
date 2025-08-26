@@ -52,7 +52,7 @@ const AppLayoutDefault = () => {
   // }, [menuId]);
 
   const networkOpt = [
-    { label: "Access Perf(Home)", value: "network/access-perf" },
+    // { label: "Access Perf(Home)", value: "network/access-perf" },
     { label: "Core Perf", value: "network/core-perf" },
     { label: "CDN Perf", value: "network/cdn-perf" },
     { label: "Quality Healthiness", value: "network/quality-healthiness" },

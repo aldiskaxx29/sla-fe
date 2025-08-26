@@ -27,6 +27,7 @@ const TableReportSite: React.FC<TableHistoryProps> = ({
   const [openClear, setOpenClear] = useState(false);
   const [dataModal, setDataModal] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [currentStatusSite, setCurrentStatusSite] = useState(""); // State untuk menyimpan status_site
   const { getClearData } = useSite();
 
   const columns1 = [
@@ -62,8 +63,8 @@ const TableReportSite: React.FC<TableHistoryProps> = ({
       key: `clear`,
       align: "center",
       openDetail: true,
+      statusSite: "clear", // Tambah property statusSite
       onHeaderCell: () => ({
-        // className: "!bg-[#0ecc60] !p-3",
         className: "!bg-[#bdeed3] !p-3",
       }),
     },
@@ -73,8 +74,8 @@ const TableReportSite: React.FC<TableHistoryProps> = ({
       align: "center",
       openDetail: true,
       key: `preventive`,
+      statusSite: "preventive", // Tambah property statusSite
       onHeaderCell: () => ({
-        // className: "!bg-[#f1f98a] !p-3",
         className: "!bg-[#fde6b9] !p-3",
       }),
     },
@@ -84,8 +85,8 @@ const TableReportSite: React.FC<TableHistoryProps> = ({
       align: "center",
       openDetail: true,
       key: `quality`,
+      statusSite: "quality", // Tambah property statusSite
       onHeaderCell: () => ({
-        // className: "!bg-[#f1f98a] !p-3",
         className: "!bg-[#fde6b9] !p-3",
       }),
     },
@@ -94,8 +95,8 @@ const TableReportSite: React.FC<TableHistoryProps> = ({
       dataIndex: "sos",
       align: "center",
       key: `sos`,
+      statusSite: "sos", // Tambah property statusSite untuk parent SOS
       onHeaderCell: () => ({
-        // className: "!bg-[#f67a78] !p-3",
         className: "!bg-[#f5c3c3] !p-3",
       }),
       children: [
@@ -105,8 +106,8 @@ const TableReportSite: React.FC<TableHistoryProps> = ({
           align: "center",
           openDetail: true,
           key: `sos_capacity`,
+          statusSite: "sos_capacity", // Tambah property statusSite
           onHeaderCell: () => ({
-            // className: "!bg-[#f67a78] !p-3",
             className: "!bg-[#f5c3c3] !p-3 cursor-pointer",
           }),
         },
@@ -116,8 +117,8 @@ const TableReportSite: React.FC<TableHistoryProps> = ({
           align: "center",
           openDetail: true,
           key: `sos_waranty`,
+          statusSite: "sos_waranty", // Tambah property statusSite
           onHeaderCell: () => ({
-            // className: "!bg-[#f67a78] !p-3",
             className: "!bg-[#f5c3c3] !p-3",
           }),
         },
@@ -127,8 +128,8 @@ const TableReportSite: React.FC<TableHistoryProps> = ({
           align: "center",
           openDetail: true,
           key: `sos_power`,
+          statusSite: "sos_power", // Tambah property statusSite
           onHeaderCell: () => ({
-            // className: "!bg-[#f67a78] !p-3",
             className: "!bg-[#f5c3c3] !p-3",
           }),
         },
@@ -138,8 +139,8 @@ const TableReportSite: React.FC<TableHistoryProps> = ({
           align: "center",
           openDetail: true,
           key: `sos_qual_tsel`,
+          statusSite: "sos_qual_tsel", // Tambah property statusSite
           onHeaderCell: () => ({
-            // className: "!bg-[#f67a78] !p-3",
             className: "!bg-[#f5c3c3] !p-3",
           }),
         },
@@ -149,8 +150,8 @@ const TableReportSite: React.FC<TableHistoryProps> = ({
           align: "center",
           openDetail: true,
           key: `sos_qe`,
+          statusSite: "sos_qe", // Tambah property statusSite
           onHeaderCell: () => ({
-            // className: "!bg-[#f67a78] !p-3",
             className: "!bg-[#f5c3c3] !p-3",
           }),
         },
@@ -160,8 +161,8 @@ const TableReportSite: React.FC<TableHistoryProps> = ({
           align: "center",
           openDetail: true,
           key: `sos`,
+          statusSite: "sos", // Tambah property statusSite
           onHeaderCell: () => ({
-            // className: "!bg-[#f67a78] !p-3",
             className: "!bg-[#f5c3c3] !p-3",
           }),
         },
@@ -173,6 +174,7 @@ const TableReportSite: React.FC<TableHistoryProps> = ({
       align: "center",
       openDetail: true,
       key: `blacklist`,
+      statusSite: "blacklist", // Tambah property statusSite
       onHeaderCell: () => ({
         className: "!bg-black !text-white !p-3",
       }),
@@ -196,14 +198,15 @@ const TableReportSite: React.FC<TableHistoryProps> = ({
   const handleSave = () => {
     console.log("Pajangan");
   };
-  const openModalClear = async (record) => {
+
+  const openModalClear = async (record, statusSite) => {
     try {
       setIsLoading(true);
       const response = await getClearData({
         query: {
           region: record.region_tsel,
           parameter: parameter,
-          status_site: record.dataIndex,
+          status_site: statusSite, // Gunakan statusSite dari parameter
           month,
           week,
           year,
@@ -214,10 +217,15 @@ const TableReportSite: React.FC<TableHistoryProps> = ({
       setOpenClear(true);
     } catch (error) {
       console.error("Error", error);
-      //
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Fungsi untuk mendapatkan statusSite berdasarkan dataIndex
+  const getStatusSiteFromColumn = (dataIndex) => {
+    const column = columns1.find(col => col.dataIndex === dataIndex);
+    return column?.statusSite || dataIndex;
   };
 
   return (
@@ -257,7 +265,8 @@ const TableReportSite: React.FC<TableHistoryProps> = ({
                         <div
                           className="text-[#5546ff] font-bold cursor-pointer"
                           onClick={() => {
-                            openModalClear(record);
+                            const statusSite = child.statusSite || child.dataIndex;
+                            openModalClear(record, statusSite);
                           }}
                         >
                           {text}
@@ -282,6 +291,7 @@ const TableReportSite: React.FC<TableHistoryProps> = ({
                 const isLast = record?.region_tsel
                   ?.toLowerCase()
                   .includes("nation");
+                
                 if (column.dataIndex?.startsWith("button")) {
                   return <Checkbox />;
                 } else if (column.dataIndex?.startsWith("input")) {
@@ -300,7 +310,8 @@ const TableReportSite: React.FC<TableHistoryProps> = ({
                     <div
                       className="text-[#5546ff] font-bold cursor-pointer"
                       onClick={() => {
-                        openModalClear(record);
+                        const statusSite = column.statusSite || column.dataIndex;
+                        openModalClear(record, statusSite);
                       }}
                     >
                       {text}

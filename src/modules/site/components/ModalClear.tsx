@@ -14,6 +14,14 @@ const ModalClear = ({ data, open, onCancel, parameter }) => {
   }, [parameter]);
   const columns = [
     {
+      title: "No",
+      key: "no",
+      render: (text, record, index) => index + 1, // auto nomor urut
+      onHeaderCell: () => ({
+        className: "!bg-blue-pacific !p-3",
+      }),
+    },
+    {
       title: "Site ID",
       dataIndex: "site_id",
       key: "no",
