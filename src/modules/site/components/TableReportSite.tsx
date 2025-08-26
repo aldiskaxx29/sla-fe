@@ -224,7 +224,7 @@ const TableReportSite: React.FC<TableHistoryProps> = ({
 
   // Fungsi untuk mendapatkan statusSite berdasarkan dataIndex
   const getStatusSiteFromColumn = (dataIndex) => {
-    const column = columns1.find(col => col.dataIndex === dataIndex);
+    const column = columns1.find((col) => col.dataIndex === dataIndex);
     return column?.statusSite || dataIndex;
   };
 
@@ -257,21 +257,22 @@ const TableReportSite: React.FC<TableHistoryProps> = ({
                     const isLast = record?.region_tsel
                       ?.toLowerCase()
                       .includes("nation");
-
-                    if (isLast) {
-                      return <span className="!font-bold">{text}</span>;
-                    } else if (child.openDetail) {
+                    if (child.openDetail) {
                       return (
                         <div
                           className="text-[#5546ff] font-bold cursor-pointer"
                           onClick={() => {
-                            const statusSite = child.statusSite || child.dataIndex;
+                            const statusSite =
+                              child.statusSite || child.dataIndex;
                             openModalClear(record, statusSite);
                           }}
                         >
                           {text}
                         </div>
                       );
+                    }
+                    if (isLast) {
+                      return <span className="!font-bold">{text}</span>;
                     }
                     return text;
                   }}
@@ -291,7 +292,20 @@ const TableReportSite: React.FC<TableHistoryProps> = ({
                 const isLast = record?.region_tsel
                   ?.toLowerCase()
                   .includes("nation");
-                
+                if (column.openDetail) {
+                  return (
+                    <div
+                      className="text-[#5546ff] font-bold cursor-pointer"
+                      onClick={() => {
+                        const statusSite =
+                          column.statusSite || column.dataIndex;
+                        openModalClear(record, statusSite);
+                      }}
+                    >
+                      {text}
+                    </div>
+                  );
+                }
                 if (column.dataIndex?.startsWith("button")) {
                   return <Checkbox />;
                 } else if (column.dataIndex?.startsWith("input")) {
@@ -305,18 +319,6 @@ const TableReportSite: React.FC<TableHistoryProps> = ({
                   );
                 } else if (isLast) {
                   return <span className="!font-bold">{text}</span>;
-                } else if (column.openDetail) {
-                  return (
-                    <div
-                      className="text-[#5546ff] font-bold cursor-pointer"
-                      onClick={() => {
-                        const statusSite = column.statusSite || column.dataIndex;
-                        openModalClear(record, statusSite);
-                      }}
-                    >
-                      {text}
-                    </div>
-                  );
                 }
                 return text;
               }}
