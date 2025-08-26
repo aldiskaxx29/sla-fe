@@ -61,6 +61,7 @@ const TableReportSite: React.FC<TableHistoryProps> = ({
       dataIndex: "clear",
       key: `clear`,
       align: "center",
+      openDetail: true,
       onHeaderCell: () => ({
         // className: "!bg-[#0ecc60] !p-3",
         className: "!bg-[#bdeed3] !p-3",
@@ -70,6 +71,7 @@ const TableReportSite: React.FC<TableHistoryProps> = ({
       title: "Preventive",
       dataIndex: "preventive",
       align: "center",
+      openDetail: true,
       key: `preventive`,
       onHeaderCell: () => ({
         // className: "!bg-[#f1f98a] !p-3",
@@ -80,6 +82,7 @@ const TableReportSite: React.FC<TableHistoryProps> = ({
       title: "Quality",
       dataIndex: "quality",
       align: "center",
+      openDetail: true,
       key: `quality`,
       onHeaderCell: () => ({
         // className: "!bg-[#f1f98a] !p-3",
@@ -100,6 +103,7 @@ const TableReportSite: React.FC<TableHistoryProps> = ({
           title: "Capacity",
           dataIndex: "sos_capacity",
           align: "center",
+          openDetail: true,
           key: `sos_capacity`,
           onHeaderCell: () => ({
             // className: "!bg-[#f67a78] !p-3",
@@ -110,6 +114,7 @@ const TableReportSite: React.FC<TableHistoryProps> = ({
           title: "Warranty",
           dataIndex: "sos_waranty",
           align: "center",
+          openDetail: true,
           key: `sos_waranty`,
           onHeaderCell: () => ({
             // className: "!bg-[#f67a78] !p-3",
@@ -120,6 +125,7 @@ const TableReportSite: React.FC<TableHistoryProps> = ({
           title: "Power",
           dataIndex: "sos_power",
           align: "center",
+          openDetail: true,
           key: `sos_power`,
           onHeaderCell: () => ({
             // className: "!bg-[#f67a78] !p-3",
@@ -130,6 +136,7 @@ const TableReportSite: React.FC<TableHistoryProps> = ({
           title: "Qual TSEL",
           dataIndex: "sos_qual_tsel",
           align: "center",
+          openDetail: true,
           key: `sos_qual_tsel`,
           onHeaderCell: () => ({
             // className: "!bg-[#f67a78] !p-3",
@@ -140,6 +147,7 @@ const TableReportSite: React.FC<TableHistoryProps> = ({
           title: "QE",
           dataIndex: "sos_qe",
           align: "center",
+          openDetail: true,
           key: `sos_qe`,
           onHeaderCell: () => ({
             // className: "!bg-[#f67a78] !p-3",
@@ -150,6 +158,7 @@ const TableReportSite: React.FC<TableHistoryProps> = ({
           title: "Others",
           dataIndex: "sos",
           align: "center",
+          openDetail: true,
           key: `sos`,
           onHeaderCell: () => ({
             // className: "!bg-[#f67a78] !p-3",
@@ -162,6 +171,7 @@ const TableReportSite: React.FC<TableHistoryProps> = ({
       title: "Blacklist",
       dataIndex: "blacklist",
       align: "center",
+      openDetail: true,
       key: `blacklist`,
       onHeaderCell: () => ({
         className: "!bg-black !text-white !p-3",
@@ -193,7 +203,7 @@ const TableReportSite: React.FC<TableHistoryProps> = ({
         query: {
           region: record.region_tsel,
           parameter: parameter,
-          status_site: "clear",
+          status_site: record.dataIndex,
           month,
           week,
           year,
@@ -242,6 +252,17 @@ const TableReportSite: React.FC<TableHistoryProps> = ({
 
                     if (isLast) {
                       return <span className="!font-bold">{text}</span>;
+                    } else if (child.openDetail) {
+                      return (
+                        <div
+                          className="text-[#5546ff] font-bold cursor-pointer"
+                          onClick={() => {
+                            openModalClear(record);
+                          }}
+                        >
+                          {text}
+                        </div>
+                      );
                     }
                     return text;
                   }}
@@ -274,7 +295,7 @@ const TableReportSite: React.FC<TableHistoryProps> = ({
                   );
                 } else if (isLast) {
                   return <span className="!font-bold">{text}</span>;
-                } else if (column.dataIndex === "clear") {
+                } else if (column.openDetail) {
                   return (
                     <div
                       className="text-[#5546ff] font-bold cursor-pointer"
