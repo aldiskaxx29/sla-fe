@@ -12,6 +12,7 @@ type SiteDetail = {
   note: string;
   evidence?: string;
   ttr_slisih?: string;
+  kpi: string[];
   // add other fields as needed
 };
 
@@ -188,6 +189,18 @@ const ModalInput = ({ open, onCancel, onSave, dataModal }) => {
               </Select>
             </Form.Item>
           )}
+
+          <Form.Item
+            label="KPI"
+            name="kpi"
+            rules={[{ required: true, message: "Pilih KPI" }]}
+          >
+            <Select mode="multiple" placeholder="Pilih KPI">
+              <Option value="Packetloss">Packetloss</Option>
+              <Option value="Jitter">Jitter</Option>
+              <Option value="Latency">Latency</Option>
+            </Select>
+          </Form.Item>
 
           <Form.Item
             label="Keterangan Rekon"

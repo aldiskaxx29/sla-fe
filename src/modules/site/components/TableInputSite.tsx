@@ -377,6 +377,8 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
       formData.append("note", payload.note);
       formData.append("parameter", parameter);
       formData.append("ticket", payload.ticket_id);
+      formData.append("kpi", payload.kpi);
+
       await saveSite(formData).unwrap();
       setOpen(false);
       toast.success("Success Edit Rekonsiliasi");
