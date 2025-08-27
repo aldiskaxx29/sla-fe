@@ -245,7 +245,13 @@ const ModalInput = ({ open, onCancel, onSave, dataModal }) => {
           </Form.Item>
 
           <div style={{ textAlign: "right" }}>
-            <Button onClick={onCancel} style={{ marginRight: 8 }}>
+            <Button
+              onClick={() => {
+                setPreview("");
+                onCancel();
+              }}
+              style={{ marginRight: 8 }}
+            >
               Cancel
             </Button>
             <Button type="primary" onClick={handleOk}>
