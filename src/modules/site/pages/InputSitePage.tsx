@@ -9,6 +9,7 @@ import { useSite } from "../hooks/site.hooks";
 const SitePage = () => {
   const [week, setWeek] = useState("");
   const [month, setMonth] = useState(dayjs().format("M"));
+  const [exclude, setExclude] = useState("all");
   const [parameter, setParameter] = useState("packetloss 1-5% ran to core");
   const { dataSite, getSite, isLoadingSite } = useSite();
   const [trigger, setTrigger] = useState(0);
@@ -20,13 +21,20 @@ const SitePage = () => {
     (async () => {
       await getSite({
         query: {
+          exclude,
           parameter,
           ...(!["mttrq major", "mttrq minor"].includes(parameter) && { week }),
           ...(["mttrq major", "mttrq minor"].includes(parameter) && { month }),
         },
       }).unwrap();
     })();
-  }, [getSite, parameter, week, month, trigger]);
+  }, [getSite, exclude,parameter, week, month, trigger]);
+
+  const optExclude = [
+    { label: "All", value: "all" },
+    { label: "Exclude", value: "2" },
+    { label: "Non Exclude", value: "1" },
+  ];
 
   const optParameters = [
     { label: "Packetloss 1-5%", value: "packetloss 1-5% ran to core" },
@@ -84,6 +92,13 @@ const SitePage = () => {
               </p>
             </div>
             <div className="flex gap-4">
+              <AppDropdown
+                title="Exclude"
+                placeholder="All"
+                options={optExclude}
+                value={exclude}
+                onChange={(value) => setExclude(value)}
+              />
               <AppDropdown
                 title="Parameter"
                 placeholder="All"
