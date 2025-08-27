@@ -196,9 +196,10 @@ const ModalInput = ({ open, onCancel, onSave, dataModal }) => {
             rules={[{ required: true, message: "Pilih KPI" }]}
           >
             <Select mode="multiple" placeholder="Pilih KPI">
-              <Option value="Packetloss">Packetloss</Option>
-              <Option value="Jitter">Jitter</Option>
-              <Option value="Latency">Latency</Option>
+              <Option value="packetloss 1-5% ran to core">Packetloss 1-5% Ran To core</Option>
+              <Option value="packetloss >5% ran to core">Packetloss &gt;5% Ran to Core</Option>
+              <Option value="jitter ran to core">Jitter Ran to Core</Option>
+              <Option value="latency ran to core">Latency Ran to Core</Option>
             </Select>
           </Form.Item>
 

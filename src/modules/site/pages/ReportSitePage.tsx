@@ -7,7 +7,7 @@ import { TableReportSite } from "../components/TableReportSite";
 
 const SitePage = () => {
   const [loading, setLoading] = useState(false);
-  const [week, setWeek] = useState("1");
+  const [week, setWeek] = useState("32");
   const [month, setMonth] = useState(new Date().getMonth());
   const [year, setYear] = useState(new Date().getFullYear());
   const [parameter, setParameter] = useState("packetloss ran to core");
@@ -125,13 +125,13 @@ const SitePage = () => {
             onChange={(value) => setParameter(value)}
             value={parameter}
           />
-          <AppDropdown
+          {/* <AppDropdown
             title="Month"
             placeholder="All"
             options={filterMonth}
             onChange={(value) => setMonth(Number(value))}
             value={month}
-          />
+          /> */}
           <AppDropdown
             title="Week"
             placeholder="All"
