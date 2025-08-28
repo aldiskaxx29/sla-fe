@@ -213,6 +213,9 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
             dataIndex: "detail_rca",
             key: "detail_rca",
             align: "center",
+            onHeaderCell: () => ({
+              className: "!w-[300px] !p-3",
+            }),
           },
           {
             title: "TICKET ID",

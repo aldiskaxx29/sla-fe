@@ -14,6 +14,7 @@ import { useNetworkRouter } from "@/modules/network/router/network.router";
 import { useTicketRouter } from "@/modules/ticket/router/ticket.router";
 import { AuthRouteGuard } from "../hooks/AuthenticationGuard";
 import { useDashboardTARouter } from "@/modules/dashboard-ta/router/dashboardTA.router";
+import { useUserRouter } from "@/modules/user/router/user.router";
 
 const useRouter = () => {
   const app = useAppRouter();
@@ -28,6 +29,7 @@ const useRouter = () => {
   const one = useOneRouter();
   const ticket = useTicketRouter();
   const dashboardTA = useDashboardTARouter();
+  const user = useUserRouter();
 
   const routes = useRoutes([
     ...app,
@@ -60,6 +62,7 @@ const useRouter = () => {
             ...network,
             ...ticket,
             ...dashboardTA,
+            ...user,
           ],
         },
       ],
