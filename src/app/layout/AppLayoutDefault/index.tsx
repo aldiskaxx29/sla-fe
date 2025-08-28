@@ -438,7 +438,12 @@ const AppLayoutDefault = () => {
 
                       {/* <hr className="my-1 border-gray-100" /> */}
 
-                      <button className="w-full text-left px-4 py-2 text-sm text-black hover:bg-black-50 transition-colors duration-150 cursor-pointer">
+                      <button
+                        className="w-full text-left px-4 py-2 text-sm text-black hover:bg-black-50 transition-colors duration-150 cursor-pointer"
+                        onClick={() => {
+                          window.open("/user");
+                        }}
+                      >
                         <div className="flex items-center gap-2">
                           <svg
                             className="w-4 h-4"
