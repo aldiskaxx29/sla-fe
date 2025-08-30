@@ -6,16 +6,17 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 import { FormEvent, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { useLoginMutation } from "../../rtk/auth.rtk";
 
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { IAuthLoginRequest } from "../../types/auth.interface";
+import ModalTwoFact from "../ModalTwoFact";
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const navigate = useNavigate();
+  const [qrData, setQrData] = useState<string | null>(null);
+  const [isOpenTwoFact, setIsOpenTwoFact] = useState(false);
 
   const [login, { isLoading }] = useLoginMutation();
 
@@ -41,11 +42,10 @@ const LoginPage = () => {
       const resp = await login(values).unwrap();
 
       if (!resp.status) throw resp;
+      setQrData(resp);
 
       toast.dismiss();
-      toast.success("Login successful 🎉", { position: "top-right" });
-
-      navigate("/msa");
+      setIsOpenTwoFact(true);
     } catch (err: any) {
       const msg =
         err?.data?.message ??
@@ -142,6 +142,11 @@ const LoginPage = () => {
           </button>
         </div>
       </form>
+      <ModalTwoFact
+        open={isOpenTwoFact}
+        parameter={qrData}
+        onCancel={() => setIsOpenTwoFact(false)}
+      />
     </>
   );
 };

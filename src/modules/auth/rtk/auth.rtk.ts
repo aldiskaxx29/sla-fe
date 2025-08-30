@@ -50,6 +50,29 @@ export const authApi = emptySplitApi.injectEndpoints({
         };
       },
       transformResponse: (response: IAuthLoginResponse) => {
+        return response;
+      },
+      transformErrorResponse: (
+        response:
+          | import("@reduxjs/toolkit/query").FetchBaseQueryError
+          | { data?: { message?: string } }
+      ) => ({
+        status: "status" in response ? response.status : undefined,
+        message:
+          (response as { data?: { message?: string } })?.data?.message ||
+          "Login failed",
+      }),
+    }),
+
+    login_2fa: builder.mutation<IAuthLoginResponse, IAuthLoginRequest>({
+      query: (body) => {
+        return {
+          method: "POST",
+          url: "login/2fa",
+          body,
+        };
+      },
+      transformResponse: (response: IAuthLoginResponse) => {
         setAuthData(response);
         return response;
       },
@@ -91,4 +114,5 @@ export const authApi = emptySplitApi.injectEndpoints({
   overrideExisting: false,
 });
 
-export const { useLoginMutation, useLogoutMutation } = authApi;
+export const { useLoginMutation, useLogoutMutation, useLogin_2faMutation } =
+  authApi;
