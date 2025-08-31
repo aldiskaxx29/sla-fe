@@ -26,8 +26,10 @@ const ModalTwoFact = ({ open, parameter, onCancel }) => {
   return (
     <Modal open={open} footer={null} centered width={400} onCancel={onCancel}>
       <div className="flex flex-col gap-6 items-center justify-center">
-        <p className="font-semibold ">
-          Scan QR Code Dengan Google Authenticator untuk mendapatkan PIN OTP
+        <p className="font-semibold">
+          {parameter?.qr_code_url
+            ? "Scan QR Code Dengan Google Authenticator untuk mendapatkan PIN OTP"
+            : "Masukkan Kode OTP dari Google Authenticator"}
         </p>
         <QRCode value={parameter?.qr_code_url} className="w-full mb-6" />
         <Form form={form} layout="vertical" className="w-full ">
