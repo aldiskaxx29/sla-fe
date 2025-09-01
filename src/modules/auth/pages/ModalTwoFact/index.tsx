@@ -22,7 +22,14 @@ const ModalTwoFact = ({ open, parameter, onCancel }) => {
     form.setFieldValue("user_id", parameter?.user_id);
   }, [form, parameter]);
   return (
-    <Modal open={open} footer={null} centered width={400} onCancel={onCancel}>
+    <Modal
+      open={open}
+      footer={null}
+      centered
+      width={400}
+      onCancel={onCancel}
+      maskClosable={false}
+    >
       <div className="flex flex-col gap-6 items-center justify-center">
         <p className="font-semibold">
           {parameter?.qr_code_url
