@@ -17,7 +17,7 @@ export interface IAuthLoginResponse {
     created_at: string;
     updated_at: string;
   };
-  access_token: string;
+  token: string;
 }
 
 export interface IAuthAuthenticatedUser {

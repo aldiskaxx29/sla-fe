@@ -52,7 +52,7 @@ const TableUser = () => {
   useEffect(() => {
     // Fetch data here and set it to state if needed
     fetchUser();
-  }, [fetchUser]);
+  }, []);
   return (
     <Table
       columns={columns}

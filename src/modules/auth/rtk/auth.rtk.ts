@@ -2,8 +2,8 @@ import { emptySplitApi } from "@/app/redux/app.rtx";
 import { IAuthLoginRequest, IAuthLoginResponse } from "../types/auth.interface";
 
 const setAuthData = (response: IAuthLoginResponse) => {
-  if (response.status && response.access_token) {
-    localStorage.setItem("access_token", response.access_token);
+  if (response.status && response.token) {
+    localStorage.setItem("access_token", response);
     localStorage.setItem("user_data", JSON.stringify(response.data));
   }
 };
@@ -73,6 +73,8 @@ export const authApi = emptySplitApi.injectEndpoints({
         };
       },
       transformResponse: (response: IAuthLoginResponse) => {
+        console.log(response, "RESP 2FA");
+
         setAuthData(response);
         return response;
       },

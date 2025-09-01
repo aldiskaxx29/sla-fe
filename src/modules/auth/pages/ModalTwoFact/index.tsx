@@ -1,25 +1,23 @@
-import { Button, Form, Input, Modal, QRCode } from "antd";
+import { Button, Form, Image, Input, Modal, QRCode } from "antd";
 import { useLogin_2faMutation } from "../../rtk/auth.rtk";
 import { useNavigate } from "react-router-dom";
 import { useCallback, useEffect } from "react";
+import { toast } from "react-toastify";
 
 const ModalTwoFact = ({ open, parameter, onCancel }) => {
   const [form] = Form.useForm();
   const navigation = useNavigate();
   const [login_2fa] = useLogin_2faMutation();
 
-  const handleOk = useCallback(() => {
-    form
-      .validateFields()
-      .then((values) => {
-        login_2fa({ ...values, user_id: `${parameter?.user_id}` });
-        form.resetFields();
-        navigation("/msa");
-      })
-      .catch((info) => {
-        console.log("Validate Failed:", info);
-      });
-  }, [form, login_2fa, navigation, parameter]);
+  const handleOk = useCallback(async () => {
+    try {
+      await login_2fa(form.getFieldsValue()).unwrap();
+      toast.success("Login Berhasil");
+      navigation("/login");
+    } catch (error) {
+      toast.error("Login Gagal, Periksa Kode OTP Anda");
+    }
+  }, [form, login_2fa, parameter]);
   useEffect(() => {
     form.setFieldValue("user_id", parameter?.user_id);
   }, [form, parameter]);
@@ -31,13 +29,17 @@ const ModalTwoFact = ({ open, parameter, onCancel }) => {
             ? "Scan QR Code Dengan Google Authenticator untuk mendapatkan PIN OTP"
             : "Masukkan Kode OTP dari Google Authenticator"}
         </p>
-        <QRCode value={parameter?.qr_code_url} className="w-full mb-6" />
+        <Image src={parameter?.qr_code_url} className="w-full mb-6" />
         <Form form={form} layout="vertical" className="w-full ">
           <Form.Item name="user_id" hidden>
             <Input placeholder="Masukkan Site ID" />
           </Form.Item>
           <Form.Item name="code">
-            <Input className="h-10 " placeholder="Masukkan Kode OTP" />
+            <Input
+              type="number"
+              className="h-10 "
+              placeholder="Masukkan Kode OTP"
+            />
           </Form.Item>
           <Button
             type="primary"
