@@ -3,7 +3,7 @@ import { IAuthLoginRequest, IAuthLoginResponse } from "../types/auth.interface";
 
 const setAuthData = (response: IAuthLoginResponse) => {
   if (response.status && response.token) {
-    localStorage.setItem("access_token", response);
+    localStorage.setItem("access_token", response.token);
     localStorage.setItem("user_data", JSON.stringify(response.data));
   }
 };

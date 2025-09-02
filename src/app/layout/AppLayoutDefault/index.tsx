@@ -95,7 +95,7 @@ const AppLayoutDefault = () => {
       await logout().unwrap();
 
       toast.dismiss();
-      toast.success("Logout successful 🎉", { position: "top-right" });
+      toast.success("Logout successful", { position: "top-right" });
 
       navigate("login");
     } catch (err: unknown) {
