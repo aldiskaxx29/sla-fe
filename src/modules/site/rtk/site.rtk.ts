@@ -65,6 +65,23 @@ export const siteApi = emptySplitApi.injectEndpoints({
         return response;
       },
     }),
+    download_template: builder.query({
+      query: () => {
+        return {
+          method: "GET",
+          url: "/rekonsiliasi/download-template",
+          responseHandler: (response) => response.blob(),
+          cache: "no-cache",
+        };
+      },
+    }),
+    upload_template: builder.mutation({
+      query: (formData: FormData) => ({
+        url: "/rekonsiliasi/import",
+        method: "POST",
+        body: formData,
+      }),
+    }),
   }),
 });
 
@@ -73,5 +90,7 @@ export const {
   useLazyReport_site_fetchDataQuery,
   useLazyDetail_site_fetchDataQuery,
   useLazyClear_data_fetchDataQuery,
+  useLazyDownload_templateQuery,
   useSave_siteMutation,
+  useUpload_templateMutation,
 } = siteApi;

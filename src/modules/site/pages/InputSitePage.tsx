@@ -5,6 +5,11 @@ import dayjs from "dayjs";
 import { useEffect, useMemo, useState } from "react";
 import { TableInputSite } from "../components/TableInputSite";
 import { useSite } from "../hooks/site.hooks";
+import {
+  useLazyDownload_templateQuery,
+  useUpload_templateMutation,
+} from "../rtk/site.rtk";
+import { toast } from "react-toastify";
 
 const SitePage = () => {
   const [week, setWeek] = useState("");
@@ -28,7 +33,7 @@ const SitePage = () => {
         },
       }).unwrap();
     })();
-  }, [getSite, exclude,parameter, week, month, trigger]);
+  }, [getSite, exclude, parameter, week, month, trigger]);
 
   const optExclude = [
     { label: "All", value: "all" },
@@ -78,6 +83,49 @@ const SitePage = () => {
     setWeek(filterWeeks.find((item) => item.month === month)?.value[0] ?? "1");
   }, [month]);
 
+  const [downloadTemplate, { data: dataDownload }] =
+    useLazyDownload_templateQuery();
+
+  const handleDownload = async () => {
+    try {
+      await downloadTemplate({}).unwrap();
+
+      const blobUrl = URL.createObjectURL(dataDownload as Blob);
+
+      const tempLink = document.createElement("a");
+      tempLink.href = blobUrl;
+
+      tempLink.setAttribute("download", "template-rekonsiliasi.xlsx");
+      document.body.appendChild(tempLink);
+      tempLink.click();
+
+      document.body.removeChild(tempLink);
+      URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error("Failed to download the file:", error);
+    }
+  };
+  const [uploadTemplate, { isLoading }] = useUpload_templateMutation();
+
+  const handleUpload = async (options) => {
+    const { file, onSuccess, onError } = options;
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      await uploadTemplate(formData).unwrap();
+
+      onSuccess?.("Ok");
+      toast.success(`${file.name} file uploaded successfully`);
+    } catch (error) {
+      // Signal to Antd that the upload failed
+      onError?.(new Error("Upload failed"));
+      console.error("Failed to upload file:", error);
+      toast.error(`${file.name} file upload failed.`);
+    }
+  };
+
   return (
     <div className="bg-white border border-[#DBDBDB] rounded-xl p-4 m-6">
       {isLoadingSite ? (
@@ -122,13 +170,24 @@ const SitePage = () => {
                   onChange={(value) => setWeek(value)}
                 />
               )}
-              <Upload>
+              <Button
+                onClick={() => {
+                  handleDownload();
+                }}
+                className="!h-11 !px-3 py-2.5 !border-0 !rounded-full !bg-[#EDFFFD]"
+              >
+                <p className="text-brand-secondary font-medium">
+                  Download Template Excel
+                </p>
+                <Image src={xlxsIcon} alt="icon" width={16} preview={false} />
+              </Button>
+              <Upload customRequest={handleUpload} showUploadList={false}>
                 <Button
-                  onClick={() => {}}
                   className="!h-11 !px-3 py-2.5 !border-0 !rounded-full !bg-[#EDFFFD]"
+                  loading={isLoading}
                 >
                   <p className="text-brand-secondary font-medium">
-                    Import Excel
+                    {isLoading ? "Uploading..." : "Import Excel"}
                   </p>
                   <Image src={xlxsIcon} alt="icon" width={16} preview={false} />
                 </Button>
