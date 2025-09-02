@@ -1,4 +1,13 @@
-import { Modal, Input, Upload, Button, Form, Select } from "antd";
+import {
+  Modal,
+  Input,
+  Upload,
+  Button,
+  Form,
+  Select,
+  Checkbox,
+  CheckboxProps,
+} from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import TextArea from "antd/es/input/TextArea";
 import { useCallback, useEffect, useState } from "react";
@@ -12,8 +21,8 @@ type SiteDetail = {
   note: string;
   evidence?: string;
   ttr_slisih?: string;
-  // kpi: string[];
-  // add other fields as needed
+  kpi: string[];
+  site_sos: boolean;
 };
 
 const ModalInput = ({ open, onCancel, onSave, dataModal }) => {
@@ -21,13 +30,14 @@ const ModalInput = ({ open, onCancel, onSave, dataModal }) => {
   const { getDetailSite } = useSite();
   const [preview, setPreview] = useState("");
   const [fileList, setFileList] = useState<any[]>([]);
+  const [checked, setChecked] = useState(false);
+  const [optionsKpi, setOptionsKpi] = useState([]);
 
   const handleOk = () => {
     form
       .validateFields()
       .then((values) => {
-        console.log("values", values);
-        onSave(values);
+        onSave({ ...values, site_sos: checked });
         form.resetFields();
         setPreview("");
       })
@@ -47,7 +57,7 @@ const ModalInput = ({ open, onCancel, onSave, dataModal }) => {
           },
         }).unwrap();
         const siteDetail = result as SiteDetail;
-
+        setOptionsKpi(result?.kpi);
         form.setFieldsValue(siteDetail);
         const parserEvidance = siteDetail.evidence
           ? JSON.parse(siteDetail?.evidence)
@@ -82,6 +92,12 @@ const ModalInput = ({ open, onCancel, onSave, dataModal }) => {
     }
   };
   const { Option } = Select;
+
+  const label = `${checked ? "Yes" : "No"}`;
+
+  const onChange: CheckboxProps["onChange"] = (e) => {
+    setChecked(e.target.checked);
+  };
 
   return (
     <Modal open={open} onCancel={onCancel} footer={null} centered>
@@ -123,6 +139,11 @@ const ModalInput = ({ open, onCancel, onSave, dataModal }) => {
               <Input type="time" placeholder="Masukkan Ttr Selisih" />
             </Form.Item>
           )}
+          <Form.Item name="site_sos" label="Site SOS">
+            <Checkbox onChange={onChange} checked={checked}>
+              {label}
+            </Checkbox>
+          </Form.Item>
 
           {!dataModal?.parameter?.includes("mttrq") ? (
             <Form.Item
@@ -190,18 +211,19 @@ const ModalInput = ({ open, onCancel, onSave, dataModal }) => {
             </Form.Item>
           )}
 
-          {/* <Form.Item
+          <Form.Item
             label="KPI"
             name="kpi"
             rules={[{ required: true, message: "Pilih KPI" }]}
           >
             <Select mode="multiple" placeholder="Pilih KPI">
-              <Option value="packetloss 1-5% ran to core">Packetloss 1-5% Ran To core</Option>
-              <Option value="packetloss >5% ran to core">Packetloss &gt;5% Ran to Core</Option>
-              <Option value="jitter ran to core">Jitter Ran to Core</Option>
-              <Option value="latency ran to core">Latency Ran to Core</Option>
+              {optionsKpi.map((kpi) => (
+                <Option key={kpi} value={kpi}>
+                  {kpi}
+                </Option>
+              ))}
             </Select>
-          </Form.Item> */}
+          </Form.Item>
 
           <Form.Item
             label="Keterangan Rekon"
