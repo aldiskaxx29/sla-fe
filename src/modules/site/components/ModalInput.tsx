@@ -190,7 +190,7 @@ const ModalInput = ({ open, onCancel, onSave, dataModal }) => {
             </Form.Item>
           )}
 
-          {/* <Form.Item
+          <Form.Item
             label="KPI"
             name="kpi"
             rules={[{ required: true, message: "Pilih KPI" }]}
@@ -201,7 +201,7 @@ const ModalInput = ({ open, onCancel, onSave, dataModal }) => {
               <Option value="jitter ran to core">Jitter Ran to Core</Option>
               <Option value="latency ran to core">Latency Ran to Core</Option>
             </Select>
-          </Form.Item> */}
+          </Form.Item>
 
           <Form.Item
             label="Keterangan Rekon"
