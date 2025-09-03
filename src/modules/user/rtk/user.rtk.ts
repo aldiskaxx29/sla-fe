@@ -6,7 +6,7 @@ export const userApi = emptySplitApi.injectEndpoints({
       query: (payload) => {
         return {
           method: "GET",
-          url: "user",
+          url: "/users/getAll",
           params: payload?.query,
         };
       },

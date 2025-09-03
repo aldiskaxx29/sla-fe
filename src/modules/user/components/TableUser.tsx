@@ -56,7 +56,7 @@ const TableUser = () => {
   return (
     <Table
       columns={columns}
-      dataSource={dataAllUser}
+      dataSource={dataAllUser?.data}
       bordered
       className="rounded-xl"
     ></Table>
