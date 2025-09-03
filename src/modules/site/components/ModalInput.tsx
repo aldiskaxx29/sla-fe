@@ -48,7 +48,6 @@ const ModalInput = ({ open, onCancel, onSave, dataModal }) => {
 
   const getDetailData = useCallback(
     async (dataModal: DataModal) => {
-      console.log("parameter", dataModal.parameter);
       try {
         const result = await getDetailSite({
           query: {
