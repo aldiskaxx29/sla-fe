@@ -4,10 +4,12 @@ import type { ColumnsType } from "antd/es/table";
 import { useEffect, useState } from "react";
 import { useUser } from "../hooks/user.hooks";
 import ModalDetailUser from "./ModalDetailUser";
+import ModalDeleteUser from "./ModalDeleteUser";
 
 const TableUser = () => {
   const { dataAllUser, getAllUser } = useUser();
   const [openDetail, setOpenDetail] = useState(false);
+  const [openDelete, setOpenDelete] = useState(false);
   const [dataDetail, setDataDetail] = useState({});
   const columns: ColumnsType<any> = [
     {
@@ -46,10 +48,20 @@ const TableUser = () => {
     {
       title: "Action",
       key: "action",
+      width: 100,
       render: (text, record) => (
-        <Button type="primary" onClick={() => handleDetailClick(record)}>
-          Detail
-        </Button>
+        <div className="flex gap-4">
+          <Button type="primary" onClick={() => handleDetailClick(record)}>
+            Detail
+          </Button>
+          <Button
+            type="primary"
+            className="!bg-red-500 !text-white"
+            onClick={() => handleDeleteClick(record)}
+          >
+            Delete
+          </Button>
+        </div>
       ),
       onHeaderCell: () => ({
         className: "!bg-blue-pacific !p-3",
@@ -63,9 +75,19 @@ const TableUser = () => {
     setOpenDetail(true);
   };
 
-  const handleDetailCancel = () => {
+  const handleDeleteClick = (record: any) => {
+    // Handle the delete button click here
+    setDataDetail(record);
+    setOpenDelete(true);
+  };
+
+  const handleDetailCancel = (isDelete) => {
     setOpenDetail(false);
     setDataDetail({});
+    if (isDelete) {
+      setOpenDelete(false);
+      fetchUser();
+    }
   };
 
   const fetchUser = async () => {
@@ -92,6 +114,11 @@ const TableUser = () => {
         open={openDetail}
         data={dataDetail}
         onCancel={handleDetailCancel}
+      />
+      <ModalDeleteUser
+        open={openDelete}
+        data={dataDetail}
+        onCancel={() => handleDetailCancel(true)}
       />
     </>
   );

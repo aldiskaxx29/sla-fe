@@ -11,7 +11,7 @@ import {
 import { UploadOutlined } from "@ant-design/icons";
 import TextArea from "antd/es/input/TextArea";
 import { useCallback, useEffect, useState } from "react";
-import { useSite } from "../hooks/site.hooks";
+import { useLazyApprover_detailDataQuery } from "../rtk/approver.rtk";
 
 type DataModal = { parameter: string; id: string };
 
@@ -27,7 +27,7 @@ type SiteDetail = {
 
 const ModalInput = ({ open, onCancel, onSave, dataModal }) => {
   const [form] = Form.useForm();
-  const { getDetailSite } = useSite();
+  const [getDetailApprover] = useLazyApprover_detailDataQuery();
   const [preview, setPreview] = useState("");
   const [fileList, setFileList] = useState<any[]>([]);
   const [checked, setChecked] = useState(false);
@@ -49,15 +49,15 @@ const ModalInput = ({ open, onCancel, onSave, dataModal }) => {
   const getDetailData = useCallback(
     async (dataModal: DataModal) => {
       try {
-        const result = await getDetailSite({
+        const result = await getDetailApprover({
           query: {
-            parameter: dataModal.parameter,
             id: dataModal.id,
           },
         }).unwrap();
-        const siteDetail = result as SiteDetail;
+        const siteDetail = result?.data as SiteDetail;
+        console.log(result);
+
         setOptionsKpi(result?.options);
-        setChecked(result?.site_sos);
         form.setFieldsValue(siteDetail);
         const parserEvidance = siteDetail.evidence
           ? JSON.parse(siteDetail?.evidence)
@@ -68,7 +68,7 @@ const ModalInput = ({ open, onCancel, onSave, dataModal }) => {
         console.log(error);
       }
     },
-    [form, getDetailSite]
+    [form, getDetailApprover]
   );
 
   useEffect(() => {
@@ -211,7 +211,7 @@ const ModalInput = ({ open, onCancel, onSave, dataModal }) => {
             </Form.Item>
           )}
 
-          <Form.Item
+          {/* <Form.Item
             label="KPI"
             name="kpi"
             rules={[{ required: true, message: "Pilih KPI" }]}
@@ -223,7 +223,7 @@ const ModalInput = ({ open, onCancel, onSave, dataModal }) => {
                 </Option>
               ))}
             </Select>
-          </Form.Item>
+          </Form.Item> */}
 
           <Form.Item
             label="Keterangan Rekon"

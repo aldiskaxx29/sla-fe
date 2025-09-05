@@ -1,10 +1,20 @@
 import { Button, Form, Input, Modal } from "antd";
 import { useCreateUserMutation } from "../rtk/user.rtk";
 import { toast } from "react-toastify";
+import { useUser } from "../hooks/user.hooks";
 
 const ModalAddUser = ({ open, onCancel }) => {
   const [createUser] = useCreateUserMutation();
+  const { getAllUser } = useUser();
+
   const [form] = Form.useForm();
+  const fetchUser = async () => {
+    try {
+      await getAllUser({}).unwrap();
+    } catch (error) {
+      //
+    }
+  };
   const handleOk = () => {
     form
       .validateFields()
@@ -12,6 +22,7 @@ const ModalAddUser = ({ open, onCancel }) => {
         console.log("Form Values:", values);
         createUser({ body: values }).unwrap();
         toast.success("User created successfully");
+        fetchUser();
         onCancel();
       })
       .catch((info) => {
