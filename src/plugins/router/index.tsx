@@ -15,6 +15,7 @@ import { useTicketRouter } from "@/modules/ticket/router/ticket.router";
 import { AuthRouteGuard } from "../hooks/AuthenticationGuard";
 import { useDashboardTARouter } from "@/modules/dashboard-ta/router/dashboardTA.router";
 import { useUserRouter } from "@/modules/user/router/user.router";
+import { useApproverRouter } from "@/modules/approver/router/approver.router";
 
 const useRouter = () => {
   const app = useAppRouter();
@@ -30,6 +31,7 @@ const useRouter = () => {
   const ticket = useTicketRouter();
   const dashboardTA = useDashboardTARouter();
   const user = useUserRouter();
+  const approver = useApproverRouter();
 
   const routes = useRoutes([
     ...app,
@@ -63,6 +65,7 @@ const useRouter = () => {
             ...ticket,
             ...dashboardTA,
             ...user,
+            ...approver,
           ],
         },
       ],

@@ -11,7 +11,7 @@ import {
 import { UploadOutlined } from "@ant-design/icons";
 import TextArea from "antd/es/input/TextArea";
 import { useCallback, useEffect, useState } from "react";
-import { useSite } from "../hooks/site.hooks";
+import { useLazyApprover_detailDataQuery } from "../rtk/approver.rtk";
 
 type DataModal = { parameter: string; id: string };
 
@@ -27,7 +27,7 @@ type SiteDetail = {
 
 const ModalInput = ({ open, onCancel, onSave, dataModal }) => {
   const [form] = Form.useForm();
-  const { getDetailSite } = useSite();
+  const [getDetailApprover] = useLazyApprover_detailDataQuery();
   const [preview, setPreview] = useState("");
   const [fileList, setFileList] = useState<any[]>([]);
   const [checked, setChecked] = useState(false);
@@ -49,9 +49,8 @@ const ModalInput = ({ open, onCancel, onSave, dataModal }) => {
   const getDetailData = useCallback(
     async (dataModal: DataModal) => {
       try {
-        const result = await getDetailSite({
+        const result = await getDetailApprover({
           query: {
-            parameter: dataModal.parameter,
             id: dataModal.id,
           },
         }).unwrap();
@@ -67,7 +66,7 @@ const ModalInput = ({ open, onCancel, onSave, dataModal }) => {
         console.log(error);
       }
     },
-    [form, getDetailSite]
+    [form, getDetailApprover]
   );
 
   useEffect(() => {
@@ -216,7 +215,7 @@ const ModalInput = ({ open, onCancel, onSave, dataModal }) => {
             rules={[{ required: true, message: "Pilih KPI" }]}
           >
             <Select mode="multiple" placeholder="Pilih KPI">
-              {optionsKpi?.map((kpi) => (
+              {optionsKpi.map((kpi) => (
                 <Option key={kpi} value={kpi}>
                   {kpi}
                 </Option>
