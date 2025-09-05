@@ -24,8 +24,20 @@ export const userApi = emptySplitApi.injectEndpoints({
       },
       keepUnusedDataFor: 0,
     }),
+    deleteUser: builder.mutation({
+      query: (payload) => {
+        return {
+          method: "Delete",
+          url: "/users/delete",
+          params: payload,
+        };
+      },
+    }),
   }),
 });
 
-export const { useLazyGetAllUser_fetchDataQuery, useCreateUserMutation } =
-  userApi;
+export const {
+  useLazyGetAllUser_fetchDataQuery,
+  useCreateUserMutation,
+  useDeleteUserMutation,
+} = userApi;
