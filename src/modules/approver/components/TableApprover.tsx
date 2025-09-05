@@ -256,7 +256,6 @@ const TableApprover = () => {
       formData.append("site_id", payload.site_id);
       formData.append("ttr_selisih", payload.ttr_selisih);
       formData.append("note", payload.note);
-      formData.append("parameter", parameter);
       formData.append("ticket", payload.ticket_id);
       formData.append("kpi", payload.kpi);
       formData.append("site_sos", payload.site_sos);
@@ -273,7 +272,7 @@ const TableApprover = () => {
   };
 
   const openEdit = (value) => {
-    setDataModal({ ...value, parameter });
+    setDataModal({ ...value });
     setOpen(true);
   };
 

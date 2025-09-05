@@ -54,7 +54,9 @@ const ModalInput = ({ open, onCancel, onSave, dataModal }) => {
             id: dataModal.id,
           },
         }).unwrap();
-        const siteDetail = result as SiteDetail;
+        const siteDetail = result?.data as SiteDetail;
+        console.log(result);
+
         setOptionsKpi(result?.options);
         form.setFieldsValue(siteDetail);
         const parserEvidance = siteDetail.evidence
@@ -209,19 +211,19 @@ const ModalInput = ({ open, onCancel, onSave, dataModal }) => {
             </Form.Item>
           )}
 
-          <Form.Item
+          {/* <Form.Item
             label="KPI"
             name="kpi"
             rules={[{ required: true, message: "Pilih KPI" }]}
           >
             <Select mode="multiple" placeholder="Pilih KPI">
-              {optionsKpi.map((kpi) => (
+              {optionsKpi?.map((kpi) => (
                 <Option key={kpi} value={kpi}>
                   {kpi}
                 </Option>
               ))}
             </Select>
-          </Form.Item>
+          </Form.Item> */}
 
           <Form.Item
             label="Keterangan Rekon"
