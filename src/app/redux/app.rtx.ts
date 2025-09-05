@@ -17,6 +17,9 @@ const baseQuery = fetchBaseQuery({
     headers.set("ngrok-skip-browser-warning", "any");
     return headers;
   },
+  headers: {
+    Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+  },
   paramsSerializer: (params) => {
     return new URLSearchParams(params).toString().replace(/\+/g, "%20");
   },

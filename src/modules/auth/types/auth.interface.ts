@@ -5,7 +5,7 @@ export interface IAuthLoginRequest {
 
 export interface IAuthLoginResponse {
   status: boolean;
-  data: {
+  user: {
     id: number;
     name: string;
     nik: string;
