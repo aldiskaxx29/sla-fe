@@ -118,6 +118,7 @@ const SitePage = () => {
 
       onSuccess?.("Ok");
       toast.success(`${file.name} file uploaded successfully`);
+      setTrigger((value) => value + 1);
     } catch (error) {
       // Signal to Antd that the upload failed
       onError?.(new Error("Upload failed"));

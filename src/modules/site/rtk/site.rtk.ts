@@ -77,7 +77,7 @@ export const siteApi = emptySplitApi.injectEndpoints({
     }),
     upload_template: builder.mutation({
       query: (formData: FormData) => ({
-        url: "/rekonsiliasi/import",
+        url: "/dashboard/rekonsiliasi/import",
         method: "POST",
         body: formData,
       }),

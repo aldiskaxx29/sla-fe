@@ -57,6 +57,7 @@ const ModalInput = ({ open, onCancel, onSave, dataModal }) => {
         }).unwrap();
         const siteDetail = result as SiteDetail;
         setOptionsKpi(result?.options);
+        setChecked(result?.site_sos);
         form.setFieldsValue(siteDetail);
         const parserEvidance = siteDetail.evidence
           ? JSON.parse(siteDetail?.evidence)
