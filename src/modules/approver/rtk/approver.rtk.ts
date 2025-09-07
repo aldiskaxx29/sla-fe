@@ -33,7 +33,7 @@ export const approverApi = emptySplitApi.injectEndpoints({
         return {
           method: "POST",
           url: "exclude/save",
-          params: payload?.query,
+          body: payload,
         };
       },
     }),
