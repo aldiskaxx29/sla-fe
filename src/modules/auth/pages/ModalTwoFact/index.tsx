@@ -1,19 +1,17 @@
-import { Button, Form, Image, Input, Modal, QRCode } from "antd";
+import { Button, Form, Image, Input, Modal } from "antd";
 import { useLogin_2faMutation } from "../../rtk/auth.rtk";
-import { useNavigate } from "react-router-dom";
 import { useCallback, useEffect } from "react";
 import { toast } from "react-toastify";
 
 const ModalTwoFact = ({ open, parameter, onCancel }) => {
   const [form] = Form.useForm();
-  const navigation = useNavigate();
   const [login_2fa] = useLogin_2faMutation();
 
   const handleOk = useCallback(async () => {
     try {
       await login_2fa(form.getFieldsValue()).unwrap();
       toast.success("Login Berhasil");
-      navigation("/login");
+      window.location.reload();
     } catch (error) {
       toast.error("Login Gagal, Periksa Kode OTP Anda");
     }
