@@ -257,7 +257,7 @@ const TableApprover = () => {
       formData.append("ttr_selisih", payload.ttr_selisih);
       formData.append("note", payload.note);
       formData.append("ticket", payload.ticket_id);
-      formData.append("kpi", payload.kpi);
+      formData.append("status", payload.statussd);
       formData.append("site_sos", payload.site_sos);
 
       await saveApprover(formData).unwrap();
@@ -265,6 +265,7 @@ const TableApprover = () => {
       setOpen(false);
       toast.success("Success Edit Rekonsiliasi");
     } catch (error) {
+      toast.error("Failed Edit Rekonsiliasi");
       console.log(error);
     } finally {
       setOpen(false);
