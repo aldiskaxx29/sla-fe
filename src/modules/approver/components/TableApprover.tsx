@@ -388,6 +388,18 @@ const TableApprover = () => {
                     </span>
                   );
                 }
+                if (column.dataIndex == "status") {
+                  switch (text) {
+                    case 1:
+                      return "Pending";
+                    case 2:
+                      return "Disetujui";
+                    case 3:
+                      return "Ditolak";
+                    default:
+                      return "-";
+                  }
+                }
                 return text;
               }}
             />
