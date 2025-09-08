@@ -214,7 +214,7 @@ const ModalInput = ({ open, onCancel, onSave, dataModal }) => {
             name="status"
             rules={[{ required: true, message: "Pilih Status" }]}
           >
-            <Select mode="multiple" placeholder="Pilih Status">
+            <Select placeholder="Pilih Status">
               <Option key={1} value={1}>
                 Pending
               </Option>

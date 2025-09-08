@@ -164,10 +164,23 @@ const TableApprover = () => {
         search: true,
       },
       {
-        title: `Status`,
-        key: `status`,
-        dataIndex: `status`,
-      },
+        title: 'Status',
+        key: 'status',
+        dataIndex: 'status',
+        render: (value) => {
+          console.log('value', value)
+          switch (value) {
+            case 1:
+              return 'Pending';
+            case 2:
+              return 'Disetujui';
+            case 3:
+              return 'Ditolak';
+            default:
+              return '-';
+          }
+        },
+      },      
       {
         title: "Assesment CNQ",
         align: "center",
@@ -345,7 +358,8 @@ const TableApprover = () => {
                         record.status_latency === 2 ||
                         record.status_packetloss_5 === 2 ||
                         record.status_packetloss_15 === 2 ||
-                        record.status_jitter === 2
+                        record.status_jitter === 2 ||
+                        record.status === 2
                       }
                       // disabled={!editable} // optional: bisa dibuat conditional
                     />
