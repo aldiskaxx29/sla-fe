@@ -5,10 +5,12 @@ import {
   useLazySiteApi_fetchDataQuery,
   useLazyCNOP_region_fetchDataQuery,
   useLazyDetail_ticketQuery,
-  useLazyChart_monitoringQuery,useLazyDetail_siteQuery,
+  useLazyChart_monitoringQuery,
+  useLazyDetail_siteQuery,
   useLazyHistory_dataQuery,
   useLazyWitel_dataQuery,
-  useLazyModal_detailQuery
+  useLazyModal_detailQuery,
+  useLazyDashboard_complyQuery,
 } from "../rtk/dashboard.rtk";
 
 const useDashboard = () => {
@@ -107,6 +109,15 @@ const useDashboard = () => {
       data: dataModalDetail,
     },
   ] = useLazyModal_detailQuery();
+  const [
+    getComply,
+    {
+      isLoading: isLoadingComply,
+      isError: isErrorComply,
+      isSuccess: isSuccessComply,
+      data: dataComply,
+    },
+  ] = useLazyDashboard_complyQuery();
 
   return {
     getSC,
@@ -164,6 +175,11 @@ const useDashboard = () => {
     isErrorModalDetail,
     isSuccessModalDetail,
     dataModalDetail,
+    getComply,
+    isLoadingComply,
+    isErrorComply,
+    isSuccessComply,
+    dataComply,
   };
 };
 

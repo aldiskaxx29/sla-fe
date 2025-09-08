@@ -7,6 +7,9 @@ import ChartMSA from "@/modules/dashboard/componets/ChartMSA";
 import { TableHistory } from "@/modules/dashboard/componets/TableHistory";
 import { TableParentChild } from "@/modules/dashboard/componets/TableParentChild";
 import AppDropdown from "@/app/components/AppDropdown";
+import { useEffect } from "react";
+import { useDashboard } from "@/modules/dashboard/hooks/dashboard.hooks";
+import { toast } from "react-toastify";
 
 const MSAmenu = ({
   dataSC,
@@ -67,6 +70,20 @@ const MSAmenu = ({
     },
   ];
 
+  const { getComply, dataComply } = useDashboard();
+
+  const fetchComply = async () => {
+    try {
+      await getComply({}).unwrap();
+    } catch {
+      toast.error("Gagal Mendapatkan data Comply");
+    }
+  };
+
+  useEffect(() => {
+    fetchComply();
+  }, []);
+
   return (
     <div>
       <div className="bg-white border border-[#DBDBDB] rounded-xl p-4 mx-6 ">
@@ -83,7 +100,9 @@ const MSAmenu = ({
                 <p className="text-sm text-primary-1 font-bold">
                   Current Service Credit
                 </p>
-                <p className="text-base text-[#4B465C] medium">Rp. 0</p>
+                <p className="text-base text-[#4B465C] medium">
+                  Rp. {dataComply && dataComply[0].service_creadir}
+                </p>
               </div>
             </div>
             {/* <div className="flex bg-green-50 px-4 py-2 rounded-xl"> */}
@@ -92,20 +111,21 @@ const MSAmenu = ({
               <Image src={warningIcon} alt="icon" width={36} preview={false} />
               <div className="ml-2 ">
                 <p className="text-sm text-primary-1 font-bold">
-                  Compliances MSA
+                  {dataComply && dataComply[1].parameter}
                 </p>
-                <p className="text-base text-[#4B465C] medium">6/8 Parameter</p>
-                {/* <p className="text-base text-[#4B465C] medium">100%</p> */}
+                <p className="text-base text-[#4B465C] medium">
+                  {dataComply && dataComply[1].jumlah} Parameter
+                </p>
               </div>
             </div>
             <div className="flex bg-yellow-50 px-4 py-2 rounded-xl">
               <Image src={warningIcon} alt="icon" width={36} preview={false} />
               <div className="ml-2">
                 <p className="text-sm text-primary-1 font-bold">
-                  Compliances SLA CNOP 3.0
+                  {dataComply && dataComply[2].parameter}
                 </p>
                 <p className="text-base text-[#4B465C] medium">
-                  29/33 Parameter
+                  {dataComply && dataComply[2].jumlah} Parameter
                 </p>
               </div>
             </div>

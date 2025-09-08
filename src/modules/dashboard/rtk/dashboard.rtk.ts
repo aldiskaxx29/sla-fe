@@ -13,7 +13,7 @@ export const dashboardApi = emptySplitApi.injectEndpoints({
       transformResponse: (response: unknown) => {
         return response;
       },
-      keepUnusedDataFor: 0
+      keepUnusedDataFor: 0,
     }),
     TrendApi_fetchData: builder.query({
       query: (payload) => {
@@ -136,6 +136,18 @@ export const dashboardApi = emptySplitApi.injectEndpoints({
         return response;
       },
     }),
+    dashboard_comply: builder.query({
+      query: (payload) => {
+        return {
+          method: "GET",
+          url: "dashboard/parameter/comply",
+          params: payload?.query,
+        };
+      },
+      transformResponse: (response: unknown) => {
+        return response;
+      },
+    }),
   }),
   overrideExisting: false,
 });
@@ -151,5 +163,6 @@ export const {
   useLazyDetail_siteQuery,
   useLazyHistory_dataQuery,
   useLazyWitel_dataQuery,
-  useLazyModal_detailQuery
+  useLazyModal_detailQuery,
+  useLazyDashboard_complyQuery,
 } = dashboardApi;

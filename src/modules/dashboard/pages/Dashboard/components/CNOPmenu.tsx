@@ -7,7 +7,9 @@ import { TableHistoryCNOP } from "@/modules/dashboard/componets/TableHistoryCNOP
 import { snakeToPascal_Utils } from "@/app/utils/wording.utils";
 import { TableParentChildCNOP } from "@/modules/dashboard/componets/TableParentChildCNOP";
 import AppDropdown from "@/app/components/AppDropdown";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
+import { useDashboard } from "@/modules/dashboard/hooks/dashboard.hooks";
+import { toast } from "react-toastify";
 
 const CNOPmenu = ({
   dataSC,
@@ -89,6 +91,20 @@ const CNOPmenu = ({
     },
   ];
 
+  const { getComply, dataComply } = useDashboard();
+
+  const fetchComply = async () => {
+    try {
+      await getComply({}).unwrap();
+    } catch {
+      toast.error("Gagal Mendapatkan data Comply");
+    }
+  };
+
+  useEffect(() => {
+    fetchComply();
+  }, []);
+
   return (
     <div>
       <div className="bg-white border border-[#DBDBDB] rounded-xl p-4 mx-6 ">
@@ -105,9 +121,11 @@ const CNOPmenu = ({
               <Image src={warningIcon} alt="icon" width={36} preview={false} />
               <div className="ml-2 ">
                 <p className="text-sm text-primary-1 font-bold">
-                  Compliances MSA
+                  {dataComply && dataComply[1].parameter}
                 </p>
-                <p className="text-base text-[#4B465C] medium">6/8 Parameter</p>
+                <p className="text-base text-[#4B465C] medium">
+                  {dataComply && dataComply[1].jumlah} Parameter
+                </p>
                 {/* <p className="text-base text-[#4B465C] medium">100%</p> */}
               </div>
             </div>
@@ -115,10 +133,10 @@ const CNOPmenu = ({
               <Image src={warningIcon} alt="icon" width={36} preview={false} />
               <div className="ml-2">
                 <p className="text-sm text-primary-1 font-bold">
-                  Compliances SLA CNOP 3.0
+                  {dataComply && dataComply[2].parameter}
                 </p>
                 <p className="text-base text-[#4B465C] medium">
-                  29/33 Parameter
+                  {dataComply && dataComply[2].jumlah} Parameter
                 </p>
               </div>
             </div>
