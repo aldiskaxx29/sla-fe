@@ -45,6 +45,8 @@ const auth = createSlice({
     authLogout: (state) => {
       state.auth_authenticatedUser = null;
       state.isAuthenticated = false;
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("user_data");
     },
     authInitializeFromStorage: (state) => {
       const userData = getUserFromStorage();

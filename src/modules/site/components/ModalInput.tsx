@@ -139,12 +139,14 @@ const ModalInput = ({ open, onCancel, onSave, dataModal }) => {
               <Input type="time" placeholder="Masukkan Ttr Selisih" />
             </Form.Item>
           )}
-          <Form.Item name="site_sos" label="Site SOS">
-            <Checkbox onChange={onChange} checked={checked}>
-              {label}
-            </Checkbox>
-          </Form.Item>
-
+          {dataModal?.parameter != "mttrq major" &&
+            dataModal?.parameter != "mttrq minor" && (
+              <Form.Item name="site_sos" label="Site SOS">
+                <Checkbox onChange={onChange} checked={checked}>
+                  {label}
+                </Checkbox>
+              </Form.Item>
+            )}
           {!dataModal?.parameter?.includes("mttrq") ? (
             <Form.Item
               label="Grouping RCA"

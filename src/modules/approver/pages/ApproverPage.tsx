@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { use, useCallback, useEffect, useState } from "react";
 import { TableApprover } from "../components/TableApprover";
 import AppDropdown from "@/app/components/AppDropdown";
 import { Spin } from "antd";
@@ -6,7 +6,7 @@ import { useLazyApprover_fetchDataQuery } from "../rtk/approver.rtk";
 
 const ApproverPage = () => {
   const [loading, setLoading] = useState(false);
-  const [week, setWeek] = useState("");
+  const [week, setWeek] = useState(0);
   const [month, setMonth] = useState(new Date().getMonth());
   const [year, setYear] = useState(new Date().getFullYear());
 
@@ -73,20 +73,41 @@ const ApproverPage = () => {
     value: `${i + 1}`,
   }));
 
-  const [getApprover] = useLazyApprover_fetchDataQuery();
+  const [getApprover, { data }] = useLazyApprover_fetchDataQuery();
 
   const fetchApprover = useCallback(async (): Promise<void> => {
     setLoading(true);
-
-    await getApprover({
-      query: {
-        week,
-        month,
-        year,
-      },
-    }).unwrap();
-    setLoading(false);
+    try {
+      await getApprover({
+        query: {},
+      }).unwrap();
+    } catch {
+      //
+    } finally {
+      setLoading(false);
+    }
   }, [month, year, week]);
+
+  const getDateWeek = (date) => {
+    const currentDate = typeof date === "object" ? date : new Date();
+    const januaryFirst = new Date(currentDate.getFullYear(), 0, 1);
+    const daysToNextMonday =
+      januaryFirst.getDay() === 1 ? 0 : (7 - januaryFirst.getDay()) % 7;
+    const nextMonday = new Date(
+      currentDate.getFullYear(),
+      0,
+      januaryFirst.getDate() + daysToNextMonday
+    );
+
+    return currentDate < nextMonday
+      ? 52
+      : currentDate > nextMonday
+      ? Math.ceil((currentDate - nextMonday) / (24 * 3600 * 1000) / 7)
+      : 1;
+  };
+  useEffect(() => {
+    setWeek(getDateWeek(new Date()));
+  }, []);
 
   useEffect(() => {
     fetchApprover();
@@ -118,7 +139,7 @@ const ApproverPage = () => {
           value={year}
         />
       </div>
-      <TableApprover />
+      <TableApprover data={data} />
     </div>
   );
 };
