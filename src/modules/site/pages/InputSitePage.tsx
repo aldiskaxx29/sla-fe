@@ -52,18 +52,18 @@ const SitePage = () => {
   ];
 
   const filterWeeks = [
-    { month: "1", value: ["merge","1", "2", "3"] },
-    { month: "2", value: ["merge","4", "5", "6", "7"] },
-    { month: "3", value: ["merge","8", "9", "10", "11", "12"] },
-    { month: "4", value: ["merge","13", "14", "15", "16"] },
-    { month: "5", value: ["merge","17", "18", "19", "20"] },
-    { month: "6", value: ["merge","21", "22", "23", "24", "25"] },
-    { month: "7", value: ["merge","26", "27", "28", "29"] },
-    { month: "8", value: ["merge","30", "31", "32", "33"] },
-    { month: "9", value: ["merge","34", "35", "36", "37"] },
-    { month: "10", value: ["merge","38", "39", "40", "41"] },
-    { month: "11", value: ["merge","42", "43", "44", "45"] },
-    { month: "12", value: ["merge","46", "47", "48", "49", "50"] },
+    { month: "1", value: ["merge", "1", "2", "3"] },
+    { month: "2", value: ["merge", "4", "5", "6", "7"] },
+    { month: "3", value: ["merge", "8", "9", "10", "11", "12"] },
+    { month: "4", value: ["merge", "13", "14", "15", "16"] },
+    { month: "5", value: ["merge", "17", "18", "19", "20"] },
+    { month: "6", value: ["merge", "21", "22", "23", "24", "25"] },
+    { month: "7", value: ["merge", "26", "27", "28", "29"] },
+    { month: "8", value: ["merge", "30", "31", "32", "33"] },
+    { month: "9", value: ["merge", "34", "35", "36", "37"] },
+    { month: "10", value: ["merge", "38", "39", "40", "41"] },
+    { month: "11", value: ["merge", "42", "43", "44", "45"] },
+    { month: "12", value: ["merge", "46", "47", "48", "49", "50"] },
   ];
 
   const optMonths = Array.from({ length: 12 }, (_, i) => ({
@@ -89,7 +89,15 @@ const SitePage = () => {
 
   const handleDownload = async () => {
     try {
-      await downloadTemplate({}).unwrap();
+      await downloadTemplate({
+        query: {
+          exclude,
+          parameter,
+          month,
+          ...(!["mttrq major", "mttrq minor"].includes(parameter) && { week }),
+          ...(["mttrq major", "mttrq minor"].includes(parameter) && { month }),
+        },
+      }).unwrap();
 
       const blobUrl = URL.createObjectURL(dataDownload as Blob);
 
@@ -115,7 +123,16 @@ const SitePage = () => {
     formData.append("file", file);
 
     try {
-      await uploadTemplate(formData).unwrap();
+      await uploadTemplate({
+        query: {
+          exclude,
+          parameter,
+          month,
+          ...(!["mttrq major", "mttrq minor"].includes(parameter) && { week }),
+          ...(["mttrq major", "mttrq minor"].includes(parameter) && { month }),
+        },
+        body: formData,
+      }).unwrap();
 
       onSuccess?.("Ok");
       toast.success(`${file.name} file uploaded successfully`);

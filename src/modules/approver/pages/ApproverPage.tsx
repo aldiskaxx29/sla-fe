@@ -1,13 +1,14 @@
-import { use, useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { TableApprover } from "../components/TableApprover";
 import AppDropdown from "@/app/components/AppDropdown";
 import { Spin } from "antd";
 import { useLazyApprover_fetchDataQuery } from "../rtk/approver.rtk";
+import dayjs from "dayjs";
 
 const ApproverPage = () => {
   const [loading, setLoading] = useState(false);
   const [week, setWeek] = useState(0);
-  const [month, setMonth] = useState(new Date().getMonth());
+  const [month, setMonth] = useState(dayjs().format("M"));
   const [year, setYear] = useState(new Date().getFullYear());
 
   const filterYear = Array.from({ length: 2 }, (_, i) => {
@@ -18,56 +19,10 @@ const ApproverPage = () => {
       value: `${year}`,
     };
   });
-  const filterMonth = [
-    {
-      label: "January",
-      value: "1",
-    },
-    {
-      label: "February",
-      value: "2",
-    },
-    {
-      label: "March",
-      value: "3",
-    },
-    {
-      label: "April",
-      value: "4",
-    },
-    {
-      label: "May",
-      value: "5",
-    },
-    {
-      label: "June",
-      value: "6",
-    },
-    {
-      label: "July",
-      value: "7",
-    },
-    {
-      label: "August",
-      value: "8",
-    },
-    {
-      label: "September",
-      value: "9",
-    },
-    {
-      label: "October",
-      value: "10",
-    },
-    {
-      label: "November",
-      value: "11",
-    },
-    {
-      label: "December",
-      value: "12",
-    },
-  ];
+  const filterMonth = Array.from({ length: 12 }, (_, i) => ({
+    label: dayjs().month(i).format("MMMM"),
+    value: String(i + 1),
+  }));
   const filterWeek = Array.from({ length: 52 }, (_, i) => ({
     label: `Week ${i + 1}`,
     value: `${i + 1}`,
@@ -79,7 +34,11 @@ const ApproverPage = () => {
     setLoading(true);
     try {
       await getApprover({
-        query: {},
+        query: {
+          week,
+          month,
+          year,
+        },
       }).unwrap();
     } catch {
       //
@@ -121,7 +80,7 @@ const ApproverPage = () => {
           title="Month"
           placeholder="All"
           options={filterMonth}
-          onChange={(value) => setMonth(Number(value))}
+          onChange={(value) => setMonth(value)}
           value={month}
         />
         <AppDropdown
