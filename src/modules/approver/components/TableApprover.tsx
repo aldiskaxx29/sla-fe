@@ -1,7 +1,7 @@
 // Antd
 import { Button, Checkbox, Input, InputRef, Space, Table } from "antd";
 import ModalInput from "./ModalInput";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { EditOutlined, SearchOutlined } from "@ant-design/icons";
 import {
   useLazyApprover_fetchDataQuery,
@@ -13,7 +13,7 @@ import { FilterDropdownProps } from "antd/es/table/interface";
 
 const { Column, ColumnGroup } = Table;
 
-const TableApprover = () => {
+const TableApprover = ({ data }) => {
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const searchInput = useRef<InputRef>(null);
@@ -164,23 +164,23 @@ const TableApprover = () => {
         search: true,
       },
       {
-        title: 'Status',
-        key: 'status',
-        dataIndex: 'status',
+        title: "Status",
+        key: "status",
+        dataIndex: "status",
         render: (value) => {
-          console.log('value', value)
+          console.log("value", value);
           switch (value) {
             case 1:
-              return 'Pending';
+              return "Pending";
             case 2:
-              return 'Disetujui';
+              return "Disetujui";
             case 3:
-              return 'Ditolak';
+              return "Ditolak";
             default:
-              return '-';
+              return "-";
           }
         },
-      },      
+      },
       {
         title: "Assesment CNQ",
         align: "center",
@@ -243,21 +243,10 @@ const TableApprover = () => {
     []
   );
 
-  const [getApprover, { data }] = useLazyApprover_fetchDataQuery();
+  const [getApprover] = useLazyApprover_fetchDataQuery();
   const [saveApprover] = useSaveApproverMutation();
 
-  const fetchApprover = async () => {
-    try {
-      const result = await getApprover({}).unwrap();
-      return result;
-    } catch (error) {
-      console.log(error);
-      return [];
-    }
-  };
-
   const handleSave = async (payload) => {
-    console.log("handle", payload);
     try {
       const formData = new FormData();
       formData.append("id", payload.id);
@@ -270,7 +259,7 @@ const TableApprover = () => {
       formData.append("ttr_selisih", payload.ttr_selisih);
       formData.append("note", payload.note);
       formData.append("ticket", payload.ticket_id);
-      formData.append("status", payload.statussd);
+      formData.append("status", payload.status);
       formData.append("site_sos", payload.site_sos);
 
       await saveApprover(formData).unwrap();
@@ -289,10 +278,6 @@ const TableApprover = () => {
     setDataModal({ ...value });
     setOpen(true);
   };
-
-  useEffect(() => {
-    fetchApprover();
-  }, []);
 
   return (
     <div className="mt-8">

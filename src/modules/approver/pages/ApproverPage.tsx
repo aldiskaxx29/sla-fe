@@ -3,11 +3,12 @@ import { TableApprover } from "../components/TableApprover";
 import AppDropdown from "@/app/components/AppDropdown";
 import { Spin } from "antd";
 import { useLazyApprover_fetchDataQuery } from "../rtk/approver.rtk";
+import dayjs from "dayjs";
 
 const ApproverPage = () => {
   const [loading, setLoading] = useState(false);
-  const [week, setWeek] = useState("");
-  const [month, setMonth] = useState(new Date().getMonth());
+  const [week, setWeek] = useState(0);
+  const [month, setMonth] = useState(dayjs().format("M"));
   const [year, setYear] = useState(new Date().getFullYear());
 
   const filterYear = Array.from({ length: 2 }, (_, i) => {
@@ -18,75 +19,54 @@ const ApproverPage = () => {
       value: `${year}`,
     };
   });
-  const filterMonth = [
-    {
-      label: "January",
-      value: "1",
-    },
-    {
-      label: "February",
-      value: "2",
-    },
-    {
-      label: "March",
-      value: "3",
-    },
-    {
-      label: "April",
-      value: "4",
-    },
-    {
-      label: "May",
-      value: "5",
-    },
-    {
-      label: "June",
-      value: "6",
-    },
-    {
-      label: "July",
-      value: "7",
-    },
-    {
-      label: "August",
-      value: "8",
-    },
-    {
-      label: "September",
-      value: "9",
-    },
-    {
-      label: "October",
-      value: "10",
-    },
-    {
-      label: "November",
-      value: "11",
-    },
-    {
-      label: "December",
-      value: "12",
-    },
-  ];
+  const filterMonth = Array.from({ length: 12 }, (_, i) => ({
+    label: dayjs().month(i).format("MMMM"),
+    value: String(i + 1),
+  }));
   const filterWeek = Array.from({ length: 52 }, (_, i) => ({
     label: `Week ${i + 1}`,
     value: `${i + 1}`,
   }));
 
-  const [getApprover] = useLazyApprover_fetchDataQuery();
+  const [getApprover, { data }] = useLazyApprover_fetchDataQuery();
 
   const fetchApprover = useCallback(async (): Promise<void> => {
     setLoading(true);
-
-    await getApprover({
-      query: {
-        week,
-        month,
-        year,
-      },
-    }).unwrap();
-    setLoading(false);
+    try {
+      await getApprover({
+        query: {
+          week,
+          month,
+          year,
+        },
+      }).unwrap();
+    } catch {
+      //
+    } finally {
+      setLoading(false);
+    }
   }, [month, year, week]);
+
+  const getDateWeek = (date) => {
+    const currentDate = typeof date === "object" ? date : new Date();
+    const januaryFirst = new Date(currentDate.getFullYear(), 0, 1);
+    const daysToNextMonday =
+      januaryFirst.getDay() === 1 ? 0 : (7 - januaryFirst.getDay()) % 7;
+    const nextMonday = new Date(
+      currentDate.getFullYear(),
+      0,
+      januaryFirst.getDate() + daysToNextMonday
+    );
+
+    return currentDate < nextMonday
+      ? 52
+      : currentDate > nextMonday
+      ? Math.ceil((currentDate - nextMonday) / (24 * 3600 * 1000) / 7)
+      : 1;
+  };
+  useEffect(() => {
+    setWeek(getDateWeek(new Date()));
+  }, []);
 
   useEffect(() => {
     fetchApprover();
@@ -100,7 +80,7 @@ const ApproverPage = () => {
           title="Month"
           placeholder="All"
           options={filterMonth}
-          onChange={(value) => setMonth(Number(value))}
+          onChange={(value) => setMonth(value)}
           value={month}
         />
         <AppDropdown
@@ -118,7 +98,7 @@ const ApproverPage = () => {
           value={year}
         />
       </div>
-      <TableApprover />
+      <TableApprover data={data} />
     </div>
   );
 };

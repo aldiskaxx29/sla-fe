@@ -7,8 +7,8 @@ import type {
 } from "@reduxjs/toolkit/query";
 
 // Mutations
-// import { auth_LOGOUT } from "@/modules/auth/redux/auth.slice";
 import { toast } from "react-toastify";
+import { authLogout } from "@/modules/auth/redux/auth.slice";
 
 const baseQuery = fetchBaseQuery({
   baseUrl: import.meta.env.VITE_APP_BASE_URL || "api.local",
@@ -41,9 +41,9 @@ const baseQueryWithReauth: BaseQueryFn<
       `Request failed with status ${status}`;
     toast.error(msg);
   }
-  // if (result.error?.status === 401) {
-  //   api.dispatch(auth_LOGOUT());
-  // }
+  if (result.error?.status === 401) {
+    api.dispatch(authLogout());
+  }
   return result;
 };
 

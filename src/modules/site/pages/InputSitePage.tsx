@@ -89,7 +89,15 @@ const SitePage = () => {
 
   const handleDownload = async () => {
     try {
-      await downloadTemplate({}).unwrap();
+      await downloadTemplate({
+        query: {
+          exclude,
+          parameter,
+          month,
+          ...(!["mttrq major", "mttrq minor"].includes(parameter) && { week }),
+          ...(["mttrq major", "mttrq minor"].includes(parameter) && { month }),
+        },
+      }).unwrap();
 
       const blobUrl = URL.createObjectURL(dataDownload as Blob);
 
@@ -115,7 +123,16 @@ const SitePage = () => {
     formData.append("file", file);
 
     try {
-      await uploadTemplate(formData).unwrap();
+      await uploadTemplate({
+        query: {
+          exclude,
+          parameter,
+          month,
+          ...(!["mttrq major", "mttrq minor"].includes(parameter) && { week }),
+          ...(["mttrq major", "mttrq minor"].includes(parameter) && { month }),
+        },
+        body: formData,
+      }).unwrap();
 
       onSuccess?.("Ok");
       toast.success(`${file.name} file uploaded successfully`);
