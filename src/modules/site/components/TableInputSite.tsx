@@ -517,6 +517,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
         dataModal={dataModal}
         onCancel={() => setOpen(false)}
         onSave={handleSave}
+        week={week}
       />
     </div>
   );

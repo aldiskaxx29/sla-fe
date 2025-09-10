@@ -25,7 +25,7 @@ type SiteDetail = {
   site_sos: boolean;
 };
 
-const ModalInput = ({ open, onCancel, onSave, dataModal }) => {
+const ModalInput = ({ open, onCancel, onSave, dataModal, week }) => {
   const [form] = Form.useForm();
   const { getDetailSite } = useSite();
   const [preview, setPreview] = useState("");
@@ -37,6 +37,7 @@ const ModalInput = ({ open, onCancel, onSave, dataModal }) => {
     form
       .validateFields()
       .then((values) => {
+        console.log('vall', values, week)
         onSave({ ...values, site_sos: checked });
         form.resetFields();
         setPreview("");
@@ -56,19 +57,25 @@ const ModalInput = ({ open, onCancel, onSave, dataModal }) => {
           },
         }).unwrap();
         const siteDetail = result as SiteDetail;
+        const siteDetails = {
+          ...result,
+          week : week, 
+        } as SiteDetail;
+        console.log("ress", result, "-> replaced week:", week, siteDetails);
+
         setOptionsKpi(result?.options);
         setChecked(result?.site_sos);
-        form.setFieldsValue(siteDetail);
-        const parserEvidance = siteDetail.evidence
-          ? JSON.parse(siteDetail?.evidence)
+        form.setFieldsValue(siteDetails);
+        const parserEvidance = siteDetails.evidence
+          ? JSON.parse(siteDetails?.evidence)
           : "";
-        const dataPreview = `${parserEvidance[0].url}`;
+        const dataPreview = `${parserEvidance[0]?.url}`;
         setPreview(dataPreview || "");
       } catch (error) {
         console.log(error);
       }
     },
-    [form, getDetailSite]
+    [form, getDetailSite, week]
   );
 
   useEffect(() => {
@@ -112,7 +119,7 @@ const ModalInput = ({ open, onCancel, onSave, dataModal }) => {
           <Form.Item name="month" className="hidden">
             <Input placeholder="Masukkan Site ID" />
           </Form.Item>
-          <Form.Item name="week" className="hidden">
+          <Form.Item name="week"  className="hidden">
             <Input placeholder="Masukkan Site ID" />
           </Form.Item>
           <Form.Item name="detail_rca" className="hidden">
