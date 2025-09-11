@@ -66,10 +66,11 @@ export const siteApi = emptySplitApi.injectEndpoints({
       },
     }),
     download_template: builder.query({
-      query: () => {
+      query: ({ query }) => {
         return {
           method: "GET",
           url: "/rekonsiliasi/download-template",
+          params: query,
           responseHandler: (response) => response.blob(),
           cache: "no-cache",
         };
