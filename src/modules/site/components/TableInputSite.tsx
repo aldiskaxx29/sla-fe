@@ -190,12 +190,12 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
       },
       ...(dynamicKey === "packetloss"
         ? [
-            {
-              title: "DIST PL",
-              key: "distribution_pl",
-              dataIndex: "distribution_pl",
-            },
-          ]
+          {
+            title: "DIST PL",
+            key: "distribution_pl",
+            dataIndex: "distribution_pl",
+          },
+        ]
         : []),
       {
         title: "Assesment CNQ",
@@ -442,17 +442,16 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
               {...(column.search ? getColumnSearchProps(column.dataIndex) : {})}
               render={(text, record) => {
                 const statusDouble =
+                  record.exclude > 1 ||
                   record.status_latency > 1 ||
                   record.status_jitter > 1 ||
                   record.status_packetloss_15 > 1 ||
                   record.status_packetloss_5 > 1;
                 if (column.dataIndex?.startsWith("site") && statusDouble)
                   return (
-                    <div className="flex gap-2 items-center">
-                      <span className="italic">{text} </span>
-                      <span className="bg-red-500 w-2 h-2 rounded-full">
-                        &nbsp;
-                      </span>
+                    <div className="flex justify-center items-center gap-2">
+                      <span className="italic">{text}</span>
+                      <span className="bg-red-500 w-2 h-2 rounded-full"></span>
                     </div>
                   );
                 if (column.dataIndex?.startsWith("button")) {
@@ -460,12 +459,13 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
                   return (
                     <Checkbox
                       checked={
+                        record.exclude === 2 ||
                         record.status_latency === 2 ||
                         record.status_packetloss_5 === 2 ||
                         record.status_packetloss_15 === 2 ||
                         record.status_jitter === 2
                       }
-                      // disabled={!editable} // optional: bisa dibuat conditional
+                    // disabled={!editable} // optional: bisa dibuat conditional
                     />
                   );
                 } else if (column.dataIndex?.startsWith("input")) {

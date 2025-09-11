@@ -59,7 +59,7 @@ const ModalInput = ({ open, onCancel, onSave, dataModal, week }) => {
         const siteDetail = result as SiteDetail;
         const siteDetails = {
           ...result,
-          week : week, 
+          week: week,
         } as SiteDetail;
         console.log("ress", result, "-> replaced week:", week, siteDetails);
 
@@ -119,7 +119,7 @@ const ModalInput = ({ open, onCancel, onSave, dataModal, week }) => {
           <Form.Item name="month" className="hidden">
             <Input placeholder="Masukkan Site ID" />
           </Form.Item>
-          <Form.Item name="week"  className="hidden">
+          <Form.Item name="week" className="hidden">
             <Input placeholder="Masukkan Site ID" />
           </Form.Item>
           <Form.Item name="detail_rca" className="hidden">
@@ -138,14 +138,14 @@ const ModalInput = ({ open, onCancel, onSave, dataModal, week }) => {
           </Form.Item>
           {(dataModal?.parameter == "mttrq major" ||
             dataModal?.parameter == "mttrq minor") && (
-            <Form.Item
-              label="Ttr Selisih"
-              name="ttr_selisih"
-              rules={[{ required: true, message: "Masukkan Ttr Selisih" }]}
-            >
-              <Input type="time" placeholder="Masukkan Ttr Selisih" />
-            </Form.Item>
-          )}
+              <Form.Item
+                label="Ttr Selisih"
+                name="ttr_selisih"
+                rules={[{ required: true, message: "Masukkan Ttr Selisih" }]}
+              >
+                <Input type="time" placeholder="Masukkan Ttr Selisih" />
+              </Form.Item>
+            )}
           {dataModal?.parameter != "mttrq major" &&
             dataModal?.parameter != "mttrq minor" && (
               <Form.Item name="site_sos" label="Site SOS">
@@ -220,19 +220,22 @@ const ModalInput = ({ open, onCancel, onSave, dataModal, week }) => {
             </Form.Item>
           )}
 
-          <Form.Item
-            label="KPI"
-            name="kpi"
-            rules={[{ required: true, message: "Pilih KPI" }]}
-          >
-            <Select mode="multiple" placeholder="Pilih KPI">
-              {optionsKpi?.map((kpi) => (
-                <Option key={kpi} value={kpi}>
-                  {kpi}
-                </Option>
-              ))}
-            </Select>
-          </Form.Item>
+          {dataModal?.parameter != "mttrq major" &&
+            dataModal?.parameter != "mttrq minor" && (
+              <Form.Item
+                label="KPI"
+                name="kpi"
+                rules={[{ required: true, message: "Pilih KPI" }]}
+              >
+                <Select mode="multiple" placeholder="Pilih KPI">
+                  {optionsKpi?.map((kpi) => (
+                    <Option key={kpi} value={kpi}>
+                      {kpi}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            )}
 
           <Form.Item
             label="Keterangan Rekon"
