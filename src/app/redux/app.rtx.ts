@@ -41,7 +41,8 @@ const baseQueryWithReauth: BaseQueryFn<
       `Request failed with status ${status}`;
     toast.error(msg);
   }
-  if (result.error?.status === 401) {
+
+  if (result.error?.status === 401 || result.error?.status === 302) {
     api.dispatch(authLogout());
   }
   return result;

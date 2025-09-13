@@ -47,6 +47,7 @@ const auth = createSlice({
       state.isAuthenticated = false;
       localStorage.removeItem("access_token");
       localStorage.removeItem("user_data");
+      window.location.href = "/login";
     },
     authInitializeFromStorage: (state) => {
       const userData = getUserFromStorage();
