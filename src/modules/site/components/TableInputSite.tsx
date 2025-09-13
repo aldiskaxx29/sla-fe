@@ -380,7 +380,6 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
   }, [columns1, columns2, parameter]);
 
   const handleSave = async (payload) => {
-    console.log("handle", payload);
     try {
       const formData = new FormData();
       formData.append("id", payload.id);
@@ -415,7 +414,6 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
 
   return (
     <div className="mt-8">
-      {week}
       <Table dataSource={dataSource} bordered className="rounded-xl">
         {columns.map((column) =>
           column.children ? (

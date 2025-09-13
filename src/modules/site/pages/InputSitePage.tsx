@@ -2,7 +2,7 @@ import AppDropdown from "@/app/components/AppDropdown";
 import xlxsIcon from "@/assets/file-spreadsheet.svg";
 import { Button, Image, Spin, Upload } from "antd";
 import dayjs from "dayjs";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { TableInputSite } from "../components/TableInputSite";
 import { useSite } from "../hooks/site.hooks";
 import {
@@ -15,14 +15,14 @@ const SitePage = () => {
   const [week, setWeek] = useState("");
   const [month, setMonth] = useState(dayjs().format("M"));
   const [exclude, setExclude] = useState("all");
+  const [loading, setLoading] = useState(false);
   const [parameter, setParameter] = useState("packetloss 1-5% ran to core");
-  const { dataSite, getSite, isLoadingSite } = useSite();
+  const { dataSite, getSite } = useSite();
   const [trigger, setTrigger] = useState(0);
 
-  useEffect(() => {
-    if (!week || !month) return;
-
-    (async () => {
+  const fetchSite = useCallback(async () => {
+    setLoading(true);
+    try {
       await getSite({
         query: {
           exclude,
@@ -32,8 +32,17 @@ const SitePage = () => {
           ...(["mttrq major", "mttrq minor"].includes(parameter) && { month }),
         },
       }).unwrap();
-    })();
-  }, [getSite, exclude, parameter, week, month, trigger]);
+    } catch (error) {
+      console.error("Failed to fetch site data:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [exclude, parameter, month, week]);
+
+  useEffect(() => {
+    if (!week || !month) return;
+    fetchSite();
+  }, [exclude, parameter, week, month, trigger]);
 
   const optExclude = [
     { label: "All", value: "all" },
@@ -146,7 +155,7 @@ const SitePage = () => {
 
   return (
     <div className="bg-white border border-[#DBDBDB] rounded-xl p-4 m-6">
-      {isLoadingSite ? (
+      {loading ? (
         <Spin fullscreen tip="Sedang Memuat Data..." />
       ) : (
         <>
