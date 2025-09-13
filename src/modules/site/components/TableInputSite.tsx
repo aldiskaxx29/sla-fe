@@ -163,10 +163,14 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
     if (parameter.includes("latency")) return "Latency";
   }, [parameter]);
   const monthOrWeek = useMemo(() => {
+    console.log(week);
+
     if (week.includes("all")) return "month";
     else return "week";
   }, [week]);
   const titleMonthOrWeek = useMemo(() => {
+    console.log(week);
+
     if (week.includes("all")) return "Month";
     else return "Week";
   }, [week]);
@@ -264,106 +268,108 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
         align: "center",
       },
     ],
-    [dynamicKey, dynamicTitle]
+    [dynamicKey, dynamicTitle, monthOrWeek, titleMonthOrWeek]
   );
 
-  const columns2 = [
-    {
-      title: "Month",
-      dataIndex: "month",
-      key: "month",
-      align: "center",
-      search: true,
-    },
-    {
-      title: "No Ticket",
-      dataIndex: "ticket_id",
-      key: "ticket_id",
-      align: "center",
-      search: true,
-    },
-    {
-      title: "Site Id",
-      dataIndex: "site_id",
-      key: "site_id",
-      align: "center",
-      search: true,
-    },
-    {
-      title: "FINAL SEVERITY",
-      dataIndex: "final_severity",
-      key: "final_severity",
-      align: "center",
-    },
-    {
-      title: "WITEL",
-      dataIndex: "witel",
-      key: "witel",
-      align: "center",
-      search: true,
-    },
-    {
-      title: "TRESHOLD",
-      dataIndex: "treshold",
-      key: "treshold",
-      align: "center",
-    },
-    {
-      title: "TTR AWAL",
-      dataIndex: "ttr_customer_jam",
-      key: "ttr_customer_jam",
-      align: "center",
-    },
-    {
-      title: "TTR SELISIH",
-      dataIndex: "ttr_selisih",
-      key: "ttr_selisih",
-      align: "center",
-    },
-    {
-      title: "TTR FINAL",
-      key: "ttr_final",
-      align: "center",
-      dataIndex: "ttr_final",
-    },
-
-    // {
-    //   title: "GROUPING ISSUE",
-    //   dataIndex: "grouping_rca",
-    //   key: "grouping_issue",
-    //   align: "center",
-    // },
-    {
-      title: "KET RECON",
-      dataIndex: "detail_rca",
-      key: "detail_rca",
-      align: "center",
-    },
-    // {
-    //   title: "INPUT EVIDENCE",
-    //   dataIndex: "input_evidence",
-    //   key: "input_evidence",
-    //   align: "center",
-    // },
-    {
-      title: "EXCLUDED",
-      key: "req",
-      dataIndex: "button_req",
-      align: "center",
-    },
-    // {
-    //   title: "SUBMIT",
-    //   dataIndex: "submit",
-    //   key: "submit",
-    //   align: "center",
-    // },
-    {
-      title: "Action",
-      key: "action",
-      dataIndex: "action",
-      align: "center",
-    },
-  ];
+  const columns2 = useMemo(
+    () => [
+      {
+        title: "Month",
+        dataIndex: "month",
+        key: "month",
+        align: "center",
+        search: true,
+      },
+      {
+        title: "No Ticket",
+        dataIndex: "ticket_id",
+        key: "ticket_id",
+        align: "center",
+        search: true,
+      },
+      {
+        title: "Site Id",
+        dataIndex: "site_id",
+        key: "site_id",
+        align: "center",
+        search: true,
+      },
+      {
+        title: "FINAL SEVERITY",
+        dataIndex: "final_severity",
+        key: "final_severity",
+        align: "center",
+      },
+      {
+        title: "WITEL",
+        dataIndex: "witel",
+        key: "witel",
+        align: "center",
+        search: true,
+      },
+      {
+        title: "TRESHOLD",
+        dataIndex: "treshold",
+        key: "treshold",
+        align: "center",
+      },
+      {
+        title: "TTR AWAL",
+        dataIndex: "ttr_customer_jam",
+        key: "ttr_customer_jam",
+        align: "center",
+      },
+      {
+        title: "TTR SELISIH",
+        dataIndex: "ttr_selisih",
+        key: "ttr_selisih",
+        align: "center",
+      },
+      {
+        title: "TTR FINAL",
+        key: "ttr_final",
+        align: "center",
+        dataIndex: "ttr_final",
+      },
+      // {
+      //   title: "GROUPING ISSUE",
+      //   dataIndex: "grouping_rca",
+      //   key: "grouping_issue",
+      //   align: "center",
+      // },
+      {
+        title: "KET RECON",
+        dataIndex: "detail_rca",
+        key: "detail_rca",
+        align: "center",
+      },
+      // {
+      //   title: "INPUT EVIDENCE",
+      //   dataIndex: "input_evidence",
+      //   key: "input_evidence",
+      //   align: "center",
+      // },
+      {
+        title: "EXCLUDED",
+        key: "req",
+        dataIndex: "button_req",
+        align: "center",
+      },
+      // {
+      //   title: "SUBMIT",
+      //   dataIndex: "submit",
+      //   key: "submit",
+      //   align: "center",
+      // },
+      {
+        title: "Action",
+        key: "action",
+        dataIndex: "action",
+        align: "center",
+      },
+    ],
+    []
+  );
 
   const { saveSite, getSite } = useSite();
   const columns = useMemo(() => {
@@ -371,7 +377,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
       return columns2;
     }
     return columns1;
-  }, [parameter]);
+  }, [columns1, columns2, parameter]);
 
   const handleSave = async (payload) => {
     console.log("handle", payload);
@@ -409,6 +415,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
 
   return (
     <div className="mt-8">
+      {week}
       <Table dataSource={dataSource} bordered className="rounded-xl">
         {columns.map((column) =>
           column.children ? (

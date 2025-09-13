@@ -20,7 +20,6 @@ const SitePage = () => {
   const [trigger, setTrigger] = useState(0);
 
   useEffect(() => {
-    console.log(trigger);
     if (!week || !month) return;
 
     (async () => {
@@ -52,18 +51,18 @@ const SitePage = () => {
   ];
 
   const filterWeeks = [
-    { month: "1", value: ["all","1", "2", "3", "4"] },
-    { month: "2", value: ["all","5", "6", "7","8"] },
-    { month: "3", value: ["all","9", "10", "11", "12","13"] },
-    { month: "4", value: ["all","14", "15", "16","17"] },
-    { month: "5", value: ["all","18", "19", "20", "21"] },
-    { month: "6", value: ["all","22","23", "24", "25","26"] },
-    { month: "7", value: ["all","27", "28", "29","30"] },
-    { month: "8", value: ["all","31", "32", "33", "34"] },
-    { month: "9", value: ["all","35", "36", "37","38","39"] },
-    { month: "10", value: ["all","40", "41","42","43"] },
-    { month: "11", value: ["all", "44", "45","46","47"] },
-    { month: "12", value: ["all","48", "49", "50", "51","52"] },
+    { month: "1", value: ["all", "1", "2", "3", "4"] },
+    { month: "2", value: ["all", "5", "6", "7", "8"] },
+    { month: "3", value: ["all", "9", "10", "11", "12", "13"] },
+    { month: "4", value: ["all", "14", "15", "16", "17"] },
+    { month: "5", value: ["all", "18", "19", "20", "21"] },
+    { month: "6", value: ["all", "22", "23", "24", "25", "26"] },
+    { month: "7", value: ["all", "27", "28", "29", "30"] },
+    { month: "8", value: ["all", "31", "32", "33", "34"] },
+    { month: "9", value: ["all", "35", "36", "37", "38", "39"] },
+    { month: "10", value: ["all", "40", "41", "42", "43"] },
+    { month: "11", value: ["all", "44", "45", "46", "47"] },
+    { month: "12", value: ["all", "48", "49", "50", "51", "52"] },
   ];
 
   const optMonths = Array.from({ length: 12 }, (_, i) => ({
