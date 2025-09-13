@@ -16,6 +16,7 @@ import { AuthRouteGuard } from "../hooks/AuthenticationGuard";
 import { useDashboardTARouter } from "@/modules/dashboard-ta/router/dashboardTA.router";
 import { useUserRouter } from "@/modules/user/router/user.router";
 import { useApproverRouter } from "@/modules/approver/router/approver.router";
+import { useProfileRouter } from "@/modules/profile/router/profile.router";
 
 const useRouter = () => {
   const app = useAppRouter();
@@ -32,6 +33,7 @@ const useRouter = () => {
   const dashboardTA = useDashboardTARouter();
   const user = useUserRouter();
   const approver = useApproverRouter();
+  const profile = useProfileRouter();
 
   const routes = useRoutes([
     ...app,
@@ -66,6 +68,7 @@ const useRouter = () => {
             ...dashboardTA,
             ...user,
             ...approver,
+            ...profile,
           ],
         },
       ],
