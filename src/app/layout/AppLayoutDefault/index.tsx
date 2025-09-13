@@ -473,6 +473,37 @@ const AppLayoutDefault = () => {
                         <button
                           className="w-full text-left px-4 py-2 text-sm text-black hover:bg-black-50 transition-colors duration-150 cursor-pointer"
                           onClick={() => {
+                            navigate("/profile");
+                          }}
+                        >
+                          <div className="flex items-center gap-2">
+                            <svg
+                              className="w-4 h-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              {/* Original user icon path */}
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                              />
+                              {/* New path for the square border */}
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M1 1h22v22H1z"
+                              />
+                            </svg>
+                            Profile
+                          </div>
+                        </button>
+                        <button
+                          className="w-full text-left px-4 py-2 text-sm text-black hover:bg-black-50 transition-colors duration-150 cursor-pointer"
+                          onClick={() => {
                             navigate("/approver");
                           }}
                         >
