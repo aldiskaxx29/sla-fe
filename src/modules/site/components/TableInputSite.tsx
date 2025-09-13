@@ -162,12 +162,20 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
     if (parameter.includes("jitter")) return "Jitter";
     if (parameter.includes("latency")) return "Latency";
   }, [parameter]);
+  const monthOrWeek = useMemo(() => {
+    if (week.includes("all")) return "month";
+    else return "week";
+  }, [week]);
+  const titleMonthOrWeek = useMemo(() => {
+    if (week.includes("all")) return "Month";
+    else return "Week";
+  }, [week]);
   const columns1 = useMemo(
     () => [
       {
-        title: "Week",
-        dataIndex: "week",
-        key: "week",
+        title: `${titleMonthOrWeek}`,
+        dataIndex: `${monthOrWeek}`,
+        key: `${monthOrWeek}`,
         search: true,
       },
       {
@@ -190,12 +198,12 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
       },
       ...(dynamicKey === "packetloss"
         ? [
-          {
-            title: "DIST PL",
-            key: "distribution_pl",
-            dataIndex: "distribution_pl",
-          },
-        ]
+            {
+              title: "DIST PL",
+              key: "distribution_pl",
+              dataIndex: "distribution_pl",
+            },
+          ]
         : []),
       {
         title: "Assesment CNQ",
@@ -465,7 +473,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
                         record.status_packetloss_15 === 2 ||
                         record.status_jitter === 2
                       }
-                    // disabled={!editable} // optional: bisa dibuat conditional
+                      // disabled={!editable} // optional: bisa dibuat conditional
                     />
                   );
                 } else if (column.dataIndex?.startsWith("input")) {
