@@ -56,9 +56,11 @@ const ProfilePage = () => {
           <Form.Item name="id_telegram" label="ID Telegram">
             <Input placeholder="Masukkan ID Telegram" className="h-12" />
             <a
-              href={`https://t.me/${form.getFieldValue("id_telegram")}?start=1`}
+                href="https://t.me/userinfobot?start=1"
+                target="_blank"
+                rel="noopener noreferrer"
             >
-              https://t.me/{form.getFieldValue("id_telegram")}
+              https://t.me/userinfobot?start=1
             </a>
           </Form.Item>
 

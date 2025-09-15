@@ -16,7 +16,7 @@ const SitePage = () => {
   const [month, setMonth] = useState(dayjs().format("M"));
   const [exclude, setExclude] = useState("all");
   const [loading, setLoading] = useState(false);
-  const [parameter, setParameter] = useState("packetloss 1-5% ran to core");
+  const [parameter, setParameter] = useState("packetloss ran to core");
   const { dataSite, getSite } = useSite();
   const [trigger, setTrigger] = useState(0);
 
@@ -51,8 +51,8 @@ const SitePage = () => {
   ];
 
   const optParameters = [
-    { label: "Packetloss 1-5%", value: "packetloss 1-5% ran to core" },
-    { label: "Packetloss >5%", value: "packetloss >5% ran to core" },
+    // { label: "Packetloss 1-5%", value: "packetloss 1-5% ran to core" },
+    { label: "Packetloss", value: "packetloss ran to core" },
     { label: "Jitter", value: "jitter ran to core" },
     { label: "Latency", value: "latency ran to core" },
     { label: "Mttrq Major", value: "mttrq major" },
@@ -111,8 +111,11 @@ const SitePage = () => {
 
       const tempLink = document.createElement("a");
       tempLink.href = blobUrl;
-
-      tempLink.setAttribute("download", "template-rekonsiliasi.xlsx");
+      if (parameter.includes("mttrq major") || parameter.includes("mttrq minor")) {
+        tempLink.setAttribute("download", "template-rekonsiliasi-mttr.xlsx");
+      } else {
+        tempLink.setAttribute("download", "template-rekonsiliasi-access.xlsx");
+      }
       document.body.appendChild(tempLink);
       tempLink.click();
 
