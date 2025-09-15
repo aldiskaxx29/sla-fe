@@ -7,7 +7,7 @@ const ProfilePage = () => {
   const [createUser] = useCreateUserMutation();
   const userData = localStorage.getItem("user_data");
   const handleOk = () => {
-    const id = userData ? JSON.parse(userData).id : null;
+    const id = userData ? JSON?.parse(userData).id : null;
     form
       .validateFields()
       .then((values) => {
@@ -20,7 +20,7 @@ const ProfilePage = () => {
   };
   useEffect(() => {
     if (userData) {
-      const parsedData = JSON.parse(userData);
+      const parsedData = JSON?.parse(userData);
       form.setFieldsValue(parsedData);
     }
   }, [form, userData]);

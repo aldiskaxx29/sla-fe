@@ -54,6 +54,7 @@ const ModalInput = ({ open, onCancel, onSave, dataModal, week }) => {
           query: {
             parameter: dataModal.parameter,
             id: dataModal.id,
+            week: week,
           },
         }).unwrap();
         const siteDetail = result as SiteDetail;
