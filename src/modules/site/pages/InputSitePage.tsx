@@ -92,12 +92,11 @@ const SitePage = () => {
     setWeek(filterWeeks.find((item) => item.month === month)?.value[0] ?? "1");
   }, [month]);
 
-  const [downloadTemplate, { data: dataDownload }] =
-    useLazyDownload_templateQuery();
+  const [downloadTemplate] = useLazyDownload_templateQuery();
 
   const handleDownload = useCallback(async () => {
     try {
-      await downloadTemplate({
+      const result = await downloadTemplate({
         query: {
           exclude,
           parameter,
@@ -107,7 +106,7 @@ const SitePage = () => {
         },
       }).unwrap();
 
-      const blobUrl = URL.createObjectURL(dataDownload as Blob);
+      const blobUrl = URL.createObjectURL(result as Blob);
 
       const tempLink = document.createElement("a");
       tempLink.href = blobUrl;
@@ -127,7 +126,7 @@ const SitePage = () => {
     } catch (error) {
       console.error("Failed to download the file:", error);
     }
-  }, [dataDownload, exclude, month, parameter, week]);
+  }, [exclude, month, parameter, week]);
   const [uploadTemplate, { isLoading }] = useUpload_templateMutation();
 
   const handleUpload = async (options) => {
