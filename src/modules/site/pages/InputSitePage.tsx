@@ -95,7 +95,7 @@ const SitePage = () => {
   const [downloadTemplate, { data: dataDownload }] =
     useLazyDownload_templateQuery();
 
-  const handleDownload = async () => {
+  const handleDownload = useCallback(async () => {
     try {
       await downloadTemplate({
         query: {
@@ -127,7 +127,7 @@ const SitePage = () => {
     } catch (error) {
       console.error("Failed to download the file:", error);
     }
-  };
+  }, [dataDownload, exclude, month, parameter, week]);
   const [uploadTemplate, { isLoading }] = useUpload_templateMutation();
 
   const handleUpload = async (options) => {
