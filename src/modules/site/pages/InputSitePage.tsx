@@ -111,7 +111,10 @@ const SitePage = () => {
 
       const tempLink = document.createElement("a");
       tempLink.href = blobUrl;
-      if (parameter.includes("mttrq major") || parameter.includes("mttrq minor")) {
+      if (
+        parameter.includes("mttrq major") ||
+        parameter.includes("mttrq minor")
+      ) {
         tempLink.setAttribute("download", "template-rekonsiliasi-mttr.xlsx");
       } else {
         tempLink.setAttribute("download", "template-rekonsiliasi-access.xlsx");
@@ -158,85 +161,77 @@ const SitePage = () => {
 
   return (
     <div className="bg-white border border-[#DBDBDB] rounded-xl p-4 m-6">
-      {loading ? (
-        <Spin fullscreen tip="Sedang Memuat Data..." />
-      ) : (
-        <>
-          {" "}
-          <div className="flex justify-between mb-6">
-            <div className="bg-[#EDEDED] max-w-[210px] rounded-[54px] px-4 py-2 h-12 flex justify-center items-center">
-              <p className="font-semibold text-[#0E2133] text-base">
-                REKONSILIASI
+      {loading && <Spin fullscreen tip="Sedang Memuat Data..." />}
+      <div className="flex justify-between mb-6">
+        <div className="bg-[#EDEDED] max-w-[210px] rounded-[54px] px-4 py-2 h-12 flex justify-center items-center">
+          <p className="font-semibold text-[#0E2133] text-base">REKONSILIASI</p>
+        </div>
+        <div className="flex gap-4">
+          <AppDropdown
+            title="Exclude"
+            placeholder="All"
+            options={optExclude}
+            value={exclude}
+            onChange={(value) => setExclude(value)}
+          />
+          <AppDropdown
+            title="Parameter"
+            placeholder="All"
+            options={optParameters}
+            value={parameter}
+            onChange={(value) => setParameter(value)}
+          />
+          <AppDropdown
+            title="Month"
+            placeholder="All"
+            options={optMonths}
+            value={month}
+            onChange={(value) => setMonth(value)}
+          />
+          {!["mttrq major", "mttrq minor"].includes(parameter) && (
+            <AppDropdown
+              title="Week"
+              placeholder="All"
+              options={optWeeks}
+              value={week}
+              onChange={(value) => setWeek(value)}
+            />
+          )}
+          <Button
+            onClick={() => {
+              handleDownload();
+            }}
+            className="!h-11 !px-3 py-2.5 !border-0 !rounded-full !bg-[#EDFFFD]"
+          >
+            <p className="text-brand-secondary font-medium">
+              Download Template Excel
+            </p>
+            <Image src={xlxsIcon} alt="icon" width={16} preview={false} />
+          </Button>
+          <Upload customRequest={handleUpload} showUploadList={false}>
+            <Button
+              className="!h-11 !px-3 py-2.5 !border-0 !rounded-full !bg-[#EDFFFD]"
+              loading={isLoading}
+            >
+              <p className="text-brand-secondary font-medium">
+                {isLoading ? "Uploading..." : "Import Excel"}
               </p>
-            </div>
-            <div className="flex gap-4">
-              <AppDropdown
-                title="Exclude"
-                placeholder="All"
-                options={optExclude}
-                value={exclude}
-                onChange={(value) => setExclude(value)}
-              />
-              <AppDropdown
-                title="Parameter"
-                placeholder="All"
-                options={optParameters}
-                value={parameter}
-                onChange={(value) => setParameter(value)}
-              />
-              <AppDropdown
-                title="Month"
-                placeholder="All"
-                options={optMonths}
-                value={month}
-                onChange={(value) => setMonth(value)}
-              />
-              {!["mttrq major", "mttrq minor"].includes(parameter) && (
-                <AppDropdown
-                  title="Week"
-                  placeholder="All"
-                  options={optWeeks}
-                  value={week}
-                  onChange={(value) => setWeek(value)}
-                />
-              )}
-              <Button
-                onClick={() => {
-                  handleDownload();
-                }}
-                className="!h-11 !px-3 py-2.5 !border-0 !rounded-full !bg-[#EDFFFD]"
-              >
-                <p className="text-brand-secondary font-medium">
-                  Download Template Excel
-                </p>
-                <Image src={xlxsIcon} alt="icon" width={16} preview={false} />
-              </Button>
-              <Upload customRequest={handleUpload} showUploadList={false}>
-                <Button
-                  className="!h-11 !px-3 py-2.5 !border-0 !rounded-full !bg-[#EDFFFD]"
-                  loading={isLoading}
-                >
-                  <p className="text-brand-secondary font-medium">
-                    {isLoading ? "Uploading..." : "Import Excel"}
-                  </p>
-                  <Image src={xlxsIcon} alt="icon" width={16} preview={false} />
-                </Button>
-              </Upload>
-            </div>
-          </div>
-          <div>
-            {dataSite && (
-              <TableInputSite
-                dataSource={dataSite.data}
-                parameter={parameter}
-                week={week}
-                month={month}
-                setTrigger={setTrigger}
-              />
-            )}
-          </div>
-        </>
-      )}
+              <Image src={xlxsIcon} alt="icon" width={16} preview={false} />
+            </Button>
+          </Upload>
+        </div>
+      </div>
+      <div>
+        {dataSite && (
+          <TableInputSite
+            dataSource={dataSite.data}
+            parameter={parameter}
+            week={week}
+            month={month}
+            setTrigger={setTrigger}
+          />
+        )}
+      </div>
     </div>
   );
 };
