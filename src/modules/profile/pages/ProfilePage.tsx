@@ -12,7 +12,7 @@ const ProfilePage = () => {
       .validateFields()
       .then((values) => {
         createUser({ body: { id, ...values } }).unwrap();
-        console.log("vall", values);
+        localStorage.setItem("user_data", JSON.stringify({id, ...values}))
       })
       .catch((info) => {
         console.log("Validate Failed:", info);
