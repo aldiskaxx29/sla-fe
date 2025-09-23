@@ -17,6 +17,24 @@ export const isAuthenticated = (): boolean => {
   return !!localStorage.getItem("access_token");
 };
 
+// export const getCurrentUser = () => {
+//   try {
+//     const userData = localStorage.getItem("user_data");
+//     const accessToken = localStorage.getItem("access_token");
+
+//     if (userData && accessToken) {
+//       const parsedData = JSON.parse(userData);
+//       return {
+//         ...parsedData,
+//         access_token: accessToken,
+//       };
+//     }
+//     return null;
+//   } catch (error) {
+//     console.error("Error parsing user data from localStorage:", error);
+//     return null;
+//   }
+// };
 export const getCurrentUser = () => {
   try {
     const userData = localStorage.getItem("user_data");
@@ -24,17 +42,34 @@ export const getCurrentUser = () => {
 
     if (userData && accessToken) {
       const parsedData = JSON.parse(userData);
+
+      // kalau hasil parse null/undefined, hapus semua data
+      if (!parsedData) {
+        localStorage.removeItem("user_data");
+        localStorage.removeItem("access_token");
+        return null;
+      }
+
       return {
         ...parsedData,
         access_token: accessToken,
       };
     }
+
+    // kalau salah satu tidak ada, hapus juga biar konsisten
+    localStorage.removeItem("user_data");
+    localStorage.removeItem("access_token");
     return null;
+
   } catch (error) {
     console.error("Error parsing user data from localStorage:", error);
+    // kalau JSON rusak → hapus
+    localStorage.removeItem("user_data");
+    localStorage.removeItem("access_token");
     return null;
   }
 };
+
 
 export const authApi = emptySplitApi.injectEndpoints({
   endpoints: (builder) => ({

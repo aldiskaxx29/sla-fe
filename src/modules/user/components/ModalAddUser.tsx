@@ -70,7 +70,7 @@ const ModalAddUser = ({ open, onCancel }) => {
             label="Level User"
             rules={[{ required: true, message: "Masukkan Level User" }]}
           >
-            <Input placeholder="Masukkan Level User" />
+            <Input placeholder="Masukkan Level User" disabled readOnly />
           </Form.Item>
           <Form.Item
             name="treg"

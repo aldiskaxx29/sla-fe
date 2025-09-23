@@ -11,7 +11,7 @@ const ProfilePage = () => {
     form
       .validateFields()
       .then((values) => {
-        createUser({ body: { id, ...values } }).unwrap();
+        createUser({ id, ...values }).unwrap();
         console.log("vall", values);
       })
       .catch((info) => {
@@ -21,6 +21,7 @@ const ProfilePage = () => {
   useEffect(() => {
     if (userData) {
       const parsedData = JSON?.parse(userData);
+      console.log('dapet', parsedData)
       form.setFieldsValue(parsedData);
     }
   }, [form, userData]);
@@ -50,7 +51,7 @@ const ProfilePage = () => {
           <Form.Item name="level_user" label="Level User">
             <Input placeholder="Masukkan Level User" className="h-12" />
           </Form.Item>
-          <Form.Item name="region" label="Region">
+          <Form.Item name="treg" label="Region">
             <Input placeholder="Masukkan Region" className="h-12" />
           </Form.Item>
           <Form.Item name="id_telegram" label="ID Telegram">
