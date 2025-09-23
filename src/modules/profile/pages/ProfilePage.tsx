@@ -11,8 +11,9 @@ const ProfilePage = () => {
     form
       .validateFields()
       .then((values) => {
-        createUser({ id, ...values }).unwrap();
-        console.log("vall", values);
+        createUser({ body: { id, ...values } }).unwrap();
+        localStorage.setItem("user_data", JSON.stringify({id, ...values}))
+        window.location.reload()
       })
       .catch((info) => {
         console.log("Validate Failed:", info);
