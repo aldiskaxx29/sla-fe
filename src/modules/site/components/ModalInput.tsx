@@ -12,6 +12,8 @@ import { UploadOutlined } from "@ant-design/icons";
 import TextArea from "antd/es/input/TextArea";
 import { useCallback, useEffect, useState } from "react";
 import { useSite } from "../hooks/site.hooks";
+import { useLazyDownload_evidanceQuery } from "../rtk/site.rtk";
+import { toast } from "react-toastify";
 
 type DataModal = { parameter: string; id: string };
 
@@ -33,11 +35,13 @@ const ModalInput = ({ open, onCancel, onSave, dataModal, week }) => {
   const [checked, setChecked] = useState(false);
   const [optionsKpi, setOptionsKpi] = useState([]);
 
+  const [downloadEvidance] = useLazyDownload_evidanceQuery();
+
   const handleOk = () => {
     form
       .validateFields()
       .then((values) => {
-        console.log('vall', values, week)
+        console.log("vall", values, week);
         onSave({ ...values, site_sos: checked });
         form.resetFields();
         setPreview("");
@@ -107,6 +111,35 @@ const ModalInput = ({ open, onCancel, onSave, dataModal, week }) => {
     setChecked(e.target.checked);
   };
 
+  const handleIconDownload = async () => {
+    try {
+      const result = await downloadEvidance({
+        query: {
+          id: dataModal.id,
+          kpi: form.getFieldValue("kpi")[0],
+        },
+      }).unwrap();
+
+      const blobUrl = URL.createObjectURL(result as Blob);
+
+      const tempLink = document.createElement("a");
+      console.log(result);
+      console.log("blobUrl", blobUrl);
+
+      tempLink.href = blobUrl;
+
+      tempLink.setAttribute("download", "evidance.xlsx");
+
+      document.body.appendChild(tempLink);
+      tempLink.click();
+
+      document.body.removeChild(tempLink);
+      URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      toast.error("Failed to download the file:", error);
+    }
+  };
+
   return (
     <Modal open={open} onCancel={onCancel} footer={null} centered>
       <div>
@@ -139,14 +172,14 @@ const ModalInput = ({ open, onCancel, onSave, dataModal, week }) => {
           </Form.Item>
           {(dataModal?.parameter == "mttrq major" ||
             dataModal?.parameter == "mttrq minor") && (
-              <Form.Item
-                label="Ttr Selisih"
-                name="ttr_selisih"
-                rules={[{ required: true, message: "Masukkan Ttr Selisih" }]}
-              >
-                <Input type="time" placeholder="Masukkan Ttr Selisih" />
-              </Form.Item>
-            )}
+            <Form.Item
+              label="Ttr Selisih"
+              name="ttr_selisih"
+              rules={[{ required: true, message: "Masukkan Ttr Selisih" }]}
+            >
+              <Input type="time" placeholder="Masukkan Ttr Selisih" />
+            </Form.Item>
+          )}
           {dataModal?.parameter != "mttrq major" &&
             dataModal?.parameter != "mttrq minor" && (
               <Form.Item name="site_sos" label="Site SOS">
@@ -278,6 +311,11 @@ const ModalInput = ({ open, onCancel, onSave, dataModal, week }) => {
                 </p>
               )}
             </Upload.Dragger>
+            {preview && (
+              <Button className="mt-3" onClick={handleIconDownload}>
+                Download Evidance
+              </Button>
+            )}
           </Form.Item>
 
           <div style={{ textAlign: "right" }}>

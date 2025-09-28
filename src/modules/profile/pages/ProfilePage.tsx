@@ -12,8 +12,8 @@ const ProfilePage = () => {
       .validateFields()
       .then((values) => {
         createUser({ body: { id, ...values } }).unwrap();
-        localStorage.setItem("user_data", JSON.stringify({id, ...values}))
-        window.location.reload()
+        localStorage.setItem("user_data", JSON.stringify({ id, ...values }));
+        // window.location.reload();
       })
       .catch((info) => {
         console.log("Validate Failed:", info);
@@ -22,7 +22,6 @@ const ProfilePage = () => {
   useEffect(() => {
     if (userData) {
       const parsedData = JSON?.parse(userData);
-      console.log('dapet', parsedData)
       form.setFieldsValue(parsedData);
     }
   }, [form, userData]);
@@ -58,11 +57,11 @@ const ProfilePage = () => {
           <Form.Item name="id_telegram" label="ID Telegram">
             <Input placeholder="Masukkan ID Telegram" className="h-12" />
             <a
-                href="https://t.me/userinfobot?start=1"
-                target="_blank"
-                rel="noopener noreferrer"
+              href={`https://t.me/${form.getFieldValue("id_telegram")}`}
+              target="_blank"
+              rel="noopener noreferrer"
             >
-              https://t.me/userinfobot?start=1
+              https://t.me/{form.getFieldValue("id_telegram")}
             </a>
           </Form.Item>
 

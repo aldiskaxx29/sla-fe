@@ -76,6 +76,17 @@ export const siteApi = emptySplitApi.injectEndpoints({
         };
       },
     }),
+    download_evidance: builder.query({
+      query: ({ query }) => {
+        return {
+          method: "GET",
+          url: "/rekonsiliasi/download-template",
+          params: query,
+          responseHandler: (response) => response.blob(),
+          cache: "no-cache",
+        };
+      },
+    }),
     upload_template: builder.mutation({
       query: ({ query, body }) => ({
         url: "/dashboard/rekonsiliasi/import",
@@ -95,4 +106,5 @@ export const {
   useLazyDownload_templateQuery,
   useSave_siteMutation,
   useUpload_templateMutation,
+  useLazyDownload_evidanceQuery,
 } = siteApi;
