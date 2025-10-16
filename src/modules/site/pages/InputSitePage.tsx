@@ -101,6 +101,7 @@ const SitePage = () => {
           exclude,
           parameter,
           month,
+          week,
           ...(!["mttrq major", "mttrq minor"].includes(parameter) && { week }),
           ...(["mttrq major", "mttrq minor"].includes(parameter) && { month }),
         },

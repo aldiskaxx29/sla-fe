@@ -311,11 +311,11 @@ const ModalInput = ({ open, onCancel, onSave, dataModal, week }) => {
                 </p>
               )}
             </Upload.Dragger>
-            {preview && (
+            {/* {preview && (
               <Button className="mt-3" onClick={handleIconDownload}>
                 Download Evidance
               </Button>
-            )}
+            )} */}
           </Form.Item>
 
           <div style={{ textAlign: "right" }}>
