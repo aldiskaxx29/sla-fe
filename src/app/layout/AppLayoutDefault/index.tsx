@@ -39,8 +39,10 @@ const AppLayoutDefault = () => {
   };
 
   const titleNavigation = useMemo(() => {
-    if (menuId === "msa") return "MONITORING ACHIEVEMENT SLA MSA";
-    if (menuId === "cnop") return "MONITORING ACHIEVEMENT SLA CNOP";
+    // if (menuId === "msa") return "MONITORING ACHIEVEMENT SLA MSA";
+    // if (menuId === "cnop") return "MONITORING ACHIEVEMENT SLA CNOP";
+    if (menuId === "msa") return "ACHIEVEMENT SLA MSA";
+    if (menuId === "cnop") return "ACHIEVEMENT SLA CNOP";
     if (location.pathname.includes("site")) return "REKONSILIASI";
     // if (menuId) setType(menuId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -60,7 +62,7 @@ const AppLayoutDefault = () => {
   const slaOpt = [
     { label: "Achievement MSA", value: "msa" },
     { label: "Achievement CNOP", value: "cnop" },
-    { label: "Reconsiliation", value: "input-site" },
+    // { label: "Reconsiliation", value: "input-site" },
     { label: "Report Reconsilation", value: "report-site" },
   ];
 
@@ -229,7 +231,7 @@ const AppLayoutDefault = () => {
                   onMouseEnter={() => setOpen2(true)}
                   onMouseLeave={() => setOpen2(false)}
                   className={`relative inline-block px-4 py-2 rounded-full cursor-pointer ${
-                    ["/msa", "/cnop", "/input-site", "/report-site"].includes(
+                    ["/msa", "/cnop", "/report-site"].includes(
                       location.pathname
                     )
                       ? "!bg-[#A6AEC1] text-white"
@@ -258,6 +260,26 @@ const AppLayoutDefault = () => {
                     </div>
                   )}
                 </div>
+                <Button
+                  className={`${
+                    location.pathname.includes("input-site")
+                      ? "!bg-[#A6AEC1]"
+                      : "!bg-[#576278]"
+                  } !border-0 !rounded-4xl !shadow-none`}
+                  onClick={() => {
+                    handleMenuSelect("input-site");
+                  }}
+                >
+                  <p
+                    className={
+                      location.pathname.includes("input-site")
+                        ? "text-white "
+                        : "text-[#C6C6C6] "
+                    }
+                  >
+                    Reconsiliation
+                  </p>
+                </Button>
                 <Button
                   className={`${
                     location.pathname.includes("one")
