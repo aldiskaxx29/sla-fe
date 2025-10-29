@@ -64,8 +64,7 @@ const TableHistory: React.FC<TableHistoryProps> = ({ dataSource:data, treg }) =>
                children: childrenMapped,
              };
            }
-         );
- 
+         ); 
          return {
            ...data,
            index: indexParent,
@@ -122,16 +121,16 @@ const TableHistory: React.FC<TableHistoryProps> = ({ dataSource:data, treg }) =>
                data.coreIndex == record.coreIndex &&
                data.parameter == record.parameter
            );
-           const newData = res.data?.map((data) => ({
+           const newData = res?.map((data) => ({
              ...data,
              mini_parameter,
              identIndex: data.identIndex || identIndex++,
            }));
-           const injectData = { ...findData, children: newData };
+           const injectData = { ...findData, children: newData };           
            setInjectedData(injectData);
          } else {
            const findData = dataMapping[record.indexParent];
-           const newData = res.data?.map((data) => ({
+           const newData = res?.map((data) => ({
              ...data,
              mini_parameter: findData.parameter,
              identIndex: data.identIndex || identIndex++,
@@ -231,7 +230,7 @@ const TableHistory: React.FC<TableHistoryProps> = ({ dataSource:data, treg }) =>
               render: (text, record) => {
                 console.log(text, "ERTET");
                 console.log(record, "RECORD");
-                return text + "knjut";
+                return text;
               },
             },
             {
@@ -288,7 +287,9 @@ const TableHistory: React.FC<TableHistoryProps> = ({ dataSource:data, treg }) =>
             setDataSource(dataMapping);
           }, 500);
         }
-      }
+      }      
+      console.log(dataMapping);
+      
     },
     [dataMapping, expandedRowKey, fetchWitelData]
   );
@@ -302,7 +303,7 @@ const TableHistory: React.FC<TableHistoryProps> = ({ dataSource:data, treg }) =>
         bordered
         pagination={{ pageSize: 1000000, hideOnSinglePage: true }}
         className="rounded-xl "
-        rowKey="key"
+        rowKey={(record) => record.identIndex}
         scroll={{ x: "max-content" }}
          expandable={{
           expandedRowKeys: expandedRowKey,
@@ -329,14 +330,18 @@ const TableHistory: React.FC<TableHistoryProps> = ({ dataSource:data, treg }) =>
                   align={child.align}
                   onHeaderCell={child.onHeaderCell}
                   fixed={child.fixed}
-                  onCell={(_, index) => {
-                    const isLastTwo = index >= dataSourceWithKeys.length - 2;
+                  onCell={(record, index) => {
+                    const isLastTwo =
+                      record.parameter.toLowerCase().includes("service") ||
+                      record.parameter.toLowerCase().includes("weighted");
                     return {
                       className: isLastTwo ? "!bg-blue-pacific !p-3" : "!p-3",
                     };
                   }}
                   render={(text, record, index) => {
-                    const isLastTwo = index >= dataSourceWithKeys.length - 2;
+                    const isLastTwo =
+                      record.parameter.toLowerCase().includes("service") ||
+                      record.parameter.toLowerCase().includes("weighted");
                     if (isLastTwo) {
                       return (
                         <span className={`${text ? "font-bold" : ""}`}>
@@ -408,14 +413,18 @@ const TableHistory: React.FC<TableHistoryProps> = ({ dataSource:data, treg }) =>
               })}
               fixed={column.fixed}
               align={column.align}
-              onCell={(_, index) => {
-                const isLastTwo = index >= dataSourceWithKeys.length - 2;
+              onCell={(record, index) => {
+                const isLastTwo =
+                  record.parameter.toLowerCase().includes("service") ||
+                  record.parameter.toLowerCase().includes("weighted");
                 return {
                   className: isLastTwo ? "!bg-blue-pacific !p-3" : "!p-3",
                 };
               }}
               render={(text, record, index) => {
-                const isLastTwo = index >= dataSourceWithKeys.length - 2;
+                const isLastTwo =
+                  record.parameter.toLowerCase().includes("service") ||
+                  record.parameter.toLowerCase().includes("weighted");
                 if (column.dataIndex === "parameter" && !isLastTwo) {
                   return (
                     <div
