@@ -64,8 +64,6 @@ const baseQueryWithReauth: BaseQueryFn<
     toast.error(msg);
   }
 
-  console.log("resssu", result);
-
   // Jika token invalid atau session expired
   if (result.error?.status === 401 || result.error?.status === 302) {
     localStorage.removeItem("token"); // hapus token biar auto logout

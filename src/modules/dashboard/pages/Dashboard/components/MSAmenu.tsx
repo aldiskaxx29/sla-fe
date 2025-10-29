@@ -314,7 +314,7 @@ const MSAmenu = ({
               <p className="text-base font-semibold">MONTHLY DATA SLA</p>
             </div>
             <div className="w-auto overflow-x-auto">
-              <TableHistory dataSource={dataHistoryData?.data} />
+              <TableHistory dataSource={dataHistoryData?.data} treg={treg} />
             </div>
           </div>
         )}

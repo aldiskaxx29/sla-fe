@@ -1,15 +1,32 @@
 // Antd
 import { snakeToPascal_Utils } from "@/app/utils/wording.utils";
-import { Table } from "antd";
-import { useMemo } from "react";
+import { DownOutlined, UpOutlined } from "@ant-design/icons";
+import { Image, Spin, Table } from "antd";
+import { useCallback, useMemo, useState } from "react";
+import { useParams } from "react-router-dom";
+import { useDashboard } from "../../hooks/dashboard.hooks";
 
 const { Column, ColumnGroup } = Table;
 
+import arrowDropdown from "@/assets/arrow_dropdown.svg";
+
 interface TableHistoryProps {
   dataSource: Record<string, unknown>[];
+  treg: string;
 }
 
-const TableHistory: React.FC<TableHistoryProps> = ({ dataSource }) => {
+let identIndex = 1;
+
+const TableHistory: React.FC<TableHistoryProps> = ({ dataSource:data, treg }) => {
+  const [dataSource, setDataSource] = useState(data);
+  const [loading, setLoading] = useState(false);
+  const [injectedData, setInjectedData] = useState([]);
+  const { getHistoryData } = useDashboard();
+  const [detailParameter, setDetailParameter] = useState("");
+  const [injectedChildData, setInjectedChildData] = useState({});
+  const [expandedRowKey, setExpandedRowKeys] = useState<number[] | string[]>(
+    []
+  );
   const dataSourceWithKeys = useMemo(() => {
     return (
       dataSource?.map((item, index) => ({
@@ -18,6 +35,124 @@ const TableHistory: React.FC<TableHistoryProps> = ({ dataSource }) => {
       })) || []
     );
   }, [dataSource]);
+
+  const dataMapping = useMemo(() => {
+     const mappingData2 = dataSource.map((data, indexParent) => {
+       if (
+         data.coreIndex == injectedData?.coreIndex &&
+         data.parameter == injectedData?.parameter
+       ) {
+         const mappingChildren = injectedData?.children?.map(
+           (childData, index) => {
+             let childrenMapped = [];
+ 
+             if (
+               injectedChildData.identIndex === childData.identIndex &&
+               Array.isArray(injectedChildData.children)
+             ) {
+               childrenMapped = injectedChildData?.children?.map((grandChild) => ({
+                 ...grandChild,
+                 index,
+                 indexParent,
+               }));
+             }
+ 
+             return {
+               ...childData,
+               index,
+               indexParent,
+               children: childrenMapped,
+             };
+           }
+         );
+ 
+         return {
+           ...data,
+           index: indexParent,
+           indexParent,
+           identIndex: data.identIndex || identIndex++,
+           children: mappingChildren,
+         };
+       }
+ 
+       return {
+         ...data,
+         indexParent,
+         index: indexParent,
+         identIndex: data.identIndex || identIndex++,
+       };
+     });
+ 
+     return mappingData2;
+   }, [dataSource, injectedData, injectedChildData]);
+
+  const fetchWitelData = useCallback(
+     async (record) => {
+       setLoading(true);
+       try {
+         let res;
+         const mini_parameter = record.parameter.toLocaleLowerCase();
+         if (record.main_parent) {
+           res = await getHistoryData({
+             query: {
+               type: mini_parameter,
+               kpi: record.parameter.toLocaleLowerCase(),
+               sort: "asc",
+               treg,
+               level: "region"
+             },
+           }).unwrap();
+         } else {
+           res = await getHistoryData({
+             query: {
+               kpi: detailParameter
+                 ?.replace(/%20/g, " ")
+                 .toLocaleLowerCase(),
+               region: record.parameter,
+               level: "witel",
+               type: 'msa',
+               treg,
+             },
+           }).unwrap();
+         }
+ 
+         if (record.main_parent) {
+           const findData = dataMapping.find(
+             (data) =>
+               data.coreIndex == record.coreIndex &&
+               data.parameter == record.parameter
+           );
+           const newData = res.data?.map((data) => ({
+             ...data,
+             mini_parameter,
+             identIndex: data.identIndex || identIndex++,
+           }));
+           const injectData = { ...findData, children: newData };
+           setInjectedData(injectData);
+         } else {
+           const findData = dataMapping[record.indexParent];
+           const newData = res.data?.map((data) => ({
+             ...data,
+             mini_parameter: findData.parameter,
+             identIndex: data.identIndex || identIndex++,
+           }));
+           const childDataInject = findData?.children[record.index];
+           const injectData = {
+             ...childDataInject,
+             children: newData,
+           };
+           setInjectedChildData(injectData);
+         }
+         return true;
+       } catch (error) {
+         console.log(error);
+         return false;
+       } finally {
+         setLoading(false);
+       }
+     },
+     [dataMapping, detailParameter, treg]
+   );
 
   const columns = useMemo(() => {
     if (!dataSource) return [];
@@ -128,14 +263,53 @@ const TableHistory: React.FC<TableHistoryProps> = ({ dataSource }) => {
     return Number.isInteger(number) ? number.toString() : number.toFixed(2);
   };
 
+  const handleExpandCollaps = useCallback(
+    async (record) => {
+      if (record.parameter.toLowerCase().includes("core"))
+        setDetailParameter(record.parameter);      
+      if (record.parent || record.main_parent) {
+        const key = record.identIndex;
+        setExpandedRowKeys((prevKeys) => {
+          const isExpanded = prevKeys.includes(key);
+          if (isExpanded) {
+            return prevKeys.filter((k) => k !== key);
+          } else {
+            return [...prevKeys, key];
+          }
+        });
+
+        const isExpandedNow = expandedRowKey.includes(key);
+
+        if (!isExpandedNow) {
+          const success = await fetchWitelData(record);
+          setTimeout(async () => {
+            setDataSource(dataMapping);
+            if (!success) await fetchWitelData(record);
+            setDataSource(dataMapping);
+          }, 500);
+        }
+      }
+    },
+    [dataMapping, expandedRowKey, fetchWitelData]
+  );
+
   return (
     <div>
+      {(loading && <Spin fullscreen tip="Sedang Memuat Data..." />)}
+
       <Table
-        dataSource={dataSourceWithKeys}
+        dataSource={dataMapping}
         bordered
         pagination={{ pageSize: 1000000, hideOnSinglePage: true }}
         className="rounded-xl "
         rowKey="key"
+        scroll={{ x: "max-content" }}
+         expandable={{
+          expandedRowKeys: expandedRowKey,
+          rowExpandable: (record) =>
+            record.children && record.children.length > 0,
+          expandIcon: () => <div></div>,
+        }}
       >
         {columns.map((column) =>
           column.children ? (
@@ -243,7 +417,26 @@ const TableHistory: React.FC<TableHistoryProps> = ({ dataSource }) => {
               render={(text, record, index) => {
                 const isLastTwo = index >= dataSourceWithKeys.length - 2;
                 if (column.dataIndex === "parameter" && !isLastTwo) {
-                  return <span>{snakeToPascal_Utils(text)}</span>;
+                  return (
+                    <div
+                      onClick={() => handleExpandCollaps(record)}
+                    >
+                       <Image
+                        className={`${
+                          record.main_parent || record.parent
+                            ? "block cursor-pointer"
+                            : "hidden"
+                        } `}
+                        width={10}
+                        src={arrowDropdown}
+                        preview={false}
+                      />
+                     <span 
+                      className="ml-2"
+                      >{snakeToPascal_Utils(text)}
+                     </span>
+                    </div>
+                    ); 
                 }
                 if (column.dataIndex === "no" && !isLastTwo) {
                   return <span>{index + 1}</span>;
