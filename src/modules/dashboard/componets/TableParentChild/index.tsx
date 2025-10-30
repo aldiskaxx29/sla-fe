@@ -571,7 +571,7 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                     const isLastTwo =
                       record.parameter.toLowerCase().includes("service") ||
                       record.parameter.toLowerCase().includes("weighted");
-                    const isBelowTarget = Number(text) < Number(record.target);
+                    const isBelowTarget = Number(text) <= Number(record.target);
                     if (!text) return text;
                     if (!record.target && !isLastTwo) {
                       return <span>{text}</span>;
@@ -671,7 +671,7 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
               align={column.align}
               fixed={column.fixed}
               render={(text, record, index) => {
-                const isBelowTarget = Number(text) < Number(record.target);
+                const isBelowTarget = Number(text) <= Number(record.target);
                 if (column.dataIndex == "parameter") {
                   return (
                     <div

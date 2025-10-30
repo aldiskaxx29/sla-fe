@@ -469,7 +469,7 @@ const TableHistory: React.FC<TableHistoryProps> = ({
                   );
                 }
                 if (column.dataIndex?.startsWith("ach")) {
-                  const isBelowTarget = Number(text) < Number(record.target);
+                  const isBelowTarget = Number(text) <= Number(record.target);
                   return (
                     <span
                       className={`${
