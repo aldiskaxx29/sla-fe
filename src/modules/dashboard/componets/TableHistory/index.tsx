@@ -17,7 +17,10 @@ interface TableHistoryProps {
 
 let identIndex = 1;
 
-const TableHistory: React.FC<TableHistoryProps> = ({ dataSource:data, treg }) => {
+const TableHistory: React.FC<TableHistoryProps> = ({
+  dataSource: data,
+  treg,
+}) => {
   const [dataSource, setDataSource] = useState(data);
   const [loading, setLoading] = useState(false);
   const [injectedData, setInjectedData] = useState([]);
@@ -37,121 +40,121 @@ const TableHistory: React.FC<TableHistoryProps> = ({ dataSource:data, treg }) =>
   }, [dataSource]);
 
   const dataMapping = useMemo(() => {
-     const mappingData2 = dataSource.map((data, indexParent) => {
-       if (
-         data.coreIndex == injectedData?.coreIndex &&
-         data.parameter == injectedData?.parameter
-       ) {
-         const mappingChildren = injectedData?.children?.map(
-           (childData, index) => {
-             let childrenMapped = [];
- 
-             if (
-               injectedChildData.identIndex === childData.identIndex &&
-               Array.isArray(injectedChildData.children)
-             ) {
-               childrenMapped = injectedChildData?.children?.map((grandChild) => ({
-                 ...grandChild,
-                 index,
-                 indexParent,
-               }));
-             }
- 
-             return {
-               ...childData,
-               index,
-               indexParent,
-               children: childrenMapped,
-             };
-           }
-         ); 
-         return {
-           ...data,
-           index: indexParent,
-           indexParent,
-           identIndex: data.identIndex || identIndex++,
-           children: mappingChildren,
-         };
-       }
- 
-       return {
-         ...data,
-         indexParent,
-         index: indexParent,
-         identIndex: data.identIndex || identIndex++,
-       };
-     });
- 
-     return mappingData2;
-   }, [dataSource, injectedData, injectedChildData]);
+    const mappingData2 = dataSource.map((data, indexParent) => {
+      if (
+        data.coreIndex == injectedData?.coreIndex &&
+        data.parameter == injectedData?.parameter
+      ) {
+        const mappingChildren = injectedData?.children?.map(
+          (childData, index) => {
+            let childrenMapped = [];
+
+            if (
+              injectedChildData.identIndex === childData.identIndex &&
+              Array.isArray(injectedChildData.children)
+            ) {
+              childrenMapped = injectedChildData?.children?.map(
+                (grandChild) => ({
+                  ...grandChild,
+                  index,
+                  indexParent,
+                })
+              );
+            }
+
+            return {
+              ...childData,
+              index,
+              indexParent,
+              children: childrenMapped,
+            };
+          }
+        );
+        return {
+          ...data,
+          index: indexParent,
+          indexParent,
+          identIndex: data.identIndex || identIndex++,
+          children: mappingChildren,
+        };
+      }
+
+      return {
+        ...data,
+        indexParent,
+        index: indexParent,
+        identIndex: data.identIndex || identIndex++,
+      };
+    });
+
+    return mappingData2;
+  }, [dataSource, injectedData, injectedChildData]);
 
   const fetchWitelData = useCallback(
-     async (record) => {
-       setLoading(true);
-       try {
-         let res;
-         const mini_parameter = record.parameter.toLocaleLowerCase();
-         if (record.main_parent) {
-           res = await getHistoryData({
-             query: {
-               type: mini_parameter,
-               kpi: record.parameter.toLocaleLowerCase(),
-               sort: "asc",
-               treg,
-               level: "region"
-             },
-           }).unwrap();
-         } else {
-           res = await getHistoryData({
-             query: {
-               kpi: detailParameter
-                 ?.replace(/%20/g, " ")
-                 .toLocaleLowerCase(),
-               region: record.parameter,
-               level: "witel",
-               type: 'msa',
-               treg,
-             },
-           }).unwrap();
-         }
- 
-         if (record.main_parent) {
-           const findData = dataMapping.find(
-             (data) =>
-               data.coreIndex == record.coreIndex &&
-               data.parameter == record.parameter
-           );
-           const newData = res?.map((data) => ({
-             ...data,
-             mini_parameter,
-             identIndex: data.identIndex || identIndex++,
-           }));
-           const injectData = { ...findData, children: newData };           
-           setInjectedData(injectData);
-         } else {
-           const findData = dataMapping[record.indexParent];
-           const newData = res?.map((data) => ({
-             ...data,
-             mini_parameter: findData.parameter,
-             identIndex: data.identIndex || identIndex++,
-           }));
-           const childDataInject = findData?.children[record.index];
-           const injectData = {
-             ...childDataInject,
-             children: newData,
-           };
-           setInjectedChildData(injectData);
-         }
-         return true;
-       } catch (error) {
-         console.log(error);
-         return false;
-       } finally {
-         setLoading(false);
-       }
-     },
-     [dataMapping, detailParameter, treg]
-   );
+    async (record) => {
+      setLoading(true);
+      try {
+        let res;
+        const mini_parameter = record.parameter.toLocaleLowerCase();
+        if (record.main_parent) {
+          res = await getHistoryData({
+            query: {
+              type: mini_parameter,
+              kpi: record.parameter.toLocaleLowerCase(),
+              sort: "asc",
+              treg,
+              level: "region",
+            },
+          }).unwrap();
+        } else {
+          res = await getHistoryData({
+            query: {
+              kpi: detailParameter?.replace(/%20/g, " ").toLocaleLowerCase(),
+              region: record.parameter,
+              level: "witel",
+              type: "msa",
+              treg,
+            },
+          }).unwrap();
+        }
+
+        if (record.main_parent) {
+          const findData = dataMapping.find(
+            (data) =>
+              data.coreIndex == record.coreIndex &&
+              data.parameter == record.parameter
+          );
+          const newData = res?.map((data) => ({
+            ...data,
+            mini_parameter,
+            identIndex: data.identIndex || identIndex++,
+          }));
+          const injectData = { ...findData, children: newData };
+          setInjectedData(injectData);
+        } else {
+          const findData = dataMapping[record.indexParent];
+          const newData = res?.map((data) => ({
+            ...data,
+            mini_parameter: findData.parameter,
+            identIndex: data.identIndex || identIndex++,
+          }));
+          const childDataInject = findData?.children[record.index];
+          const injectData = {
+            ...childDataInject,
+            children: newData,
+          };
+          setInjectedChildData(injectData);
+        }
+        return true;
+      } catch (error) {
+        console.log(error);
+        return false;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [dataMapping, detailParameter, treg]
+  );
 
   const columns = useMemo(() => {
     if (!dataSource) return [];
@@ -265,7 +268,7 @@ const TableHistory: React.FC<TableHistoryProps> = ({ dataSource:data, treg }) =>
   const handleExpandCollaps = useCallback(
     async (record) => {
       if (record.parameter.toLowerCase().includes("core"))
-        setDetailParameter(record.parameter);      
+        setDetailParameter(record.parameter);
       if (record.parent || record.main_parent) {
         const key = record.identIndex;
         setExpandedRowKeys((prevKeys) => {
@@ -287,16 +290,15 @@ const TableHistory: React.FC<TableHistoryProps> = ({ dataSource:data, treg }) =>
             setDataSource(dataMapping);
           }, 500);
         }
-      }      
+      }
       console.log(dataMapping);
-      
     },
     [dataMapping, expandedRowKey, fetchWitelData]
   );
 
   return (
     <div>
-      {(loading && <Spin fullscreen tip="Sedang Memuat Data..." />)}
+      {loading && <Spin fullscreen tip="Sedang Memuat Data..." />}
 
       <Table
         dataSource={dataMapping}
@@ -305,7 +307,7 @@ const TableHistory: React.FC<TableHistoryProps> = ({ dataSource:data, treg }) =>
         className="rounded-xl "
         rowKey={(record) => record.identIndex}
         scroll={{ x: "max-content" }}
-         expandable={{
+        expandable={{
           expandedRowKeys: expandedRowKey,
           rowExpandable: (record) =>
             record.children && record.children.length > 0,
@@ -365,9 +367,12 @@ const TableHistory: React.FC<TableHistoryProps> = ({ dataSource:data, treg }) =>
 
                       // 5) apply your coloring logic
                       if (
-                        record.parameter
-                          ?.toLowerCase()
-                          .includes("packetloss") &&
+                        (record.parameter
+                          .toLowerCase()
+                          .includes("packetloss ran to core") ||
+                          record.mini_parameter
+                            ?.toLowerCase()
+                            .includes("packetloss ran to core")) &&
                         !record.parameter?.toLowerCase().includes("internet")
                       ) {
                         return (
@@ -428,33 +433,39 @@ const TableHistory: React.FC<TableHistoryProps> = ({ dataSource:data, treg }) =>
                 if (column.dataIndex === "parameter" && !isLastTwo) {
                   return (
                     <div
+                      className="cursor-pointer text-primary-500"
                       onClick={() => handleExpandCollaps(record)}
                     >
-                       <Image
-                        className={`${
-                          record.main_parent || record.parent
-                            ? "block cursor-pointer"
-                            : "hidden"
-                        } `}
-                        width={10}
-                        src={arrowDropdown}
-                        preview={false}
-                      />
-                     <span 
-                      className="ml-2"
-                      >{text}
-                     </span>
+                      <div
+                        className={`flex gap-2 items-center ${
+                          record.main_parent
+                            ? "ml-0"
+                            : record.parent
+                            ? "ml-2 !text-[13px]"
+                            : "ml-4 !text-xs"
+                        }`}
+                      >
+                        <Image
+                          className={`${
+                            record.main_parent || record.parent
+                              ? "block cursor-pointer"
+                              : "hidden"
+                          } `}
+                          width={10}
+                          src={arrowDropdown}
+                          preview={false}
+                        />
+                        <span className="ml-2">{text}</span>
+                      </div>
                     </div>
-                    ); 
+                  );
                 }
                 if (column.dataIndex === "no" && !isLastTwo) {
                   return <span>{index + 1}</span>;
                 }
                 if (isLastTwo) {
                   return (
-                    <span className={`${text ? "font-bold" : ""}`}>
-                      {text}
-                    </span>
+                    <span className={`${text ? "font-bold" : ""}`}>{text}</span>
                   );
                 }
                 if (column.dataIndex?.startsWith("ach")) {
