@@ -99,10 +99,11 @@ function Dashboard() {
         type: menuId,
         kpi: historyType,
         filter: filter,
+        treg: treg
       },
     }).unwrap();
     setLoading(false);
-  }, [menuId, historyType, filter]);
+  }, [menuId, historyType, filter, treg]);
 
   /**
    * @description Fetch customer list

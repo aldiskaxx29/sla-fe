@@ -442,7 +442,7 @@ const TableHistory: React.FC<TableHistoryProps> = ({ dataSource:data, treg }) =>
                       />
                      <span 
                       className="ml-2"
-                      >{snakeToPascal_Utils(text)}
+                      >{text}
                      </span>
                     </div>
                     ); 
@@ -453,7 +453,7 @@ const TableHistory: React.FC<TableHistoryProps> = ({ dataSource:data, treg }) =>
                 if (isLastTwo) {
                   return (
                     <span className={`${text ? "font-bold" : ""}`}>
-                      {snakeToPascal_Utils(text)}
+                      {text}
                     </span>
                   );
                 }
