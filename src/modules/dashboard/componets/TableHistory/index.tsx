@@ -363,7 +363,7 @@ const TableHistory: React.FC<TableHistoryProps> = ({
                       const targetValue = Number(record[`target_q${quarter}`]);
 
                       // 4) compare
-                      const isBelowTarget = Number(text) < targetValue;
+                      const isBelowTarget = Number(text) <= targetValue;
 
                       // 5) apply your coloring logic
                       if (
