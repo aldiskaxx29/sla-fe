@@ -4,6 +4,7 @@ import AppDropdown from "@/app/components/AppDropdown";
 import { Spin } from "antd";
 import { useLazyApprover_fetchDataQuery } from "../rtk/approver.rtk";
 import dayjs from "dayjs";
+import { useNavigate } from "react-router-dom";
 
 const ApproverPage = () => {
   const [loading, setLoading] = useState(false);
@@ -71,6 +72,15 @@ const ApproverPage = () => {
   useEffect(() => {
     fetchApprover();
   }, [year, week, month]);
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const userData = JSON.parse(localStorage.getItem("user_data"));
+    if (!userData || userData.level_user !== 1) {
+      navigate("/"); // redirect to home
+    }
+  }, [navigate]);
 
   return (
     <div className="p-6">
