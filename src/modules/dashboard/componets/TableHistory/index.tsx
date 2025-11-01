@@ -1,9 +1,6 @@
 // Antd
-import { snakeToPascal_Utils } from "@/app/utils/wording.utils";
-import { DownOutlined, UpOutlined } from "@ant-design/icons";
 import { Image, Spin, Table } from "antd";
-import { useCallback, useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDashboard } from "../../hooks/dashboard.hooks";
 
 const { Column, ColumnGroup } = Table;
@@ -295,6 +292,13 @@ const TableHistory: React.FC<TableHistoryProps> = ({
     },
     [dataMapping, expandedRowKey, fetchWitelData]
   );
+
+  useEffect(() => {
+    setDataSource(data);
+    setInjectedData([]);
+    setInjectedChildData({});
+    setExpandedRowKeys([]);
+  }, [data, treg]);
 
   return (
     <div>

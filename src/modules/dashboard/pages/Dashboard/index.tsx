@@ -11,6 +11,7 @@ import { useParams } from "react-router-dom";
 
 import MSAmenu from "./components/MSAmenu";
 import CNOPmenu from "./components/CNOPmenu";
+import { toast } from "react-toastify";
 
 function Dashboard() {
   const menuOptions = [
@@ -94,14 +95,20 @@ function Dashboard() {
    */
   const fetchHistory = useCallback(async (): Promise<void> => {
     setLoading(true);
-    await getHistoryData({
-      query: {
-        type: menuId,
-        kpi: historyType,
-        filter: filter,
-        treg: treg
-      },
-    }).unwrap();
+    try {
+      await getHistoryData({
+        query: {
+          type: menuId,
+          kpi: historyType,
+          filter: filter,
+          treg: treg,
+        },
+      }).unwrap();
+    } catch (err) {
+      toast.error("Gagal memuat data history");
+    } finally {
+      setLoading(false);
+    }
     setLoading(false);
   }, [menuId, historyType, filter, treg]);
 
@@ -130,6 +137,7 @@ function Dashboard() {
             type: menuId,
             level,
             parameter: param,
+            treg,
           },
         }).unwrap(); // Ensure we're waiting for the correct response
 
@@ -146,7 +154,7 @@ function Dashboard() {
     } finally {
       setLoading(false);
     }
-  }, [menuId, level]);
+  }, [menuId, level, treg]);
 
   // Handle menu selection
   const handleHistoryCNOP = (data: string) => {

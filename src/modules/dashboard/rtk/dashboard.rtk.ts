@@ -101,10 +101,10 @@ export const dashboardApi = emptySplitApi.injectEndpoints({
       },
     }),
     history_data: builder.query({
-      query: (payload) => {        
+      query: (payload) => {
         return {
           method: "GET",
-          url: `dashboard/history/weekly/${payload?.query.level || ''}`,
+          url: `dashboard/history/weekly${payload?.query.level || ""}`,
           params: payload?.query,
         };
       },

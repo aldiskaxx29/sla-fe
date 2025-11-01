@@ -152,7 +152,9 @@ const MSAmenu = ({
               onClick={handleDownloadMsa}
               className="!h-11 !px-3 py-2.5 !border-0 !rounded-full !bg-[#EDFFFD]"
             >
-              <p className="text-brand-secondary font-medium">Export MSA as PPT</p>
+              <p className="text-brand-secondary font-medium">
+                Export MSA as PPT
+              </p>
               <Image src={xlxsIcon} alt="icon" width={16} preview={false} />
             </Button>
             <Button
