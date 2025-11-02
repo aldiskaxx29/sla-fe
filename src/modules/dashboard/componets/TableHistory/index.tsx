@@ -92,12 +92,12 @@ const TableHistory: React.FC<TableHistoryProps> = ({
       setLoading(true);
       try {
         let res;
-        const mini_parameter = record.parameter.toLocaleLowerCase();
+        const mini_parameter = record.parameter?.toLocaleLowerCase();
         if (record.main_parent) {
           res = await getHistoryData({
             query: {
               type: mini_parameter,
-              kpi: record.parameter.toLocaleLowerCase(),
+              kpi: record.parameter?.toLocaleLowerCase(),
               sort: "asc",
               treg,
               level: "region",
@@ -264,7 +264,7 @@ const TableHistory: React.FC<TableHistoryProps> = ({
 
   const handleExpandCollaps = useCallback(
     async (record) => {
-      if (record.parameter.toLowerCase().includes("core"))
+      if (record.parameter?.toLowerCase().includes("core"))
         setDetailParameter(record.parameter);
       if (record.parent || record.main_parent) {
         const key = record.identIndex;
@@ -338,16 +338,16 @@ const TableHistory: React.FC<TableHistoryProps> = ({
                   fixed={child.fixed}
                   onCell={(record, index) => {
                     const isLastTwo =
-                      record.parameter.toLowerCase().includes("service") ||
-                      record.parameter.toLowerCase().includes("weighted");
+                      record.parameter?.toLowerCase().includes("service") ||
+                      record.parameter?.toLowerCase().includes("weighted");
                     return {
                       className: isLastTwo ? "!bg-blue-pacific !p-3" : "!p-3",
                     };
                   }}
                   render={(text, record, index) => {
                     const isLastTwo =
-                      record.parameter.toLowerCase().includes("service") ||
-                      record.parameter.toLowerCase().includes("weighted");
+                      record.parameter?.toLowerCase().includes("service") ||
+                      record.parameter?.toLowerCase().includes("weighted");
                     if (isLastTwo) {
                       return (
                         <span className={`${text ? "font-bold" : ""}`}>
@@ -372,7 +372,7 @@ const TableHistory: React.FC<TableHistoryProps> = ({
                       // 5) apply your coloring logic
                       if (
                         (record.parameter
-                          .toLowerCase()
+                          ?.toLowerCase()
                           .includes("packetloss ran to core") ||
                           record.mini_parameter
                             ?.toLowerCase()
@@ -424,16 +424,16 @@ const TableHistory: React.FC<TableHistoryProps> = ({
               align={column.align}
               onCell={(record, index) => {
                 const isLastTwo =
-                  record.parameter.toLowerCase().includes("service") ||
-                  record.parameter.toLowerCase().includes("weighted");
+                  record.parameter?.toLowerCase().includes("service") ||
+                  record.parameter?.toLowerCase().includes("weighted");
                 return {
                   className: isLastTwo ? "!bg-blue-pacific !p-3" : "!p-3",
                 };
               }}
               render={(text, record, index) => {
                 const isLastTwo =
-                  record.parameter.toLowerCase().includes("service") ||
-                  record.parameter.toLowerCase().includes("weighted");
+                  record.parameter?.toLowerCase().includes("service") ||
+                  record.parameter?.toLowerCase().includes("weighted");
                 if (column.dataIndex === "parameter" && !isLastTwo) {
                   return (
                     <div
