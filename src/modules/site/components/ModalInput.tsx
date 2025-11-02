@@ -177,7 +177,7 @@ const ModalInput = ({ open, onCancel, onSave, dataModal, week }) => {
               name="ttr_selisih"
               rules={[{ required: true, message: "Masukkan Ttr Selisih" }]}
             >
-              <Input type="time" placeholder="Masukkan Ttr Selisih" />
+              <Input type="text" placeholder="Masukkan Ttr Selisih" />
             </Form.Item>
           )}
           {dataModal?.parameter != "mttrq major" &&
@@ -235,6 +235,7 @@ const ModalInput = ({ open, onCancel, onSave, dataModal, week }) => {
                 <Option value="QE (Quality Enhancement)">
                   QE (Quality Enhancement)
                 </Option>
+                <Option value="Double Ticket">⁠Double Ticket</Option>
                 <Option value="ISR">⁠ISR</Option>
                 <Option value="⁠Pengiriman Sparepart">
                   ⁠Pengiriman Sparepart

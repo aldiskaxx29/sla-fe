@@ -1,5 +1,11 @@
 import { emptySplitApi } from "@/app/redux/app.rtx";
 
+const buildPath = (base, level) => {
+  if (!level) return base;
+  const cleanLevel = level.replace(/^\//, ''); // Hapus slash di depan
+  return `${base}/${cleanLevel}`;
+};
+
 export const dashboardApi = emptySplitApi.injectEndpoints({
   endpoints: (builder) => ({
     SCApi_fethcData: builder.query({
@@ -104,7 +110,7 @@ export const dashboardApi = emptySplitApi.injectEndpoints({
       query: (payload) => {
         return {
           method: "GET",
-          url: `dashboard/history/weekly${payload?.query.level || ""}`,
+          url: buildPath("dashboard/history/weekly", payload?.query.level),
           params: payload?.query,
         };
       },
