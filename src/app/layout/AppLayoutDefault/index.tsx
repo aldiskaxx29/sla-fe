@@ -469,7 +469,7 @@ const AppLayoutDefault = () => {
 
                         {/* <hr className="my-1 border-gray-100" /> */}
                         {JSON.parse(localStorage.getItem("user_data"))
-                          .level_user == 1 && (
+                          ?.level_user == 1 && (
                           <>
                             <button
                               className="w-full text-left px-4 py-2 text-sm text-black hover:bg-black-50 transition-colors duration-150 cursor-pointer"
