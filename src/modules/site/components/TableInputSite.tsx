@@ -127,7 +127,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
     ),
     onFilter: (value, record) =>
       record[dataIndex]
-        .toString()
+        ?.toString()
         .toLowerCase()
         .includes((value as string).toLowerCase()),
     filterDropdownProps: {

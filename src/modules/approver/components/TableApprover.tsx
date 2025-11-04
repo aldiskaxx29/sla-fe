@@ -116,7 +116,7 @@ const TableApprover = ({ data }) => {
     ),
     onFilter: (value, record) =>
       record[dataIndex]
-        .toString()
+        ?.toString()
         .toLowerCase()
         .includes((value as string).toLowerCase()),
     filterDropdownProps: {
