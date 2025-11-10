@@ -80,7 +80,7 @@ export const siteApi = emptySplitApi.injectEndpoints({
       query: ({ query }) => {
         return {
           method: "GET",
-          url: "/rekonsiliasi/download-template",
+          url: "/download/evidence",
           params: query,
           responseHandler: (response) => response.blob(),
           cache: "no-cache",

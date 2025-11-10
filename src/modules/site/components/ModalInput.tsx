@@ -74,6 +74,7 @@ const ModalInput = ({ open, onCancel, onSave, dataModal, week }) => {
         const parserEvidance = siteDetails.evidence
           ? JSON.parse(siteDetails?.evidence)
           : "";
+        console.log('parserEvidance', parserEvidance, parserEvidance[0]?.url)
         const dataPreview = `${parserEvidance[0]?.url}`;
         setPreview(dataPreview || "");
       } catch (error) {
@@ -312,11 +313,11 @@ const ModalInput = ({ open, onCancel, onSave, dataModal, week }) => {
                 </p>
               )}
             </Upload.Dragger>
-            {/* {preview && (
+            {preview && (
               <Button className="mt-3" onClick={handleIconDownload}>
                 Download Evidance
               </Button>
-            )} */}
+            )}
           </Form.Item>
 
           <div style={{ textAlign: "right" }}>
