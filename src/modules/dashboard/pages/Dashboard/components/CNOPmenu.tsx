@@ -142,7 +142,7 @@ const CNOPmenu = ({
             </div>
           </div>
           <div className="flex gap-6">
-            {/* <AppDropdown
+            <AppDropdown
               title="Filter Treg"
               placeholder="All"
               options={filterOptions}
@@ -155,7 +155,7 @@ const CNOPmenu = ({
               options={filterBy}
               onChange={(value) => handlefilter(value)}
               value={filter}
-            /> */}
+            />
             <Button
               onClick={() => {}}
               className="!h-11 !px-3 py-2.5 !border-0 !rounded-full !bg-[#EDFFFD]"

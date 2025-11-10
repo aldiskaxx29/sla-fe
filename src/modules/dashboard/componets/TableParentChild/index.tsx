@@ -701,8 +701,8 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                         />
                         <p
                           className={
-                            text === "WEIGHTED ACHIEVEMENT" ||
-                            text === "SERVICE CREDIT"
+                            text === "WEIGHTED ACHIEVEMENT NATION" ||
+                            text === "SERVICE CREDIT NATION"
                               ? "text-white p-2 bg-[#04d1de] rounded-md text-[15px] font-bold"
                               : ""
                           }

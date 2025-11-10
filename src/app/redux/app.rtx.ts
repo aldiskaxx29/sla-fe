@@ -71,10 +71,10 @@ const baseQueryWithReauth: BaseQueryFn<
   }
 
   // Jika FETCH_ERROR (misal jaringan mati / gagal fetch)
-  // if (result.error?.status === "FETCH_ERROR") {
-  //   localStorage.removeItem("token");
-  //   api.dispatch(authLogout());
-  // }
+  if (result.error?.status === "FETCH_ERROR") {
+    localStorage.removeItem("token");
+    api.dispatch(authLogout());
+  }
 
   return result;
 };

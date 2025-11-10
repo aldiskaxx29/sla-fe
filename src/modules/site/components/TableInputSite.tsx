@@ -231,8 +231,8 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
           },
           {
             title: "TICKET ID",
-            dataIndex: "ticket_id",
-            key: "ticket_id",
+            dataIndex: "ticket",
+            key: "ticket",
             align: "center",
           },
         ],

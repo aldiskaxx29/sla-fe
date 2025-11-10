@@ -22,6 +22,7 @@ const ProfilePage = () => {
   useEffect(() => {
     if (userData) {
       const parsedData = JSON?.parse(userData);
+      console.log('parsing', parsedData)
       form.setFieldsValue(parsedData);
     }
   }, [form, userData]);

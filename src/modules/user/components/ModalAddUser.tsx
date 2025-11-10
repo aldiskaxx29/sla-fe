@@ -1,4 +1,4 @@
-import { Button, Form, Input, Modal } from "antd";
+import { Button, Form, Input, Modal, Select } from "antd";
 import { useCreateUserMutation } from "../rtk/user.rtk";
 import { toast } from "react-toastify";
 import { useUser } from "../hooks/user.hooks";
@@ -20,7 +20,8 @@ const ModalAddUser = ({ open, onCancel }) => {
       .validateFields()
       .then((values) => {
         console.log("Form Values:", values);
-        createUser({ body: values }).unwrap();
+        // createUser({ body: values }).unwrap();
+        createUser(values).unwrap();
         toast.success("User created successfully");
         fetchUser();
         onCancel();
@@ -65,20 +66,69 @@ const ModalAddUser = ({ open, onCancel }) => {
           >
             <Input placeholder="Masukkan Password" />
           </Form.Item>
-          <Form.Item
+          {/* <Form.Item
             name="level_user"
             label="Level User"
             rules={[{ required: true, message: "Masukkan Level User" }]}
           >
-            <Input placeholder="Masukkan Level User" disabled readOnly />
-          </Form.Item>
+            <Input placeholder="Masukkan Level User"/>
+          </Form.Item> */}
           <Form.Item
+              label="Level User"
+              name="level_user"
+              rules={[{ required: true, message: "Masukkan Level User" }]}
+            >
+              <Select placeholder="Pilih Level User">
+                <Option value="1">
+                  Admin
+                </Option>
+                <Option value="2">
+                  Rekonsiliasi
+                </Option>
+                <Option value="3">
+                  Guest
+                </Option>
+              </Select>
+            </Form.Item>
+          {/* <Form.Item
             name="treg"
             label="Treg"
             rules={[{ required: true, message: "Masukkan Treg" }]}
           >
             <Input placeholder="Masukkan Treg" />
-          </Form.Item>
+          </Form.Item> */}
+          <Form.Item
+              label="Treg"
+              name="treg"
+              rules={[{ required: true, message: "Masukkan Treg" }]}
+            >
+              <Select placeholder="Pilih Treg">
+                <Option value="0">
+                  All
+                </Option>
+                <Option value="1">
+                  Treg 1
+                </Option>
+                <Option value="2">
+                  Treg 2
+                </Option>
+                <Option value="3">
+                  Treg 3
+                </Option>
+                <Option value="4">
+                  Treg 4
+                </Option>
+                <Option value="5">
+                  Treg 5
+                </Option>
+                <Option value="6">
+                  Treg 6
+                </Option>
+                <Option value="7">
+                  Treg 7
+                </Option>
+              </Select>
+            </Form.Item>
           <div style={{ textAlign: "right" }}>
             <Button
               onClick={() => {
