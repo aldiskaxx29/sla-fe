@@ -6,23 +6,26 @@ const ProfilePage = () => {
   const [form] = Form.useForm();
   const [createUser] = useCreateUserMutation();
   const userData = localStorage.getItem("user_data");
-  const handleOk = () => {
-    const id = userData ? JSON?.parse(userData).id : null;
-    form
-      .validateFields()
-      .then((values) => {
-        createUser({ body: { id, ...values } }).unwrap();
-        localStorage.setItem("user_data", JSON.stringify({ id, ...values }));
-        // window.location.reload();
-      })
-      .catch((info) => {
-        console.log("Validate Failed:", info);
-      });
+  const handleOk = async () => {
+    const id = userData ? JSON.parse(userData).id : null;
+    const oldData = userData ? JSON.parse(userData) : {};
+
+    try {
+      const values = await form.validateFields();
+      await createUser({ body: { id, ...values } }).unwrap();
+
+      // ✅ Merge old data so id_telegram (or others) aren’t lost
+      const updatedData = { ...oldData, id, ...values };
+      localStorage.setItem("user_data", JSON.stringify(updatedData));
+
+      // window.location.reload();
+    } catch (error) {
+      console.log("Validate Failed:", error);
+    }
   };
   useEffect(() => {
     if (userData) {
       const parsedData = JSON?.parse(userData);
-      console.log('parsing', parsedData)
       form.setFieldsValue(parsedData);
     }
   }, [form, userData]);
@@ -56,14 +59,18 @@ const ProfilePage = () => {
             <Input placeholder="Masukkan Region" className="h-12" />
           </Form.Item>
           <Form.Item name="id_telegram" label="ID Telegram">
-            <Input placeholder="Masukkan ID Telegram" className="h-12" />
-            <a
-              href={`https://t.me/${form.getFieldValue("id_telegram")}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              https://t.me/{form.getFieldValue("id_telegram")}
-            </a>
+            <div>
+              <Input placeholder="Masukkan ID Telegram" className="h-12" />
+              {userData && (
+                <a
+                  href={`https://t.me/${JSON.parse(userData).id_telegram}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  https://t.me/{JSON.parse(userData).id_telegram}
+                </a>
+              )}
+            </div>
           </Form.Item>
 
           <Button type="primary" onClick={handleOk}>
