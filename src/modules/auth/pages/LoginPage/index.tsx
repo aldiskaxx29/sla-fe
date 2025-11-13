@@ -72,7 +72,7 @@ const LoginPage = () => {
           <h2 className="text-xl font-semibold text-gray-800">Web Admin</h2>
         </div>
         <p className="text-gray-500 text-sm ml-4">
-          Silahkan masukan akun anda yang terdaftar
+          Silahkan masukan akun anda yang terdaftlar
         </p>
       </div>
 
@@ -80,7 +80,7 @@ const LoginPage = () => {
       <form onSubmit={handleSubmit} autoComplete="off" className="space-y-4">
         <div className="flex flex-col mb-4">
           <label htmlFor="email" className="text-gray-700 font-medium mb-1">
-            Email
+            Nik
           </label>
           <div className="relative">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">

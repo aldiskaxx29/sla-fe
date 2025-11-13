@@ -169,7 +169,7 @@ const ModalInput = ({ open, onCancel, onSave, dataModal, week }) => {
             name="site_id"
             rules={[{ required: true, message: "Masukkan Site ID" }]}
           >
-            <Input placeholder="Masukkan Site ID" />
+            <Input placeholder="Masukkan Site ID" readOnly />
           </Form.Item>
           {(dataModal?.parameter == "mttrq major" ||
             dataModal?.parameter == "mttrq minor") && (
@@ -179,6 +179,16 @@ const ModalInput = ({ open, onCancel, onSave, dataModal, week }) => {
               rules={[{ required: true, message: "Masukkan Ttr Selisih" }]}
             >
               <Input type="text" placeholder="Masukkan Ttr Selisih" />
+            </Form.Item>
+          )}
+          {(dataModal?.parameter == "mttrq major" ||
+            dataModal?.parameter == "mttrq minor") && (
+            <Form.Item
+              label="Ticket Id"
+              name="ticket_id"
+              rules={[{ required: true, message: "Masukkan Ticket Id" }]}
+            >
+              <Input type="text" placeholder="Masukkan Ticket Id" readOnly />
             </Form.Item>
           )}
           {dataModal?.parameter != "mttrq major" &&

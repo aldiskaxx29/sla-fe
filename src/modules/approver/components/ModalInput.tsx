@@ -125,7 +125,7 @@ const ModalInput = ({ open, onCancel, onSave, dataModal }) => {
             name="site_id"
             rules={[{ required: true, message: "Masukkan Site ID" }]}
           >
-            <Input placeholder="Masukkan Site ID" />
+            <Input placeholder="Masukkan Site ID" disabled />
           </Form.Item>
           {(dataModal?.parameter == "mttrq major" ||
             dataModal?.parameter == "mttrq minor") && (
