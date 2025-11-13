@@ -66,16 +66,13 @@ const ModalInput = ({ open, onCancel, onSave, dataModal, week }) => {
           ...result,
           week: week,
         } as SiteDetail;
-        console.log("ress", result, "-> replaced week:", week, siteDetails);
-
         setOptionsKpi(result?.options);
         setChecked(result?.site_sos);
         form.setFieldsValue(siteDetails);
         const parserEvidance = siteDetails.evidence
           ? JSON.parse(siteDetails?.evidence)
           : "";
-        console.log('parserEvidance', parserEvidance, parserEvidance[0]?.url)
-        const dataPreview = `${parserEvidance[0]?.url}`;
+        const dataPreview = parserEvidance[0]?.url;        
         setPreview(dataPreview || "");
       } catch (error) {
         console.log(error);
@@ -95,8 +92,8 @@ const ModalInput = ({ open, onCancel, onSave, dataModal, week }) => {
 
   const handleChange = (info: any) => {
     const newList = info.fileList.slice(-1);
-    setFileList(newList);
-
+    setFileList(newList);    
+    form.setFieldsValue({ evidence: newList });
     const file = info.file;
 
     if (file) {
