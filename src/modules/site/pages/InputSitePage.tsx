@@ -15,6 +15,7 @@ const SitePage = () => {
   const [week, setWeek] = useState("");
   const [month, setMonth] = useState(dayjs().format("M"));
   const [exclude, setExclude] = useState("all");
+  const [prev, setPrev] = useState("all");
   const [loading, setLoading] = useState(false);
   const [parameter, setParameter] = useState("packetloss ran to core");
   const { dataSite, getSite } = useSite();
@@ -43,6 +44,12 @@ const SitePage = () => {
     if (!week || !month) return;
     fetchSite();
   }, [exclude, parameter, week, month, trigger]);
+
+  const optPrev = [
+    { label: "All", value: "all" },
+    { label: "Corrective", value: "corrective" },
+    { label: "Preventive", value: "preventive" },
+  ];
 
   const optExclude = [
     { label: "All", value: "all" },
@@ -163,10 +170,17 @@ const SitePage = () => {
     <div className="bg-white border border-[#DBDBDB] rounded-xl p-4 m-6">
       {loading && <Spin fullscreen tip="Sedang Memuat Data..." />}
       <div className="flex justify-between mb-6">
-        <div className="bg-[#EDEDED] max-w-[210px] rounded-[54px] px-4 py-2 h-12 flex justify-center items-center">
+        <div className="bg-[#EDEDED] max-w-[210px] rounded-[54px] px-4 py-1 h-10 flex justify-center items-center mr-2">
           <p className="font-semibold text-[#0E2133] text-base">REKONSILIASI</p>
         </div>
         <div className="flex gap-4">
+          {/* <AppDropdown
+            title="Site Type"
+            placeholder="All"
+            options={optPrev}
+            value={prev}
+            onChange={(value) => setPrev(value)}
+          /> */}
           <AppDropdown
             title="Exclude"
             placeholder="All"

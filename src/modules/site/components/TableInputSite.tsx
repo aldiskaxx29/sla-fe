@@ -381,13 +381,14 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
 
   const handleSave = async (payload) => {
     try {
+      console.log("evidence", payload.evidence.file || payload.evidence[0].originFileObj)
       const formData = new FormData();
       formData.append("id", payload.id);
       formData.append("month", payload.month);
       formData.append("week", payload.week);
       formData.append("grouping_rca", payload.grouping_rca);
       formData.append("detail_rca", payload.detail_rca);
-      formData.append("evidence", payload.evidence.file || payload.evidence);
+      formData.append("evidence", payload.evidence.file || payload.evidence[0].originFileObj);
       formData.append("site_id", payload.site_id);
       formData.append("ttr_selisih", payload.ttr_selisih);
       formData.append("note", payload.note);
