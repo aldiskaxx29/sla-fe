@@ -210,50 +210,115 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
           ]
         : []),
       {
-        title: "Assesment CNQ",
+        title: "Value",
+        dataIndex: "value",
+        key: "value",
         align: "center",
-        children: [
-          {
-            title: "GROUP RCA",
-            dataIndex: "RCA",
-            key: "RCA",
-            align: "center",
-            search: true,
-          },
-          {
-            title: "DETAIL RCA",
-            dataIndex: "detail_rca",
-            key: "detail_rca",
-            align: "center",
-            onHeaderCell: () => ({
-              className: "!w-[300px] !p-3",
-            }),
-          },
-          {
-            title: "TICKET ID",
-            dataIndex: "ticket",
-            key: "ticket",
-            align: "center",
-          },
-        ],
+        search: true,
+      },
+      // {
+      //   title: "Assesment CNQ",
+      //   align: "center",
+      //   children: [
+      //     {
+      //       title: "GROUP RCA",
+      //       dataIndex: "RCA",
+      //       key: "RCA",
+      //       align: "center",
+      //       search: true,
+      //     },
+      //     {
+      //       title: "DETAIL RCA",
+      //       dataIndex: "detail_rca",
+      //       key: "detail_rca",
+      //       align: "center",
+      //       onHeaderCell: () => ({
+      //         className: "!w-[300px] !p-3",
+      //       }),
+      //     },
+      //     {
+      //       title: "TICKET ID",
+      //       dataIndex: "ticket",
+      //       key: "ticket",
+      //       align: "center",
+      //     },
+      //   ],
+      // },
+      {
+        title: "Gropu Rca",
+        dataIndex: "RCA",
+        key: "RCA",
+        align: "center",
+        search: true,
       },
       {
-        title: "Update Regional",
+        title: "Detail Rca",
+        dataIndex: "detail_rca",
+        key: "detail_rca",
         align: "center",
-        children: [
-          {
-            title: "GROUPING RCA",
-            dataIndex: "grouping_rca",
-            key: "grouping_rca",
-            align: "center",
-          },
-          {
-            title: "UPDATE PROGRES",
-            dataIndex: "note",
-            key: "note",
-            align: "center",
-          },
-        ],
+        search: true,
+      },
+      // {
+      //   title: "Update Regional",
+      //   align: "center",
+      //   children: [
+      //     {
+      //       title: "GROUPING RCA",
+      //       dataIndex: "grouping_rca",
+      //       key: "grouping_rca",
+      //       align: "center",
+      //     },
+      //     {
+      //       title: "UPDATE PROGRES",
+      //       dataIndex: "note",
+      //       key: "note",
+      //       align: "center",
+      //     },
+      //   ],
+      // },
+
+      // 's.grouping_rca_packetloss_cnq',
+      // 's.last_update_packetloss_cnq',
+      // 's.user_update_packetloss_cnq',
+      // 's.grouping_rca_packetloss_regional',
+      // 's.last_update_packetloss_regional',
+      // 's.user_update_packetloss_regional'
+      ,
+      {
+        title: `Update Progres Cnq`,
+        key: `grouping_rca_${dynamicKey}_cnq`,
+        dataIndex: `grouping_rca_${dynamicKey}_cnq`,
+      },
+      
+      {
+        title: `Last Update Cnq`,
+        key: `last_update_${dynamicKey}_cnq`,
+        dataIndex: `last_update_${dynamicKey}_cnq`,
+      },
+
+      {
+        title: `User Update Cnq`,
+        key: `user_update_${dynamicKey}_cnq`,
+        dataIndex: `user_update_${dynamicKey}_cnq`,
+      },
+      
+      ,
+      {
+        title: `Update Progres Regional`,
+        key: `grouping_rca_${dynamicKey}_regional`,
+        dataIndex: `grouping_rca_${dynamicKey}_regional`,
+      },
+      
+      {
+        title: `Last Update Regional`,
+        key: `last_update_${dynamicKey}_regional`,
+        dataIndex: `last_update_${dynamicKey}_regional`,
+      },
+
+      {
+        title: `User Update Regional`,
+        key: `user_update_${dynamicKey}_regional`,
+        dataIndex: `user_update_${dynamicKey}_regional`,
       },
       {
         title: "EXCLUDED",
@@ -381,12 +446,14 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
 
   const handleSave = async (payload) => {
     try {
+      console.log("payload", payload)
       console.log("evidence", payload.evidence.file || payload.evidence[0].originFileObj)
       const formData = new FormData();
       formData.append("id", payload.id);
       formData.append("month", payload.month);
       formData.append("week", payload.week);
       formData.append("grouping_rca", payload.grouping_rca);
+      formData.append("grouping_rca_regional", payload.grouping_rca_regional);
       formData.append("detail_rca", payload.detail_rca);
       formData.append("evidence", payload.evidence.file || payload.evidence[0].originFileObj);
       formData.append("site_id", payload.site_id);

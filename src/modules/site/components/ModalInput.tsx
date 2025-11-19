@@ -37,6 +37,20 @@ const ModalInput = ({ open, onCancel, onSave, dataModal, week }) => {
 
   const [downloadEvidance] = useLazyDownload_evidanceQuery();
 
+  const userData = localStorage.getItem("user_data");
+  const user = JSON.parse(userData);
+  const isRegional = user.unit === "regional";
+
+  const labelText = isRegional
+    ? "Grouping RCA Regional"
+    : "Grouping RCA Cnq";
+
+  const nameField = isRegional
+    ? "grouping_rca_regional"
+    : "grouping_rca";
+    
+  console.log('user data', userData)
+
   const handleOk = () => {
     form
       .validateFields()
@@ -198,8 +212,8 @@ const ModalInput = ({ open, onCancel, onSave, dataModal, week }) => {
             )}
           {!dataModal?.parameter?.includes("mttrq") ? (
             <Form.Item
-              label="Grouping RCA"
-              name="grouping_rca"
+              label={labelText}
+              name={nameField}
               rules={[{ required: true, message: "Masukkan Grouping RCA" }]}
             >
               <Select placeholder="Pilih Grouping RCA">

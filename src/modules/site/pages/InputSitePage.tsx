@@ -15,7 +15,7 @@ const SitePage = () => {
   const [week, setWeek] = useState("");
   const [month, setMonth] = useState(dayjs().format("M"));
   const [exclude, setExclude] = useState("all");
-  const [prev, setPrev] = useState("all");
+  const [prev, setPrev] = useState("corrective");
   const [loading, setLoading] = useState(false);
   const [parameter, setParameter] = useState("packetloss ran to core");
   const { dataSite, getSite } = useSite();
@@ -26,6 +26,7 @@ const SitePage = () => {
     try {
       await getSite({
         query: {
+          prev,
           exclude,
           parameter,
           month,
@@ -38,15 +39,15 @@ const SitePage = () => {
     } finally {
       setLoading(false);
     }
-  }, [exclude, parameter, month, week]);
+  }, [exclude, parameter, month, week, prev]);
 
   useEffect(() => {
     if (!week || !month) return;
     fetchSite();
-  }, [exclude, parameter, week, month, trigger]);
+  }, [exclude, parameter, week, month, trigger, prev]);
 
   const optPrev = [
-    { label: "All", value: "all" },
+    // { label: "All", value: "all" },
     { label: "Corrective", value: "corrective" },
     { label: "Preventive", value: "preventive" },
   ];
@@ -174,13 +175,13 @@ const SitePage = () => {
           <p className="font-semibold text-[#0E2133] text-base">REKONSILIASI</p>
         </div>
         <div className="flex gap-4">
-          {/* <AppDropdown
+          <AppDropdown
             title="Site Type"
             placeholder="All"
             options={optPrev}
             value={prev}
             onChange={(value) => setPrev(value)}
-          /> */}
+          />
           <AppDropdown
             title="Exclude"
             placeholder="All"
