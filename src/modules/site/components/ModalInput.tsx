@@ -27,7 +27,7 @@ type SiteDetail = {
   site_sos: boolean;
 };
 
-const ModalInput = ({ open, onCancel, onSave, dataModal, week }) => {
+const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week }) => {
   const [form] = Form.useForm();
   const { getDetailSite } = useSite();
   const [preview, setPreview] = useState("");
@@ -45,11 +45,32 @@ const ModalInput = ({ open, onCancel, onSave, dataModal, week }) => {
     ? "Grouping RCA Regional"
     : "Grouping RCA Cnq";
 
-  const nameField = isRegional
-    ? "grouping_rca_regional"
-    : "grouping_rca";
+    // const nameField = isRegional
+    //   ? "grouping_rca_regional"
+    //   : "grouping_rca";
+  let nameField = '';
+  switch (parameter) {
+    case 'packetloss ran to core':
+        nameField = isRegional
+              ? "grouping_rca_packetloss_regional"
+              : "grouping_rca_packetloss_cnq";
+      break;
+    case 'jitter ran to core':
+        nameField = isRegional
+              ? "grouping_rca_latency_regional"
+              : "grouping_rca_latency_cnq";
+      break;
+    case 'latency ran to core':
+        nameField = isRegional
+              ? "grouping_rca_jitter_regional"
+              : "grouping_rca_jitter_cnq";
+      break;
+  
+    default:
+      break;
+  } 
     
-  console.log('user data', userData)
+  console.log('user data', userData, dataModal, parameter)
 
   const handleOk = () => {
     form
