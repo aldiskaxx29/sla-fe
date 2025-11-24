@@ -25,6 +25,7 @@ type SiteDetail = {
   ttr_slisih?: string;
   kpi: string[];
   site_sos: boolean;
+  site_exclude: boolean;
 };
 
 const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week }) => {
@@ -33,6 +34,7 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week }) => {
   const [preview, setPreview] = useState("");
   const [fileList, setFileList] = useState<any[]>([]);
   const [checked, setChecked] = useState(false);
+  const [exclude, setExclude] = useState(false);
   const [optionsKpi, setOptionsKpi] = useState([]);
 
   const [downloadEvidance] = useLazyDownload_evidanceQuery();
@@ -77,7 +79,7 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week }) => {
       .validateFields()
       .then((values) => {
         console.log("vall", values, week);
-        onSave({ ...values, site_sos: checked });
+        onSave({ ...values, site_sos: checked, exclude });
         form.resetFields();
         setPreview("");
       })
@@ -103,6 +105,7 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week }) => {
         } as SiteDetail;
         setOptionsKpi(result?.options);
         setChecked(result?.site_sos);
+        setExclude(result?.site_exclude);
         form.setFieldsValue(siteDetails);
         const parserEvidance = siteDetails.evidence
           ? JSON.parse(siteDetails?.evidence)
@@ -361,6 +364,15 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week }) => {
               </Button>
             )} */}
           </Form.Item>
+
+          {dataModal?.parameter != "mttrq major" &&
+            dataModal?.parameter != "mttrq minor" && (
+              <Form.Item name="site_sos" label="Exclude?">
+                <Checkbox onChange={onChange} checked={exclude}>
+                  {label}
+                </Checkbox>
+              </Form.Item>
+            )}
 
           <div style={{ textAlign: "right" }}>
             <Button

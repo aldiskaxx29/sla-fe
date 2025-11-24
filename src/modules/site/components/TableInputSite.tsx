@@ -245,14 +245,14 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
       //   ],
       // },
       {
-        title: "Gropu Rca",
+        title: "Group RCA",
         dataIndex: "RCA",
         key: "RCA",
         align: "center",
         search: true,
       },
       {
-        title: "Detail Rca",
+        title: "Detail RCA",
         dataIndex: "detail_rca",
         key: "detail_rca",
         align: "center",
