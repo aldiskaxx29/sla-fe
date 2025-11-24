@@ -43,36 +43,34 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week }) => {
   const user = JSON.parse(userData);
   const isRegional = user.unit === "regional";
 
-  const labelText = isRegional
-    ? "Grouping RCA Regional"
-    : "Grouping RCA Cnq";
+  const labelText = isRegional ? "Grouping RCA Regional" : "Grouping RCA Cnq";
 
-    // const nameField = isRegional
-    //   ? "grouping_rca_regional"
-    //   : "grouping_rca";
-  let nameField = '';
+  // const nameField = isRegional
+  //   ? "grouping_rca_regional"
+  //   : "grouping_rca";
+  let nameField = "";
   switch (parameter) {
-    case 'packetloss ran to core':
-        nameField = isRegional
-              ? "grouping_rca_packetloss_regional"
-              : "grouping_rca_packetloss_cnq";
+    case "packetloss ran to core":
+      nameField = isRegional
+        ? "grouping_rca_packetloss_regional"
+        : "grouping_rca_packetloss_cnq";
       break;
-    case 'jitter ran to core':
-        nameField = isRegional
-              ? "grouping_rca_latency_regional"
-              : "grouping_rca_latency_cnq";
+    case "jitter ran to core":
+      nameField = isRegional
+        ? "grouping_rca_latency_regional"
+        : "grouping_rca_latency_cnq";
       break;
-    case 'latency ran to core':
-        nameField = isRegional
-              ? "grouping_rca_jitter_regional"
-              : "grouping_rca_jitter_cnq";
+    case "latency ran to core":
+      nameField = isRegional
+        ? "grouping_rca_jitter_regional"
+        : "grouping_rca_jitter_cnq";
       break;
-  
+
     default:
       break;
-  } 
-    
-  console.log('user data', userData, dataModal, parameter)
+  }
+
+  console.log("user data", userData, dataModal, parameter);
 
   const handleOk = () => {
     form
@@ -110,7 +108,7 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week }) => {
         const parserEvidance = siteDetails.evidence
           ? JSON.parse(siteDetails?.evidence)
           : "";
-        const dataPreview = parserEvidance[0]?.url;        
+        const dataPreview = parserEvidance[0]?.url;
         setPreview(dataPreview || "");
       } catch (error) {
         console.log(error);
@@ -130,7 +128,7 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week }) => {
 
   const handleChange = (info: any) => {
     const newList = info.fileList.slice(-1);
-    setFileList(newList);    
+    setFileList(newList);
     form.setFieldsValue({ evidence: newList });
     const file = info.file;
 
@@ -367,8 +365,11 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week }) => {
 
           {dataModal?.parameter != "mttrq major" &&
             dataModal?.parameter != "mttrq minor" && (
-              <Form.Item name="site_sos" label="Exclude?">
-                <Checkbox onChange={onChange} checked={exclude}>
+              <Form.Item name="site_exclude" label="Exclude?">
+                <Checkbox
+                  onChange={() => setExclude(!exclude)}
+                  checked={exclude}
+                >
                   {label}
                 </Checkbox>
               </Form.Item>

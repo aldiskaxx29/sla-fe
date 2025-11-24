@@ -258,6 +258,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
         align: "center",
         search: true,
       },
+      ,
       // {
       //   title: "Update Regional",
       //   align: "center",
@@ -283,13 +284,12 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
       // 's.grouping_rca_packetloss_regional',
       // 's.last_update_packetloss_regional',
       // 's.user_update_packetloss_regional'
-      ,
       {
         title: `Update Progres Cnq`,
         key: `grouping_rca_${dynamicKey}_cnq`,
         dataIndex: `grouping_rca_${dynamicKey}_cnq`,
       },
-      
+
       {
         title: `Last Update Cnq`,
         key: `last_update_${dynamicKey}_cnq`,
@@ -301,14 +301,14 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
         key: `user_update_${dynamicKey}_cnq`,
         dataIndex: `user_update_${dynamicKey}_cnq`,
       },
-      
+
       ,
       {
         title: `Update Progres Regional`,
         key: `grouping_rca_${dynamicKey}_regional`,
         dataIndex: `grouping_rca_${dynamicKey}_regional`,
       },
-      
+
       {
         title: `Last Update Regional`,
         key: `last_update_${dynamicKey}_regional`,
@@ -446,25 +446,53 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
 
   const handleSave = async (payload) => {
     try {
-      console.log("payload", payload?.evidance, payload.evidence.file)
-      console.log("evidence", payload.evidence.file, payload.evidence, payload.evidence[0].originFileObj)
+      console.log("payload", payload?.evidance, payload.evidence.file);
+      console.log(
+        "evidence",
+        payload.evidence.file,
+        payload.evidence,
+        payload.evidence[0].originFileObj
+      );
       const formData = new FormData();
       formData.append("id", payload.id);
       formData.append("month", payload.month);
       formData.append("week", payload.week);
-      
+
       // formData.append("grouping_rca", payload.grouping_rca);
       // formData.append("grouping_rca_regional", payload.grouping_rca_regional);
-      
-      formData.append("grouping_rca_packetloss_cnq", payload?.grouping_rca_packetloss_cnq ?? '');
-      formData.append("grouping_rca_packetloss_regional", payload?.grouping_rca_packetloss_regional ?? '');
-      formData.append("grouping_rca_latency_cnq", payload?.grouping_rca_latency_cnq ?? '');
-      formData.append("grouping_rca_latency_regional", payload?.grouping_rca_latency_regional ?? '');
-      formData.append("grouping_rca_jitter_cnq", payload?.grouping_rca_jitter_cnq ?? '');
-      formData.append("grouping_rca_jitter_regional", payload?.grouping_rca_jitter_regional ?? '');
+
+      formData.append(
+        "grouping_rca_packetloss_cnq",
+        payload?.grouping_rca_packetloss_cnq ?? ""
+      );
+      formData.append(
+        "grouping_rca_packetloss_regional",
+        payload?.grouping_rca_packetloss_regional ?? ""
+      );
+      formData.append(
+        "grouping_rca_latency_cnq",
+        payload?.grouping_rca_latency_cnq ?? ""
+      );
+      formData.append(
+        "grouping_rca_latency_regional",
+        payload?.grouping_rca_latency_regional ?? ""
+      );
+      formData.append(
+        "grouping_rca_jitter_cnq",
+        payload?.grouping_rca_jitter_cnq ?? ""
+      );
+      formData.append(
+        "grouping_rca_jitter_regional",
+        payload?.grouping_rca_jitter_regional ?? ""
+      );
 
       formData.append("detail_rca", payload.detail_rca);
-      formData.append("evidence", payload.evidence[0].originFileObj || payload.evidence.file || payload.evidence);
+      formData.append(
+        "evidence",
+        payload.evidence[0].originFileObj ||
+          payload.evidence.file ||
+          payload.evidence
+      );
       formData.append("site_id", payload.site_id);
       formData.append("ttr_selisih", payload.ttr_selisih);
       formData.append("note", payload.note);
@@ -472,6 +500,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
       formData.append("ticket", payload.ticket_id);
       formData.append("kpi", payload.kpi);
       formData.append("site_sos", payload.site_sos);
+      formData.append("site_exclude", payload.site_exclude);
 
       await saveSite(formData).unwrap();
       setOpen(false);
