@@ -462,28 +462,52 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
       // formData.append("grouping_rca_regional", payload.grouping_rca_regional);
 
       formData.append(
-        "grouping_rca_packetloss_cnq",
-        payload?.grouping_rca_packetloss_cnq ?? ""
+        "grouping_rca_packetloss_cnq_1",
+        payload?.grouping_rca_packetloss_cnq_1 ?? ""
       );
       formData.append(
-        "grouping_rca_packetloss_regional",
-        payload?.grouping_rca_packetloss_regional ?? ""
+        "grouping_rca_packetloss_regional_1",
+        payload?.grouping_rca_packetloss_regional_1 ?? ""
       );
       formData.append(
-        "grouping_rca_latency_cnq",
-        payload?.grouping_rca_latency_cnq ?? ""
+        "grouping_rca_latency_cnq_1",
+        payload?.grouping_rca_latency_cnq_1 ?? ""
       );
       formData.append(
-        "grouping_rca_latency_regional",
-        payload?.grouping_rca_latency_regional ?? ""
+        "grouping_rca_latency_regional_1",
+        payload?.grouping_rca_latency_regional_1 ?? ""
       );
       formData.append(
-        "grouping_rca_jitter_cnq",
-        payload?.grouping_rca_jitter_cnq ?? ""
+        "grouping_rca_jitter_cnq_1",
+        payload?.grouping_rca_jitter_cnq_1 ?? ""
       );
       formData.append(
-        "grouping_rca_jitter_regional",
-        payload?.grouping_rca_jitter_regional ?? ""
+        "grouping_rca_jitter_regional_1",
+        payload?.grouping_rca_jitter_regional_1 ?? ""
+      );
+      formData.append(
+        "grouping_rca_packetloss_cnq_2",
+        payload?.grouping_rca_packetloss_cnq_2 ?? ""
+      );
+      formData.append(
+        "grouping_rca_packetloss_regional_2",
+        payload?.grouping_rca_packetloss_regional_2 ?? ""
+      );
+      formData.append(
+        "grouping_rca_latency_cnq_2",
+        payload?.grouping_rca_latency_cnq_2 ?? ""
+      );
+      formData.append(
+        "grouping_rca_latency_regional_2",
+        payload?.grouping_rca_latency_regional_2 ?? ""
+      );
+      formData.append(
+        "grouping_rca_jitter_cnq_2",
+        payload?.grouping_rca_jitter_cnq_2 ?? ""
+      );
+      formData.append(
+        "grouping_rca_jitter_regional_2",
+        payload?.grouping_rca_jitter_regional_2 ?? ""
       );
 
       formData.append("detail_rca", payload.detail_rca);

@@ -291,7 +291,7 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week }) => {
             <div>
               <Form.Item
                 label={labelText + " 1"}
-                name={nameField}
+                name={nameField + "_1"}
                 rules={[{ required: true, message: "Masukkan Grouping RCA" }]}
               >
                 <Select
@@ -307,7 +307,7 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week }) => {
               </Form.Item>
               <Form.Item
                 label={labelText + " 2"}
-                name={nameField}
+                name={nameField + "_2"}
                 rules={[{ required: true, message: "Masukkan Grouping RCA" }]}
               >
                 <Select
