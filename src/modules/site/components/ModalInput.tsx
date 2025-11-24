@@ -28,9 +28,53 @@ type SiteDetail = {
   site_exclude: boolean;
 };
 
+const GroupingOptions = [
+  { group1: "Capacity", group2: "Cap End Site Need Order" },
+  { group1: "Capacity", group2: "Cap End Site Order" },
+  { group1: "Capacity", group2: "Cap Intermediate / Hub" },
+  { group1: "Capacity", group2: "Cap 3rd Party" },
+  { group1: "Capacity", group2: "Cap OLT" },
+  { group1: "Capacity", group2: "Cap Link Backup" },
+
+  { group1: "Hardware / Software Capab", group2: "Hardware / Software Capab" },
+
+  { group1: "Power", group2: "Power TSEL" },
+  { group1: "Power", group2: "Power Non TSEL" },
+
+  { group1: "QE", group2: "QE Redaman" },
+  { group1: "QE", group2: "QE Jarak" },
+
+  { group1: "ISR", group2: "ISR Segel Balmon" },
+  { group1: "ISR", group2: "ISR Interference Internal" },
+  { group1: "ISR", group2: "ISR Interference External" },
+
+  { group1: "Warranty", group2: "Warranty New Link" },
+  { group1: "Warranty", group2: "Warranty Redeploy" },
+
+  { group1: "Gamas", group2: "Gamas SKKL" },
+  { group1: "Gamas", group2: "Gamas FO Darat / SKSO" },
+  { group1: "Gamas", group2: "Gamas Repetitive" },
+
+  { group1: "Temperature", group2: "Temperature TSEL" },
+  { group1: "Temperature", group2: "Temperature Non TSEL" },
+
+  { group1: "Technical", group2: "Comcase Quality" },
+  { group1: "Technical", group2: "Force Majeur" },
+  { group1: "Technical", group2: "Routing TSEL" },
+  { group1: "Technical", group2: "Routing TIF" },
+  { group1: "Technical", group2: "Technical TSEL" },
+  { group1: "Technical", group2: "Technical TIF" },
+  { group1: "Technical", group2: "Technical Unknown" },
+  { group1: "Technical", group2: "Vandalisme" },
+  { group1: "Technical", group2: "Issue Tower" },
+  { group1: "Technical", group2: "Obstacle" },
+  { group1: "Technical", group2: "Sparepart Readiness" },
+];
+
 const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week }) => {
   const [form] = Form.useForm();
   const { getDetailSite } = useSite();
+  const [selectedGroup1, setSelectedGroup1] = useState("");
   const [preview, setPreview] = useState("");
   const [fileList, setFileList] = useState<any[]>([]);
   const [checked, setChecked] = useState(false);
@@ -173,6 +217,17 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week }) => {
       toast.error("Failed to download the file:", error);
     }
   };
+  const getGroup2 = (group1) => {
+    return GroupingOptions.filter((item) => item.group1 === group1).map(
+      (item) => item.group2
+    );
+  };
+
+  const group1Options = [...new Set(GroupingOptions.map((i) => i.group1))];
+
+  const group2Options = GroupingOptions.filter(
+    (i) => i.group1 === selectedGroup1
+  ).map((i) => i.group2);
 
   return (
     <Modal open={open} onCancel={onCancel} footer={null} centered>
@@ -233,42 +288,40 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week }) => {
               </Form.Item>
             )}
           {!dataModal?.parameter?.includes("mttrq") ? (
-            <Form.Item
-              label={labelText}
-              name={nameField}
-              rules={[{ required: true, message: "Masukkan Grouping RCA" }]}
-            >
-              <Select placeholder="Pilih Grouping RCA">
-                <Option value="Cap End Site No Order">
-                  Cap End Site No Order
-                </Option>
-                <Option value="Capacity - Intermediate">
-                  Capacity - Intermediate
-                </Option>
-                <Option value="Cap Under Order">Cap Under Order</Option>
-                <Option value="Cap Ada order tapi lambat">
-                  Cap Ada order tapi lambat
-                </Option>
-                <Option value="Availablibilty - Gamas">
-                  Availablibilty - Gamas
-                </Option>
-                <Option value="Cap LAN/Optic/CO">Cap LAN/Optic/CO</Option>
-                <Option value="Cap Hardware / Software">
-                  Cap Hardware / Software
-                </Option>
-                <Option value="Cap Intermediate / Hub">
-                  Cap Intermediate / Hub
-                </Option>
-                <Option value="Cap 3rd Party">Cap 3rd Party</Option>
-                <Option value="Power TSEL">Power TSEL</Option>
-                <Option value="Warranty New Link">Warranty New Link</Option>
-                <Option value="Warranty Redeploy">Warranty Redeploy</Option>
-                <Option value="Temperature TSEL">Temperature TSEL</Option>
-                <Option value="Routing TSEL">Routing TSEL</Option>
-                <Option value="Quality TSEL">Quality TSEL</Option>
-                <Option value="Issue Tower">Issue Tower</Option>
-              </Select>
-            </Form.Item>
+            <div>
+              <Form.Item
+                label={labelText + " 1"}
+                name={nameField}
+                rules={[{ required: true, message: "Masukkan Grouping RCA" }]}
+              >
+                <Select
+                  placeholder="Pilih Grouping RCA 1"
+                  onChange={(value) => setSelectedGroup1(value)}
+                >
+                  {group1Options.map((g1) => (
+                    <Option key={g1} value={g1}>
+                      {g1}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+              <Form.Item
+                label={labelText + " 2"}
+                name={nameField}
+                rules={[{ required: true, message: "Masukkan Grouping RCA" }]}
+              >
+                <Select
+                  placeholder="Pilih Grouping RCA 2"
+                  disabled={!selectedGroup1}
+                >
+                  {group2Options.map((g2) => (
+                    <Option key={g2} value={g2}>
+                      {g2}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </div>
           ) : (
             <Form.Item
               label="Grouping RCA"
