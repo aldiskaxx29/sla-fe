@@ -10,6 +10,7 @@ import { AppRouteGuard } from "@/app/components";
 // UI
 const InputSite = lazy(() => import("@/modules/site/pages/InputSitePage"));
 const ReportSite = lazy(() => import("@/modules/site/pages/ReportSitePage"));
+const ReportSupportNeeded = lazy(() => import("@/modules/site/pages/ReportSupportNeededPage"));
 
 const useSiteRouter = (): RouteObject[] => {
   return [
@@ -26,6 +27,14 @@ const useSiteRouter = (): RouteObject[] => {
       element: (
         <AppRouteGuard>
           <ReportSite />
+        </AppRouteGuard>
+      ),
+    },
+    {
+      path: "report-support-needed",
+      element: (
+        <AppRouteGuard>
+          <ReportSupportNeeded />
         </AppRouteGuard>
       ),
     },
