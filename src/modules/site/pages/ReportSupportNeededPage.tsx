@@ -97,6 +97,7 @@ const ReportSupportNeededPage = () => {
   ];
   const options = {
     indexAxis: "y" as const,
+    maintainAspectRatio: false,
     elements: {
       bar: {
         borderWidth: 2,
@@ -115,10 +116,12 @@ const ReportSupportNeededPage = () => {
 
   const options3D = {
     responsive: true,
+    maintainAspectRatio: false,
     plugins: {},
     elements: {
       bar: {
         borderWidth: 2,
+        height: 210
       },
     },
     scales: {
@@ -259,25 +262,36 @@ const ReportSupportNeededPage = () => {
         </Select>
       </div>
 
-      <section className="grid grid-cols-3 gap-4 mt-4">
+      <section className="grid grid-cols-4 gap-4 mt-4">
         <div className="p-6 bg-neutral-100 rounded-2xl shadow-sm">
           <h2 className="text-lg font-semibold">Upgrade Capacity</h2>
+
           <Pie data={dataPie} />
+          
           <TableDetailReportSupport data={dataCap?.data[0].data} />
         </div>
         <div className="p-6 bg-neutral-100 rounded-2xl shadow-sm">
           <h2 className="text-lg font-semibold">1 Port 1 Node B</h2>
+          <div className="w-full aspect-square">
+
           <Bar data={dataBarNode} options={options3D} />
+          </div>
           <TableDetailReportSupport data={dataNode?.data[0].data} />
         </div>
         <div className="p-6 bg-neutral-100 rounded-2xl shadow-sm">
           <h2 className="text-lg font-semibold">QE</h2>
+          <div className="w-full aspect-square">
+
           <Bar data={dataBarQE} options={options} />
+          </div>
           <TableDetailReportSupport data={dataQe?.data[0].data} />
         </div>
         <div className="p-6 bg-neutral-100 rounded-2xl shadow-sm">
           <h2 className="text-lg font-semibold">TSEL</h2>
+          <div className="w-full aspect-square">
+
           <Bar data={dataBarTsel} options={options3D} />
+          </div>
           <TableDetailReportSupport data={dataTsel?.data[0].data} />
         </div>
       </section>

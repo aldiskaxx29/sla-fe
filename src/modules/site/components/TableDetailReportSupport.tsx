@@ -8,7 +8,7 @@ const TableDetailReportSupport = ({data}) => {
             dataIndex: 'No',
             key: 'No',
             onHeaderCell: () => ({
-                className: "!bg-neutral-800 !text-white",
+                className: "!p-1 !text-center !bg-neutral-800 !text-white",
             })
         },
         {
@@ -16,7 +16,7 @@ const TableDetailReportSupport = ({data}) => {
             dataIndex: 'Issue',
             key: 'Issue',
             onHeaderCell: () => ({
-                className: "!bg-neutral-800 !text-white",
+                className: "!p-1 !text-center !bg-neutral-800 !text-white",
             })
         },
         {
@@ -24,7 +24,7 @@ const TableDetailReportSupport = ({data}) => {
             dataIndex: 'Jumlah',
             key: 'Jumlah',
             onHeaderCell: () => ({
-                className: "!bg-neutral-800 !text-white",
+                className: "!p-1 !text-center !bg-neutral-800 !text-white",
             })
         },
         {
@@ -32,15 +32,15 @@ const TableDetailReportSupport = ({data}) => {
             dataIndex: 'Open',
             key: 'Open',
             onHeaderCell: () => ({
-                className: "!bg-neutral-800 !text-white",
+                className: "!p-1 !text-center !bg-neutral-800 !text-white",
             })
         },
         {
-            title: 'On Progress',
+            title: 'OGP',
             dataIndex: 'OnProgress',
             key: 'OnProgress',
             onHeaderCell: () => ({
-                className: "!bg-neutral-800 !text-white",
+                className: "!p-1 !text-center !bg-neutral-800 !text-white",
             })
         },
         {
@@ -48,7 +48,7 @@ const TableDetailReportSupport = ({data}) => {
             dataIndex: 'Done',
             key: 'Done',
             onHeaderCell: () => ({
-                className: "!bg-neutral-800 !text-white",
+                className: "!p-1 !text-center !bg-neutral-800 !text-white",
             })
         },
     ]
