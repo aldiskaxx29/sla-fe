@@ -409,11 +409,11 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week }) => {
                 </p>
               )}
             </Upload.Dragger>
-            {/* {preview && (
+            {preview && (
               <Button className="mt-3" onClick={handleIconDownload}>
                 Download Evidance
               </Button>
-            )} */}
+            )}
           </Form.Item>
 
           {dataModal?.parameter != "mttrq major" &&
