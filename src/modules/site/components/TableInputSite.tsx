@@ -523,7 +523,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
       formData.append("parameter", parameter);
       formData.append("ticket", payload.ticket_id);
       formData.append("kpi", payload.kpi);
-      formData.append("site_sos", payload.site_sos);
+      formData.append("site_sos", payload.site_sos);      
       formData.append("site_exclude", payload.site_exclude);
 
       await saveSite(formData).unwrap();

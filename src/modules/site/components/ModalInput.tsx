@@ -114,14 +114,11 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week }) => {
       break;
   }
 
-  console.log("user data", userData, dataModal, parameter);
-
   const handleOk = () => {
     form
       .validateFields()
       .then((values) => {
-        console.log("vall", values, week);
-        onSave({ ...values, site_sos: checked, exclude });
+        onSave({ ...values, site_sos: checked, exclude, site_exclude: exclude });
         form.resetFields();
         setPreview("");
       })
@@ -201,9 +198,7 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week }) => {
       const blobUrl = URL.createObjectURL(result as Blob);
 
       const tempLink = document.createElement("a");
-      console.log(result);
-      console.log("blobUrl", blobUrl);
-
+      
       tempLink.href = blobUrl;
 
       tempLink.setAttribute("download", "evidance.xlsx");

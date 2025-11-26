@@ -44,6 +44,7 @@ const AppLayoutDefault = () => {
     if (menuId === "msa") return "ACHIEVEMENT SLA MSA";
     if (menuId === "cnop") return "ACHIEVEMENT SLA CNOP";
     if (location.pathname.includes("site")) return "REKONSILIASI";
+    if (location.pathname.includes("support")) return "REPORT SUPPORT NEEDED";
     // if (menuId) setType(menuId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [menuId]);
@@ -64,6 +65,7 @@ const AppLayoutDefault = () => {
     { label: "Achievement CNOP", value: "cnop" },
     // { label: "Reconsiliation", value: "input-site" },
     { label: "Report Reconsilation", value: "report-site" },
+    { label: "Report Support Needed", value: "report-support-needed" },
   ];
 
   const [open1, setOpen1] = useState(false);
@@ -231,7 +233,7 @@ const AppLayoutDefault = () => {
                   onMouseEnter={() => setOpen2(true)}
                   onMouseLeave={() => setOpen2(false)}
                   className={`relative inline-block px-4 py-2 rounded-full cursor-pointer ${
-                    ["/msa", "/cnop", "/report-site"].includes(
+                    ["/msa", "/cnop", "/report-site","/report-support-needed"].includes(
                       location.pathname
                     )
                       ? "!bg-[#A6AEC1] text-white"
