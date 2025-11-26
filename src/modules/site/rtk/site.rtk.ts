@@ -95,6 +95,30 @@ export const siteApi = emptySplitApi.injectEndpoints({
         body,
       }),
     }),
+    getReportSupportUpgradeCap: builder.query({
+      query: ({ query }) => ({
+        url: "/report-support-needed/getAll/upgrade/cap",
+        params: query,
+      }),
+    }),
+    getReportSupportUpgradeNodeb: builder.query({
+      query: ({ query }) => ({
+        url: "/report-support-needed/getAll/port/nodeb",
+        params: query,
+      }),
+    }),
+    getReportSupportUpgradeQe: builder.query({
+      query: ({ query }) => ({
+        url: "/report-support-needed/getAll/qe",
+        params: query,
+      }),
+    }),
+    getReportSupportUpgradeTsel: builder.query({
+      query: ({ query }) => ({
+        url: "/report-support-needed/getAll/tsel",
+        params: query,
+      }),
+    }),
   }),
 });
 
@@ -107,4 +131,8 @@ export const {
   useSave_siteMutation,
   useUpload_templateMutation,
   useLazyDownload_evidanceQuery,
+  useLazyGetReportSupportUpgradeCapQuery,
+  useLazyGetReportSupportUpgradeNodebQuery,
+  useLazyGetReportSupportUpgradeQeQuery,
+  useLazyGetReportSupportUpgradeTselQuery,
 } = siteApi;

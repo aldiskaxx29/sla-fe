@@ -1,5 +1,5 @@
 import { Select, Spin } from "antd";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Bar, Pie } from "react-chartjs-2";
 
 import {
@@ -12,6 +12,8 @@ import {
   BarElement,
   Title,
 } from "chart.js";
+import { TableDetailReportSupport } from "../components/TableDetailReportSupport";
+import { useLazyGetReportSupportUpgradeCapQuery, useLazyGetReportSupportUpgradeNodebQuery, useLazyGetReportSupportUpgradeQeQuery, useLazyGetReportSupportUpgradeTselQuery } from "../rtk/site.rtk";
 
 ChartJS.register(
   ArcElement,
@@ -140,15 +142,39 @@ const ReportSupportNeededPage = () => {
   const options3D = {
     responsive: true,
     plugins: {},
+    elements: {
+      bar: {
+        borderWidth: 2,
+      },
+    },
     scales: {
       x: {
-        stacked: true, // Stacked to place shadow behind
+        stacked: false,
       },
       y: {
         beginAtZero: true,
       },
     },
   };
+  const [getCap, {data: dataCap}] = useLazyGetReportSupportUpgradeCapQuery()
+  const [getNode, {data: dataNode}] = useLazyGetReportSupportUpgradeNodebQuery()
+  const [getQe, {data: dataQe}] = useLazyGetReportSupportUpgradeQeQuery()
+  const [getTsel, {data: dataTsel}] = useLazyGetReportSupportUpgradeTselQuery()
+
+  const getData = async () => {
+    setLoading(true)
+    await getCap({ query: { month: 11 } }).unwrap()
+    await getNode({ query: { month: 11 } }).unwrap()
+    await getQe({ query: { month: 11 } }).unwrap()
+    await getTsel({ query: { month: 11 } }).unwrap()
+    console.log(dataCap);
+    
+    setLoading(false)
+  }
+
+  useEffect(() => {
+    getData()
+  }, []);
 
   return (
     <div className="bg-white border border-[#DBDBDB] rounded-xl p-4 m-6">
@@ -166,22 +192,26 @@ const ReportSupportNeededPage = () => {
         </Select>
       </div>
 
-      <section className="grid grid-cols-4 gap-4 mt-4">
+      <section className="grid grid-cols-3 gap-4 mt-4">
         <div className="p-6 bg-neutral-100 rounded-2xl shadow-sm">
           <h2 className="text-lg font-semibold">Upgrade Capacity</h2>
           <Pie data={dataPie} />
+          <TableDetailReportSupport data={dataCap?.data[0].data} />
         </div>
         <div className="p-6 bg-neutral-100 rounded-2xl shadow-sm">
           <h2 className="text-lg font-semibold">1 Port 1 Node B</h2>
-          <Bar data={dataBar} />
+          <Bar data={dataBar} options={options3D}  />
+          <TableDetailReportSupport data={dataNode?.data[0].data} />
         </div>
         <div className="p-6 bg-neutral-100 rounded-2xl shadow-sm">
           <h2 className="text-lg font-semibold">QE</h2>
           <Bar data={dataBar} options={options} />
+          <TableDetailReportSupport data={dataQe?.data[0].data} />
         </div>
         <div className="p-6 bg-neutral-100 rounded-2xl shadow-sm">
           <h2 className="text-lg font-semibold">TSEL</h2>
           <Bar data={dataBar} options={options3D} />
+          <TableDetailReportSupport data={dataTsel?.data[0].data} />
         </div>
       </section>
     </div>
