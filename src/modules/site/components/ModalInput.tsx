@@ -180,10 +180,15 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week }) => {
   };
   const { Option } = Select;
 
-  const label = `${checked ? "Yes" : "No"}`;
+  const labelSos = `${checked ? "Yes" : "No"}`;
+  const labelEx = `${exclude ? "Yes" : "No"}`;
 
-  const onChange: CheckboxProps["onChange"] = (e) => {
+  const onChangeSos: CheckboxProps["onChange"] = (e) => {
     setChecked(e.target.checked);
+  };
+
+  const onChangeEx: CheckboxProps["onChange"] = (e) => {
+    setExclude(e.target.checked);
   };
 
   const handleIconDownload = async () => {
@@ -277,8 +282,8 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week }) => {
           {dataModal?.parameter != "mttrq major" &&
             dataModal?.parameter != "mttrq minor" && (
               <Form.Item name="site_sos" label="Site SOS">
-                <Checkbox onChange={onChange} checked={checked}>
-                  {label}
+                <Checkbox onChange={onChangeSos} checked={checked}>
+                  {labelSos}
                 </Checkbox>
               </Form.Item>
             )}
@@ -415,10 +420,10 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week }) => {
             dataModal?.parameter != "mttrq minor" && (
               <Form.Item name="site_exclude" label="Exclude?">
                 <Checkbox
-                  onChange={() => setExclude(!exclude)}
-                  checked={exclude}
+                  // onChange={() => setExclude(!exclude)} checked={exclude}
+                  onChange={onChangeEx} checked={exclude}
                 >
-                  {label}
+                  {labelEx}
                 </Checkbox>
               </Form.Item>
             )}

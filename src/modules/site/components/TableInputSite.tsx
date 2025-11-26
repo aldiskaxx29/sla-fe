@@ -174,6 +174,27 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
     if (week.includes("all")) return "Month";
     else return "Week";
   }, [week]);
+  
+  const groupingRcaRegional : Record<"packetloss" | "latency" | "jitter", any> = {
+    packetloss: {
+      title: `Update Progres Regional`,
+      key: `grouping_rca_packetloss_regional_2`,
+      dataIndex: `grouping_rca_packetloss_regional_2`,
+    },
+    latency: {
+      title: `Update Progres Regional`,
+      key: `grouping_rca_latency_regional_2`,
+      dataIndex: `grouping_rca_latency_regional_2`,
+    },
+    jitter: {
+      title: `Update Progres Regional`,
+      key: `grouping_rca_jitter_regional_2`,
+      dataIndex: `grouping_rca_jitter_regional_2`,
+    }
+  } as const;
+
+  type DynamicKey = "packetloss" | "latency" | "jitter";
+
   const columns1 = useMemo(
     () => [
       {
@@ -301,14 +322,10 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
         key: `user_update_${dynamicKey}_cnq`,
         dataIndex: `user_update_${dynamicKey}_cnq`,
       },
-
+      ...(groupingRcaRegional[dynamicKey as DynamicKey]
+        ? [groupingRcaRegional[dynamicKey as DynamicKey]]
+        : [])
       ,
-      {
-        title: `Update Progres Regional`,
-        key: `grouping_rca_${dynamicKey}_regional`,
-        dataIndex: `grouping_rca_${dynamicKey}_regional`,
-      },
-
       {
         title: `Last Update Regional`,
         key: `last_update_${dynamicKey}_regional`,
