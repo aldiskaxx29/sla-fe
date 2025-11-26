@@ -11,6 +11,7 @@ import {
   LinearScale,
   BarElement,
   Title,
+  ChartData,
 } from "chart.js";
 import { TableDetailReportSupport } from "../components/TableDetailReportSupport";
 import { useLazyGetReportSupportUpgradeCapQuery, useLazyGetReportSupportUpgradeNodebQuery, useLazyGetReportSupportUpgradeQeQuery, useLazyGetReportSupportUpgradeTselQuery } from "../rtk/site.rtk";
@@ -27,6 +28,22 @@ ChartJS.register(
 
 const ReportSupportNeededPage = () => {
   const [loading, setLoading] = useState(false);
+  const [dataPie, setDataPie] = useState<ChartData<"pie", number[], string>>({
+    labels: [],
+    datasets: [],
+  });
+  const [dataBarNode, setDataBarNode] = useState<ChartData<"bar", number[], string>>({
+    labels: [],
+    datasets: [],
+  });
+  const [dataBarQE, setDataBarQE] = useState<ChartData<"bar", number[], string>>({
+    labels: [],
+    datasets: [],
+  });
+  const [dataBarTsel, setDataBarTsel] = useState<ChartData<"bar", number[], string>>({
+    labels: [],
+    datasets: [],
+  });
 
   const filterMonth = [
     {
@@ -78,49 +95,6 @@ const ReportSupportNeededPage = () => {
       value: "12",
     },
   ];
-
-  const dataPie = {
-    labels: ["Done", "On Progress", "Open"],
-    datasets: [
-      {
-        data: [30, 45, 25],
-        backgroundColor: [
-          "rgba(255, 99, 132, 0.2)",
-          "rgba(54, 162, 235, 0.2)",
-          "rgba(255, 206, 86, 0.2)",
-        ],
-        borderColor: [
-          "rgba(255, 99, 132, 1)",
-          "rgba(54, 162, 235, 1)",
-          "rgba(255, 206, 86, 1)",
-        ],
-      },
-    ],
-  };
-  const dataBar = {
-    labels: ["Progress Status"],
-    datasets: [
-      {
-        label: "Done",
-        data: [30],
-        backgroundColor: ["rgba(255, 99, 132, 0.2)"],
-        borderColor: ["rgba(255, 99, 132, 1)"],
-      },
-      {
-        label: "On Progress",
-        data: [45],
-        backgroundColor: ["rgba(54, 162, 235, 0.2)"],
-        borderColor: ["rgba(54, 162, 235, 1)"],
-      },
-      {
-        label: "Open",
-        data: [25],
-        backgroundColor: ["rgba(255, 206, 86, 0.2)"],
-        borderColor: ["rgba(255, 206, 86, 1)"],
-      },
-    ],
-  };
-
   const options = {
     indexAxis: "y" as const,
     elements: {
@@ -156,19 +130,112 @@ const ReportSupportNeededPage = () => {
       },
     },
   };
-  const [getCap, {data: dataCap}] = useLazyGetReportSupportUpgradeCapQuery()
-  const [getNode, {data: dataNode}] = useLazyGetReportSupportUpgradeNodebQuery()
-  const [getQe, {data: dataQe}] = useLazyGetReportSupportUpgradeQeQuery()
-  const [getTsel, {data: dataTsel}] = useLazyGetReportSupportUpgradeTselQuery()
+  const [getCap, { data: dataCap }] = useLazyGetReportSupportUpgradeCapQuery()
+  const [getNode, { data: dataNode }] = useLazyGetReportSupportUpgradeNodebQuery()
+  const [getQe, { data: dataQe }] = useLazyGetReportSupportUpgradeQeQuery()
+  const [getTsel, { data: dataTsel }] = useLazyGetReportSupportUpgradeTselQuery()
 
   const getData = async () => {
     setLoading(true)
-    await getCap({ query: { month: 11 } }).unwrap()
-    await getNode({ query: { month: 11 } }).unwrap()
-    await getQe({ query: { month: 11 } }).unwrap()
-    await getTsel({ query: { month: 11 } }).unwrap()
-    console.log(dataCap);
-    
+    const resultCap = await getCap({ query: { month: 11 } }).unwrap()
+    const resultNode = await getNode({ query: { month: 11 } }).unwrap()
+   const resultQE = await getQe({ query: { month: 11 } }).unwrap()
+   const resultTsel = await getTsel({ query: { month: 11 } }).unwrap()
+    setDataPie(
+      {
+        labels: Object.keys(resultCap.upgradeCapacity.percentage),
+        datasets: [
+          {
+            data: Object.values(resultCap.upgradeCapacity.percentage),
+            backgroundColor: [
+              "rgba(255, 99, 132, 0.2)",
+              "rgba(54, 162, 235, 0.2)",
+              "rgba(255, 206, 86, 0.2)",
+            ],
+            borderColor: [
+              "rgba(255, 99, 132, 1)",
+              "rgba(54, 162, 235, 1)",
+              "rgba(255, 206, 86, 1)",
+            ],
+          },
+        ],
+      }
+    )
+    setDataBarNode(
+      {
+        labels: ["Progress Status"],
+        datasets: [
+          {
+            label: "Done",
+            data: [resultNode.onePortOneNodeB.done],
+            backgroundColor: ["rgba(255, 99, 132, 0.2)"],
+            borderColor: ["rgba(255, 99, 132, 1)"],
+          },
+          {
+            label: "On Progress",
+            data: [resultNode.onePortOneNodeB.onProgress],
+            backgroundColor: ["rgba(54, 162, 235, 0.2)"],
+            borderColor: ["rgba(54, 162, 235, 1)"],
+          },
+          {
+            label: "Open",
+            data: [resultNode.onePortOneNodeB.open],
+            backgroundColor: ["rgba(255, 206, 86, 0.2)"],
+            borderColor: ["rgba(255, 206, 86, 1)"],
+          },
+        ],
+      }
+    )
+    setDataBarQE(
+      {
+        labels: ["Progress Status"],
+        datasets: [
+          {
+            label: "Done",
+            data: [resultQE.QE.done],
+            backgroundColor: ["rgba(255, 99, 132, 0.2)"],
+            borderColor: ["rgba(255, 99, 132, 1)"],
+          },
+          {
+            label: "On Progress",
+            data: [resultQE.QE.onProgress],
+            backgroundColor: ["rgba(54, 162, 235, 0.2)"],
+            borderColor: ["rgba(54, 162, 235, 1)"],
+          },
+          {
+            label: "Open",
+            data: [resultQE.QE.open],
+            backgroundColor: ["rgba(255, 206, 86, 0.2)"],
+            borderColor: ["rgba(255, 206, 86, 1)"],
+          },
+        ],
+      }
+    )
+    setDataBarTsel(
+      {
+        labels: ["Progress Status"],
+        datasets: [
+          {
+            label: "Done",
+            data: [resultTsel.TSEL.done],
+            backgroundColor: ["rgba(255, 99, 132, 0.2)"],
+            borderColor: ["rgba(255, 99, 132, 1)"],
+          },
+          {
+            label: "On Progress",
+            data: [resultTsel.TSEL.onProgress],
+            backgroundColor: ["rgba(54, 162, 235, 0.2)"],
+            borderColor: ["rgba(54, 162, 235, 1)"],
+          },
+          {
+            label: "Open",
+            data: [resultTsel.TSEL.open],
+            backgroundColor: ["rgba(255, 206, 86, 0.2)"],
+            borderColor: ["rgba(255, 206, 86, 1)"],
+          },
+        ],
+      }
+    )
     setLoading(false)
   }
 
@@ -200,17 +267,17 @@ const ReportSupportNeededPage = () => {
         </div>
         <div className="p-6 bg-neutral-100 rounded-2xl shadow-sm">
           <h2 className="text-lg font-semibold">1 Port 1 Node B</h2>
-          <Bar data={dataBar} options={options3D}  />
+          <Bar data={dataBarNode} options={options3D} />
           <TableDetailReportSupport data={dataNode?.data[0].data} />
         </div>
         <div className="p-6 bg-neutral-100 rounded-2xl shadow-sm">
           <h2 className="text-lg font-semibold">QE</h2>
-          <Bar data={dataBar} options={options} />
+          <Bar data={dataBarQE} options={options} />
           <TableDetailReportSupport data={dataQe?.data[0].data} />
         </div>
         <div className="p-6 bg-neutral-100 rounded-2xl shadow-sm">
           <h2 className="text-lg font-semibold">TSEL</h2>
-          <Bar data={dataBar} options={options3D} />
+          <Bar data={dataBarTsel} options={options3D} />
           <TableDetailReportSupport data={dataTsel?.data[0].data} />
         </div>
       </section>
