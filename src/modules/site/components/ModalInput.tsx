@@ -334,8 +334,11 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week }) => {
                 </Option>
                 <Option value="Double Ticket">⁠Double Ticket</Option>
                 <Option value="ISR">⁠ISR</Option>
-                <Option value="⁠Pengiriman Sparepart">
-                  ⁠Pengiriman Sparepart
+                <Option value="⁠Pengiriman Sparepart Spms">
+                  ⁠Pengiriman Sparepart Spms
+                </Option>
+                <Option value="⁠Pengiriman L2SW & SFP">
+                  ⁠Pengiriman L2SW & SFP
                 </Option>
                 <Option value="⁠Action Butuh CRA / CRQ">
                   ⁠Action Butuh CRA / CRQ

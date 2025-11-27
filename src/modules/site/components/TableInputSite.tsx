@@ -192,6 +192,23 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
       dataIndex: `grouping_rca_jitter_regional_2`,
     }
   } as const;
+  const groupingRcaCnq : Record<"packetloss" | "latency" | "jitter", any> = {
+    packetloss: {
+      title: `Update Progres Cnq`,
+      key: `grouping_rca_packetloss_cnq_2`,
+      dataIndex: `grouping_rca_packetloss_cnq_2`,
+    },
+    latency: {
+      title: `Update Progres Cnq`,
+      key: `grouping_rca_latency_cnq_2`,
+      dataIndex: `grouping_rca_latency_cnq_2`,
+    },
+    jitter: {
+      title: `Update Progres Cnq`,
+      key: `grouping_rca_jitter_cnq_2`,
+      dataIndex: `grouping_rca_jitter_cnq_2`,
+    }
+  } as const;
 
   type DynamicKey = "packetloss" | "latency" | "jitter";
 
@@ -279,38 +296,15 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
         align: "center",
         search: true,
       },
-      ,
       // {
-      //   title: "Update Regional",
-      //   align: "center",
-      //   children: [
-      //     {
-      //       title: "GROUPING RCA",
-      //       dataIndex: "grouping_rca",
-      //       key: "grouping_rca",
-      //       align: "center",
-      //     },
-      //     {
-      //       title: "UPDATE PROGRES",
-      //       dataIndex: "note",
-      //       key: "note",
-      //       align: "center",
-      //     },
-      //   ],
+      //   title: `Update Progres Cnq`,
+      //   key: `grouping_rca_${dynamicKey}_cnq`,
+      //   dataIndex: `grouping_rca_${dynamicKey}_cnq`,
       // },
-
-      // 's.grouping_rca_packetloss_cnq',
-      // 's.last_update_packetloss_cnq',
-      // 's.user_update_packetloss_cnq',
-      // 's.grouping_rca_packetloss_regional',
-      // 's.last_update_packetloss_regional',
-      // 's.user_update_packetloss_regional'
-      {
-        title: `Update Progres Cnq`,
-        key: `grouping_rca_${dynamicKey}_cnq`,
-        dataIndex: `grouping_rca_${dynamicKey}_cnq`,
-      },
-
+      ...(groupingRcaCnq[dynamicKey as DynamicKey]
+        ? [groupingRcaCnq[dynamicKey as DynamicKey]]
+        : [])
+      ,
       {
         title: `Last Update Cnq`,
         key: `last_update_${dynamicKey}_cnq`,

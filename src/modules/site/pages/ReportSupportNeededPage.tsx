@@ -1,6 +1,6 @@
 import { Select, Spin } from "antd";
 import { useEffect, useState } from "react";
-import { Bar, Pie } from "react-chartjs-2";
+import { Bar, Pie, Doughnut } from "react-chartjs-2";
 
 import {
   Chart as ChartJS,
@@ -13,6 +13,9 @@ import {
   Title,
   ChartData,
 } from "chart.js";
+
+import ChartDataLabels from "chartjs-plugin-datalabels";
+
 import { TableDetailReportSupport } from "../components/TableDetailReportSupport";
 import { useLazyGetReportSupportUpgradeCapQuery, useLazyGetReportSupportUpgradeNodebQuery, useLazyGetReportSupportUpgradeQeQuery, useLazyGetReportSupportUpgradeTselQuery } from "../rtk/site.rtk";
 
@@ -23,7 +26,8 @@ ChartJS.register(
   BarElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  ChartDataLabels
 );
 
 const ReportSupportNeededPage = () => {
@@ -246,6 +250,218 @@ const ReportSupportNeededPage = () => {
     getData()
   }, []);
 
+  const total = 8700;
+  const dataValues = [34, 52, 14]; // persen
+
+  const dataPieD = {
+    labels: ["Done", "On Progress", "Open"],
+    datasets: [
+      {
+        data: dataValues,
+        backgroundColor: ["#185E8B", "#EB7035", "#3B7E2D"],
+        borderWidth: 0,
+        cutout: "70%", //  donut
+      },
+    ],
+  };
+
+  const optionsD = {
+    plugins: {
+      legend: {
+        position: "right",
+        labels: {
+          usePointStyle: true,
+        },
+      },
+      datalabels: {
+        color: "#fff",
+        font: { weight: "bold", size: 14 },
+        formatter: (value) => `${value}%`,
+      },
+    },
+  };
+
+  const dataBarNodeB = {
+    labels: ["Done", "On Progress", "Open"],
+    datasets: [
+      {
+        label: "",
+        data: [3000, 4500, 1200],
+        backgroundColor: (ctx) => {
+          const chart = ctx.chart;
+          const { ctx: g, chartArea } = chart;
+  
+          if (!chartArea) return "#0e5774";
+  
+          const gradient = g.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+          gradient.addColorStop(0, "#0e5774");
+          gradient.addColorStop(1, "#0f6e8e");
+          return gradient;
+        },
+        borderRadius: 8,
+        barPercentage: 0.5,
+      },
+    ],
+  };
+
+  const options3DB = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      datalabels: {
+        color: "#fff",
+        anchor: "end",
+        align: "start",
+        font: { weight: "bold", size: 14 },
+        formatter: (v) => v.toLocaleString(),
+      },
+    },
+    scales: {
+      x: {
+        ticks: { font: { size: 14 } },
+        grid: { display: false }
+      },
+      y: {
+        display: false,
+        grid: { display: false },
+      },
+    },
+    datasets: {
+      bar: {
+        shadowOffsetX: 4,
+        shadowOffsetY: 12,
+        shadowBlur: 20,
+        shadowColor: "rgba(0,0,0,0.25)",
+      },
+    },
+  };
+  
+  // ChartJS.register({
+  //   id: "barShadow",
+  //   beforeDraw: (chart) => {
+  //     const ctx = chart.ctx;
+  //     chart.data.datasets.forEach((dataset, i) => {
+  //       const meta = chart.getDatasetMeta(i);
+  
+  //       meta.data.forEach((bar) => {
+  //         ctx.save();
+  //         ctx.shadowColor = "rgba(0,0,0,0.25)";
+  //         ctx.shadowBlur = 20;
+  //         ctx.shadowOffsetX = 4;
+  //         ctx.shadowOffsetY = 12;
+  //         ctx.fillStyle = bar.options.backgroundColor;
+  //         ctx.fillRect(bar.x - bar.width / 2, bar.y, bar.width, bar.base - bar.y);
+  //         ctx.restore();
+  //       });
+  //     });
+  //   },
+  // });
+
+  const dataBarQEB = {
+    labels: ["Done", "On Progress", "Open"],
+    datasets: [
+      {
+        label: "",
+        data: [3000, 4500, 1200],
+        backgroundColor: "#0e5774",
+        borderRadius: 6,
+        barThickness: 25,
+      },
+    ],
+  };
+
+  const optionsB = {
+    indexAxis: "y", // membuat bar horizontal
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      datalabels: {
+        color: "#000",
+        anchor: "end",
+        align: "right",
+        font: {
+          size: 14,
+          weight: "bold",
+        },
+        formatter: (value) => value.toLocaleString(),
+      },
+    },
+    scales: {
+      y: {
+        ticks: {
+          font: { size: 16, weight: "bold" },
+          color: "#000",
+        },
+        grid: { display: false },
+      },
+      x: {
+        ticks: {
+          font: { size: 12 },
+        },
+        grid: {
+          color: "#dcdcdc",
+        },
+        beginAtZero: true,
+      },
+    },
+  };
+
+  const dataBarTselB = {
+    labels: ["Done", "On Progress", "Open"],
+    datasets: [
+      {
+        label: "TSEL",
+        data: [3000, 4500, 1200],
+        backgroundColor: "#0A4C66",        // warna utama bar
+        borderColor: "#083B4E",           // warna sisi untuk efek 3D
+        borderWidth: 10,                  // ketebalan sisi "3D"
+        borderSkipped: false,             // bikin efek kotak 3D
+        borderRadius: 2,
+      }
+    ]
+  };
+
+  const optionsTselB = {
+    responsive: true,
+    maintainAspectRatio: false,
+    layout: { padding: 0 },
+    plugins: {
+      legend: { 
+        display: false,
+        labels: {
+          color: "#ffffff"
+        }
+      },
+      tooltip: {
+        titleColor: "#ffffff",
+        bodyColor: "#ffffff"
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        offset: false,
+        grace: 0,
+        ticks: {
+          color: "#ffffff"   // ← warna teks sumbu Y
+        },
+        grid: {
+          drawBorder: false
+        }
+      },
+      x: {
+        ticks: {
+          color: "#ffffff"   // ← warna teks sumbu X
+        }
+      }
+    }
+  };
+  
+  
+  
+
   return (
     <div className="bg-white border border-[#DBDBDB] rounded-xl p-4 m-6">
       {loading && <Spin fullscreen tip="Sedang Memuat Data..." />}
@@ -266,15 +482,16 @@ const ReportSupportNeededPage = () => {
         <div className="p-6 bg-neutral-100 rounded-2xl shadow-sm">
           <h2 className="text-lg font-semibold">Upgrade Capacity</h2>
 
-          <Pie data={dataPie} />
-          
+          {/* <Pie data={dataPie} /> */}
+          <Doughnut data={dataPieD} options={optionsD} />
           <TableDetailReportSupport data={dataCap?.data[0].data} />
         </div>
         <div className="p-6 bg-neutral-100 rounded-2xl shadow-sm">
           <h2 className="text-lg font-semibold">1 Port 1 Node B</h2>
           <div className="w-full aspect-square">
 
-          <Bar data={dataBarNode} options={options3D} />
+          {/* <Bar data={dataBarNode} options={options3D} /> */}
+          <Bar data={dataBarNodeB} options={options3DB} />
           </div>
           <TableDetailReportSupport data={dataNode?.data[0].data} />
         </div>
@@ -282,7 +499,7 @@ const ReportSupportNeededPage = () => {
           <h2 className="text-lg font-semibold">QE</h2>
           <div className="w-full aspect-square">
 
-          <Bar data={dataBarQE} options={options} />
+          <Bar data={dataBarQEB} options={optionsB} />
           </div>
           <TableDetailReportSupport data={dataQe?.data[0].data} />
         </div>
@@ -290,7 +507,7 @@ const ReportSupportNeededPage = () => {
           <h2 className="text-lg font-semibold">TSEL</h2>
           <div className="w-full aspect-square">
 
-          <Bar data={dataBarTsel} options={options3D} />
+          <Bar data={dataBarTselB} options={optionsTselB} />
           </div>
           <TableDetailReportSupport data={dataTsel?.data[0].data} />
         </div>
