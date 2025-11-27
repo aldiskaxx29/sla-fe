@@ -119,6 +119,12 @@ export const siteApi = emptySplitApi.injectEndpoints({
         params: query,
       }),
     }),
+    getDetailRegion: builder.query({
+      query: ({ query }) => ({
+        url: "/report-support-needed/getAll/upgrade/cap/detailRegion",
+        params: query,
+      }),
+    }),
   }),
 });
 
@@ -135,4 +141,5 @@ export const {
   useLazyGetReportSupportUpgradeNodebQuery,
   useLazyGetReportSupportUpgradeQeQuery,
   useLazyGetReportSupportUpgradeTselQuery,
+  useLazyGetDetailRegionQuery
 } = siteApi;

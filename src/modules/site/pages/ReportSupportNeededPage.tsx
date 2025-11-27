@@ -1,5 +1,5 @@
 import { Select, Spin } from "antd";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Bar, Doughnut } from "react-chartjs-2";
 
 import {
@@ -18,6 +18,7 @@ import ChartDataLabels from "chartjs-plugin-datalabels";
 
 import { TableDetailReportSupport } from "../components/TableDetailReportSupport";
 import { useLazyGetReportSupportUpgradeCapQuery, useLazyGetReportSupportUpgradeNodebQuery, useLazyGetReportSupportUpgradeQeQuery, useLazyGetReportSupportUpgradeTselQuery } from "../rtk/site.rtk";
+import { ModalTableBreakRegion } from "../components/ModalTableBreakRegion";
 
 ChartJS.register(
   ArcElement,
@@ -31,6 +32,9 @@ ChartJS.register(
 );
 
 const ReportSupportNeededPage = () => {
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState('');
+  const [month, setMonth] = useState(String(new Date().getMonth() + 1));
   const [loading, setLoading] = useState(false);
   const [dataPie, setDataPie] = useState<ChartData<"doughnut", number[], string>>({
     labels: [],
@@ -104,12 +108,12 @@ const ReportSupportNeededPage = () => {
   const [getQe, { data: dataQe }] = useLazyGetReportSupportUpgradeQeQuery()
   const [getTsel, { data: dataTsel }] = useLazyGetReportSupportUpgradeTselQuery()
 
-  const getData = async () => {
+  const getData = useCallback (async () => {
     setLoading(true)
-    const resultCap = await getCap({ query: { month: 11 } }).unwrap()
-    const resultNode = await getNode({ query: { month: 11 } }).unwrap()
-    const resultQE = await getQe({ query: { month: 11 } }).unwrap()
-    const resultTsel = await getTsel({ query: { month: 11 } }).unwrap()
+    const resultCap = await getCap({ query: { month } }).unwrap()
+    const resultNode = await getNode({ query: { month } }).unwrap()
+    const resultQE = await getQe({ query: { month } }).unwrap()
+    const resultTsel = await getTsel({ query: { month } }).unwrap()
     setDataPie(
       {
         labels: Object.keys(resultCap.upgradeCapacity.percentage),
@@ -177,11 +181,11 @@ const ReportSupportNeededPage = () => {
       }
     )
     setLoading(false)
-  }
+  }, [month])
 
   useEffect(() => {
     getData()
-  }, []);
+  }, [month]);
 
   const optionsD = {
     plugins: {
@@ -315,12 +319,17 @@ const ReportSupportNeededPage = () => {
     }
   };
 
+  const handleModal = (action, segmentName: string) => {
+    setName(segmentName);
+    setOpen(action);
+  }
+
   return (
     <div className="bg-white border border-[#DBDBDB] rounded-xl p-4 m-6">
       {loading && <Spin fullscreen tip="Sedang Memuat Data..." />}
       <div className="flex gap-4">
         <p className="text-xl font-semibold">Periode :</p>
-        <Select className="w-42" onChange={() => setLoading(!loading)}>
+        <Select className="w-42" defaultValue={month} onChange={setMonth}>
           {filterMonth.map((month) => {
             return (
               <Select.Option key={month.value} value={month.value}>
@@ -334,14 +343,18 @@ const ReportSupportNeededPage = () => {
       <section className="grid grid-cols-4 gap-4 mt-4">
         <div className="p-6 bg-neutral-100 rounded-2xl shadow-sm">
           <h2 className="text-lg font-semibold">Upgrade Capacity</h2>
-          <Doughnut data={dataPie} options={optionsD} />
+          <Doughnut data={dataPie} options={optionsD} onClick={() => {
+            handleModal(true,'updgrade capacity');
+          }} />
           <p className="text-lg font-semibold text-center">Total: {dataCap && dataCap?.upgradeCapacity?.totalSite}</p>
-          <TableDetailReportSupport data={dataCap?.data[0].data} />
+          <TableDetailReportSupport data={dataCap?.data[0].data} total={dataCap?.data[0].Total} />
         </div>
         <div className="p-6 bg-neutral-100 rounded-2xl shadow-sm">
           <h2 className="text-lg font-semibold">1 Port 1 Node B</h2>
-          <div className="w-full aspect-square">
-            <Bar data={dataBarNode} options={options3DB} />
+          <div className="w-full aspect-square" >
+            <Bar data={dataBarNode} options={options3DB} onClick={() => {
+            handleModal(true, 'node b');
+          }} />
           </div>
           <p className="text-lg font-semibold text-center">Total: {
             (() => {
@@ -351,12 +364,14 @@ const ReportSupportNeededPage = () => {
               return nums.reduce((sum, val) => sum + val, 0);
             })()
           }</p>
-          <TableDetailReportSupport data={dataNode?.data[0].data} />
+          <TableDetailReportSupport data={dataNode?.data[0].data} total={dataNode?.data[0].Total}/>
         </div>
         <div className="p-6 bg-neutral-100 rounded-2xl shadow-sm">
           <h2 className="text-lg font-semibold">QE</h2>
           <div className="w-full aspect-square">
-            <Bar data={dataBarQE} options={optionsB} />
+            <Bar data={dataBarQE} options={optionsB} onClick={() => {
+            handleModal(true, 'qe');
+          }} />
           </div>
           <p className="text-lg font-semibold text-center">Total: {
             (() => {
@@ -366,12 +381,14 @@ const ReportSupportNeededPage = () => {
               return nums.reduce((sum, val) => sum + val, 0);
             })()
           }</p>
-          <TableDetailReportSupport data={dataQe?.data[0].data} />
+          <TableDetailReportSupport data={dataQe?.data[0].data} total={dataQe?.data[0].Total}/>
         </div>
         <div className="p-6 bg-neutral-100 rounded-2xl shadow-sm">
           <h2 className="text-lg font-semibold">TSEL</h2>
           <div className="w-full aspect-square">
-            <Bar data={dataBarTsel} options={optionsTselB} />
+            <Bar data={dataBarTsel} options={optionsTselB} onClick={() => {
+            handleModal(true, 'tsel');
+          }} />
           </div>
           <p className="text-lg font-semibold text-center">Total: {
             (() => {
@@ -381,9 +398,12 @@ const ReportSupportNeededPage = () => {
               return nums.reduce((sum, val) => sum + val, 0);
             })()
           }</p>
-          <TableDetailReportSupport data={dataTsel?.data[0].data} />
+          <TableDetailReportSupport data={dataTsel?.data[0].data} total={dataTsel?.data[0].Total}/>
         </div>
       </section>
+      <ModalTableBreakRegion open={open} onCancel={() => {
+        handleModal(false, '');
+      }} name={name} />
     </div>
   );
 };

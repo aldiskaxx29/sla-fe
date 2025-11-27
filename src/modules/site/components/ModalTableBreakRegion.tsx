@@ -1,7 +1,9 @@
-import { Table } from "antd"
+import { Modal, Table } from "antd"
+import { useLazyGetDetailRegionQuery } from "../rtk/site.rtk"
+import { useCallback, useEffect, useState } from "react"
 
-const TableDetailReportSupport = ({ data, total }) => {
-
+const ModalTableBreakRegion = ({ open, onCancel, name }) => {
+    const [data, setData] = useState([])
     const columns = [
         {
             title: 'No',
@@ -36,7 +38,7 @@ const TableDetailReportSupport = ({ data, total }) => {
             })
         },
         {
-            title: 'OGP',
+            title: 'On Progress',
             dataIndex: 'OnProgress',
             key: 'OnProgress',
             onHeaderCell: () => ({
@@ -52,13 +54,22 @@ const TableDetailReportSupport = ({ data, total }) => {
             })
         },
     ]
+    const [getDetailRegion] = useLazyGetDetailRegionQuery()
+    const getData = useCallback(async () => {
+        const result = await getDetailRegion({ query: { name } })
+        console.log(result);
+        setData(result)
+
+    }, [name])
+
+    useEffect(() => {
+        if(name) getData()
+    }, [name])
     return (
-        <>
-            {data &&
-                <Table className="mt-4" columns={columns} dataSource={[...data, total]} />
-            }
-        </>
+        <Modal open={open} onCancel={onCancel} footer={null} centered>
+            <Table columns={columns}  dataSource={data}/>
+        </Modal>
     )
 }
 
-export { TableDetailReportSupport }
+export { ModalTableBreakRegion }
