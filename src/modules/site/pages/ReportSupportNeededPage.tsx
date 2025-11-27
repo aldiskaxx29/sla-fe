@@ -1,6 +1,6 @@
 import { Select, Spin } from "antd";
 import { useEffect, useState } from "react";
-import { Bar, Pie, Doughnut } from "react-chartjs-2";
+import { Bar, Doughnut } from "react-chartjs-2";
 
 import {
   Chart as ChartJS,
@@ -32,7 +32,7 @@ ChartJS.register(
 
 const ReportSupportNeededPage = () => {
   const [loading, setLoading] = useState(false);
-  const [dataPie, setDataPie] = useState<ChartData<"pie", number[], string>>({
+  const [dataPie, setDataPie] = useState<ChartData<"doughnut", number[], string>>({
     labels: [],
     datasets: [],
   });
