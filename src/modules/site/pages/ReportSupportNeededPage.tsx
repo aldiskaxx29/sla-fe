@@ -1,6 +1,6 @@
 import { Select, Spin } from "antd";
 import { useEffect, useState } from "react";
-import { Bar, Pie } from "react-chartjs-2";
+import { Bar, Doughnut } from "react-chartjs-2";
 
 import {
   Chart as ChartJS,
@@ -28,7 +28,7 @@ ChartJS.register(
 
 const ReportSupportNeededPage = () => {
   const [loading, setLoading] = useState(false);
-  const [dataPie, setDataPie] = useState<ChartData<"pie", number[], string>>({
+  const [dataPie, setDataPie] = useState<ChartData<"doughnut", number[], string>>({
     labels: [],
     datasets: [],
   });
@@ -265,9 +265,7 @@ const ReportSupportNeededPage = () => {
       <section className="grid grid-cols-4 gap-4 mt-4">
         <div className="p-6 bg-neutral-100 rounded-2xl shadow-sm">
           <h2 className="text-lg font-semibold">Upgrade Capacity</h2>
-
-          <Pie data={dataPie} />
-          
+          <Doughnut data={dataPie} />
           <TableDetailReportSupport data={dataCap?.data[0].data} />
         </div>
         <div className="p-6 bg-neutral-100 rounded-2xl shadow-sm">
