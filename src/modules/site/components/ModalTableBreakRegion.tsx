@@ -7,7 +7,7 @@ const ModalTableBreakRegion = ({ open, onCancel, name }) => {
     const columns = [
         {
             title: 'No',
-            dataIndex: 'No',
+            dataIndex: 'no',
             key: 'No',
             onHeaderCell: () => ({
                 className: "!p-1 !text-center !bg-neutral-800 !text-white",
@@ -15,7 +15,7 @@ const ModalTableBreakRegion = ({ open, onCancel, name }) => {
         },
         {
             title: 'Issue',
-            dataIndex: 'Issue',
+            dataIndex: 'issue',
             key: 'Issue',
             onHeaderCell: () => ({
                 className: "!p-1 !text-center !bg-neutral-800 !text-white",
@@ -23,7 +23,7 @@ const ModalTableBreakRegion = ({ open, onCancel, name }) => {
         },
         {
             title: 'Jumlah',
-            dataIndex: 'Jumlah',
+            dataIndex: 'jumlah',
             key: 'Jumlah',
             onHeaderCell: () => ({
                 className: "!p-1 !text-center !bg-neutral-800 !text-white",
@@ -31,7 +31,7 @@ const ModalTableBreakRegion = ({ open, onCancel, name }) => {
         },
         {
             title: 'Open',
-            dataIndex: 'Open',
+            dataIndex: 'open',
             key: 'Open',
             onHeaderCell: () => ({
                 className: "!p-1 !text-center !bg-neutral-800 !text-white",
@@ -39,7 +39,7 @@ const ModalTableBreakRegion = ({ open, onCancel, name }) => {
         },
         {
             title: 'On Progress',
-            dataIndex: 'OnProgress',
+            dataIndex: 'on_progress',
             key: 'OnProgress',
             onHeaderCell: () => ({
                 className: "!p-1 !text-center !bg-neutral-800 !text-white",
@@ -47,7 +47,7 @@ const ModalTableBreakRegion = ({ open, onCancel, name }) => {
         },
         {
             title: 'Done',
-            dataIndex: 'Done',
+            dataIndex: 'done',
             key: 'Done',
             onHeaderCell: () => ({
                 className: "!p-1 !text-center !bg-neutral-800 !text-white",
@@ -57,8 +57,7 @@ const ModalTableBreakRegion = ({ open, onCancel, name }) => {
     const [getDetailRegion] = useLazyGetDetailRegionQuery()
     const getData = useCallback(async () => {
         const result = await getDetailRegion({ query: { name } })
-        console.log(result);
-        setData(result)
+        setData(result.data)
 
     }, [name])
 
@@ -66,7 +65,7 @@ const ModalTableBreakRegion = ({ open, onCancel, name }) => {
         if(name) getData()
     }, [name])
     return (
-        <Modal open={open} onCancel={onCancel} footer={null} centered>
+        <Modal open={open} onCancel={onCancel} footer={null} centered title={name.toUpperCase() + " PER REGION "}>
             <Table columns={columns}  dataSource={data}/>
         </Modal>
     )

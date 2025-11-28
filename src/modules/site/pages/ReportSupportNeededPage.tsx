@@ -19,6 +19,7 @@ import ChartDataLabels from "chartjs-plugin-datalabels";
 import { TableDetailReportSupport } from "../components/TableDetailReportSupport";
 import { useLazyGetReportSupportUpgradeCapQuery, useLazyGetReportSupportUpgradeNodebQuery, useLazyGetReportSupportUpgradeQeQuery, useLazyGetReportSupportUpgradeTselQuery } from "../rtk/site.rtk";
 import { ModalTableBreakRegion } from "../components/ModalTableBreakRegion";
+import { useNavigate } from "react-router-dom";
 
 ChartJS.register(
   ArcElement,
@@ -32,6 +33,7 @@ ChartJS.register(
 );
 
 const ReportSupportNeededPage = () => {
+    const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
   const [month, setMonth] = useState(String(new Date().getMonth() + 1));
@@ -344,10 +346,10 @@ const ReportSupportNeededPage = () => {
         <div className="p-6 bg-neutral-100 rounded-2xl shadow-sm">
           <h2 className="text-lg font-semibold">Upgrade Capacity</h2>
           <Doughnut data={dataPie} options={optionsD} onClick={() => {
-            handleModal(true,'updgrade capacity');
+            handleModal(true,'upgrade capacity');
           }} />
-          <p className="text-lg font-semibold text-center">Total: {dataCap && dataCap?.upgradeCapacity?.totalSite}</p>
-          <TableDetailReportSupport data={dataCap?.data[0].data} total={dataCap?.data[0].Total} />
+          <p className="text-lg font-semibold text-center cursor-pointer">Total: {dataCap && dataCap?.upgradeCapacity?.totalSite}</p>
+          <TableDetailReportSupport data={dataCap?.data[0].data} total={dataCap?.data[0].Total} name='upgrade capacity'/>
         </div>
         <div className="p-6 bg-neutral-100 rounded-2xl shadow-sm">
           <h2 className="text-lg font-semibold">1 Port 1 Node B</h2>
@@ -356,7 +358,7 @@ const ReportSupportNeededPage = () => {
             handleModal(true, 'node b');
           }} />
           </div>
-          <p className="text-lg font-semibold text-center">Total: {
+          <p className="text-lg font-semibold text-center cursor-pointer">Total: {
             (() => {
               if (!dataNode) return 0;
               const values = Object.values((dataNode as any)?.onePortOneNodeB ?? {});
@@ -364,7 +366,7 @@ const ReportSupportNeededPage = () => {
               return nums.reduce((sum, val) => sum + val, 0);
             })()
           }</p>
-          <TableDetailReportSupport data={dataNode?.data[0].data} total={dataNode?.data[0].Total}/>
+          <TableDetailReportSupport data={dataNode?.data[0].data} total={dataNode?.data[0].Total} name='node b'/>
         </div>
         <div className="p-6 bg-neutral-100 rounded-2xl shadow-sm">
           <h2 className="text-lg font-semibold">QE</h2>
@@ -373,7 +375,7 @@ const ReportSupportNeededPage = () => {
             handleModal(true, 'qe');
           }} />
           </div>
-          <p className="text-lg font-semibold text-center">Total: {
+          <p className="text-lg font-semibold text-center cursor-pointer">Total: {
             (() => {
               if (!dataQe) return 0;
               const values = Object.values((dataQe as any)?.QE ?? {});
@@ -381,7 +383,7 @@ const ReportSupportNeededPage = () => {
               return nums.reduce((sum, val) => sum + val, 0);
             })()
           }</p>
-          <TableDetailReportSupport data={dataQe?.data[0].data} total={dataQe?.data[0].Total}/>
+          <TableDetailReportSupport data={dataQe?.data[0].data} total={dataQe?.data[0].Total} name='qe'/>
         </div>
         <div className="p-6 bg-neutral-100 rounded-2xl shadow-sm">
           <h2 className="text-lg font-semibold">TSEL</h2>
@@ -390,7 +392,7 @@ const ReportSupportNeededPage = () => {
             handleModal(true, 'tsel');
           }} />
           </div>
-          <p className="text-lg font-semibold text-center">Total: {
+          <p className="text-lg font-semibold text-center cursor-pointer">Total: {
             (() => {
               if (!dataTsel) return 0;
               const values = Object.values((dataTsel as any)?.TSEL ?? {});
@@ -398,7 +400,7 @@ const ReportSupportNeededPage = () => {
               return nums.reduce((sum, val) => sum + val, 0);
             })()
           }</p>
-          <TableDetailReportSupport data={dataTsel?.data[0].data} total={dataTsel?.data[0].Total}/>
+          <TableDetailReportSupport data={dataTsel?.data[0].data} total={dataTsel?.data[0].Total} name='tsel'/>
         </div>
       </section>
       <ModalTableBreakRegion open={open} onCancel={() => {

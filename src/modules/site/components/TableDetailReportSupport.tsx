@@ -1,8 +1,10 @@
 import { Table } from "antd"
+import { useMemo } from "react"
+import { useNavigate } from "react-router-dom"
 
-const TableDetailReportSupport = ({ data, total }) => {
-
-    const columns = [
+const TableDetailReportSupport = ({ data, total, name }) => {
+    const navigate = useNavigate()
+    const columns = useMemo(() => [
         {
             title: 'No',
             dataIndex: 'No',
@@ -25,6 +27,13 @@ const TableDetailReportSupport = ({ data, total }) => {
             key: 'Jumlah',
             onHeaderCell: () => ({
                 className: "!p-1 !text-center !bg-neutral-800 !text-white",
+            }),
+            onCell: (record) => ({
+                onClick: () => {
+                    console.log(record)
+                    navigate(`/report-support-needed/detail/${name}/${record.Issue}`);
+                },
+                style: { cursor: "pointer" }
             })
         },
         {
@@ -51,7 +60,8 @@ const TableDetailReportSupport = ({ data, total }) => {
                 className: "!p-1 !text-center !bg-neutral-800 !text-white",
             })
         },
-    ]
+    ],[name])
+    
     return (
         <>
             {data &&
