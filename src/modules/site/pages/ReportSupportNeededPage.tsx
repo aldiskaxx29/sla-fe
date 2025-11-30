@@ -471,6 +471,7 @@ const ReportSupportNeededPage = () => {
           handleModal(false, "");
         }}
         name={name}
+        month={month}
       />
     </div>
   );

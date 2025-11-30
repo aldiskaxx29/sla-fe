@@ -4,7 +4,7 @@ import { useLazyGetDetailRegionQuery } from "../rtk/site.rtk";
 
 const { Text, Link } = Typography;
 
-const ModalTableBreakRegion = ({ open, onCancel, name }) => {
+const ModalTableBreakRegion = ({ open, onCancel, name, month }) => {
   const [tableData, setTableData] = useState([]);
   const [expandedRowKeys, setExpandedRowKeys] = useState([]);
   const [loadingRow, setLoadingRow] = useState(null); // optional: show per-row loading
@@ -16,7 +16,7 @@ const ModalTableBreakRegion = ({ open, onCancel, name }) => {
   const loadInitial = useCallback(async () => {
     if (!name) return;
     try {
-      const res = await getDetailRegion({ query: { name, region } });
+      const res = await getDetailRegion({ query: { name, region, month } });
       setTableData(res?.data ?? []);
     } catch (err) {
       console.error("Failed to load initial region detail:", err);
@@ -78,13 +78,14 @@ const ModalTableBreakRegion = ({ open, onCancel, name }) => {
 
   const columns = [
     {
-      title: "No",
-      dataIndex: "no",
-      key: "no",
+      title: 'No',
+      key: 'no',
       onHeaderCell: () => ({
         className: "!p-1 !text-center !bg-neutral-800 !text-white",
       }),
+      align: 'center',
       width: 60,
+      render: (_, __, index) => index + 1,
     },
     {
       title: "Issue",
