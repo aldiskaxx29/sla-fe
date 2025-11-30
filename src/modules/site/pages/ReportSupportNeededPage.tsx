@@ -349,7 +349,7 @@ const ReportSupportNeededPage = () => {
             handleModal(true,'upgrade capacity');
           }} />
           <p className="text-lg font-semibold text-center cursor-pointer">Total: {dataCap && dataCap?.upgradeCapacity?.totalSite}</p>
-          <TableDetailReportSupport data={dataCap?.data[0].data} total={dataCap?.data[0].Total} name='upgrade capacity'/>
+          <TableDetailReportSupport data={dataCap?.data[0].data} total={dataCap?.data[0].Total} name='upgrade capacity' month={month} />
         </div>
         <div className="p-6 bg-neutral-100 rounded-2xl shadow-sm">
           <h2 className="text-lg font-semibold">1 Port 1 Node B</h2>
@@ -366,7 +366,7 @@ const ReportSupportNeededPage = () => {
               return nums.reduce((sum, val) => sum + val, 0);
             })()
           }</p>
-          <TableDetailReportSupport data={dataNode?.data[0].data} total={dataNode?.data[0].Total} name='node b'/>
+          <TableDetailReportSupport data={dataNode?.data[0].data} total={dataNode?.data[0].Total} name='node b'  month={month}/>
         </div>
         <div className="p-6 bg-neutral-100 rounded-2xl shadow-sm">
           <h2 className="text-lg font-semibold">QE</h2>
@@ -383,7 +383,7 @@ const ReportSupportNeededPage = () => {
               return nums.reduce((sum, val) => sum + val, 0);
             })()
           }</p>
-          <TableDetailReportSupport data={dataQe?.data[0].data} total={dataQe?.data[0].Total} name='qe'/>
+          <TableDetailReportSupport data={dataQe?.data[0].data} total={dataQe?.data[0].Total} name='qe'  month={month} />
         </div>
         <div className="p-6 bg-neutral-100 rounded-2xl shadow-sm">
           <h2 className="text-lg font-semibold">TSEL</h2>
@@ -400,7 +400,7 @@ const ReportSupportNeededPage = () => {
               return nums.reduce((sum, val) => sum + val, 0);
             })()
           }</p>
-          <TableDetailReportSupport data={dataTsel?.data[0].data} total={dataTsel?.data[0].Total} name='tsel'/>
+          <TableDetailReportSupport data={dataTsel?.data[0].data} total={dataTsel?.data[0].Total} name='tsel'  month={month} />
         </div>
       </section>
       <ModalTableBreakRegion open={open} onCancel={() => {

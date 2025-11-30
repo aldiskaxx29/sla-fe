@@ -2,16 +2,16 @@ import { Table } from "antd"
 import { useMemo } from "react"
 import { useNavigate } from "react-router-dom"
 
-const TableDetailReportSupport = ({ data, total, name }) => {
+const TableDetailReportSupport = ({ data, total, name, month }) => {
     const navigate = useNavigate()
     const columns = useMemo(() => [
         {
             title: 'No',
-            dataIndex: 'No',
-            key: 'No',
+            key: 'no',
+            render: (_, __, index) => index + 1,
             onHeaderCell: () => ({
-                className: "!p-1 !text-center !bg-neutral-800 !text-white",
-            })
+              className: "!p-1 !text-center !bg-neutral-800 !text-white",
+            }),
         },
         {
             title: 'Issue',
