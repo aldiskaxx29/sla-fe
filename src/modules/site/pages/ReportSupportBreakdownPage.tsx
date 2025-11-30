@@ -5,7 +5,7 @@ import { useLazyGetDetailSiteQuery } from "../rtk/site.rtk";
 
 const ReportSupportBreakdown = () => {
   const navigate = useNavigate();
-  const { breakdown, issue, monthnow } = useParams();
+  const { breakdown, issue, monthnow, parameter } = useParams();
   const [getSite] = useLazyGetDetailSiteQuery();
   const [dataSource, setDataSource] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -13,7 +13,7 @@ const ReportSupportBreakdown = () => {
   const getDetail = useCallback(async () => {
     setLoading(true);
     const { data } = await getSite({
-      query: { name: breakdown, issue, month: monthnow },
+      query: { name: breakdown, issue, month: monthnow, parameter },
     });
     setDataSource(data);
     setLoading(false);

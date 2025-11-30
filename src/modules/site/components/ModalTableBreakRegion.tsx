@@ -1,10 +1,8 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Modal, Table, Typography } from "antd";
+import { Modal, Table } from "antd";
 import { useLazyGetDetailRegionQuery } from "../rtk/site.rtk";
 
-const { Text, Link } = Typography;
-
-const ModalTableBreakRegion = ({ open, onCancel, name }) => {
+const ModalTableBreakRegion = ({ open, onCancel, name, month, parameter }) => {
   const [tableData, setTableData] = useState([]);
   const [expandedRowKeys, setExpandedRowKeys] = useState([]);
   const [loadingRow, setLoadingRow] = useState(null); // optional: show per-row loading
@@ -16,7 +14,9 @@ const ModalTableBreakRegion = ({ open, onCancel, name }) => {
   const loadInitial = useCallback(async () => {
     if (!name) return;
     try {
-      const res = await getDetailRegion({ query: { name, region } });
+      const res = await getDetailRegion({
+        query: { name, region, month, parameter },
+      });
       setTableData(res?.data ?? []);
     } catch (err) {
       console.error("Failed to load initial region detail:", err);

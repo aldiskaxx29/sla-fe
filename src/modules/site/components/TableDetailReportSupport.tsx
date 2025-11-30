@@ -2,7 +2,7 @@ import { Table } from "antd";
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 
-const TableDetailReportSupport = ({ data, total, name, month }) => {
+const TableDetailReportSupport = ({ data, total, name, month, parameter }) => {
   const navigate = useNavigate();
   const columns = useMemo(
     () => [
@@ -32,7 +32,7 @@ const TableDetailReportSupport = ({ data, total, name, month }) => {
         onCell: (record) => ({
           onClick: () => {
             navigate(
-              `/report-support-needed/detail/${name}/${record.Issue}/${month}`
+              `/report-support-needed/detail/${name}/${record.Issue}/${month}/${parameter}`
             );
           },
           style: { cursor: "pointer" },
@@ -63,7 +63,7 @@ const TableDetailReportSupport = ({ data, total, name, month }) => {
         }),
       },
     ],
-    [name, month]
+    [name, month, parameter]
   );
 
   return (

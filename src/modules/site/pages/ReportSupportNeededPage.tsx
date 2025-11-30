@@ -41,6 +41,7 @@ const ReportSupportNeededPage = () => {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
+  const [parameter, setParameter] = useState("");
   const [month, setMonth] = useState(String(new Date().getMonth() + 1));
   const [loading, setLoading] = useState(false);
   const [dataPie, setDataPie] = useState<
@@ -118,6 +119,42 @@ const ReportSupportNeededPage = () => {
       value: "12",
     },
   ];
+
+  const filterParemeter = [
+    {
+      label: "Packetloss Ran to Core",
+      value: "packetloss ran to core",
+    },
+    {
+      label: "Latency Ran to Core",
+      value: "latency ran to core",
+    },
+    {
+      label: "Jitter Ran to Core",
+      value: "jitter ran to core",
+    },
+    {
+      label: "Packetloss Core to Internet",
+      value: "packetloss core to internet",
+    },
+    {
+      label: "Latency Core to Internet",
+      value: "latency core to internet",
+    },
+    {
+      label: "Jitter Core to Internet",
+      value: "jitter core to internet",
+    },
+    {
+      label: "Mttrq Ran to Core Major",
+      value: "mttrq ran to core major",
+    },
+    {
+      label: "Mttrq Ran to Core Minor",
+      value: "mttrq ran to core minor",
+    },
+  ];
+
   const [getCap, { data: dataCap }] = useLazyGetReportSupportUpgradeCapQuery();
   const [getNode, { data: dataNode }] =
     useLazyGetReportSupportUpgradeNodebQuery();
@@ -127,10 +164,10 @@ const ReportSupportNeededPage = () => {
 
   const getData = useCallback(async () => {
     setLoading(true);
-    const resultCap = await getCap({ query: { month } }).unwrap();
-    const resultNode = await getNode({ query: { month } }).unwrap();
-    const resultQE = await getQe({ query: { month } }).unwrap();
-    const resultTsel = await getTsel({ query: { month } }).unwrap();
+    const resultCap = await getCap({ query: { month, parameter } }).unwrap();
+    const resultNode = await getNode({ query: { month, parameter } }).unwrap();
+    const resultQE = await getQe({ query: { month, parameter } }).unwrap();
+    const resultTsel = await getTsel({ query: { month, parameter } }).unwrap();
     setDataPie({
       labels: Object.keys(resultCap.upgradeCapacity.percentage),
       datasets: [
@@ -202,11 +239,11 @@ const ReportSupportNeededPage = () => {
       ],
     });
     setLoading(false);
-  }, [month]);
+  }, [month, parameter]);
 
   useEffect(() => {
     getData();
-  }, [month]);
+  }, [month, parameter]);
 
   const optionsD = {
     plugins: {
@@ -359,6 +396,16 @@ const ReportSupportNeededPage = () => {
             );
           })}
         </Select>
+
+        <Select className="w-42" defaultValue={month} onChange={setParameter}>
+          {filterParemeter.map((month) => {
+            return (
+              <Select.Option key={month.value} value={month.value}>
+                {month.label}
+              </Select.Option>
+            );
+          })}
+        </Select>
       </div>
 
       <section className="grid grid-cols-4 gap-4 mt-4">
@@ -379,6 +426,7 @@ const ReportSupportNeededPage = () => {
             total={dataCap?.data[0].Total}
             name="upgrade capacity"
             month={month}
+            parameter={parameter}
           />
         </div>
         <div className="p-6 bg-neutral-100 rounded-2xl shadow-sm">
@@ -407,6 +455,7 @@ const ReportSupportNeededPage = () => {
             data={dataNode?.data[0].data}
             total={dataNode?.data[0].Total}
             name="node b"
+            parameter={parameter}
             month={month}
           />
         </div>
@@ -435,6 +484,7 @@ const ReportSupportNeededPage = () => {
             total={dataQe?.data[0].Total}
             name="qe"
             month={month}
+            parameter={parameter}
           />
         </div>
         <div className="p-6 bg-neutral-100 rounded-2xl shadow-sm">
@@ -462,6 +512,7 @@ const ReportSupportNeededPage = () => {
             total={dataTsel?.data[0].Total}
             name="tsel"
             month={month}
+            parameter={parameter}
           />
         </div>
       </section>
@@ -471,6 +522,8 @@ const ReportSupportNeededPage = () => {
           handleModal(false, "");
         }}
         name={name}
+        month={month}
+        parameter={parameter}
       />
     </div>
   );

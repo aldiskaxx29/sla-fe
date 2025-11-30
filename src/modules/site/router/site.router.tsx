@@ -44,7 +44,7 @@ const useSiteRouter = (): RouteObject[] => {
       ),
     },
     {
-      path: "report-support-needed/detail/:breakdown/:issue/:monthnow",
+      path: "report-support-needed/detail/:breakdown/:issue/:monthnow/:parameter",
       element: (
         <AppRouteGuard>
           <ReportSupportBreakdown />
