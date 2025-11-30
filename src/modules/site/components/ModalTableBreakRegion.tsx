@@ -79,12 +79,13 @@ const ModalTableBreakRegion = ({ open, onCancel, name, month, parameter }) => {
   const columns = [
     {
       title: "No",
-      dataIndex: "no",
       key: "no",
       onHeaderCell: () => ({
         className: "!p-1 !text-center !bg-neutral-800 !text-white",
       }),
+      align: "center",
       width: 60,
+      render: (_, __, index) => index + 1,
     },
     {
       title: "Issue",

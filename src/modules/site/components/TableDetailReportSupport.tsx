@@ -73,6 +73,7 @@ const TableDetailReportSupport = ({ data, total, name, month, parameter }) => {
           className="mt-4"
           columns={columns}
           dataSource={[...data, total]}
+          pagination={{ pageSize: 5 }}
         />
       )}
     </>

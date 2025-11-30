@@ -22,10 +22,10 @@ const ReportSupportBreakdown = () => {
   const columns = [
     {
       title: "No",
-      dataIndex: "No",
-      key: "No",
+      key: "no",
+      render: (_, __, index) => index + 1,
       onHeaderCell: () => ({
-        className: "!text-center !bg-neutral-800 !text-white",
+        className: "!p-1 !text-center !bg-neutral-800 !text-white",
       }),
     },
     {
