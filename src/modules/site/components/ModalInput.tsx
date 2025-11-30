@@ -118,7 +118,12 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week }) => {
     form
       .validateFields()
       .then((values) => {
-        onSave({ ...values, site_sos: checked, exclude, site_exclude: exclude });
+        onSave({
+          ...values,
+          site_sos: checked,
+          exclude,
+          site_exclude: exclude,
+        });
         form.resetFields();
         setPreview("");
       })
@@ -203,7 +208,7 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week }) => {
       const blobUrl = URL.createObjectURL(result as Blob);
 
       const tempLink = document.createElement("a");
-      
+
       tempLink.href = blobUrl;
 
       tempLink.setAttribute("download", "evidance.xlsx");
@@ -252,13 +257,28 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week }) => {
             <Input placeholder="Masukkan Ticket ID" />
           </Form.Item>
 
-          <Form.Item
-            label="Site ID"
-            name="site_id"
-            rules={[{ required: true, message: "Masukkan Site ID" }]}
-          >
-            <Input placeholder="Masukkan Site ID" readOnly />
-          </Form.Item>
+          <div className="flex gap-6">
+            <Form.Item
+              label="Site ID"
+              name="site_id"
+              rules={[{ required: true, message: "Masukkan Site ID" }]}
+            >
+              <Input placeholder="Masukkan Site ID" readOnly />
+            </Form.Item>
+            {dataModal?.parameter != "mttrq major" &&
+              dataModal?.parameter != "mttrq minor" && (
+                <Form.Item name="site_exclude" label="Exclude?">
+                  <Checkbox
+                    // onChange={() => setExclude(!exclude)} checked={exclude}
+                    onChange={onChangeEx}
+                    checked={exclude}
+                  >
+                    {labelEx}
+                  </Checkbox>
+                </Form.Item>
+              )}
+          </div>
+
           {(dataModal?.parameter == "mttrq major" ||
             dataModal?.parameter == "mttrq minor") && (
             <Form.Item
@@ -418,18 +438,6 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week }) => {
               </Button>
             )}
           </Form.Item>
-
-          {dataModal?.parameter != "mttrq major" &&
-            dataModal?.parameter != "mttrq minor" && (
-              <Form.Item name="site_exclude" label="Exclude?">
-                <Checkbox
-                  // onChange={() => setExclude(!exclude)} checked={exclude}
-                  onChange={onChangeEx} checked={exclude}
-                >
-                  {labelEx}
-                </Checkbox>
-              </Form.Item>
-            )}
 
           <div style={{ textAlign: "right" }}>
             <Button

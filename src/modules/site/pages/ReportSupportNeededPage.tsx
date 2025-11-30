@@ -17,7 +17,12 @@ import {
 import ChartDataLabels from "chartjs-plugin-datalabels";
 
 import { TableDetailReportSupport } from "../components/TableDetailReportSupport";
-import { useLazyGetReportSupportUpgradeCapQuery, useLazyGetReportSupportUpgradeNodebQuery, useLazyGetReportSupportUpgradeQeQuery, useLazyGetReportSupportUpgradeTselQuery } from "../rtk/site.rtk";
+import {
+  useLazyGetReportSupportUpgradeCapQuery,
+  useLazyGetReportSupportUpgradeNodebQuery,
+  useLazyGetReportSupportUpgradeQeQuery,
+  useLazyGetReportSupportUpgradeTselQuery,
+} from "../rtk/site.rtk";
 import { ModalTableBreakRegion } from "../components/ModalTableBreakRegion";
 import { useNavigate } from "react-router-dom";
 
@@ -33,24 +38,32 @@ ChartJS.register(
 );
 
 const ReportSupportNeededPage = () => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
-  const [name, setName] = useState('');
+  const [name, setName] = useState("");
   const [month, setMonth] = useState(String(new Date().getMonth() + 1));
   const [loading, setLoading] = useState(false);
-  const [dataPie, setDataPie] = useState<ChartData<"doughnut", number[], string>>({
+  const [dataPie, setDataPie] = useState<
+    ChartData<"doughnut", number[], string>
+  >({
     labels: [],
     datasets: [],
   });
-  const [dataBarNode, setDataBarNode] = useState<ChartData<"bar", number[], string>>({
+  const [dataBarNode, setDataBarNode] = useState<
+    ChartData<"bar", number[], string>
+  >({
     labels: [],
     datasets: [],
   });
-  const [dataBarQE, setDataBarQE] = useState<ChartData<"bar", number[], string>>({
+  const [dataBarQE, setDataBarQE] = useState<
+    ChartData<"bar", number[], string>
+  >({
     labels: [],
     datasets: [],
   });
-  const [dataBarTsel, setDataBarTsel] = useState<ChartData<"bar", number[], string>>({
+  const [dataBarTsel, setDataBarTsel] = useState<
+    ChartData<"bar", number[], string>
+  >({
     labels: [],
     datasets: [],
   });
@@ -105,88 +118,94 @@ const ReportSupportNeededPage = () => {
       value: "12",
     },
   ];
-  const [getCap, { data: dataCap }] = useLazyGetReportSupportUpgradeCapQuery()
-  const [getNode, { data: dataNode }] = useLazyGetReportSupportUpgradeNodebQuery()
-  const [getQe, { data: dataQe }] = useLazyGetReportSupportUpgradeQeQuery()
-  const [getTsel, { data: dataTsel }] = useLazyGetReportSupportUpgradeTselQuery()
+  const [getCap, { data: dataCap }] = useLazyGetReportSupportUpgradeCapQuery();
+  const [getNode, { data: dataNode }] =
+    useLazyGetReportSupportUpgradeNodebQuery();
+  const [getQe, { data: dataQe }] = useLazyGetReportSupportUpgradeQeQuery();
+  const [getTsel, { data: dataTsel }] =
+    useLazyGetReportSupportUpgradeTselQuery();
 
-  const getData = useCallback (async () => {
-    setLoading(true)
-    const resultCap = await getCap({ query: { month } }).unwrap()
-    const resultNode = await getNode({ query: { month } }).unwrap()
-    const resultQE = await getQe({ query: { month } }).unwrap()
-    const resultTsel = await getTsel({ query: { month } }).unwrap()
-    setDataPie(
-      {
-        labels: Object.keys(resultCap.upgradeCapacity.percentage),
-        datasets: [
-          {
-            data: Object.values(resultCap.upgradeCapacity.percentage),
-            backgroundColor: ["#185E8B", "#EB7035", "#3B7E2D"],
-            cutout: "70%",
+  const getData = useCallback(async () => {
+    setLoading(true);
+    const resultCap = await getCap({ query: { month } }).unwrap();
+    const resultNode = await getNode({ query: { month } }).unwrap();
+    const resultQE = await getQe({ query: { month } }).unwrap();
+    const resultTsel = await getTsel({ query: { month } }).unwrap();
+    setDataPie({
+      labels: Object.keys(resultCap.upgradeCapacity.percentage),
+      datasets: [
+        {
+          data: Object.values(resultCap.upgradeCapacity.percentage),
+          backgroundColor: ["#185E8B", "#EB7035", "#3B7E2D"],
+          cutout: "70%",
+        },
+      ],
+    });
+    setDataBarNode({
+      labels: ["Done", "On Progress", "Open"],
+      datasets: [
+        {
+          data: [
+            resultNode.onePortOneNodeB.done,
+            resultNode.onePortOneNodeB.onProgress,
+            resultNode.onePortOneNodeB.open,
+          ],
+          backgroundColor: (ctx) => {
+            const chart = ctx.chart;
+            const { ctx: g, chartArea } = chart;
+
+            if (!chartArea) return "#0e5774";
+
+            const gradient = g.createLinearGradient(
+              0,
+              chartArea.bottom,
+              0,
+              chartArea.top
+            );
+            gradient.addColorStop(0, "#0e5774");
+            gradient.addColorStop(1, "#0f6e8e");
+            return gradient;
           },
-        ],
-      }
-    )
-    setDataBarNode(
-      {
-        labels: ["Done", "On Progress", "Open"],
-        datasets: [
-          {
-            data: [resultNode.onePortOneNodeB.done, resultNode.onePortOneNodeB.onProgress, resultNode.onePortOneNodeB.open],
-            backgroundColor: (ctx) => {
-              const chart = ctx.chart;
-              const { ctx: g, chartArea } = chart;
-
-              if (!chartArea) return "#0e5774";
-
-              const gradient = g.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
-              gradient.addColorStop(0, "#0e5774");
-              gradient.addColorStop(1, "#0f6e8e");
-              return gradient;
-            },
-            borderRadius: 8,
-            barPercentage: 0.5,
-          },
-        ],
-      }
-    )
-    setDataBarQE(
-      {
-        labels: ["Done", "On Progress", "Open"],
-        datasets: [
-          {
-            label: "QE",
-            data: [resultQE.QE.done, resultQE.QE.onProgress, resultQE.QE.open],
-            backgroundColor: "#0e5774",
-            borderRadius: 6,
-            barThickness: 25,
-          },
-        ],
-      }
-    )
-    setDataBarTsel(
-      {
-        labels: ["Done", "On Progress", "Open"],
-        datasets: [
-          {
-            label: "TSEL",
-            data: [resultTsel.TSEL.done, resultTsel.TSEL.onProgress, resultTsel.TSEL.open],
-            backgroundColor: "#0A4C66",        // warna utama bar
-            borderColor: "#083B4E",           // warna sisi untuk efek 3D
-            borderWidth: 10,                  // ketebalan sisi "3D"
-            borderSkipped: false,             // bikin efek kotak 3D
-            borderRadius: 2,
-
-          }
-        ],
-      }
-    )
-    setLoading(false)
-  }, [month])
+          borderRadius: 8,
+          barPercentage: 0.5,
+        },
+      ],
+    });
+    setDataBarQE({
+      labels: ["Done", "On Progress", "Open"],
+      datasets: [
+        {
+          label: "QE",
+          data: [resultQE.QE.done, resultQE.QE.onProgress, resultQE.QE.open],
+          backgroundColor: "#0e5774",
+          borderRadius: 6,
+          barThickness: 25,
+        },
+      ],
+    });
+    setDataBarTsel({
+      labels: ["Done", "On Progress", "Open"],
+      datasets: [
+        {
+          label: "TSEL",
+          data: [
+            resultTsel.TSEL.done,
+            resultTsel.TSEL.onProgress,
+            resultTsel.TSEL.open,
+          ],
+          backgroundColor: "#0A4C66", // warna utama bar
+          borderColor: "#083B4E", // warna sisi untuk efek 3D
+          borderWidth: 10, // ketebalan sisi "3D"
+          borderSkipped: false, // bikin efek kotak 3D
+          borderRadius: 2,
+        },
+      ],
+    });
+    setLoading(false);
+  }, [month]);
 
   useEffect(() => {
-    getData()
+    getData();
   }, [month]);
 
   const optionsD = {
@@ -221,7 +240,7 @@ const ReportSupportNeededPage = () => {
     scales: {
       x: {
         ticks: { font: { size: 14 } },
-        grid: { display: false }
+        grid: { display: false },
       },
       y: {
         display: false,
@@ -283,23 +302,23 @@ const ReportSupportNeededPage = () => {
       legend: {
         display: false,
         labels: {
-          color: "#ffffff"
+          color: "#ffffff",
         },
       },
       tooltip: {
         titleColor: "#ffffff",
-        bodyColor: "#ffffff"
+        bodyColor: "#ffffff",
       },
       datalabels: {
-        color: "#ffffff",  // warna text di dalam bar
+        color: "#ffffff", // warna text di dalam bar
         anchor: "center",
         align: "center",
         font: {
           weight: "bold",
-          size: 14
+          size: 14,
         },
-        formatter: (value) => value
-      }
+        formatter: (value) => value,
+      },
     },
     scales: {
       y: {
@@ -307,24 +326,24 @@ const ReportSupportNeededPage = () => {
         offset: false,
         grace: 0,
         ticks: {
-          color: "#000000"   // ← warna teks sumbu Y
+          color: "#000000", // ← warna teks sumbu Y
         },
         grid: {
-          drawBorder: false
-        }
+          drawBorder: false,
+        },
       },
       x: {
         ticks: {
-          color: "#000000"   // ← warna teks sumbu X
-        }
-      }
-    }
+          color: "#000000", // ← warna teks sumbu X
+        },
+      },
+    },
   };
 
   const handleModal = (action, segmentName: string) => {
     setName(segmentName);
     setOpen(action);
-  }
+  };
 
   return (
     <div className="bg-white border border-[#DBDBDB] rounded-xl p-4 m-6">
@@ -345,67 +364,114 @@ const ReportSupportNeededPage = () => {
       <section className="grid grid-cols-4 gap-4 mt-4">
         <div className="p-6 bg-neutral-100 rounded-2xl shadow-sm">
           <h2 className="text-lg font-semibold">Upgrade Capacity</h2>
-          <Doughnut data={dataPie} options={optionsD} onClick={() => {
-            handleModal(true,'upgrade capacity');
-          }} />
-          <p className="text-lg font-semibold text-center cursor-pointer">Total: {dataCap && dataCap?.upgradeCapacity?.totalSite}</p>
-          <TableDetailReportSupport data={dataCap?.data[0].data} total={dataCap?.data[0].Total} name='upgrade capacity' month={month} />
+          <Doughnut
+            data={dataPie}
+            options={optionsD}
+            onClick={() => {
+              handleModal(true, "upgrade capacity");
+            }}
+          />
+          <p className="text-lg font-semibold text-center cursor-pointer">
+            Total: {dataCap && dataCap?.upgradeCapacity?.totalSite}
+          </p>
+          <TableDetailReportSupport
+            data={dataCap?.data[0].data}
+            total={dataCap?.data[0].Total}
+            name="upgrade capacity"
+            month={month}
+          />
         </div>
         <div className="p-6 bg-neutral-100 rounded-2xl shadow-sm">
           <h2 className="text-lg font-semibold">1 Port 1 Node B</h2>
-          <div className="w-full aspect-square" >
-            <Bar data={dataBarNode} options={options3DB} onClick={() => {
-            handleModal(true, 'node b');
-          }} />
+          <div className="w-full aspect-square">
+            <Bar
+              data={dataBarNode}
+              options={options3DB}
+              onClick={() => {
+                handleModal(true, "node b");
+              }}
+            />
           </div>
-          <p className="text-lg font-semibold text-center cursor-pointer">Total: {
-            (() => {
+          <p className="text-lg font-semibold text-center cursor-pointer">
+            Total:{" "}
+            {(() => {
               if (!dataNode) return 0;
-              const values = Object.values((dataNode as any)?.onePortOneNodeB ?? {});
+              const values = Object.values(
+                (dataNode as any)?.onePortOneNodeB ?? {}
+              );
               const nums = values.map((v) => Number(v ?? 0));
               return nums.reduce((sum, val) => sum + val, 0);
-            })()
-          }</p>
-          <TableDetailReportSupport data={dataNode?.data[0].data} total={dataNode?.data[0].Total} name='node b'  month={month}/>
+            })()}
+          </p>
+          <TableDetailReportSupport
+            data={dataNode?.data[0].data}
+            total={dataNode?.data[0].Total}
+            name="node b"
+            month={month}
+          />
         </div>
         <div className="p-6 bg-neutral-100 rounded-2xl shadow-sm">
           <h2 className="text-lg font-semibold">QE</h2>
           <div className="w-full aspect-square">
-            <Bar data={dataBarQE} options={optionsB} onClick={() => {
-            handleModal(true, 'qe');
-          }} />
+            <Bar
+              data={dataBarQE}
+              options={optionsB}
+              onClick={() => {
+                handleModal(true, "qe");
+              }}
+            />
           </div>
-          <p className="text-lg font-semibold text-center cursor-pointer">Total: {
-            (() => {
+          <p className="text-lg font-semibold text-center cursor-pointer">
+            Total:{" "}
+            {(() => {
               if (!dataQe) return 0;
               const values = Object.values((dataQe as any)?.QE ?? {});
               const nums = values.map((v) => Number(v ?? 0));
               return nums.reduce((sum, val) => sum + val, 0);
-            })()
-          }</p>
-          <TableDetailReportSupport data={dataQe?.data[0].data} total={dataQe?.data[0].Total} name='qe'  month={month} />
+            })()}
+          </p>
+          <TableDetailReportSupport
+            data={dataQe?.data[0].data}
+            total={dataQe?.data[0].Total}
+            name="qe"
+            month={month}
+          />
         </div>
         <div className="p-6 bg-neutral-100 rounded-2xl shadow-sm">
           <h2 className="text-lg font-semibold">TSEL</h2>
           <div className="w-full aspect-square">
-            <Bar data={dataBarTsel} options={optionsTselB} onClick={() => {
-            handleModal(true, 'tsel');
-          }} />
+            <Bar
+              data={dataBarTsel}
+              options={optionsTselB}
+              onClick={() => {
+                handleModal(true, "tsel");
+              }}
+            />
           </div>
-          <p className="text-lg font-semibold text-center cursor-pointer">Total: {
-            (() => {
+          <p className="text-lg font-semibold text-center cursor-pointer">
+            Total:{" "}
+            {(() => {
               if (!dataTsel) return 0;
               const values = Object.values((dataTsel as any)?.TSEL ?? {});
               const nums = values.map((v) => Number(v ?? 0));
               return nums.reduce((sum, val) => sum + val, 0);
-            })()
-          }</p>
-          <TableDetailReportSupport data={dataTsel?.data[0].data} total={dataTsel?.data[0].Total} name='tsel'  month={month} />
+            })()}
+          </p>
+          <TableDetailReportSupport
+            data={dataTsel?.data[0].data}
+            total={dataTsel?.data[0].Total}
+            name="tsel"
+            month={month}
+          />
         </div>
       </section>
-      <ModalTableBreakRegion open={open} onCancel={() => {
-        handleModal(false, '');
-      }} name={name} />
+      <ModalTableBreakRegion
+        open={open}
+        onCancel={() => {
+          handleModal(false, "");
+        }}
+        name={name}
+      />
     </div>
   );
 };
