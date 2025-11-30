@@ -150,6 +150,7 @@ const ModalTableBreakRegion = ({ open, onCancel, name }) => {
     >
       <Table
         columns={columns}
+        pagination={{ pageSize: 1000000, hideOnSinglePage: true }}
         dataSource={tableData}
         rowKey={(r, idx) => getRowKey(r, idx)}
         expandable={{
@@ -161,7 +162,6 @@ const ModalTableBreakRegion = ({ open, onCancel, name }) => {
           // optional: show a simple expanded row render, or let antd render children as nested rows automatically
           // expandedRowRender: (row) => <pre>{JSON.stringify(row.children, null, 2)}</pre>,
         }}
-        pagination={false}
       />
     </Modal>
   );
