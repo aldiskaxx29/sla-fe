@@ -2,6 +2,7 @@ import { Button, Spin, Table } from "antd";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useLazyGetDetailSiteQuery } from "../rtk/site.rtk";
+import { EditOutlined } from "@ant-design/icons";
 
 const ReportSupportBreakdown = () => {
   const navigate = useNavigate();
@@ -83,6 +84,14 @@ const ReportSupportBreakdown = () => {
       onHeaderCell: () => ({
         className: "!text-center !bg-neutral-800 !text-white",
       }),
+      render: (record) => (
+        <div className="flex justify-center">
+          <EditOutlined
+            className="text-blue-600 cursor-pointer hover:text-blue-800"
+            onClick={() => console.log(record)}
+            />
+        </div>
+      ),
     },
   ];
 
