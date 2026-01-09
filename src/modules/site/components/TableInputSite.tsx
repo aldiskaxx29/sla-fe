@@ -469,7 +469,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
       formData.append("month", payload.month);
       formData.append("week", payload.week);
 
-      // formData.append("grouping_rca", payload.grouping_rca);
+      formData.append("grouping_rca", payload.grouping_rca);
       // formData.append("grouping_rca_regional", payload.grouping_rca_regional);
 
       formData.append(

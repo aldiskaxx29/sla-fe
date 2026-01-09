@@ -205,8 +205,21 @@ const TableParentChildCNOP: React.FC<TableParentChildCNOPProps> = ({
             };
           }),
           {
-            title: "Ach",
-            dataIndex: `ach_fm_${monthNum}`,
+            title: "Ach Before",
+            dataIndex: `ach_fm_before_${monthNum}`,
+            align: "center",
+            key: `ach_fm_${monthNum}`,
+            onHeaderCell: () => ({
+              className: "!bg-[#5195d4] !text-white !p-3",
+              // className: "!bg-blue-pacific !p-3",
+            }),
+            onCell: () => ({}),
+            // className: "!bg-[#F9EFEA] !p-3",
+            className: "!bg-blue-pacific !p-3",
+          },
+          {
+            title: "Ach After",
+            dataIndex: `ach_fm_after_${monthNum}`,
             align: "center",
             key: `ach_fm_${monthNum}`,
             onHeaderCell: () => ({

@@ -41,7 +41,7 @@ const ReportSupportNeededPage = () => {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
-  const [parameter, setParameter] = useState("");
+  const [parameter, setParameter] = useState("packetoss ran to core");
   const [month, setMonth] = useState(String(new Date().getMonth() + 1));
   const [loading, setLoading] = useState(false);
   const [dataPie, setDataPie] = useState<
@@ -132,27 +132,27 @@ const ReportSupportNeededPage = () => {
     {
       label: "Jitter Ran to Core",
       value: "jitter ran to core",
-    },
-    {
-      label: "Packetloss Core to Internet",
-      value: "packetloss core to internet",
-    },
-    {
-      label: "Latency Core to Internet",
-      value: "latency core to internet",
-    },
-    {
-      label: "Jitter Core to Internet",
-      value: "jitter core to internet",
-    },
-    {
-      label: "Mttrq Ran to Core Major",
-      value: "mttrq ran to core major",
-    },
-    {
-      label: "Mttrq Ran to Core Minor",
-      value: "mttrq ran to core minor",
-    },
+    }
+    // {
+    //   label: "Packetloss Core to Internet",
+    //   value: "packetloss core to internet",
+    // },
+    // {
+    //   label: "Latency Core to Internet",
+    //   value: "latency core to internet",
+    // },
+    // {
+    //   label: "Jitter Core to Internet",
+    //   value: "jitter core to internet",
+    // },
+    // {
+    //   label: "Mttrq Ran to Core Major",
+    //   value: "mttrq ran to core major",
+    // },
+    // {
+    //   label: "Mttrq Ran to Core Minor",
+    //   value: "mttrq ran to core minor",
+    // },
   ];
 
   const [getCap, { data: dataCap }] = useLazyGetReportSupportUpgradeCapQuery();
@@ -397,15 +397,15 @@ const ReportSupportNeededPage = () => {
           })}
         </Select>
 
-        <Select className="w-42" defaultValue={month} onChange={setParameter}>
-          {filterParemeter.map((month) => {
+        {/* <Select className="w-42" defaultValue={parameter} onChange={setParameter}>
+          {filterParemeter.map((parameter) => {
             return (
-              <Select.Option key={month.value} value={month.value}>
-                {month.label}
+              <Select.Option key={parameter.value} value={parameter.value}>
+                {parameter.label}
               </Select.Option>
             );
           })}
-        </Select>
+        </Select> */}
       </div>
 
       <section className="grid grid-cols-4 gap-4 mt-4">

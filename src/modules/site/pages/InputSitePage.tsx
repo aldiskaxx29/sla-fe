@@ -14,6 +14,7 @@ import { toast } from "react-toastify";
 const SitePage = () => {
   const [week, setWeek] = useState("");
   const [month, setMonth] = useState(dayjs().format("M"));
+  const [year, setYear] = useState(dayjs(new Date()).year());
   const [exclude, setExclude] = useState("all");
   const [prev, setPrev] = useState("corrective");
   const [loading, setLoading] = useState(false);
@@ -29,9 +30,10 @@ const SitePage = () => {
           prev,
           exclude,
           parameter,
+          year,
           month,
-          ...(!["mttrq major", "mttrq minor"].includes(parameter) && { week }),
-          ...(["mttrq major", "mttrq minor"].includes(parameter) && { month }),
+          ...(!["mttrq critical","mttrq major", "mttrq minor"].includes(parameter) && { week }),
+          ...(["mttrq critical","mttrq major", "mttrq minor"].includes(parameter) && { month }),
         },
       }).unwrap();
     } catch (error) {
@@ -39,12 +41,12 @@ const SitePage = () => {
     } finally {
       setLoading(false);
     }
-  }, [exclude, parameter, month, week, prev]);
+  }, [exclude, parameter, month, week, year, prev]);
 
   useEffect(() => {
-    if (!week || !month) return;
+    if (!week || !month || !year) return;
     fetchSite();
-  }, [exclude, parameter, week, month, trigger, prev]);
+  }, [exclude, parameter, year, week, month, trigger, prev]);
 
   const optPrev = [
     // { label: "All", value: "all" },
@@ -63,8 +65,18 @@ const SitePage = () => {
     { label: "Packetloss", value: "packetloss ran to core" },
     { label: "Jitter", value: "jitter ran to core" },
     { label: "Latency", value: "latency ran to core" },
+    { label: "Mttrq Critical", value: "mttrq critical" },
     { label: "Mttrq Major", value: "mttrq major" },
     { label: "Mttrq Minor", value: "mttrq minor" },
+  ];
+
+  const optYear = [
+    { label: "2025", value: "2025" },
+    { label: "2026", value: "2026" },
+    { label: "2027", value: "2027" },
+    { label: "2028", value: "2028" },
+    { label: "2029", value: "2029" },
+    { label: "2030", value: "2030" },
   ];
 
   const filterWeeks = [
@@ -110,8 +122,8 @@ const SitePage = () => {
           parameter,
           month,
           week,
-          ...(!["mttrq major", "mttrq minor"].includes(parameter) && { week }),
-          ...(["mttrq major", "mttrq minor"].includes(parameter) && { month }),
+          ...(!["mttrq critical","mttrq major", "mttrq minor"].includes(parameter) && { week }),
+          ...(["mttrq critical","mttrq major", "mttrq minor"].includes(parameter) && { month }),
         },
       }).unwrap();
 
@@ -150,8 +162,8 @@ const SitePage = () => {
           exclude,
           parameter,
           month,
-          ...(!["mttrq major", "mttrq minor"].includes(parameter) && { week }),
-          ...(["mttrq major", "mttrq minor"].includes(parameter) && { month }),
+          ...(!["mttrq critical","mttrq major", "mttrq minor"].includes(parameter) && { week }),
+          ...(["mttrq critical","mttrq major", "mttrq minor"].includes(parameter) && { month }),
         },
         body: formData,
       }).unwrap();
@@ -171,9 +183,9 @@ const SitePage = () => {
     <div className="bg-white border border-[#DBDBDB] rounded-xl p-4 m-6">
       {loading && <Spin fullscreen tip="Sedang Memuat Data..." />}
       <div className="flex justify-between mb-6">
-        <div className="bg-[#EDEDED] max-w-[210px] rounded-[54px] px-4 py-1 h-10 flex justify-center items-center mr-2">
+        {/* <div className="bg-[#EDEDED] max-w-[210px] rounded-[54px] px-4 py-1 h-10 flex justify-center items-center mr-2">
           <p className="font-semibold text-[#0E2133] text-base">REKONSILIASI</p>
-        </div>
+        </div> */}
         <div className="flex gap-4">
           <AppDropdown
             title="Site Type"
@@ -197,13 +209,21 @@ const SitePage = () => {
             onChange={(value) => setParameter(value)}
           />
           <AppDropdown
+            
+            title="Tahun"
+            placeholder="All"
+            options={optYear}
+            value={year}
+            onChange={(value) => setYear(value)}
+          />
+          <AppDropdown
             title="Month"
             placeholder="All"
             options={optMonths}
             value={month}
             onChange={(value) => setMonth(value)}
           />
-          {!["mttrq major", "mttrq minor"].includes(parameter) && (
+          {!["mttrq critical","mttrq major", "mttrq minor"].includes(parameter) && (
             <AppDropdown
               title="Week"
               placeholder="All"

@@ -25,7 +25,7 @@ export const AuthRouteGuard: React.FC<GuardProps> = ({
   }
   if (!requireAuth && authed) {
     return (
-      <Navigate to={redirectTo || "/msa"} state={{ from: location }} replace />
+      <Navigate to={redirectTo || "/executive"} state={{ from: location }} replace />
     );
   }
   return <Outlet {...props} />;

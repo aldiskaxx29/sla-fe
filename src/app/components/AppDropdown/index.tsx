@@ -25,7 +25,7 @@ const AppDropdown = <
         {title}
       </div>
       <div
-        className={`border border-[#DBDADE] rounded-r-full pr-4 py-0.5 text-xs w-[150px] ${
+        className={`border border-[#DBDADE] rounded-r-full pr-4 py-0.5 text-xs w-[100px] ${
           className || ""
         }`}
       >

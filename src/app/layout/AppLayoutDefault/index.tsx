@@ -119,6 +119,9 @@ const AppLayoutDefault = () => {
     setProfileOpen(false);
   };
 
+  // const userData = localStorage.getItem("user_data");
+  // const parsedData = JSON.parse(userData);
+  // console.log('user siapa', parsedData.level_user)
   return (
     <>
       {loading && <Spin fullscreen tip="Harap Tunggu..." />}
@@ -134,253 +137,275 @@ const AppLayoutDefault = () => {
               </div>
             </div>
             <div className="flex gap-4">
-              <div className="text-sm flex justify-between items-center bg-[#576278] rounded-[54px] px-3 py-2">
-                <Button
-                  className={`${
-                    location.pathname.includes("executive")
-                      ? "!bg-[#A6AEC1]"
-                      : "!bg-[#576278]"
-                  } !border-0 !rounded-4xl !shadow-none`}
-                  onClick={() => {
-                    handleMenuSelect("executive");
-                  }}
-                >
-                  <p
-                    className={
+              {/* Dapatkan level_user dari localStorage */}
+              {JSON.parse(localStorage.getItem("user_data"))?.level_user == 5 ? (
+                /* Menu untuk level_user = 5 - hanya Executive Summary dan One Visibility */
+                <div className="text-sm flex justify-between items-center bg-[#576278] rounded-[54px] px-3 py-2">
+                  <Button
+                    className={`${
                       location.pathname.includes("executive")
-                        ? "text-white "
-                        : "text-[#C6C6C6] "
-                    }
-                  >
-                    Executive Summary
-                  </p>
-                </Button>
-                {/* <Button
-                className={`${
-                  location.pathname.includes("quality-healthiness")
-                    ? "!bg-[#A6AEC1]"
-                    : "!bg-[#576278]"
-                } !border-0 !rounded-4xl !shadow-none`}
-                onClick={() => {
-                  handleMenuSelect("quality-healthiness");
-                }}
-              >
-                <p
-                  className={
-                    location.pathname.includes("quality-healthiness")
-                      ? "text-white "
-                      : "text-[#C6C6C6] "
-                  }
-                >
-                  Quality Healthiness
-                </p>
-              </Button> */}
-                <Button
-                  className={`${
-                    location.pathname.includes("monday")
-                      ? "!bg-[#A6AEC1]"
-                      : "!bg-[#576278]"
-                  } !border-0 !rounded-4xl !shadow-none`}
-                  onClick={() => {
-                    handleMenuSelect("monday");
-                  }}
-                >
-                  <p
-                    className={
-                      location.pathname.includes("monday")
-                        ? "text-white "
-                        : "text-[#C6C6C6] "
-                    }
-                  >
-                    Monday Monitoring
-                  </p>
-                </Button>
-                <div
-                  ref={containerRef}
-                  onMouseEnter={() => setOpen1(true)}
-                  onMouseLeave={() => setOpen1(false)}
-                  className={`relative inline-block px-4 py-2 rounded-full cursor-pointer ${
-                    location.pathname?.includes("network")
-                      ? "!bg-[#A6AEC1] text-white"
-                      : "!bg-[#576278] text-[#C6C6C6]"
-                  }`}
-                >
-                  Network Performance
-                  {open1 && (
-                    <div className="absolute left-0 top-full -mt-2 w-full bg-[#576278] border rounded shadow z-10">
-                      {networkOpt.map((option) => (
-                        <p
-                          key={option.value}
-                          className={`px-4 py-2 hover:bg-gray-500 cursor-pointer ${
-                            location.pathname?.includes(option.value)
-                              ? "!bg-[#A6AEC1] text-white"
-                              : "!bg-[#576278] text-[#C6C6C6]"
-                          }`}
-                          onClick={() => {
-                            handleMenuSelect(option.value);
-                            setOpen1(false);
-                          }}
-                        >
-                          {option.label}
-                        </p>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                <div
-                  ref={containerRef}
-                  onMouseEnter={() => setOpen2(true)}
-                  onMouseLeave={() => setOpen2(false)}
-                  className={`relative inline-block px-4 py-2 rounded-full cursor-pointer ${
-                    ["/msa", "/cnop", "/report-site","/report-support-needed"].includes(
-                      location.pathname
-                    )
-                      ? "!bg-[#A6AEC1] text-white"
-                      : "!bg-[#576278] text-[#C6C6C6]"
-                  }`}
-                >
-                  SLA
-                  {open2 && (
-                    <div className="absolute left-0 top-full -mt-2 w-[200px] bg-[#576278] border rounded shadow opacity-100">
-                      {slaOpt.map((option) => (
-                        <p
-                          key={option.value}
-                          className={`px-4 py-2 hover:bg-gray-500 cursor-pointer ${
-                            location.pathname?.includes(option.value)
-                              ? "!bg-[#A6AEC1] text-white"
-                              : "!bg-[#576278] text-[#C6C6C6]"
-                          }`}
-                          onClick={() => {
-                            handleMenuSelect(option.value);
-                            setOpen2(false);
-                          }}
-                        >
-                          {option.label}
-                        </p>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                <Button
-                  className={`${
-                    location.pathname.includes("input-site")
-                      ? "!bg-[#A6AEC1]"
-                      : "!bg-[#576278]"
-                  } !border-0 !rounded-4xl !shadow-none`}
-                  onClick={() => {
-                    handleMenuSelect("input-site");
-                  }}
-                >
-                  <p
-                    className={
-                      location.pathname.includes("input-site")
-                        ? "text-white "
-                        : "text-[#C6C6C6] "
-                    }
-                  >
-                    Reconsiliation
-                  </p>
-                </Button>
-                <Button
-                  className={`${
-                    location.pathname.includes("one")
-                      ? "!bg-[#A6AEC1]"
-                      : "!bg-[#576278]"
-                  } !border-0 !rounded-4xl !shadow-none`}
-                  onClick={() => {
-                    handleMenuSelect("one");
-                  }}
-                >
-                  <p
-                    className={
-                      location.pathname.includes("one")
-                        ? "text-white "
-                        : "text-[#C6C6C6] "
-                    }
-                  >
-                    One Visibility
-                  </p>
-                </Button>
-                <Button
-                  className={`${
-                    location.pathname.includes("ticket")
-                      ? "!bg-[#A6AEC1]"
-                      : "!bg-[#576278]"
-                  } !border-0 !rounded-4xl !shadow-none`}
-                >
-                  <p
-                    className={
-                      location.pathname.includes("ticket")
-                        ? "text-white "
-                        : "text-[#C6C6C6] "
-                    }
+                        ? "!bg-[#A6AEC1]"
+                        : "!bg-[#576278]"
+                    } !border-0 !rounded-4xl !shadow-none`}
                     onClick={() => {
-                      handleMenuSelect("ticket");
+                      handleMenuSelect("executive");
                     }}
-                    // onClick={() =>
-                    //   window.open(
-                    //     "http://10.60.174.187/ticket_quality_v3/",
-                    //     "_blank"
-                    //   )
-                    // }
                   >
-                    Ticket Quality
-                  </p>
-                </Button>
-                <Button
-                  className={`${
-                    location.pathname.includes("elibrary")
-                      ? "!bg-[#A6AEC1]"
-                      : "!bg-[#576278]"
-                  } !border-0 !rounded-4xl !shadow-none`}
-                  onClick={() => {
-                    handleMenuSelect("elibrary");
-                  }}
-                >
-                  <p
-                    className={
-                      location.pathname.includes("elibrary")
-                        ? "text-white "
-                        : "text-[#C6C6C6] "
-                    }
+                    <p
+                      className={
+                        location.pathname.includes("executive")
+                          ? "text-white "
+                          : "text-[#C6C6C6] "
+                      }
+                    >
+                      Executive Summary
+                    </p>
+                  </Button>
+  
+                  <Button
+                    className={`${
+                      location.pathname.includes("one")
+                        ? "!bg-[#A6AEC1]"
+                        : "!bg-[#576278]"
+                    } !border-0 !rounded-4xl !shadow-none`}
+                    onClick={() => {
+                      handleMenuSelect("one");
+                    }}
                   >
-                    E-Library
-                  </p>
-                </Button>
-                <Button
-                  className={`${
-                    location.pathname.includes("msa")
-                      ? "!bg-[#576278]"
-                      : "!bg-[#576278]"
-                  } !border-0 !rounded-4xl !shadow-none`}
-                  onClick={() => {
-                    handleMenuSelect("msa");
-                  }}
-                >
-                  {/* <p
-                  className={
-                    location.pathname.includes("dashboard-ta")
-                      ? "text-white "
-                      : "text-[#C6C6C6] "
-                  }
-                >
-                  Dashboard
-                </p> */}
-                  <p
-                    className={`cursor-pointer ${
-                      location.pathname.includes("dashboard-ta")
-                        ? "text-white"
-                        : "text-[#C6C6C6]"
+                    <p
+                      className={
+                        location.pathname.includes("one")
+                          ? "text-white "
+                          : "text-[#C6C6C6] "
+                      }
+                    >
+                      One Visibility
+                    </p>
+                  </Button>
+                </div>
+              ) : (
+                /* Menu untuk level_user selain 5 - semua menu biasa */
+                <div className="text-sm flex justify-between items-center bg-[#576278] rounded-[54px] px-3 py-2">
+                  <Button
+                    className={`${
+                      location.pathname.includes("executive")
+                        ? "!bg-[#A6AEC1]"
+                        : "!bg-[#576278]"
+                    } !border-0 !rounded-4xl !shadow-none`}
+                    onClick={() => {
+                      handleMenuSelect("executive");
+                    }}
+                  >
+                    <p
+                      className={
+                        location.pathname.includes("executive")
+                          ? "text-white "
+                          : "text-[#C6C6C6] "
+                      }
+                    >
+                      Executive Summary
+                    </p>
+                  </Button>
+  
+                  <Button
+                    className={`${
+                      location.pathname.includes("monday")
+                        ? "!bg-[#A6AEC1]"
+                        : "!bg-[#576278]"
+                    } !border-0 !rounded-4xl !shadow-none`}
+                    onClick={() => {
+                      handleMenuSelect("monday");
+                    }}
+                  >
+                    <p
+                      className={
+                        location.pathname.includes("monday")
+                          ? "text-white "
+                          : "text-[#C6C6C6] "
+                      }
+                    >
+                      Monday Monitoring
+                    </p>
+                  </Button>
+                  
+                  <div
+                    ref={containerRef}
+                    onMouseEnter={() => setOpen1(true)}
+                    onMouseLeave={() => setOpen1(false)}
+                    className={`relative inline-block px-4 py-2 rounded-full cursor-pointer ${
+                      location.pathname?.includes("network")
+                        ? "!bg-[#A6AEC1] text-white"
+                        : "!bg-[#576278] text-[#C6C6C6]"
                     }`}
-                    onClick={() =>
-                      window.open("http://10.60.174.188:8008/", "_blank")
-                    }
                   >
-                    Dashboard Ta
-                  </p>
-                </Button>
-              </div>
+                    Network Performance
+                    {open1 && (
+                      <div className="absolute left-0 top-full -mt-2 w-full bg-[#576278] border rounded shadow z-10">
+                        {networkOpt.map((option) => (
+                          <p
+                            key={option.value}
+                            className={`px-4 py-2 hover:bg-gray-500 cursor-pointer ${
+                              location.pathname?.includes(option.value)
+                                ? "!bg-[#A6AEC1] text-white"
+                                : "!bg-[#576278] text-[#C6C6C6]"
+                            }`}
+                            onClick={() => {
+                              handleMenuSelect(option.value);
+                              setOpen1(false);
+                            }}
+                          >
+                            {option.label}
+                          </p>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+  
+                  <div
+                    ref={containerRef}
+                    onMouseEnter={() => setOpen2(true)}
+                    onMouseLeave={() => setOpen2(false)}
+                    className={`relative inline-block px-4 py-2 rounded-full cursor-pointer ${
+                      ["/msa", "/cnop", "/report-site","/report-support-needed"].includes(
+                        location.pathname
+                      )
+                        ? "!bg-[#A6AEC1] text-white"
+                        : "!bg-[#576278] text-[#C6C6C6]"
+                    }`}
+                  >
+                    SLA
+                    {open2 && (
+                      <div className="absolute left-0 top-full -mt-2 w-[200px] bg-[#576278] border rounded shadow opacity-100">
+                        {slaOpt.map((option) => (
+                          <p
+                            key={option.value}
+                            className={`px-4 py-2 hover:bg-gray-500 cursor-pointer ${
+                              location.pathname?.includes(option.value)
+                                ? "!bg-[#A6AEC1] text-white"
+                                : "!bg-[#576278] text-[#C6C6C6]"
+                            }`}
+                            onClick={() => {
+                              handleMenuSelect(option.value);
+                              setOpen2(false);
+                            }}
+                          >
+                            {option.label}
+                          </p>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  
+                  <Button
+                    className={`${
+                      location.pathname.includes("input-site")
+                        ? "!bg-[#A6AEC1]"
+                        : "!bg-[#576278]"
+                    } !border-0 !rounded-4xl !shadow-none`}
+                    onClick={() => {
+                      handleMenuSelect("input-site");
+                    }}
+                  >
+                    <p
+                      className={
+                        location.pathname.includes("input-site")
+                          ? "text-white "
+                          : "text-[#C6C6C6] "
+                      }
+                    >
+                      Reconsiliation
+                    </p>
+                  </Button>
+  
+                  <Button
+                    className={`${
+                      location.pathname.includes("one")
+                        ? "!bg-[#A6AEC1]"
+                        : "!bg-[#576278]"
+                    } !border-0 !rounded-4xl !shadow-none`}
+                    onClick={() => {
+                      handleMenuSelect("one");
+                    }}
+                  >
+                    <p
+                      className={
+                        location.pathname.includes("one")
+                          ? "text-white "
+                          : "text-[#C6C6C6] "
+                      }
+                    >
+                      One Visibility
+                    </p>
+                  </Button>
+                  
+                  <Button
+                    className={`${
+                      location.pathname.includes("ticket")
+                        ? "!bg-[#A6AEC1]"
+                        : "!bg-[#576278]"
+                    } !border-0 !rounded-4xl !shadow-none`}
+                  >
+                    <p
+                      className={
+                        location.pathname.includes("ticket")
+                          ? "text-white "
+                          : "text-[#C6C6C6] "
+                      }
+                      onClick={() => {
+                        handleMenuSelect("ticket");
+                      }}
+                    >
+                      Ticket Quality
+                    </p>
+                  </Button>
+                  
+                  <Button
+                    className={`${
+                      location.pathname.includes("elibrary")
+                        ? "!bg-[#A6AEC1]"
+                        : "!bg-[#576278]"
+                    } !border-0 !rounded-4xl !shadow-none`}
+                    onClick={() => {
+                      handleMenuSelect("elibrary");
+                    }}
+                  >
+                    <p
+                      className={
+                        location.pathname.includes("elibrary")
+                          ? "text-white "
+                          : "text-[#C6C6C6] "
+                      }
+                    >
+                      E-Library
+                    </p>
+                  </Button>
+                  
+                  <Button
+                    className={`${
+                      location.pathname.includes("msa")
+                        ? "!bg-[#576278]"
+                        : "!bg-[#576278]"
+                    } !border-0 !rounded-4xl !shadow-none`}
+                    onClick={() => {
+                      handleMenuSelect("msa");
+                    }}
+                  >
+                    <p
+                      className={`cursor-pointer ${
+                        location.pathname.includes("dashboard-ta")
+                          ? "text-white"
+                          : "text-[#C6C6C6]"
+                      }`}
+                      onClick={() =>
+                        window.open("http://10.60.174.188:8008/", "_blank")
+                      }
+                    >
+                      Dashboard Ta
+                    </p>
+                  </Button>
+                </div>
+              )}
+  
               <div className="flex rounded-[54px] border border-[#DBDADE] gap-4 px-3 py-1 h-12 items-center justify-center">
                 <Image
                   src={notification}
@@ -388,7 +413,7 @@ const AppLayoutDefault = () => {
                   width={30}
                   preview={false}
                 />
-
+  
                 {/* Profile Dropdown */}
                 <div ref={profileRef} className="relative flex">
                   <Image
@@ -399,77 +424,11 @@ const AppLayoutDefault = () => {
                     preview={false}
                     onClick={() => setProfileOpen(!profileOpen)}
                   />
-
+  
                   {/* Dropdown Menu */}
                   {profileOpen && (
                     <div className="absolute right-0 top-full bg-white border border-gray-200 rounded-lg shadow-lg z-50">
                       <div className="flex flex-col divide-y divide-gray-100">
-                        {/* <div className="px-4 py-2 border-b border-gray-100">
-                        <p className="text-sm font-medium text-gray-900">
-                          John Doe
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          john.doe@company.com
-                        </p>
-                      </div> */}
-
-                        {/* <button
-                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-150"
-                        onClick={() => {
-                          console.log("Profile clicked");
-                          setProfileOpen(false);
-                        }}
-                      >
-                        <div className="flex items-center gap-2">
-                          <svg
-                            className="w-4 h-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                            />
-                          </svg>
-                          Profile
-                        </div>
-                      </button> */}
-
-                        {/* <button
-                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-150"
-                        onClick={() => {
-                          console.log("Settings clicked");
-                          setProfileOpen(false);
-                        }}
-                      >
-                        <div className="flex items-center gap-2">
-                          <svg
-                            className="w-4 h-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-                            />
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                            />
-                          </svg>
-                          Settings
-                        </div>
-                      </button> */}
-
-                        {/* <hr className="my-1 border-gray-100" /> */}
                         {JSON.parse(localStorage.getItem("user_data"))
                           ?.level_user == 1 && (
                           <>
@@ -509,14 +468,12 @@ const AppLayoutDefault = () => {
                                   stroke="currentColor"
                                   viewBox="0 0 24 24"
                                 >
-                                  {/* Original user icon path */}
                                   <path
                                     strokeLinecap="round"
                                     strokeLinejoin="round"
                                     strokeWidth={2}
                                     d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                                   />
-                                  {/* New path for the square border */}
                                   <path
                                     strokeLinecap="round"
                                     strokeLinejoin="round"
@@ -581,13 +538,7 @@ const AppLayoutDefault = () => {
             </div>
           </Header>
           <Content className="z-10">
-            {/* {menuId !== "quality-healthiness" ? (
-            <div className="py-2 md:py-4 overflow-auto lg:py-6 bg-white">
-              <AppRouteWrapper />
-            </div>
-          ) : ( */}
             <AppRouteWrapper />
-            {/* )} */}
           </Content>
         </Layout>
       </Layout>
