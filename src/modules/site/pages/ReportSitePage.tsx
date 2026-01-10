@@ -39,8 +39,9 @@ const SitePage = () => {
     { label: "Packetloss", value: "packetloss ran to core" },
     { label: "Jitter", value: "jitter ran to core" },
     { label: "Latency", value: "latency ran to core" },
-    // { label: "Mttrq Major", value: "Mttrq Major" },
-    // { label: "Mttrq Minor", value: "Mttrq Minor" },
+    { label: "Mttrq Critical", value: "mttrq critical" },
+    { label: "Mttrq Major", value: "mttrq major" },
+    { label: "Mttrq Minor", value: "mttrq minor" },
   ];
 
   const filterMonth = [
