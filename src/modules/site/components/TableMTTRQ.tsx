@@ -38,7 +38,7 @@ const TableMTTRQ: React.FC<TableMTTRQProps> = ({
         const res = await getReportSite({
           query: { parameter, week, month, year },
         }).unwrap();
-        setReport((res as any)?.data || res);
+        setReport(res.data);
       } catch (err) {
         // ignore - show empty
         console.error(err);
@@ -49,14 +49,33 @@ const TableMTTRQ: React.FC<TableMTTRQProps> = ({
   }, [parameter, week, month, year, getReportSite]);
 
   const resumeData = useMemo(() => {
-    // transform report resume (defensive)
-    const r = report?.resume || report?.resume_issue || report?.pie || [];
-    if (!Array.isArray(r)) return [];
-    return r.map((i: Record<string, any>, idx: number) => ({
-      label: (i.label as string) || (i.name as string) || `Item ${idx + 1}`,
-      value: Number(i.value ?? i.count ?? 0),
-      color: (i.color as string) || undefined,
-    }));
+    const summaryArray = (report as any)?.original?.chart;
+
+    if (!Array.isArray(summaryArray) || summaryArray.length === 0) return [];
+
+    const summary = summaryArray[0]; // Nation Wide row
+
+    const fieldMap = [
+      ["spms", "SPMS", "#2f5bd8"],
+      ["isr", "ISR", "#f97316"],
+      ["menunggu", "MENUNGGU TRANSPORTASI", "#10b981"],
+      ["qe", "QE", "#06b6d4"],
+      ["tsel", "ISSUE TSEL", "#f43f5e"],
+      ["warranty", "WARRANTY", "#7c3aed"],
+      ["comcase", "COMCASE", "#f59e0b"],
+      ["ceragon", "CERAGON", "#8b5cf6"],
+      ["waiting_cra_crq", "WAITING CRA / CRQ", "#ef4444"],
+      ["issue_dws", "ISSUE DWS", "#14b8a6"],
+      ["late_response", "LATE RESPONSE TIF / MITRA", "#374151"],
+    ];
+
+    return fieldMap
+      .map(([key, label, color]) => ({
+        label,
+        value: Number(summary[key] || 0),
+        color,
+      }))
+      .filter((i) => i.value > 0);
   }, [report]);
 
   const detailData = useMemo<Array<Record<string, unknown>>>(() => {

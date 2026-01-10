@@ -9,7 +9,8 @@ import TableMTTRQ from "../components/TableMTTRQ";
 const SitePage = () => {
   const [loading, setLoading] = useState(false);
   const [week, setWeek] = useState("32");
-  const [month, setMonth] = useState(String(new Date().getMonth()));
+  // month is 1-based to match dropdown values (1..12)
+  const [month, setMonth] = useState(String(new Date().getMonth() + 1));
   const [year, setYear] = useState(String(new Date().getFullYear()));
   const [parameter, setParameter] = useState("packetloss ran to core");
   const { dataReportSite, getReportSite, isLoadingSite } = useSite();
@@ -34,7 +35,14 @@ const SitePage = () => {
 
   useEffect(() => {
     fetchSite();
-  }, [parameter, week, month]);
+  }, [fetchSite]);
+
+  // Auto-set month when week selection changes (simple mapping across 52 weeks -> 12 months)
+  useEffect(() => {
+    const w = Number(week) || 1;
+    const monthFromWeek = Math.min(12, Math.max(1, Math.ceil((w * 12) / 52)));
+    setMonth(String(monthFromWeek));
+  }, [week]);
 
   const filterParameter = [
     { label: "Packetloss", value: "packetloss ran to core" },
