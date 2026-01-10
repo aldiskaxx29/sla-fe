@@ -4,12 +4,13 @@ import AppDropdown from "@/app/components/AppDropdown";
 import { Button, Image, Spin, Upload } from "antd";
 import xlxsIcon from "@/assets/file-spreadsheet.svg";
 import { TableReportSite } from "../components/TableReportSite";
+import TableMTTRQ from "../components/TableMTTRQ";
 
 const SitePage = () => {
   const [loading, setLoading] = useState(false);
   const [week, setWeek] = useState("32");
-  const [month, setMonth] = useState(new Date().getMonth());
-  const [year, setYear] = useState(new Date().getFullYear());
+  const [month, setMonth] = useState(String(new Date().getMonth()));
+  const [year, setYear] = useState(String(new Date().getFullYear()));
   const [parameter, setParameter] = useState("packetloss ran to core");
   const { dataReportSite, getReportSite, isLoadingSite } = useSite();
   /**
@@ -144,7 +145,7 @@ const SitePage = () => {
             title="Year"
             placeholder="All"
             options={filterYear}
-            onChange={(value) => setYear(Number(value))}
+            onChange={(value) => setYear(value)}
             value={year}
           />
           <Upload>
@@ -159,15 +160,30 @@ const SitePage = () => {
         </div>
       </div>
       <div>
-        {dataReportSite && (
+        {parameter.includes("mttrq") ? (
+          <div>
+            <p className="mb-4 font-medium text-sm text-[#0E2133]">
+              MTTRQ (Mean Time To Repair and Quality) is a metric used to
+              measure the average time taken to repair and restore a system or
+              service after a failure or outage, including the quality of the
+              repair process.
+            </p>
+            <TableMTTRQ
+              parameter={parameter}
+              week={week}
+              month={month}
+              year={year}
+            />
+          </div>
+        ) : dataReportSite && "data" in dataReportSite ? (
           <TableReportSite
-            dataSource={dataReportSite.data}
+            dataSource={dataReportSite.data as Record<string, unknown>[]}
             parameter={parameter}
             week={week}
             month={month}
             year={year}
           />
-        )}
+        ) : null}
       </div>
     </div>
   );
