@@ -39,10 +39,11 @@ const SitePage = () => {
 
   // Auto-set month when week selection changes (simple mapping across 52 weeks -> 12 months)
   useEffect(() => {
+    if (parameter.includes("mttrq")) return; // when MTTRQ uses explicit month selection ignore week changes
     const w = Number(week) || 1;
     const monthFromWeek = Math.min(12, Math.max(1, Math.ceil((w * 12) / 52)));
     setMonth(String(monthFromWeek));
-  }, [week]);
+  }, [week, parameter]);
 
   const filterParameter = [
     { label: "Packetloss", value: "packetloss ran to core" },
@@ -135,20 +136,23 @@ const SitePage = () => {
             onChange={(value) => setParameter(value)}
             value={parameter}
           />
-          {/* <AppDropdown
-            title="Month"
-            placeholder="All"
-            options={filterMonth}
-            onChange={(value) => setMonth(Number(value))}
-            value={month}
-          /> */}
-          <AppDropdown
-            title="Week"
-            placeholder="All"
-            options={filterWeek}
-            onChange={(value) => setWeek(value)}
-            value={week}
-          />
+          {parameter.includes("mttrq") ? (
+            <AppDropdown
+              title="Month"
+              placeholder="All"
+              options={filterMonth}
+              onChange={(value) => setMonth(value)}
+              value={month}
+            />
+          ) : (
+            <AppDropdown
+              title="Week"
+              placeholder="All"
+              options={filterWeek}
+              onChange={(value) => setWeek(value)}
+              value={week}
+            />
+          )}
           <AppDropdown
             title="Year"
             placeholder="All"

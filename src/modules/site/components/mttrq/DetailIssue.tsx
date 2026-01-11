@@ -7,11 +7,11 @@ interface DetailIssueProps {
 }
 
 const defaultColumns: Array<Record<string, any>> = [
-  { title: "REGION", dataIndex: "region_tsel", key: "region", width: 200 },
+  { title: "REGION", dataIndex: "region", key: "region", width: 200 },
   {
     title: "TOTAL TICKET NOT CLEAR",
-    dataIndex: "total_not_clear",
-    key: "total_not_clear",
+    dataIndex: "total",
+    key: "total",
     align: "center" as any,
   },
   {
@@ -32,11 +32,11 @@ const defaultColumns: Array<Record<string, any>> = [
   },
   {
     title: "MENUNGGU TRANSPORTASI",
-    dataIndex: "menunggu_transportasi",
-    key: "menunggu_transportasi",
+    dataIndex: "menunggu",
+    key: "menunggu",
     align: "center" as any,
     openDetail: true,
-    statusSite: "menunggu_transportasi",
+    statusSite: "menunggu",
   },
   {
     title: "QE",
@@ -48,19 +48,19 @@ const defaultColumns: Array<Record<string, any>> = [
   },
   {
     title: "ISSUE TSEL",
-    dataIndex: "issue_tsel",
-    key: "issue_tsel",
+    dataIndex: "tsel",
+    key: "tsel",
     align: "center" as any,
     openDetail: true,
-    statusSite: "issue_tsel",
+    statusSite: "tsel",
   },
   {
     title: "WARRANTY",
-    dataIndex: "waranty",
-    key: "waranty",
+    dataIndex: "warranty",
+    key: "warranty",
     align: "center" as any,
     openDetail: true,
-    statusSite: "waranty",
+    statusSite: "warranty",
   },
   {
     title: "COMCASE",
@@ -80,8 +80,8 @@ const defaultColumns: Array<Record<string, any>> = [
   },
   {
     title: "WAITING CRA / CRQ",
-    dataIndex: "waiting_cra",
-    key: "waiting_cra",
+    dataIndex: "waiting_cra_crq",
+    key: "waiting_cra_crq",
     align: "center" as any,
     openDetail: true,
     statusSite: "waiting_cra",

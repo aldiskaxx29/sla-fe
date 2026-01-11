@@ -35,10 +35,10 @@ const TableMTTRQ: React.FC<TableMTTRQProps> = ({
     (async () => {
       try {
         // fetch report data
-        const res = await getReportSite({
+        const res = (await getReportSite({
           query: { parameter, week, month, year },
-        }).unwrap();
-        setReport(res.data);
+        }).unwrap()) as any;
+        setReport(res?.data);
       } catch (err) {
         // ignore - show empty
         console.error(err);
@@ -49,11 +49,18 @@ const TableMTTRQ: React.FC<TableMTTRQProps> = ({
   }, [parameter, week, month, year, getReportSite]);
 
   const resumeData = useMemo(() => {
-    const summaryArray = (report as any)?.original?.chart;
+    const chart = (report as any)?.chart;
+    if (!chart || Object.keys(chart).length === 0) return [];
 
-    if (!Array.isArray(summaryArray) || summaryArray.length === 0) return [];
-
-    const summary = summaryArray[0]; // Nation Wide row
+    // normalize keys (remove non-alphanumeric and lowercase) for tolerant matching
+    const normalize = (s: any) =>
+      String(s || "")
+        .replace(/[^a-z0-9]/gi, "")
+        .toLowerCase();
+    const normalizedChart: Record<string, number> = {};
+    Object.entries(chart).forEach(([k, v]) => {
+      normalizedChart[normalize(k)] = Number(v) || 0;
+    });
 
     const fieldMap = [
       ["spms", "SPMS", "#2f5bd8"],
@@ -70,16 +77,24 @@ const TableMTTRQ: React.FC<TableMTTRQProps> = ({
     ];
 
     return fieldMap
-      .map(([key, label, color]) => ({
-        label,
-        value: Number(summary[key] || 0),
-        color,
-      }))
+      .map(([key, label, color]) => {
+        const desired = normalize(key);
+        // find first chart key that contains desired token OR its prefix (tolerant to minor variations)
+        const prefix = desired.slice(0, Math.min(5, desired.length));
+        const match = Object.keys(normalizedChart).find(
+          (nk) => nk.includes(desired) || (prefix && nk.includes(prefix))
+        );
+        const value = match ? normalizedChart[match] : 0;
+        return { label, value: Number(value || 0), color };
+      })
       .filter((i) => i.value > 0);
   }, [report]);
 
   const detailData = useMemo<Array<Record<string, unknown>>>(() => {
+    // API now returns rows under `data` (e.g. { data: { data: [...], chart: {...} }})
     return (
+      (report?.data as Array<Record<string, unknown>>) ||
+      ((report?.data as any)?.data as Array<Record<string, unknown>>) ||
       (report?.detail as Array<Record<string, unknown>>) ||
       (report?.table as Array<Record<string, unknown>>) ||
       []
@@ -98,7 +113,7 @@ const TableMTTRQ: React.FC<TableMTTRQProps> = ({
   const openDetail = async (region: string, statusSite: string) => {
     try {
       setIsLoading(true);
-      const res = await getClearData({
+      const res = (await getClearData({
         query: {
           region,
           parameter,
@@ -107,8 +122,8 @@ const TableMTTRQ: React.FC<TableMTTRQProps> = ({
           week,
           year,
         },
-      }).unwrap();
-      setModalData((res as any)?.data || (res as any) || []);
+      }).unwrap()) as any;
+      setModalData(res?.data || res || []);
       setModalTitle(`${region} - ${statusSite}`);
       setOpenModal(true);
     } catch (err) {
