@@ -111,6 +111,7 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week }) => {
       break;
 
     default:
+      
       break;
   }
 
@@ -265,7 +266,8 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week }) => {
             >
               <Input placeholder="Masukkan Site ID" readOnly />
             </Form.Item>
-            {dataModal?.parameter != "mttrq major" &&
+            {dataModal?.parameter != "mttrq critical" &&
+              dataModal?.parameter != "mttrq major" &&
               dataModal?.parameter != "mttrq minor" && (
                 <Form.Item name="site_exclude" label="Exclude?">
                   <Checkbox
@@ -279,7 +281,8 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week }) => {
               )}
           </div>
 
-          {(dataModal?.parameter == "mttrq major" ||
+          {(dataModal?.parameter == "mttrq critical" ||
+            dataModal?.parameter == "mttrq major" ||
             dataModal?.parameter == "mttrq minor") && (
             <Form.Item
               label="Ttr Selisih"
@@ -289,7 +292,8 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week }) => {
               <Input type="text" placeholder="Masukkan Ttr Selisih" />
             </Form.Item>
           )}
-          {(dataModal?.parameter == "mttrq major" ||
+          {(dataModal?.parameter == "mttrq critical" ||
+            dataModal?.parameter == "mttrq major" ||
             dataModal?.parameter == "mttrq minor") && (
             <Form.Item
               label="Ticket Id"
@@ -299,7 +303,8 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week }) => {
               <Input type="text" placeholder="Masukkan Ticket Id" readOnly />
             </Form.Item>
           )}
-          {dataModal?.parameter != "mttrq major" &&
+          {dataModal?.parameter != "mttrq critical" &&
+            dataModal?.parameter != "mttrq major" &&
             dataModal?.parameter != "mttrq minor" && (
               <Form.Item name="site_sos" label="Site SOS">
                 <Checkbox onChange={onChangeSos} checked={checked}>
@@ -371,11 +376,14 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week }) => {
                 <Option value="⁠Issue TSEL">⁠Issue TSEL</Option>
                 <Option value="⁠Warranty">⁠Warranty</Option>
                 <Option value="⁠Waiting DWS">⁠Waiting DWS</Option>
+                <Option value="Force Major">Force Major</Option>
               </Select>
             </Form.Item>
           )}
 
-          {dataModal?.parameter != "mttrq major" &&
+          {
+            dataModal?.parameter != "mttrq critical" &&
+            dataModal?.parameter != "mttrq major" &&
             dataModal?.parameter != "mttrq minor" && (
               <Form.Item
                 label="KPI"

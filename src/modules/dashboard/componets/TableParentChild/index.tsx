@@ -148,7 +148,7 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
           className: "!bg-blue-pacific !p-3",
         }),
         render: (text, record) => {
-          if (record.parameter === "PACKETLOSS RAN TO CORE") {
+          if (record.parameter === "PACKETLOSS 1-5% RAN TO CORE" || record.parameter === "PACKETLOSS >5% RAN TO CORE") {
             // Hilangkan .00
             return parseFloat(text).toFixed(2).endsWith(".00")
               ? parseInt(text)
@@ -584,8 +584,11 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                     ) {
                       if (
                         record.parameter
-                          .toLowerCase()
-                          .includes("packetloss ran to core") ||
+                          ?.toLowerCase()
+                          .includes("packetloss 1-5% ran to core") ||
+                        record.parameter
+                          ?.toLowerCase()
+                          .includes("packetloss >5% ran to core") ||
                         record.mini_parameter
                           ?.toLowerCase()
                           .includes("packetloss ran to core")
