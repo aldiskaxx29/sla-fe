@@ -41,7 +41,7 @@ const AppLayoutDefault = () => {
   const titleNavigation = useMemo(() => {
     // if (menuId === "msa") return "MONITORING ACHIEVEMENT SLA MSA";
     // if (menuId === "cnop") return "MONITORING ACHIEVEMENT SLA CNOP";
-    if (menuId === "msa") return "ACHIEVEMENT SLA MSA";
+    if (menuId === "msa") return "ACHIEVEMENT SLA WISA";
     if (menuId === "cnop") return "ACHIEVEMENT SLA CNOP";
     if (location.pathname.includes("site")) return "REKONSILIASI";
     if (location.pathname.includes("support")) return "REPORT SUPPORT NEEDED";
@@ -61,7 +61,7 @@ const AppLayoutDefault = () => {
     { label: "Quality Healthiness", value: "network/quality-healthiness" },
   ];
   const slaOpt = [
-    { label: "Achievement MSA", value: "msa" },
+    { label: "Achievement WISA", value: "msa" },
     { label: "Achievement CNOP", value: "cnop" },
     // { label: "Reconsiliation", value: "input-site" },
     { label: "Report Reconsilation", value: "report-site" },

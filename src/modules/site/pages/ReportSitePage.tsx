@@ -5,15 +5,55 @@ import { Button, Image, Spin, Upload } from "antd";
 import xlxsIcon from "@/assets/file-spreadsheet.svg";
 import { TableReportSite } from "../components/TableReportSite";
 import TableMTTRQ from "../components/TableMTTRQ";
+import {
+  useLazyDownload_excel_evidenceQuery
+} from "../rtk/site.rtk";
 
 const SitePage = () => {
   const [loading, setLoading] = useState(false);
-  const [week, setWeek] = useState("32");
+  const [week, setWeek] = useState("1");
   // month is 1-based to match dropdown values (1..12)
   const [month, setMonth] = useState(String(new Date().getMonth() + 1));
   const [year, setYear] = useState(String(new Date().getFullYear()));
   const [parameter, setParameter] = useState("packetloss ran to core");
   const { dataReportSite, getReportSite, isLoadingSite } = useSite();
+
+  const [downloadRecon] = useLazyDownload_excel_evidenceQuery();
+
+  const handleDownload = useCallback(async () => {
+    try {
+      const result = await downloadRecon({
+        query: {
+          parameter,
+          year,
+          month,
+          week,
+          ...(!["mttrq critical", "mttrq major", "mttrq minor"].includes(parameter) && { week }),
+          ...(["mttrq critical", "mttrq major", "mttrq minor"].includes(parameter) && { month }),
+        },
+      }).unwrap();
+
+      const blobUrl = URL.createObjectURL(result as Blob);
+
+      const tempLink = document.createElement("a");
+      tempLink.href = blobUrl;
+      if (
+        parameter.includes("mttrq major") ||
+        parameter.includes("mttrq minor")
+      ) {
+        tempLink.setAttribute("download", "rekonsiliasi-mttr.xlsx");
+      } else {
+        tempLink.setAttribute("download", "rekonsiliasi-access.xlsx");
+      }
+      document.body.appendChild(tempLink);
+      tempLink.click();
+
+      document.body.removeChild(tempLink);
+      URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error("Failed to download the file:", error);
+    }
+  }, [year,month, parameter, week]);
   /**
    * @description Fetch customer list
    *
@@ -160,15 +200,23 @@ const SitePage = () => {
             onChange={(value) => setYear(value)}
             value={year}
           />
-          <Upload>
-            <Button
+          {/* <Button
               onClick={() => {}}
               className="!h-11 !px-3 py-2.5 !border-0 !rounded-full !bg-[#EDFFFD]"
             >
               <p className="text-brand-secondary font-medium">Import Excel</p>
               <Image src={xlxsIcon} alt="icon" width={16} preview={false} />
-            </Button>
-          </Upload>
+            </Button> */}
+          <Button
+            // onClick={() => {}}
+            onClick={() => {
+              handleDownload();
+            }}
+            className="!h-11 !px-3 py-2.5 !border-0 !rounded-full !bg-[#EDFFFD]"
+          >
+            <p className="text-brand-secondary font-medium">Export Recon</p>
+            <Image src={xlxsIcon} alt="icon" width={16} preview={false} />
+          </Button>
         </div>
       </div>
       <div>

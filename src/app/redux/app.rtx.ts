@@ -25,29 +25,6 @@ const baseQuery = fetchBaseQuery({
   },
 });
 
-// const baseQueryWithReauth: BaseQueryFn<
-//   string | FetchArgs,
-//   unknown,
-//   FetchBaseQueryError
-// > = async (args, api, extraOptions) => {
-//   const result = await baseQuery(args, api, extraOptions);
-
-//   if (result.error?.status && result.error?.originalStatus >= 400) {
-//     const { status, data } = result.error;
-//     // you can customize the message however you like:
-//     const msg =
-//       // if your backend returns { message: "..." }:
-//       (typeof data === "object" && (data as any).message) ||
-//       `Request failed with status ${status}`;
-//     toast.error(msg);
-//   }
-//   console.log('resssu', result)
-//   if (result.error?.status === 401 || result.error?.status === 302) {
-//     api.dispatch(authLogout());
-//   }
-//   return result;
-// };
-
 const baseQueryWithReauth: BaseQueryFn<
   string | FetchArgs,
   unknown,
@@ -71,10 +48,10 @@ const baseQueryWithReauth: BaseQueryFn<
   }
 
   // Jika FETCH_ERROR (misal jaringan mati / gagal fetch)
-  // if (result.error?.status === "FETCH_ERROR") {
-  //   localStorage.removeItem("token");
-  //   api.dispatch(authLogout());
-  // }
+  if (result.error?.status === "FETCH_ERROR") {
+    localStorage.removeItem("token");
+    api.dispatch(authLogout());
+  }
 
   return result;
 };
