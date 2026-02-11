@@ -1,0 +1,111 @@
+.mapboxgl-marker {
+  left: 0;
+  opacity: 1;
+  position: absolute;
+  top: 0;
+  transition: opacity 0.2s;
+  will-change: transform;
+}
+
+.flag-marker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.flag-wrapper {
+  display: flex;
+  gap: 2px;
+}
+
+.flag-pole {
+  width: 3px;
+  height: 50px;
+  background: #2c3e50;
+  border-radius: 1.5px;
+}
+
+.flag-flag {
+  width: 40px;
+  height: 24px;
+  background: #fff;
+  border: 1.5px solid #2c3e50;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  clip-path: polygon(0% 0%, 95% 0%, 100% 50%, 95% 100%, 0% 100%);
+}
+
+.flag-logo {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+.flag-text {
+  font-size: 10px;
+  font-weight: bold;
+  color: #2c3e50;
+  white-space: nowrap;
+  text-shadow: 0 0 2px white;
+}
+
+.tooltip-card {
+  /* background: white; */
+  /* border-radius: 12px; */
+  /* box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); */
+  padding: 10px;
+  width: 220px;
+  font-family: sans-serif;
+}
+
+.tooltip-title {
+  background: #1e2a38;
+  color: white;
+  font-weight: bold;
+  text-align: center;
+  padding: 4px 10px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.tooltip-segment {
+  background: #f8f8f8;
+  border-radius: 10px;
+  padding: 6px;
+  margin-bottom: 6px;
+  display: flex;
+  flex-direction: column;
+}
+
+.segment-label {
+  color: #00a3a3;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.segment-value {
+  color: #f9b233; /* kuning oranye */
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.segment-detail {
+  font-size: 11px;
+  color: #333;
+}
+
+.segment-bar {
+  margin-top: 4px;
+  height: 6px;
+  background: #dcdcdc;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.segment-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4cd964, #1e9d34);
+}

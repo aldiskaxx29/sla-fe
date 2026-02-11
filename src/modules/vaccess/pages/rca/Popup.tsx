@@ -1,0 +1,45 @@
+import {
+ CloseOutlined
+} from "@ant-design/icons";
+
+const Popup = ({close,data}) =>{
+    return(
+        <div className="fixed flex top-20 justify-center left-0 right-0 bottom-0">
+            <div className="bg-gray-900 opacity-70 absolute h-full w-full"></div>
+            <div className="bg-white px-3 py-5 mx-auto rounded-sm border border-gray-200 relative z-2 top-10 mb-15">
+                <CloseOutlined onClick={()=>close(false)} className="absolute cursor-pointer right-0 text-white bg-red-600 w-8 h-8 flex justify-center items-center rounded-full" style={{color:'#fff',right:-15,top:-20}}></CloseOutlined>
+                {/* <div className="italic text-red-700 font-bold text-md text-center">{title}</div> */}
+                <div className="h-full py-2">
+                <div className="overflow-y-auto scrollbar-thin mb-2" style={{height:'99%'}}>
+                    <table className="w-220 border">
+                        <thead>
+                            <tr>
+                                <th className="py-0.5 px-2 sticky top-0 text-center border border-gray-800 bg-blue-200 text-gray-800" style={{boxShadow:'inset 0px 0.2px 0px #000,inset 0px -0.2px 0px #000'}}>No</th>
+                                <th className="py-0.5 px-2 sticky top-0 text-center border border-gray-800 bg-blue-200 text-gray-800" style={{boxShadow:'inset 0px 0.2px 0px #000,inset 0px -0.2px 0px #000'}}>Site ID</th>
+                                <th className="py-0.5 px-2 sticky top-0 text-center border border-gray-800 bg-blue-200 text-gray-800" style={{boxShadow:'inset 0px 0.2px 0px #000,inset 0px -0.2px 0px #000'}}>Regional</th>
+                                <th className="py-0.5 px-2 sticky top-0 text-center border border-gray-800 bg-blue-200 text-gray-800" style={{boxShadow:'inset 0px 0.2px 0px #000,inset 0px -0.2px 0px #000'}}>Witel</th>
+                                <th className="py-0.5 px-2 sticky top-0 text-center border border-gray-800 bg-blue-200 text-gray-800" style={{boxShadow:'inset 0px 0.2px 0px #000,inset 0px -0.2px 0px #000'}}>Packetloss Status</th>
+                                <th className="py-0.5 px-2 sticky top-0 text-center border border-gray-800 bg-blue-200 text-gray-800" style={{boxShadow:'inset 0px 0.2px 0px #000,inset 0px -0.2px 0px #000'}}>Packetloss</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {[...Array(100).keys()].map(n => n + 1).map(a=>{
+                                return(<tr>
+                                <td className="py-0.5 px-2 border border-gray-800 text-center">{a}</td>
+                                <td className="py-0.5 px-2 border border-gray-800 text-center">JKSSHKD</td>
+                                <td className="py-0.5 px-2 border border-gray-800 text-center">01-SUMBAGUT</td>
+                                <td className="py-0.5 px-2 border border-gray-800 text-center">ACEH</td>
+                                <td className="py-0.5 px-2 border border-gray-800 text-center">CONSECUTIVE</td>
+                                <td className="py-0.5 px-2 border border-gray-800 text-center">2</td>
+                                </tr>)
+                            })}
+                        </tbody>
+                    </table>
+                </div>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+export default Popup

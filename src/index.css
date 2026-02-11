@@ -1,0 +1,56 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary-500: #11375C;
+  --color-blue-pacific: #cbeffb;
+  --color-brand-secondary: #0E2133;
+  --color-secondary: #64748b;
+}
+
+:root {
+  font-family: "Poppins" !important;
+  line-height: 1.5;
+  font-weight: 400;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@font-family {
+  font-family: "Poppins" !important;
+}
+
+button:hover {
+  border-color: #646cff;
+}
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    background-color: #ffffff;
+  }
+  a:hover {
+    color: #747bff;
+  }
+  button {
+    background-color: #f9f9f9;
+  }
+}
+
+.custom-menu .ant-menu-submenu-title {
+  background: #ffffff;
+  color: #4B465C !important;
+display: flex;
+justify-content: center;
+align-items: center;
+gap: 24;
+}
+
+.custom-menu .ant-menu-submenu-title:hover {
+  background-color: #747bff !important;
+}
