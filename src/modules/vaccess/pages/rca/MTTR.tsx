@@ -96,17 +96,17 @@ const StackedBarChart = ({datachart}) => {
 
   return <div style={{ height: "190px",width:"100%" }}><Bar data={data} options={options} /></div>;
 };
-const TOPOLDEST =()=>{
+const TOPOLDEST =({sitegroup,week})=>{
     const [TOP,setTOP] = useState([])
     async function TopOldest(){
-        let res = await fetch('https://qosmo.telkom.co.id/baseapi/vrca.php?cmd=top-oldest')
+        let res = await fetch('https://qosmo.telkom.co.id/baseapi/vrca.php?cmd=top-oldest&sitegroup='+sitegroup)
         let {data} = await res.json();
         setTOP(data)
     }
 
     useEffect(()=>{
         TopOldest()
-    },[])
+    },[sitegroup,week])
     return(
             <div>
                     <div className="text-md font-bold text-red-700 flex gap-2 italic">TOP 15 OLDEST TICKET</div>
@@ -130,21 +130,21 @@ const TOPOLDEST =()=>{
                                         <td style={{fontWeight:'400'}} className="bg-white border border-gray-800 text-gray-800 text-center p-[2px]">{T.region.split("-")[1]}</td>
                                         <td style={{fontWeight:'400'}} className="bg-white border border-gray-800 text-gray-800 text-center p-[2px]">{T.rca}</td>
                                         <td style={{fontWeight:'400'}} className="bg-white border border-gray-800 text-gray-800 text-center p-[2px]">{Number(T.ttr).toFixed(2)}</td>
-<td
-  style={{
-    fontWeight: 400,
-    height: 10,
-    width: 50,
-    whiteSpace: 'nowrap',
-    textOverflow: 'ellipsis',
-    overflow: 'hidden'
-  }}
-  className="bg-white border border-gray-800 text-gray-800 text-center p-[2px]"
->
-  {T.last_update
-    ? `${T.last_update.slice(0, 15)}...`
-    : ''}
-</td>
+                                        <td
+                                        style={{
+                                            fontWeight: 400,
+                                            height: 10,
+                                            width: 50,
+                                            whiteSpace: 'nowrap',
+                                            textOverflow: 'ellipsis',
+                                            overflow: 'hidden'
+                                        }}
+                                        className="bg-white border border-gray-800 text-gray-800 text-center p-[2px]"
+                                        >
+                                        {T.last_update
+                                            ? `${T.last_update.slice(0, 15)}...`
+                                            : ''}
+                                        </td>
                                     </tr>
                                 )})}
                             </tbody>
@@ -153,11 +153,11 @@ const TOPOLDEST =()=>{
     )
 }
 
-const RCACHART = React.memo(()=>{
+const RCACHART = React.memo(({sitegroup,week})=>{
     const [DATA,setData] = useState({SPMS:0,ISR:0,QE:0,"ISSUE TSEL":0,WARRANTY:0,COMCASE:0,"WAITING CRA/CRQ":0,"ISSUE DWS":0,"LATE RESPONSE TIF":0})
     const [DATACHART,setDataChart] = useState([])
     async function ChartData(){
-        let res = await fetch('https://qosmo.telkom.co.id/baseapi/vrca.php?cmd=chart-rca-not-clear')
+        let res = await fetch('https://qosmo.telkom.co.id/baseapi/vrca.php?cmd=chart-rca-not-clear&sitegroup='+sitegroup)
         let {data} = await res.json()
         let d = []
         Object.keys(DATA).forEach((a,i)=>{
@@ -168,7 +168,7 @@ const RCACHART = React.memo(()=>{
     }
     useEffect(()=>{
         ChartData()
-    },[])
+    },[sitegroup,week])
     return(
         <div>
             <div className="text-gray-800 font-bold text-center" style={{fontSize:'0.8em'}}>RCA TICKET NOT CLEAR</div>
@@ -176,18 +176,18 @@ const RCACHART = React.memo(()=>{
         </div>
     )
 })
-const RESUME = React.memo(({week})=>{
+const RESUME = React.memo(({week,sitegroup})=>{
     const [CLOSED,setCLOSED] = useState([])
     const [OPEN,setOPEN] = useState([])
     async function ChartData(){
-        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vrca.php?cmd=resume&week=${week.split('-')[0]}&year=${week.split('-')[1]}`)
+        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vrca.php?cmd=resume&week=${week.split('-')[0]}&year=${week.split('-')[1]}&sitegroup=${sitegroup}`)
         let {data} = await res.json()
         setCLOSED([...data.CLOSED])
         setOPEN([...data.OPEN])
     }
     useEffect(()=>{
         ChartData()
-    },[])
+    },[sitegroup,week])
     return(
         <div>
             <div className="text-md font-bold text-red-700 flex gap-2 italic">RESUME</div>
@@ -210,7 +210,7 @@ const RESUME = React.memo(({week})=>{
     )
 })
 
-const TABLERCANOTCLEAR = React.memo(()=>{
+const TABLERCANOTCLEAR = React.memo(({sitegroup,week})=>{
     const RESETTB = {
         SUMBAGUT : {total_ticket:0},
         SUMBAGSEL : {total_ticket:0},
@@ -246,7 +246,7 @@ const TABLERCANOTCLEAR = React.memo(()=>{
     const [POPDATA,setPOPDATA] = useState({})
     const [DETAIL,setDETAIL]=useState(RESETDETAIL)
     async function TableData(){
-        let res = await fetch('https://qosmo.telkom.co.id/baseapi/vrca.php?cmd=detail-rca-not-clear&sitegroup=')
+        let res = await fetch('https://qosmo.telkom.co.id/baseapi/vrca.php?cmd=detail-rca-not-clear&sitegroup='+sitegroup)
         let {data} = await res.json()
         let d = RESETTB
         Object.keys(data.total_ticket).forEach(a=>{
@@ -265,7 +265,7 @@ const TABLERCANOTCLEAR = React.memo(()=>{
     }
 
     async function PopTable(region,rca){
-        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vrca.php?cmd=pop-not-clear&region=${region}&rca=${rca}`)
+        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vrca.php?cmd=pop-not-clear&region=${region}&rca=${rca}&sitegroup=${sitegroup}`)
         let {data} = await res.json()
         setPOPDATA(data)
         
@@ -276,7 +276,7 @@ const TABLERCANOTCLEAR = React.memo(()=>{
 
     useEffect(()=>{
         TableData()
-    },[])
+    },[sitegroup,week])
     return(
         <div>
             {POP && <PopupTTR close={()=>setPOP(!POP)} data={POPDATA}></PopupTTR>}
@@ -344,6 +344,7 @@ const TABLERCANOTCLEAR = React.memo(()=>{
     )
 })
 const MTTR=({parameter,week})=>{
+    const [refresh,setRefresh] = useState(false)
     const [TOP,setTOP] = useState([
         {ticket:'aksdkjasd',region:'SUMBAGUT',rca:'ISR',last_update:''},
         {ticket:'aksdkjasd',region:'SUMBAGUT',rca:'ISR',last_update:''},
@@ -355,13 +356,17 @@ const MTTR=({parameter,week})=>{
         {ticket:'aksdkjasd',region:'SUMBAGUT',rca:'ISR',last_update:''},
         {ticket:'aksdkjasd',region:'SUMBAGUT',rca:'ISR',last_update:''},
     ]) 
+
+    useEffect(()=>{
+        setRefresh(!refresh)
+    },[week])
     
     return(
             <div className="grid w-full col-span-2 gap-2" style={{gridTemplateColumns:'0.5fr 1fr'}}>
                 <RESUME week={week} sitegroup={parameter.split(' ')[1]}></RESUME>
-                <RCACHART></RCACHART>
-                <TOPOLDEST></TOPOLDEST>
-                <TABLERCANOTCLEAR></TABLERCANOTCLEAR>
+                <RCACHART week={week} sitegroup={parameter.split(' ')[1]}></RCACHART>
+                <TOPOLDEST week={week} sitegroup={parameter.split(' ')[1]}></TOPOLDEST>
+                <TABLERCANOTCLEAR week={week} sitegroup={parameter.split(' ')[1]}></TABLERCANOTCLEAR>
             </div>
     )
 }

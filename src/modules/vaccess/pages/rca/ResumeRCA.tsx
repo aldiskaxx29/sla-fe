@@ -103,9 +103,7 @@ const ResumeRCA = ()=>{
     let WEEKS52 = generate52Weeks()
     
     useEffect(()=>{
-        // console.log(generate52Weeks())
         setWeek(`${WEEKS52[0].week}-${WEEKS52[0].year}`)
-        // console.log(WEEK,WEEKS52[0].week)
     },[])
     
     return (

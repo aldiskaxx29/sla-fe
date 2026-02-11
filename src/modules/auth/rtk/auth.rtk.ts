@@ -138,17 +138,9 @@ export const authApi = emptySplitApi.injectEndpoints({
         }
       },
     }),
-<<<<<<< HEAD
-=======
-
->>>>>>> 6354a4b0266037d4693628ef77724ba22da01c5a
   }),
   overrideExisting: false,
 });
 
-<<<<<<< HEAD
-export const { useLoginMutation, useLogoutMutation, useLogin_2faMutation } =
-=======
 export const { useLoginMutation, useLogoutMutation, useLogin_2faMutation, useResetTokenMutation } =
->>>>>>> 6354a4b0266037d4693628ef77724ba22da01c5a
   authApi;

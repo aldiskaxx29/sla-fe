@@ -17,11 +17,8 @@ import { useDashboardTARouter } from "@/modules/dashboard-ta/router/dashboardTA.
 import { useUserRouter } from "@/modules/user/router/user.router";
 import { useApproverRouter } from "@/modules/approver/router/approver.router";
 import { useProfileRouter } from "@/modules/profile/router/profile.router";
-<<<<<<< HEAD
 import { useAccessPredictionRouter } from "@/modules/vaccess/router/prediction.router";
 import { useResumeRCARouter } from "@/modules/vaccess/router/resumerca.router";
-=======
->>>>>>> 6354a4b0266037d4693628ef77724ba22da01c5a
 
 const useRouter = () => {
   const app = useAppRouter();
@@ -57,7 +54,7 @@ const useRouter = () => {
     },
     {
       path: "",
-      element: <AuthRouteGuard />,
+      element: <AuthRouteGuard  requireAuth={false}/>,
       children: [
         {
           path: "",

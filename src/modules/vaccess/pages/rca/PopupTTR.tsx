@@ -23,12 +23,12 @@ const PopupTTR = ({close,data}) =>{
                         </thead>
                         <tbody>
                             {data.map((a,i)=>{
-                                return(<tr>
-                                <td className="py-0.5 px-2 border border-gray-800 text-center">{i}</td>
-                                <td className="py-0.5 px-2 border border-gray-800 text-center">{a.ticket_id}</td>
-                                <td className="py-0.5 px-2 border border-gray-800 text-center">{a.region}</td>
-                                <td className="py-0.5 px-2 border border-gray-800 text-center">{a.treshold}</td>
-                                <td className="py-0.5 px-2 border border-gray-800 text-center">{a.ttr}</td>
+                                return(<tr key={i}>
+                                    <td className="py-0.5 px-2 border border-gray-800 text-center">{i+1}</td>
+                                    <td className="py-0.5 px-2 border border-gray-800 text-center">{a.ticket_id}</td>
+                                    <td className="py-0.5 px-2 border border-gray-800 text-center">{a.region}</td>
+                                    <td className="py-0.5 px-2 border border-gray-800 text-center">{a.treshold}</td>
+                                    <td className="py-0.5 px-2 border border-gray-800 text-center">{Number(a.ttr).toFixed(2)}</td>
                                 </tr>)
                             })}
                         </tbody>

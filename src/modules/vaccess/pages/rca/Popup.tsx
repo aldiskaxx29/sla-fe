@@ -24,7 +24,7 @@ const Popup = ({close,data}) =>{
                         </thead>
                         <tbody>
                             {[...Array(100).keys()].map(n => n + 1).map(a=>{
-                                return(<tr>
+                                return(<tr key={i}>
                                 <td className="py-0.5 px-2 border border-gray-800 text-center">{a}</td>
                                 <td className="py-0.5 px-2 border border-gray-800 text-center">JKSSHKD</td>
                                 <td className="py-0.5 px-2 border border-gray-800 text-center">01-SUMBAGUT</td>
