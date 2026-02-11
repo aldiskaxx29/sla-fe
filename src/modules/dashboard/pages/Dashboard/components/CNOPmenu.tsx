@@ -105,6 +105,11 @@ const CNOPmenu = ({
     fetchComply();
   }, []);
 
+
+  const handleExportXlsx = () => {
+
+  }
+
   return (
     <div>
       <div className="bg-white border border-[#DBDBDB] rounded-xl p-4 mx-6 ">
@@ -157,7 +162,7 @@ const CNOPmenu = ({
               value={filter}
             />
             <Button
-              onClick={() => {}}
+              onClick={() => {handleExportXlsx}}
               className="!h-11 !px-3 py-2.5 !border-0 !rounded-full !bg-[#EDFFFD]"
             >
               <p className="text-brand-secondary font-medium">Export as XLS</p>

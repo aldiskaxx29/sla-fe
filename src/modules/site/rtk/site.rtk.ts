@@ -76,6 +76,17 @@ export const siteApi = emptySplitApi.injectEndpoints({
         };
       },
     }),
+    download_excel_evidence: builder.query({
+      query: ({ query }) => {
+        return {
+          method: "GET",
+          url: "/rekonsiliasi/evidence",
+          params: query,
+          responseHandler: (response) => response.blob(),
+          cache: "no-cache",
+        };
+      },
+    }),
     download_evidance: builder.query({
       query: ({ query }) => {
         return {
@@ -140,6 +151,7 @@ export const {
   useLazyDetail_site_fetchDataQuery,
   useLazyClear_data_fetchDataQuery,
   useLazyDownload_templateQuery,
+  useLazyDownload_excel_evidenceQuery,
   useSave_siteMutation,
   useUpload_templateMutation,
   useLazyDownload_evidanceQuery,

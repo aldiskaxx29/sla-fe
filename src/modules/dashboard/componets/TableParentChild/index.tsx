@@ -571,9 +571,36 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                     const isLastTwo =
                       record.parameter.toLowerCase().includes("service") ||
                       record.parameter.toLowerCase().includes("weighted");
-                    const isBelowTarget = Number(text) < Number(record.target);
+                    // const isBelowTarget = Number(text) <= Number(record.target);
+                    const value = Number(text);
+                    const target = Number(record.target);
+
+                    if (Number.isNaN(value) || Number.isNaN(target)) {
+                      return <span>{text}</span>;
+                    }
+
+                    const isJitter = record.mini_parameter
+                      ?.toLowerCase()
+                      .includes('latency') || 
+                      record.mini_parameter
+                      ?.toLowerCase()
+                      .includes('jitter') ||
+                      record.mini_parameter
+                      ?.toLowerCase()
+                      .includes('mttr');
+
+                    const isBelowTarget = isJitter
+                      ? value < target        // 👉 JITTER
+                      : value <= target;    
+
                     if (!text) return text;
-                    if (!record.target && !isLastTwo) {
+                    // if (!record.target && !isLastTwo) {
+                    if (
+                      (record.target === '' ||
+                        record.target === null ||
+                        record.target === undefined) &&
+                      !isLastTwo
+                    ) {
                       return <span>{text}</span>;
                     }
                     if (
@@ -587,6 +614,12 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                           ?.toLowerCase()
                           .includes("packetloss 1-5% ran to core") ||
                         record.parameter
+                          ?.toLowerCase()
+                          .includes("packetloss >5% ran to core") ||
+                        record.mini_parameter
+                          ?.toLowerCase()
+                          .includes("packetloss 1-5% ran to core") ||
+                        record.mini_parameter
                           ?.toLowerCase()
                           .includes("packetloss >5% ran to core") ||
                         record.mini_parameter

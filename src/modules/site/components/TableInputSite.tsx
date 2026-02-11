@@ -194,17 +194,17 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
   } as const;
   const groupingRcaCnq : Record<"packetloss" | "latency" | "jitter", any> = {
     packetloss: {
-      title: `Update Progres Cnq`,
+      title: `Update Progres CNQ`,
       key: `grouping_rca_packetloss_cnq_2`,
       dataIndex: `grouping_rca_packetloss_cnq_2`,
     },
     latency: {
-      title: `Update Progres Cnq`,
+      title: `Update Progres CNQ`,
       key: `grouping_rca_latency_cnq_2`,
       dataIndex: `grouping_rca_latency_cnq_2`,
     },
     jitter: {
-      title: `Update Progres Cnq`,
+      title: `Update Progres CNQ`,
       key: `grouping_rca_jitter_cnq_2`,
       dataIndex: `grouping_rca_jitter_cnq_2`,
     }
@@ -306,13 +306,13 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
         : [])
       ,
       {
-        title: `Last Update Cnq`,
+        title: `Last Update CNQ`,
         key: `last_update_${dynamicKey}_cnq`,
         dataIndex: `last_update_${dynamicKey}_cnq`,
       },
 
       {
-        title: `User Update Cnq`,
+        title: `User Update CNQ`,
         key: `user_update_${dynamicKey}_cnq`,
         dataIndex: `user_update_${dynamicKey}_cnq`,
       },

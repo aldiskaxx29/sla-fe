@@ -9,7 +9,7 @@ import { ToastContainer } from "react-toastify";
 import "mapbox-gl/dist/mapbox-gl.css";
 
 createRoot(document.getElementById("root")!).render(
-  // <StrictMode>
+  <StrictMode>
     <BrowserRouter>
       {/* Redux, Persist, and Router */}
       <Provider store={store}>
@@ -17,5 +17,5 @@ createRoot(document.getElementById("root")!).render(
       </Provider>
       <ToastContainer />
     </BrowserRouter>
-  // </StrictMode>
+  </StrictMode>
 );

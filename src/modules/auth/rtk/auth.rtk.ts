@@ -90,6 +90,32 @@ export const authApi = emptySplitApi.injectEndpoints({
       }),
     }),
 
+    resetToken: builder.mutation<IAuthLoginResponse, IAuthLoginRequest>({
+      query: (body) => {
+        return {
+          method: "POST",
+          url: "reset2fa",
+          body,
+        };
+      },
+      transformResponse: (response: IAuthLoginResponse) => {
+        console.log(response, "RESP Reset Token");
+
+        setAuthData(response);
+        return response;
+      },
+      transformErrorResponse: (
+        response:
+          | import("@reduxjs/toolkit/query").FetchBaseQueryError
+          | { data?: { message?: string } }
+      ) => ({
+        status: "status" in response ? response.status : undefined,
+        message:
+          (response as { data?: { message?: string } })?.data?.message ||
+          "Login failed",
+      }),
+    }),
+
     logout: builder.mutation<void, void>({
       query: () => ({
         method: "POST",
@@ -112,9 +138,17 @@ export const authApi = emptySplitApi.injectEndpoints({
         }
       },
     }),
+<<<<<<< HEAD
+=======
+
+>>>>>>> 6354a4b0266037d4693628ef77724ba22da01c5a
   }),
   overrideExisting: false,
 });
 
+<<<<<<< HEAD
 export const { useLoginMutation, useLogoutMutation, useLogin_2faMutation } =
+=======
+export const { useLoginMutation, useLogoutMutation, useLogin_2faMutation, useResetTokenMutation } =
+>>>>>>> 6354a4b0266037d4693628ef77724ba22da01c5a
   authApi;

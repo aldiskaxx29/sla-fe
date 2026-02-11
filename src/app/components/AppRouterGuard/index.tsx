@@ -26,7 +26,6 @@ const AppRouteGuard = ({ children, permissible }: IAppRouteGuardProps) => {
   }, [location.pathname]);
 
   const readPermissions = ["sla"];
-  
   // auth_authenticatedUser?.roles?.permissionGroupResponses
   //   ?.filter(({ permissions }: IPermissionList) =>
   //     permissions.some(({ granted }) => granted)

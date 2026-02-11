@@ -272,7 +272,7 @@ function Dashboard() {
       )}
       {menu.key === "monday" && (
         <iframe
-          src="/mondaymonitoring/"
+          src="/weeklymonitoring/"
           title="Monday Monitoring Dashboard"
           className="w-full min-h-[100vh]"
         />
