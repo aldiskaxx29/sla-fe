@@ -120,10 +120,7 @@ const SitePage = () => {
         query: {
           exclude,
           parameter,
-<<<<<<< HEAD
-=======
           year,
->>>>>>> 6354a4b0266037d4693628ef77724ba22da01c5a
           month,
           week,
           ...(!["mttrq critical","mttrq major", "mttrq minor"].includes(parameter) && { week }),
