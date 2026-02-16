@@ -315,7 +315,7 @@ const Prediction = ()=>{
                         <div className="flex flex-col items-center justify-center w-full">
                             <div className="py-2 bg-sky-700 text-white rounded-t-lg text-lg w-full text-center font-bold">SITE JITTER 2 DAYS</div>
                             <div className="rounded-b-lg text-sm bg-to-green-600 flex flex-col items-center bg-linear-to-r from-sky-400 to-sky-200 w-full justify-center py-2">
-                                <div onClick={PopJITTER} className="cursor-pointer text-3xl py-2 font-bold text-red-600">{JITTER2}</div>
+                                <div onClick={PopJITTER} className="cursor-pointer text-3xl py-2 font-bold text-red-600">{JIT2}</div>
                                 <div>SITE</div>
                                 <div>JITTER</div>
                             </div>
