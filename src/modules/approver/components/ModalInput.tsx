@@ -205,6 +205,7 @@ const ModalInput = ({ open, onCancel, onSave, dataModal }) => {
                 <Option value="⁠Issue TSEL">⁠Issue TSEL</Option>
                 <Option value="⁠Warranty">⁠Warranty</Option>
                 <Option value="⁠Waiting DWS">⁠Waiting DWS</Option>
+                <Option value="3RD Party">⁠3RD Party</Option>
               </Select>
             </Form.Item>
           )}

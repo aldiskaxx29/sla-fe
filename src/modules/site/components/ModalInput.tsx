@@ -377,6 +377,7 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week }) => {
                 <Option value="⁠Warranty">⁠Warranty</Option>
                 <Option value="⁠Waiting DWS">⁠Waiting DWS</Option>
                 <Option value="Force Major">Force Major</Option>
+                <Option value="3rd Party">⁠3rd Party</Option>
               </Select>
             </Form.Item>
           )}
