@@ -73,6 +73,7 @@ function getWeek(date = new Date()) {
 }
 
 const Prediction = ()=>{
+    const [MAX_DATE,setMAXDATE] = useState("")
     const [PL18,setPL18] = useState(0)
     const [PL18DATA,setPL18DATA] = useState([])
     const [JIT2,setJIT2] = useState(0)
@@ -81,7 +82,6 @@ const Prediction = ()=>{
     const [PDETAIL,setPDetail] = useState([])
     const [POPDATA,setPOPDATA] = useState([])
     const [POPMODE,setPOPMODE] = useState("")
-    let {start,end}= getStartEnd()
     
     const [POP,setPOP] = useState(false)
     const [TITLEPOP,setTITLEPOP] = useState("")
@@ -146,7 +146,7 @@ const Prediction = ()=>{
     })
 
     async function SitePL18(){
-        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vaccess.php?cmd=site-pl-18-hours&week=${getWeek()}`)
+        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vaccess.php?cmd=site-pl-18-hours&week=${getWeek(new Date(MAX_DATE))}`)
         let {data} = await res.json()
         setPL18(data.length)
         setPL18DATA(data)
@@ -157,7 +157,7 @@ const Prediction = ()=>{
         setJIT2(data.length)
         setJIT2DATA(data)
     }
-    async function PredictionWeek(){
+    async function PredictionWeek(start,end){
         let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vaccess.php?cmd=prediction-week&start=${start}&end=${end}`)
         let {data} = await res.json()
         let TBT = RESETTBSITE
@@ -169,34 +169,37 @@ const Prediction = ()=>{
         })
         setTBSITE({...TBT})
     }
-    async function PredictionWeekDetail(){
+    async function PredictionWeekDetail(start,end){
         let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vaccess.php?cmd=prediction-week-detail&start=${start}&end=${end}`)
         let {data} = await res.json()
         let TBT = RESETTB
         data.forEach((a)=>{
-            if(Number(a.pl5)>=4 && TBT[a.region.replace(" ","_")]){
+            try {
+                if(Number(a.pl5)>=4 && TBT[a.region.replace(" ","_")]){
                 TBT[a.region.replace(" ","_")].r_pl5+=1
+                }
+                if(Number(a.pl15)>=4 && TBT[a.region.replace(" ","_")]){
+                    TBT[a.region.replace(" ","_")].r_pl15+=1
+                }
+                if(Number(a.lat)>=4 && TBT[a.region.replace(" ","_")]){
+                    TBT[a.region.replace(" ","_")].r_lat+=1
+                }
+                if(Number(a.jit)>=4 && TBT[a.region.replace(" ","_")]){
+                    TBT[a.region.replace(" ","_")].r_jit+=1
+                }
+            } catch (error) {
+                console.log(error)
             }
-            if(Number(a.pl15)>=4 && TBT[a.region.replace(" ","_")]){
-                TBT[a.region.replace(" ","_")].r_pl15+=1
-            }
-            if(Number(a.lat)>=4 && TBT[a.region.replace(" ","_")]){
-                TBT[a.region.replace(" ","_")].r_lat+=1
-            }
-            if(Number(a.jit)>=4 && TBT[a.region.replace(" ","_")]){
-                TBT[a.region.replace(" ","_")].r_jit+=1
-            }
-
         })        
         setTB({...TBT})
         setPDetail(data)
-        PredictionWeek()
+        PredictionWeek(start,end)
     }
 
     function exportExcel() {
         const table = document.getElementById("excel-prediction");
         const wb = XLSX.utils.table_to_book(table, { sheet: "Sheet1" });
-        let filename = "PREDIKSI W"+getWeek()+"_"+Date.now()
+        let filename = "PREDIKSI W"+getWeek(new Date(MAX_DATE))+"_"+Date.now()
         XLSX.writeFile(wb, filename+".xlsx");
     }
 
@@ -221,25 +224,41 @@ const Prediction = ()=>{
     }
 
     function PopJITTER(){
+        setPOPMODE('jit')
+        setPOPDATA(JIT2DATA.map(a=>{
+        let c=a
+        c.pop_value = a['av_jit']
+        return c}))
         setPOP(true);setTITLEPOP("SITE DAILY JITTER - 2 DAYS")
     }  
 
+    async function currentUpdateState(){
+        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vaccess.php?cmd=max-date`)
+        let {data} = await res.json()
+        setMAXDATE(data.max_date)
+    }
+
     useEffect(()=>{
+        currentUpdateState()
         SitePL18()
         SiteJit2Days()
     },[])
+    
     useEffect(()=>{
-        PredictionWeekDetail()
-    },[])
+        if(MAX_DATE){
+            let {start,end}= getStartEnd(new Date(MAX_DATE))
+            PredictionWeekDetail(start,end)
+        }
+    },[MAX_DATE])
 
  
-
+    if(MAX_DATE)
     return (
         <div className="bg-white text-gray-800 p-2" style={{fontFamily:'Poppins'}}>
             {POP && <Popup title={TITLEPOP} close={setPOP} data={POPDATA} mode={POPMODE}></Popup>}
             <div className="grid grid-cols-7 mb-1">
                 <div className="col-span-6 flex justify-between items-center">
-                    <div className="text-md font-bold text-red-700 flex gap-2">PREDIKSI <div>W{getWeek()} ({getStartEnd().startText} - {getStartEnd().endText})</div></div>
+                    <div className="text-md font-bold text-red-700 flex gap-2">PREDIKSI <div>W{getWeek(new Date(MAX_DATE))} ({getStartEnd(new Date(MAX_DATE)).startText} - {getStartEnd(new Date(MAX_DATE)).endText})</div></div>
                     <div onClick={exportExcel} className="cursor-pointer flex items-center gap-1" style={{fontSize:'0.8em'}}>
                         Export As Excel
                         <FileExcelFilled style={{color:'green',fontSize:'1.7em'}}></FileExcelFilled>
@@ -323,7 +342,7 @@ const Prediction = ()=>{
                     </div>
                 </div>
             </div>
-            <DailyTracking start={getStartEnd().start} end={getStartEnd().end}></DailyTracking>
+            <DailyTracking start={getStartEnd(new Date(MAX_DATE)).start} end={getStartEnd(new Date(MAX_DATE)).end}></DailyTracking>
     </div>);
 }
 
