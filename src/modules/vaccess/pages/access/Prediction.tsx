@@ -29,7 +29,8 @@ function getStartEnd(date = new Date()) {
     start: formatYMD(start),
     end: formatYMD(end),
     startText: formatID(start),
-    endText: formatID(end)
+    endText: formatID(end),
+    currentText: formatID(date)
   };
 }
 
@@ -207,10 +208,17 @@ const Prediction = ()=>{
 
     function PopTable(region,mode){
         setPOPMODE(mode)
-        setPOPDATA(PDETAIL.filter(a=>a.region==region && a[mode]>=4).map(a=>{
-        let c=a
-        c.pop_value = a['av_'+(mode=='lat' ||mode=='jit' ? mode :'pl')]
-        return c}))
+        if(region=='nationwide'){
+            setPOPDATA(PDETAIL.filter(a=>a[mode]>=4).map(a=>{
+            let c=a
+            c.pop_value = a['av_'+(mode=='lat' ||mode=='jit' ? mode :'pl')]
+            return c}))
+        }else{
+            setPOPDATA(PDETAIL.filter(a=>a.region==region && a[mode]>=4).map(a=>{
+            let c=a
+            c.pop_value = a['av_'+(mode=='lat' ||mode=='jit' ? mode :'pl')]
+            return c}))
+        }
         setPOP(true);setTITLEPOP("SITE POTENTIAL PACKET LOSS 5%")
     }
 
@@ -254,20 +262,20 @@ const Prediction = ()=>{
  
     if(MAX_DATE)
     return (
-        <div className="bg-white text-gray-800 p-2" style={{fontFamily:'Poppins'}}>
+        <div className="bg-white h-full text-gray-800 p-2" style={{fontFamily:'Poppins'}}>
             {POP && <Popup title={TITLEPOP} close={setPOP} data={POPDATA} mode={POPMODE}></Popup>}
             <div className="grid grid-cols-7 mb-1">
                 <div className="col-span-6 flex justify-between items-center">
-                    <div className="text-md font-bold text-red-700 flex gap-2">PREDIKSI <div>W{getWeek(new Date(MAX_DATE))} ({getStartEnd(new Date(MAX_DATE)).startText} - {getStartEnd(new Date(MAX_DATE)).endText})</div></div>
+                    <div className="text-md font-bold text-red-700 flex gap-2">PREDIKSI <div>W{getWeek(new Date(MAX_DATE))} ({getStartEnd(new Date(MAX_DATE)).startText} - {getStartEnd(new Date(MAX_DATE)).currentText})</div></div>
                     <div onClick={exportExcel} className="cursor-pointer flex items-center gap-1" style={{fontSize:'0.8em'}}>
                         Export As Excel
                         <FileExcelFilled style={{color:'green',fontSize:'1.7em'}}></FileExcelFilled>
                     </div>
                 </div>
             </div>
-            <div className="grid grid-cols-7 gap-4">
+            <div className="grid grid-cols-7 gap-4" >
                 <div className="col-span-6">
-                    <table id="excel-prediction" className="w-full border border-gray-800 py-2" style={{fontWeight:'300 !important',fontSize:'0.7em'}}>
+                    <table id="excel-prediction" className="w-full border border-gray-800 py-2" style={{fontWeight:'300 !important',fontSize:'0.7em',height:'47vh'}}>
                         <thead>
                             <tr>
                                 <th style={{fontWeight:'400'}} rowSpan={2} className="bg-linear-to-b from-sky-900 to-sky-700 border border-gray-800 text-white p-[3.5px]">Region</th>
@@ -308,13 +316,13 @@ const Prediction = ()=>{
                                 <td style={{fontWeight:'700'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-left p-[3.5px]">Nationwide</td>
                                 <td style={{fontWeight:'400'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3.5px]">{Object.keys(TBSITE).map(a=>Number(TBSITE[a].total_site)).reduce((a,b)=>a+b)}</td>
                                 <td style={{fontWeight:'400'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3.5px]">{Object.keys(TB).map(a=>Number(TB[a].t_pl5)).reduce((a,b)=>a+b)}</td>
-                                <td style={{fontWeight:'400'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3.5px]">{Object.keys(TB).map(a=>Number(TB[a].r_pl5)).reduce((a,b)=>a+b)}</td>
+                                <td style={{fontWeight:'400'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3.5px] cursor-pointer" onClick={()=>PopTable('nationwide','pl5')}>{Object.keys(TB).map(a=>Number(TB[a].r_pl5)).reduce((a,b)=>a+b)}</td>
                                 <td style={{fontWeight:'400'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3.5px]">{Object.keys(TB).map(a=>Number(TB[a].t_pl15)).reduce((a,b)=>a+b)}</td>
-                                <td style={{fontWeight:'400'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3.5px]">{Object.keys(TB).map(a=>Number(TB[a].r_pl15)).reduce((a,b)=>a+b)}</td>
+                                <td style={{fontWeight:'400'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3.5px] cursor-pointer" onClick={()=>PopTable('nationwide','pl15')}>{Object.keys(TB).map(a=>Number(TB[a].r_pl15)).reduce((a,b)=>a+b)}</td>
                                 <td style={{fontWeight:'400'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3.5px]">{Object.keys(TBSITE).map(a=>Number(((100-Number(TBSITE[a].treshold_lat))/100*Number(TBSITE[a].total_site)).toFixed(0))).reduce((a,b)=>a+b)}</td>
-                                <td style={{fontWeight:'400'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3.5px]">{Object.keys(TB).map(a=>Number(TB[a].r_lat)).reduce((a,b)=>a+b)}</td>
+                                <td style={{fontWeight:'400'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3.5px] cursor-pointer" onClick={()=>PopTable('nationwide','lat')}>{Object.keys(TB).map(a=>Number(TB[a].r_lat)).reduce((a,b)=>a+b)}</td>
                                 <td style={{fontWeight:'400'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3.5px]">{Object.keys(TBSITE).map(a=>Number(((100-Number(TBSITE[a].treshold_jit))/100*Number(TBSITE[a].total_site)).toFixed(0))).reduce((a,b)=>a+b)}</td>
-                                <td style={{fontWeight:'400'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3.5px]">{Object.keys(TB).map(a=>Number(TB[a].r_jit)).reduce((a,b)=>a+b)}</td>
+                                <td style={{fontWeight:'400'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3.5px] cursor-pointer" onClick={()=>PopTable('nationwide','jit')}>{Object.keys(TB).map(a=>Number(TB[a].r_jit)).reduce((a,b)=>a+b)}</td>
                             </tr>
                         </tbody>
                     </table>
