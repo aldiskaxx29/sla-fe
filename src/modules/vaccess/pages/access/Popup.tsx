@@ -51,7 +51,7 @@ const Popup = ({title,close,data,mode}) =>{
                         </thead>
                         <tbody>
                             {data.map((a,i)=>{
-                                return(<tr>
+                                return(<tr key={i}>
                                 <td className="py-0.5 px-2 border border-gray-800 text-center">{i+1}</td>
                                 <td className="py-0.5 px-2 border border-gray-800 text-center">{REG[a.region]}</td>
                                 <td className="py-0.5 px-2 border border-gray-800 text-center">{a.site_id}</td>
