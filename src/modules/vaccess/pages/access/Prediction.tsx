@@ -219,7 +219,16 @@ const Prediction = ()=>{
             c.pop_value = a['av_'+(mode=='lat' ||mode=='jit' ? mode :'pl')]
             return c}))
         }
-        setPOP(true);setTITLEPOP("SITE POTENTIAL PACKET LOSS 5%")
+        setPOP(true);
+        if(mode=='pl5'){
+            setTITLEPOP("SITE POTENTIAL PACKET LOSS 5%")
+        }else if(mode=='pl15'){
+            setTITLEPOP("SITE POTENTIAL PACKET LOSS 1-5%")
+        }else if(mode=='lat'){
+            setTITLEPOP("SITE POTENTIAL LATENCY")
+        }else if(mode=='jit'){
+            setTITLEPOP("SITE POTENTIAL JITTER")
+        }
     }
 
     function PopPL18Hours(){
