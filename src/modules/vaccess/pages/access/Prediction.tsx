@@ -152,8 +152,8 @@ const Prediction = ()=>{
         JABOTABEK_OUTER : {total_site:0,t_pl5:0,t_pl15:2,t_lat:25,t_jit:25,r_pl5:0,r_pl15:0,r_lat:0,r_jit:0},
     })
 
-    async function SitePL18(){
-        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vaccess.php?cmd=site-pl-18-hours&week=${getWeek(new Date(MAX_DATE))}`)
+    async function SitePL18(start,end){
+        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vaccess.php?cmd=site-pl-18-hours&week=${getWeek(new Date(MAX_DATE))}&start=${start}&end=${end}`)
         let {data} = await res.json()
         setPL18(data.length)
         setPL18DATA(data)
@@ -223,6 +223,11 @@ const Prediction = ()=>{
             setPOPDATA(PDETAIL.filter(a=>a.region==region && a[mode]>=4).map(a=>{
             let c=a
             c.pop_value = a['av_'+(mode=='lat' ||mode=='jit' ? mode :'pl')]
+
+            if(mode!='lat' && mode!='jit'){
+                c.pl_last = a['pl_last'];
+            }
+
             return c}))
         }
         setPOP(true);
@@ -263,13 +268,13 @@ const Prediction = ()=>{
 
     useEffect(()=>{
         currentUpdateState()
-        SitePL18()
         SiteJit2Days()
     },[])
     
     useEffect(()=>{
         if(MAX_DATE){
             let {start,end}= getStartEnd(new Date(MAX_DATE))
+            SitePL18(start,end)
             PredictionWeekDetail(start,end)
         }
     },[MAX_DATE])
