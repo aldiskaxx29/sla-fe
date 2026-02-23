@@ -281,7 +281,7 @@ const Prediction = ()=>{
             {POP && <Popup title={TITLEPOP} close={setPOP} data={POPDATA} mode={POPMODE}></Popup>}
             <div className="grid grid-cols-7 mb-1">
                 <div className="col-span-6 flex justify-between items-center">
-                    <div className="text-md font-bold text-red-700 flex gap-2">PREDIKSI <div>W{getWeek(new Date(MAX_DATE))} ({getStartEnd(new Date(MAX_DATE)).startText} - {getStartEnd(new Date(MAX_DATE)).currentText})</div></div>
+                    <div className="text-md font-bold text-red-700 flex gap-2">PREDIKSI <div>W{getWeek(new Date(getStartEnd(new Date(MAX_DATE)).currentText))} ({getStartEnd(new Date(MAX_DATE)).startText} - {getStartEnd(new Date(MAX_DATE)).currentText})</div></div>
                     <div onClick={exportExcel} className="cursor-pointer flex items-center gap-1" style={{fontSize:'0.8em'}}>
                         Export As Excel
                         <FileExcelFilled style={{color:'green',fontSize:'1.7em'}}></FileExcelFilled>
