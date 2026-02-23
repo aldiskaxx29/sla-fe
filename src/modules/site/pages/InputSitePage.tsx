@@ -264,6 +264,7 @@ const SitePage = () => {
             parameter={parameter}
             week={week}
             month={month}
+            year={year}
             setTrigger={setTrigger}
           />
         )}

@@ -71,7 +71,7 @@ const GroupingOptions = [
   { group1: "Technical", group2: "Sparepart Readiness" },
 ];
 
-const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week }) => {
+const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week, year }) => {
   const [form] = Form.useForm();
   const { getDetailSite } = useSite();
   const [selectedGroup1, setSelectedGroup1] = useState("");
@@ -249,6 +249,9 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week }) => {
             <Input placeholder="Masukkan Site ID" />
           </Form.Item>
           <Form.Item name="week" className="hidden">
+            <Input placeholder="Masukkan Site ID" />
+          </Form.Item>
+          <Form.Item name="year" className="hidden">
             <Input placeholder="Masukkan Site ID" />
           </Form.Item>
           <Form.Item name="detail_rca" className="hidden">

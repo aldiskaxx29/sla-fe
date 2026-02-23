@@ -15,6 +15,7 @@ interface TableHistoryProps {
   parameter: string;
   week;
   month;
+  year;
   setTrigger: React.Dispatch<React.SetStateAction<number>>;
 }
 
@@ -23,6 +24,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
   parameter,
   week,
   month,
+  year,
   setTrigger,
 }) => {
   const [searchText, setSearchText] = useState("");
@@ -244,6 +246,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
               title: "DIST PL",
               key: "distribution_pl",
               dataIndex: "distribution_pl",
+              search: true,
             },
           ]
         : []),
@@ -466,6 +469,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
       );
       const formData = new FormData();
       formData.append("id", payload.id);
+      formData.append("year", payload.year);
       formData.append("month", payload.month);
       formData.append("week", payload.week);
 
@@ -673,6 +677,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
         onCancel={() => setOpen(false)}
         onSave={handleSave}
         week={week}
+        year={year}
       />
     </div>
   );
