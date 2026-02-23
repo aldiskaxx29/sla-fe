@@ -24,13 +24,19 @@ function getStartEnd(date = new Date()) {
   // akhir minggu (Kamis)
   const end = new Date(start);
   end.setDate(start.getDate() + 6);
-
+    let currentText = ""
+    let now = new Date()
+    if(end.getUTCMilliseconds()<now.getUTCMilliseconds()){
+        currentText = formatID(end)
+    }else{
+        currentText = formatID(date)
+    }
   return {
     start: formatYMD(start),
     end: formatYMD(end),
     startText: formatID(start),
     endText: formatID(end),
-    currentText: formatID(date)
+    currentText: currentText
   };
 }
 
