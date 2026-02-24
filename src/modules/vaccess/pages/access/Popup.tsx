@@ -47,7 +47,8 @@ const Popup = ({title,close,data,mode}) =>{
                                 <th className="py-0.5 px-2 sticky top-0 text-center border border-gray-800 bg-blue-200 text-gray-800" style={{boxShadow:'inset 0px 0.2px 0px #000,inset 0px -0.2px 0px #000'}}>No</th>
                                 <th className="py-0.5 px-2 sticky top-0 text-center border border-gray-800 bg-blue-200 text-gray-800" style={{boxShadow:'inset 0px 0.2px 0px #000,inset 0px -0.2px 0px #000'}}>Region</th>
                                 <th className="py-0.5 px-2 sticky top-0 text-center border border-gray-800 bg-blue-200 text-gray-800" style={{boxShadow:'inset 0px 0.2px 0px #000,inset 0px -0.2px 0px #000'}}>Site ID</th>
-                                <th className="py-0.5 px-2 sticky top-0 text-center border border-gray-800 bg-blue-200 text-gray-800" style={{boxShadow:'inset 0px 0.2px 0px #000,inset 0px -0.2px 0px #000'}}>{mode=='lat' || mode=='jit'? mode.toUpperCase() : 'PL'} Value</th>
+                                <th className="py-0.5 px-2 sticky top-0 text-center border border-gray-800 bg-blue-200 text-gray-800" style={{boxShadow:'inset 0px 0.2px 0px #000,inset 0px -0.2px 0px #000'}}>{mode=='lat' || mode=='jit'? mode.toUpperCase() : 'PL This Week'} Value</th>
+                                {(mode!='lat' && mode!='jit') && <th className="py-0.5 px-2 sticky top-0 text-center border border-gray-800 bg-blue-200 text-gray-800" style={{boxShadow:'inset 0px 0.2px 0px #000,inset 0px -0.2px 0px #000'}}>PL Last Week</th>}
                             </tr>
                         </thead>
                         <tbody>
@@ -57,6 +58,7 @@ const Popup = ({title,close,data,mode}) =>{
                                 <td className="py-0.5 px-2 border border-gray-800 text-center">{REG[a.region]}</td>
                                 <td className="py-0.5 px-2 border border-gray-800 text-center">{a.site_id}</td>
                                 <td className="py-0.5 px-2 border border-gray-800 text-center">{Number(a.pop_value).toFixed(2)??0}</td>
+                                {(mode!='lat' && mode!='jit') && <td className="py-0.5 px-2 border border-gray-800 text-center">{Number(a.pl_last).toFixed(2)??0}</td>}
                                 </tr>)
                             })}
                         </tbody>
