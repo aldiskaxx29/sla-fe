@@ -218,6 +218,10 @@ const Prediction = ()=>{
             setPOPDATA(PDETAIL.filter(a=>a[mode]>=4).map(a=>{
             let c=a
             c.pop_value = a['av_'+(mode=='lat' ||mode=='jit' ? mode :'pl')]
+
+            if(mode!='lat' && mode!='jit'){
+                c.pl_last = a['pl_last'];
+            }
             return c}))
         }else{
             setPOPDATA(PDETAIL.filter(a=>a.region==region && a[mode]>=4).map(a=>{
