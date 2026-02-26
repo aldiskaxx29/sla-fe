@@ -23,7 +23,7 @@ ChartJS.register(
 );
 const StackedBarChart = ({datachart}) => {
   const data = {
-    labels: ["SPMS", "ISR", "QE", "ISSUE TSEL","WARRANTY","COMCASE","WAITING CRA/CRQ","ISSUE DWS","LATE RESPONSE TIF"],
+    labels: ["SPMS", "ISR", "TRANSPORT","QE", "COMCASE","CERAGON","LATE RESPON","WARRANTY","ISSUE DWS","ISSUE TSEL","WAITING CRA/CRQ"],
     datasets: [
       {
         data: datachart,
@@ -38,7 +38,7 @@ const StackedBarChart = ({datachart}) => {
     maintainAspectRatio: false,
     layout:{
         padding:{
-            top:20,
+            top:30,
             bottom:0
         }
     },
@@ -57,9 +57,9 @@ const StackedBarChart = ({datachart}) => {
       },
       y: {
         min: 0,
-        max: Math.max(...datachart),
+        suggestedMax: Math.max(...datachart)+1,
         ticks: {
-            stepSize: 2,
+            stepSize: 1,
             autoSkip:true,
             callback: (value) => value,
         },
@@ -122,7 +122,7 @@ const TOPOLDEST =({sitegroup,week})=>{
                                 </tr>
                             </thead>
                             <tbody>
-                                {TOP.length && TOP.map((T,i)=>{
+                                {TOP.length>0 && TOP.map((T,i)=>{
                                     return(
                                     <tr key={i} style={{height:15}}>
                                         <td style={{fontWeight:'400'}} className="bg-white border border-gray-800 text-gray-800 text-center p-[2px]">{i+1}</td>
@@ -131,19 +131,16 @@ const TOPOLDEST =({sitegroup,week})=>{
                                         <td style={{fontWeight:'400'}} className="bg-white border border-gray-800 text-gray-800 text-center p-[2px]">{T.rca}</td>
                                         <td style={{fontWeight:'400'}} className="bg-white border border-gray-800 text-gray-800 text-center p-[2px]">{Number(T.ttr).toFixed(2)}</td>
                                         <td
-                                        style={{
-                                            fontWeight: 400,
-                                            height: 10,
-                                            width: 50,
-                                            whiteSpace: 'nowrap',
-                                            textOverflow: 'ellipsis',
-                                            overflow: 'hidden'
-                                        }}
-                                        className="bg-white border border-gray-800 text-gray-800 text-center p-[2px]"
-                                        >
-                                        {T.last_update
-                                            ? `${T.last_update.slice(0, 15)}...`
-                                            : ''}
+                                            style={{
+                                                fontWeight: 400,
+                                                height: 10,
+                                                width: 50,
+                                                whiteSpace: 'nowrap',
+                                                textOverflow: 'ellipsis',
+                                                overflow: 'hidden'
+                                            }}
+                                            className="bg-white border border-gray-800 text-gray-800 text-center p-[2px]"
+                                        > {T.last_update ? `${T.last_update.slice(0, 15)}...`: ''}
                                         </td>
                                     </tr>
                                 )})}
@@ -154,10 +151,10 @@ const TOPOLDEST =({sitegroup,week})=>{
 }
 
 const RCACHART = React.memo(({sitegroup,week})=>{
-    const [DATA,setData] = useState({SPMS:0,ISR:0,QE:0,"ISSUE TSEL":0,WARRANTY:0,COMCASE:0,"WAITING CRA/CRQ":0,"ISSUE DWS":0,"LATE RESPONSE TIF":0})
+    const [DATA,setData] = useState({SPMS:0,ISR:0,TRANSPORT:0,QE:0,COMCASE:0,CERAGON:0,"LATE RESPONSE":0,"ISSUE DWS":0,"ISSUE TSEL":0,WARRANTY:0,"WAITING CRA/CRQ":0})
     const [DATACHART,setDataChart] = useState([])
     async function ChartData(){
-        let res = await fetch('https://qosmo.telkom.co.id/baseapi/vrca.php?cmd=chart-rca-not-clear&sitegroup='+sitegroup)
+        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vrca.php?cmd=chart-rca-not-clear&week=${week.split('-')[0]}&year=${week.split('-')[1]}&sitegroup=${sitegroup}`)
         let {data} = await res.json()
         let d = []
         Object.keys(DATA).forEach((a,i)=>{
@@ -167,7 +164,9 @@ const RCACHART = React.memo(({sitegroup,week})=>{
         // setData({...d})
     }
     useEffect(()=>{
-        ChartData()
+        if(week){
+            ChartData()
+        }
     },[sitegroup,week])
     return(
         <div>
@@ -202,8 +201,8 @@ const RESUME = React.memo(({week,sitegroup})=>{
                     <div className="text-3xl cursor-pointer pt-2 font-bold text-green-700 border-l border-r border-white">{CLOSED.length}</div>
                     <div className="text-3xl cursor-pointer pt-2 font-bold text-red-600">{OPEN.length}</div>
                     <div className="text-3xl pb-2 text-white"></div>
-                    <div className="text-md pb-2 text-gray-800 border-l border-r border-white">{(CLOSED.length/(CLOSED.length+OPEN.length)*100).toFixed(2)}%</div>
-                    <div className="text-md pb-2 text-gray-800">{(OPEN.length/(CLOSED.length+OPEN.length)*100).toFixed(2)}%</div>
+                    <div className="text-md pb-2 text-gray-800 border-l border-r border-white">{((CLOSED.length/(CLOSED.length+OPEN.length)*100) ||0).toFixed(2)}%</div>
+                    <div className="text-md pb-2 text-gray-800">{((OPEN.length/(CLOSED.length+OPEN.length)*100) || 0).toFixed(2)}%</div>
                 </div>
             </div>
         </div>
@@ -246,15 +245,15 @@ const TABLERCANOTCLEAR = React.memo(({sitegroup,week})=>{
     const [POPDATA,setPOPDATA] = useState({})
     const [DETAIL,setDETAIL]=useState(RESETDETAIL)
     async function TableData(){
-        let res = await fetch('https://qosmo.telkom.co.id/baseapi/vrca.php?cmd=detail-rca-not-clear&sitegroup='+sitegroup)
+        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vrca.php?cmd=detail-rca-not-clear&week=${week.split('-')[0]}&year=${week.split('-')[1]}&sitegroup=${sitegroup}`)
         let {data} = await res.json()
         let d = RESETTB
-        Object.keys(data.total_ticket).forEach(a=>{
+        data.total_ticket && Object.keys(data.total_ticket).forEach(a=>{
             d[a.split("-")[1]] && (d[a.split("-")[1]].total_ticket=data.total_ticket[a])
         })
 
         let e = RESETDETAIL
-        Object.keys(data.detail).forEach(a=>{
+        data.detail && Object.keys(data.detail).forEach(a=>{
             Object.keys(data.detail[a]).forEach(b=>{
                 e[a.split("-")[1]]&& (e[a.split("-")[1]][b]=data.detail[a][b])
             })
@@ -265,12 +264,11 @@ const TABLERCANOTCLEAR = React.memo(({sitegroup,week})=>{
     }
 
     async function PopTable(region,rca){
-        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vrca.php?cmd=pop-not-clear&region=${region}&rca=${rca}&sitegroup=${sitegroup}`)
+        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vrca.php?cmd=pop-not-clear&region=${region}&rca=${rca}&week=${week.split('-')[0]}&year=${week.split('-')[1]}&sitegroup=${sitegroup}`)
         let {data} = await res.json()
         setPOPDATA(data)
         
         setPOP(true);
-        // setTITLEPOP("SITE POTENTIAL PACKET LOSS 5%")
     }
 
 
@@ -345,22 +343,10 @@ const TABLERCANOTCLEAR = React.memo(({sitegroup,week})=>{
 })
 const MTTR=({parameter,week})=>{
     const [refresh,setRefresh] = useState(false)
-    const [TOP,setTOP] = useState([
-        {ticket:'aksdkjasd',region:'SUMBAGUT',rca:'ISR',last_update:''},
-        {ticket:'aksdkjasd',region:'SUMBAGUT',rca:'ISR',last_update:''},
-        {ticket:'aksdkjasd',region:'SUMBAGUT',rca:'ISR',last_update:''},
-        {ticket:'aksdkjasd',region:'SUMBAGUT',rca:'ISR',last_update:''},
-        {ticket:'aksdkjasd',region:'SUMBAGUT',rca:'ISR',last_update:''},
-        {ticket:'aksdkjasd',region:'SUMBAGUT',rca:'ISR',last_update:''},
-        {ticket:'aksdkjasd',region:'SUMBAGUT',rca:'ISR',last_update:''},
-        {ticket:'aksdkjasd',region:'SUMBAGUT',rca:'ISR',last_update:''},
-        {ticket:'aksdkjasd',region:'SUMBAGUT',rca:'ISR',last_update:''},
-    ]) 
-
     useEffect(()=>{
         setRefresh(!refresh)
     },[week])
-    
+    if(week)
     return(
             <div className="grid w-full col-span-2 gap-2" style={{gridTemplateColumns:'0.5fr 1fr'}}>
                 <RESUME week={week} sitegroup={parameter.split(' ')[1]}></RESUME>

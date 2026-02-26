@@ -10,7 +10,7 @@ const PopupTTR = ({close,data}) =>{
                 <CloseOutlined onClick={()=>close(false)} className="absolute cursor-pointer right-0 text-white bg-red-600 w-8 h-8 flex justify-center items-center rounded-full" style={{color:'#fff',right:-15,top:-20}}></CloseOutlined>
                 {/* <div className="italic text-red-700 font-bold text-md text-center">{title}</div> */}
                 <div className="h-full py-2">
-                <div className="overflow-y-auto scrollbar-thin mb-2" style={{minHeight:'fit-content',maxHeight:'65vh'}}>
+                <div className="overflow-y-auto scrollbar-thin mb-2" style={{minHeight:'50px',maxHeight:'65vh'}}>
                     <table className="w-220 border">
                         <thead>
                             <tr>
