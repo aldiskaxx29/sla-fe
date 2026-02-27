@@ -44,6 +44,30 @@ const TableUser = () => {
       onHeaderCell: () => ({
         className: "!bg-blue-pacific !p-3",
       }),
+      render: (value) => {
+        return value == 0 ? "All" : value;
+      },
+    },
+    {
+      title: "Privilage",
+      dataIndex: "level_user",
+      key: "level_user",
+      onHeaderCell: () => ({
+        className: "!bg-blue-pacific !p-3",
+      }),
+      render: (value) => {
+        const levelMap = {
+          0: "All",
+          1: "Administrator",
+          2: "TIF HO",
+          3: "TIF Regional",
+          4: "Mitra",
+          5: "TSEL",
+          6: "Guest",
+        };
+    
+        return levelMap[value] || "-";
+      },
     },
     {
       title: "Action",

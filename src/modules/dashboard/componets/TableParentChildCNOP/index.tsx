@@ -438,8 +438,9 @@ const TableParentChildCNOP: React.FC<TableParentChildCNOPProps> = ({
                           return <span>{text}</span>;
                         }
                       } else {
+                        // di sini
                         textBigger =
-                          parseNumber(text) > parseNumber(record.target);
+                          parseNumber(text) >= parseNumber(record.target);
                         // if (!record.target) {
                         if (record.target === '' ||
                           record.target === null ||

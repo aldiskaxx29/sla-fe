@@ -30,7 +30,7 @@ const ModalDetailUser = ({ open, onCancel, data }) => {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <p className="text-base font-semibold">Treg</p>
-            <p className="">{data.treg}</p>
+            <p className="">{data.treg == 0 || data.treg == 'TREG 0' ? 'All' : data.treg}</p>
           </div>
         </div>
       </div>

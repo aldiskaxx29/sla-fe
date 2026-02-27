@@ -17,13 +17,16 @@ const UserPage = () => {
 
   return (
     <div className="bg-white border border-[#DBDBDB] rounded-xl p-4 m-6 ">
-      <div className="flex justify-end">
-        <Button
-          className="mb-6 p-4 border-2 shadow-2xl"
-          onClick={() => setOpen(true)}
-        >
-          <span className="font-semibold">Tambah User</span>
-        </Button>
+      <div className="flex flex-row justify-between">
+        <span className="font-semibold text-lg">Data User</span>
+        <div className="flex justify-end">
+          <Button
+            className="mb-6 p-4 border-2 shadow-2xl"
+            onClick={() => setOpen(true)}
+          >
+            <span className="font-semibold">Tambah User</span>
+          </Button>
+        </div>
       </div>
       <TableUser />
       <ModalAddUser open={open} onCancel={() => setOpen(false)} />

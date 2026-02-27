@@ -53,10 +53,10 @@ const ModalAddUser = ({ open, onCancel }) => {
 
           <Form.Item
             name="name"
-            label="Nama Lengkap"
-            rules={[{ required: true, message: "Masukkan Nama Lengkap" }]}
+            label="Nama"
+            rules={[{ required: true, message: "Masukkan Nama" }]}
           >
-            <Input placeholder="Masukkan Nama Lengkap" />
+            <Input placeholder="Masukkan Nama" />
           </Form.Item>
 
           <Form.Item
@@ -70,12 +70,21 @@ const ModalAddUser = ({ open, onCancel }) => {
             <Input placeholder="Masukkan Email" />
           </Form.Item>
 
-          <Form.Item
+          {/* <Form.Item
             name="password"
             label="Password"
             rules={[{ required: true, message: "Masukkan Password" }]}
           >
             <Input placeholder="Masukkan Password" />
+          </Form.Item> */}
+          <Form.Item
+            name="password"
+            label="Password"
+            rules={[{ required: true, message: "Masukkan Password" }]}
+          >
+            <Input.Password 
+              placeholder="Masukkan Password" 
+            />
           </Form.Item>
 
           <Form.Item
@@ -85,8 +94,11 @@ const ModalAddUser = ({ open, onCancel }) => {
           >
             <Select placeholder="Pilih Level User">
               <Option value="1">Admin</Option>
-              <Option value="2">Rekonsiliasi</Option>
-              <Option value="3">Guest</Option>
+              <Option value="2">TIF HO</Option>
+              <Option value="3">TIF Regional</Option>
+              <Option value="4">Mitra</Option>
+              <Option value="5">TSEL</Option>
+              <Option value="5">Guest</Option>
             </Select>
           </Form.Item>
 

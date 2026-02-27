@@ -5,17 +5,21 @@ import tailwindcss from "@tailwindcss/vite";
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [tailwindcss(), react()],
+  server: {
+    host: true,
+    port: 80
+  },
   resolve: {
     alias: {
       "@": "/src",
     },
   },
-  server: {
-    allowedHosts: [
-      '10.60.174.187:8089',
-      'bf0b-110-137-192-103.ngrok-free.app',
-      'nd-pupils-aruba-logs.trycloudflare.com',
-      'frequent-probably-leads-consisting.trycloudflare.com'
-    ]
-  }
+  // server: {
+  //   allowedHosts: [
+  //     '10.60.174.187:8089',
+  //     'bf0b-110-137-192-103.ngrok-free.app',
+  //     'nd-pupils-aruba-logs.trycloudflare.com',
+  //     'rhombohedral-miesha-libidinally.ngrok-free.dev'
+  //   ]
+  // }
 });
