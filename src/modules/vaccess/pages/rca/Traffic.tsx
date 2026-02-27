@@ -10,6 +10,7 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+import Popup from "./Popup";
 
 ChartJS.register(
         ChartDataLabels,
@@ -21,7 +22,7 @@ ChartJS.register(
 );
 const StackedBarChart = ({chartdata}) => {
   const data = {
-    labels: ["Capacity", "Technical", "Impcat Gamas", "Issue TSEL"],
+    labels: ["Capacity", "Technical", "Impact Gamas", "Issue TSEL"],
     datasets: [
       {
         label: "OGP",
@@ -45,6 +46,7 @@ const StackedBarChart = ({chartdata}) => {
     maintainAspectRatio: false,
     layout:{
         padding:{
+            top:20,
             bottom:0
         }
     },
@@ -78,41 +80,41 @@ const StackedBarChart = ({chartdata}) => {
       },
       tooltip: {
         callbacks: {
-          label: function(context) {
-            const datasetIndex = context.datasetIndex;
-            const dataIndex = context.dataIndex;
-            const datasets = context.chart.data.datasets;
+        //   label: function(context) {
+        //     const datasetIndex = context.datasetIndex;
+        //     const dataIndex = context.dataIndex;
+        //     const datasets = context.chart.data.datasets;
 
-            const label = context.dataset.label || '';
-            const value = context.raw;
+        //     const label = context.dataset.label || '';
+        //     const value = context.raw;
 
-            // Kalau dataset kedua → tampilkan hasil pengurangan
-            if (datasetIndex === 1) {
-              const total = datasets[0].data[dataIndex];
-              const result = total - value;
-              return Math.abs(result);
-            }
+        //     // Kalau dataset kedua → tampilkan hasil pengurangan
+        //     if (datasetIndex === 1) {
+        //       const total = datasets[0].data[dataIndex];
+        //       const result = total - value;
+        //       return Math.abs(result);
+        //     }
 
-            // Dataset pertama normal
-            return Math.abs(value);
-          }
+        //     // Dataset pertama normal
+        //     return Math.abs(value);
+        //   }
         }
       },
       datalabels: {
-        display: function(context) {
-          // Hanya tampilkan di dataset terakhir
-          return context.datasetIndex === context.chart.data.datasets.length - 1;
-        },
-        formatter: function(value, context) {
-          let sum = 0;
-          const dataArr = context.chart.data.datasets;
+        // display: function(context) {
+        //   // Hanya tampilkan di dataset terakhir
+        //   return context.datasetIndex === context.chart.data.datasets.length - 1;
+        // },
+        // formatter: function(value, context) {
+        //   let sum = 0;
+        //   const dataArr = context.chart.data.datasets;
 
-          dataArr.forEach(dataset => {
-            sum += dataset.data[context.dataIndex];
-          });
+        //   dataArr.forEach(dataset => {
+        //     sum += dataset.data[context.dataIndex];
+        //   });
 
-          return sum;
-        },
+        //   return sum;
+        // },
         anchor: 'end',
         align: 'end',
         font: {
@@ -135,7 +137,9 @@ const StackedBarChart = ({chartdata}) => {
 
   return <div style={{ height: "205px",width:"100%" }}><Bar data={data} style={{width:1000}} options={options} /></div>;
 };
-export default ({ShowPopup,mode,week})=>{
+const TRAFFIC = React.memo(({ShowPopup,mode,week})=>{
+    const [POPUP,setPOPUP] = useState(false)
+    const [POPDATA,setPOPDATA] = useState([])
     const [NASIONAL,setNasional] = useState(0)
     const [DATACHART,setDataChart] = useState({})
     const [DATATABLE,setDataTable] = useState({progress:{},sites:{}})
@@ -155,8 +159,10 @@ export default ({ShowPopup,mode,week})=>{
     }
 
     const [PROGRES,setProgress] = useState(TB)
+
+    
     async function Nasional(){
-        let res = await fetch('https://qosmo.telkom.co.id/baseapi/vrca.php?cmd=rca-'+mode.split('-')[0].toLowerCase()+`&week=${week.split('-')[0]}&year=${week.split('-')[1]}`)
+        let res = await fetch('https://qosmo.telkom.co.id/baseapi/vrca.php?cmd=rca-'+mode.split('_')[0].toLowerCase()+`&week=${week.split('-')[0]}&year=${week.split('-')[1]}&dist=${mode.split('_')[1]}`)
         let {data} = await res.json()
         try {
             setNasional(data.length)
@@ -166,7 +172,7 @@ export default ({ShowPopup,mode,week})=>{
         }
     }
     async function Table(){
-        let res = await fetch('https://qosmo.telkom.co.id/baseapi/vrecon.php?cmd=table-recon&traffic='+mode.split('-')[0].toLowerCase()+`&week=${week.split('-')[0]}&year=${week.split('-')[1]}`)
+        let res = await fetch('https://qosmo.telkom.co.id/baseapi/vrecon.php?cmd=table-recon&traffic='+mode.split('_')[0].toLowerCase()+`&week=${week.split('-')[0]}&year=${week.split('-')[1]}&dist=${mode.split('_')[1]}`)
         let {data} = await res.json()
         try {
             let d = {progress:{},sites:{}}
@@ -177,13 +183,53 @@ export default ({ShowPopup,mode,week})=>{
             setDataTable({...DATATABLE})
             let c = TB
 
-            Object.keys(TB).forEach(a=>{
-                c[a].total_site = d.sites.hasOwnProperty(a) ? DATATABLE.sites[a].length : 0
-                c[a].t_capacity = d.sites.hasOwnProperty(a) ? DATATABLE.sites[a].filter(a=>a.rca=='Capacity').length : 0
-                c[a].t_gamas = d.sites.hasOwnProperty(a) ? DATATABLE.sites[a].filter(a=>a.rca=='Impact Gamas').length : 0
-                c[a].t_technical = d.sites.hasOwnProperty(a) ? DATATABLE.sites[a].filter(a=>a.rca=='Technical').length : 0
-                c[a].t_tsel = d.sites.hasOwnProperty(a) ? DATATABLE.sites[a].filter(a=>a.rca=='Issue TSEL').length : 0
-                // c[a].p_capacity = d.progress.hasOwnProperty(a) ? (DATATABLE.progress[a].filter(a=>a.rca=='Capacity' && a.status=='Closed').length+DATATABLE.progress[a].filter(a=>a.rca=='Capacity' && a.status=='OGP').length) : 0
+            Object.keys(TB).forEach(b=>{
+                try {
+                    
+               
+                c[b].total_site = d.sites.hasOwnProperty(b.replace('_',' ')) ? DATATABLE.sites[b.replace('_',' ')].length : 0
+                c[b].t_capacity = d.sites.hasOwnProperty(b.replace('_',' ')) ? DATATABLE.sites[b.replace('_',' ')].filter(a=>a.rca=='Capacity').length : 0
+                c[b].t_gamas = d.sites.hasOwnProperty(b.replace('_',' ')) ? DATATABLE.sites[b.replace('_',' ')].filter(a=>a.rca=='Impact Gamas').length : 0
+                c[b].t_technical = d.sites.hasOwnProperty(b.replace('_',' ')) ? DATATABLE.sites[b.replace('_',' ')].filter(a=>a.rca=='Technical').length : 0
+                c[b].t_tsel = d.sites.hasOwnProperty(b.replace('_',' ')) ? DATATABLE.sites[b.replace('_',' ')].filter(a=>a.rca=='Issue TSEL').length : 0
+                if(d.progress.hasOwnProperty(b.replace('_',' '))){
+                  if(DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Capacity' && a.status=='CLOSED').length>0 && DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Capacity' && a.status=='OGP').length>0){
+                      c[b].p_capacity = DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Capacity' && a.status=='CLOSED').length/(DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Capacity' && a.status=='CLOSED').length+DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Capacity' && a.status=='OGP').length)*100
+                  }else if(DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Capacity' && a.status=='CLOSED').length>0 && DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Capacity' && a.status=='OGP').length==0){
+                      c[b].p_capacity = 100
+                  }else if(DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Capacity' && a.status=='CLOSED').length==0 && DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Capacity' && a.status=='OGP').length>0){
+                      c[b].p_capacity = 0
+                  }
+                  
+                  if(DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Impact Gamas' && a.status=='CLOSED').length>0 && DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Impact Gamas' && a.status=='OGP').length>0){
+                      c[b].p_capacity = DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Impact Gamas' && a.status=='CLOSED').length/(DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Impact Gamas' && a.status=='CLOSED').length+DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Impact Gamas' && a.status=='OGP').length)*100
+                  }else if(DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Impact Gamas' && a.status=='CLOSED').length>0 && DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Impact Gamas' && a.status=='OGP').length==0){
+                      c[b].p_gamas = 100
+                  }else if(DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Impact Gamas' && a.status=='CLOSED').length==0 && DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Impact Gamas' && a.status=='OGP').length>0){
+                      c[b].p_gamas = 0
+                  }
+
+                  if(DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Technical' && a.status=='CLOSED').length>0 && DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Technical' && a.status=='OGP').length>0){
+                      c[b].p_capacity = DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Technical' && a.status=='CLOSED').length/(DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Technical' && a.status=='CLOSED').length+DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Technical' && a.status=='OGP').length)*100
+                  }else if(DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Technical' && a.status=='CLOSED').length>0 && DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Technical' && a.status=='OGP').length==0){
+                      c[b].p_gamas = 100
+                  }else if(DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Technical' && a.status=='CLOSED').length==0 && DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Technical' && a.status=='OGP').length>0){
+                      c[b].p_gamas = 0
+                  }
+                  
+                  if(DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Issue TSEL' && a.status=='CLOSED').length>0 && DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Issue TSEL' && a.status=='OGP').length>0){
+                      c[b].p_capacity = DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Issue TSEL' && a.status=='CLOSED').length/(DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Issue TSEL' && a.status=='CLOSED').length+DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Issue TSEL' && a.status=='OGP').length)*100
+                  }else if(DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Issue TSEL' && a.status=='CLOSED').length>0 && DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Issue TSEL' && a.status=='OGP').length==0){
+                      c[b].p_gamas = 100
+                  }else if(DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Issue TSEL' && a.status=='CLOSED').length==0 && DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Issue TSEL' && a.status=='OGP').length>0){
+                      c[b].p_gamas = 0
+                  }
+                }else{
+                //   c[b.replace('_',' ')].p_capacity = 100
+                }
+                 } catch (error) {
+                    console.log(error,b)
+                }
             })
 
             setProgress(c)
@@ -192,21 +238,42 @@ export default ({ShowPopup,mode,week})=>{
         }
     }
 
+    function formatNumber(num) {
+      return Number.isInteger(num) 
+        ? num.toString() 
+        : num.toFixed(2);
+    }
     async function ChartData(){
-        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vrecon.php?cmd=chart-recon`)
+        let res = await fetch('https://qosmo.telkom.co.id/baseapi/vrecon.php?cmd=chart-recon&traffic='+mode.split('_')[0].toLowerCase()+`&week=${week.split('-')[0]}&year=${week.split('-')[1]}&dist=${mode.split('_')[1]}`)
         let {data} = await res.json()
         let chart = {OGP:[],close:[]}
         let group = ['Capacity','Technical','Impact Gamas','Issue TSEL']
         group.forEach((a,i)=>{
-            chart['OGP'].push(data[a]['OGP'] || 0)
-            chart['close'].push(data[a]['Closed']+data[a]['OGP'] || 0)
+            // if(data[a]){
+                try {
+                    chart['OGP'].push(data[a]['OGP'] || 0)
+                } catch (error) {
+                    chart['OGP'].push(0)
+                }
+
+                try {
+                    chart['close'].push(data[a]['CLOSED'] || 0)
+                } catch (error) {
+                    chart['close'].push(0)
+                }
+            // }
+
+
         })
-        setDataChart({...chart})
+        setDataChart({OGP:chart.OGP,close:chart.close})
     }
 
-    function Progress(region,rca){
-        DATATABLE.progress[T.replace('_',' ')] ? ((DATATABLE.progress[T.replace('_',' ')].filter(a=>a.status=='Closed').length/(DATATABLE.progress[T.replace('_',' ')].filter(a=>a.status=='OGP').length+DATATABLE.progress[T.replace('_',' ')].filter(a=>a.status=='Closed').length))*100).toFixed(2) : 0
+    async function PopTable(region,rca){
+        let POPD = DATATABLE.sites[region].filter(a=>a.rca==rca).map(a=>a) || []
+        setPOPUP(true);
+        setPOPDATA(POPD)
     }
+
     useEffect(()=>{
         if(week){
             Nasional()
@@ -217,6 +284,7 @@ export default ({ShowPopup,mode,week})=>{
     return(
     <React.Fragment>
           <div>
+                {POPUP && <Popup close={()=>setPOPUP(false)} data={POPDATA}></Popup>}
                 <div className="text-md font-bold text-red-700 flex gap-2">RESUME RCA</div>
                 <div className="grid grid-cols-6">
                     <div className="flex flex-col items-center justify-center w-full">
@@ -262,34 +330,36 @@ export default ({ShowPopup,mode,week})=>{
                                     <tr key={i} onClick={ShowPopup}>
                                     <td style={{fontWeight:'400'}} className="bg-white border border-gray-800 text-gray-800 text-left p-[3px]">{String(i+1).padStart(2,'0')+'-'+T.replace('_',' ')}</td>
                                     <td style={{fontWeight:'400'}} className="bg-white border border-gray-800 text-gray-800 text-center p-[3px]">{PROGRES[T.replace('_',' ')] && PROGRES[T.replace('_',' ')].total_site || 0}</td>
-                                    <td style={{fontWeight:'400'}} className="bg-white border border-gray-800 text-gray-800 text-center p-[3px]">{PROGRES[T.replace('_',' ')] && PROGRES[T.replace('_',' ')].t_capacity || 0}</td>
-                                    <td style={{fontWeight:'400'}} className="bg-white border border-gray-800 text-gray-800 text-center p-[3px]">{PROGRES[T.replace('_',' ')] && PROGRES[T.replace('_',' ')].p_capacity || 0}</td>
-                                    <td style={{fontWeight:'400'}} className="bg-white border border-gray-800 text-gray-800 text-center p-[3px]">{PROGRES[T.replace('_',' ')] && PROGRES[T.replace('_',' ')].t_gamas || 0}</td>
-                                    <td style={{fontWeight:'400'}} className="bg-white border border-gray-800 text-gray-800 text-center p-[3px]">{PROGRES[T.replace('_',' ')] && PROGRES[T.replace('_',' ')].p_gamas || 0}</td>
-                                    <td style={{fontWeight:'400'}} className="bg-white border border-gray-800 text-gray-800 text-center p-[3px]">{PROGRES[T.replace('_',' ')] && PROGRES[T.replace('_',' ')].t_technical || 0}</td>
-                                    <td style={{fontWeight:'400'}} className="bg-white border border-gray-800 text-gray-800 text-center p-[3px]">{PROGRES[T.replace('_',' ')] && PROGRES[T.replace('_',' ')].p_technical || 0}</td>
-                                    <td style={{fontWeight:'400'}} className="bg-white border border-gray-800 text-gray-800 text-center p-[3px]">{PROGRES[T.replace('_',' ')] && PROGRES[T.replace('_',' ')].t_tsel || 0}</td>
-                                    <td style={{fontWeight:'400'}} className="bg-white border border-gray-800 text-gray-800 text-center p-[3px]">{PROGRES[T.replace('_',' ')] && PROGRES[T.replace('_',' ')].p_tsel || 0}</td>
+                                    <td onClick={()=>PopTable(T.replace('_',' '),'Capacity')} style={{fontWeight:'400'}} className="bg-white border border-gray-800 text-gray-800 text-center p-[3px]">{PROGRES[T.replace('_',' ')] && PROGRES[T.replace('_',' ')].t_capacity || 0}</td>
+                                    <td style={{fontWeight:'400',color:PROGRES[T.replace('_',' ')] && PROGRES[T.replace('_',' ')].p_capacity>80? 'green' : (PROGRES[T.replace('_',' ')] && PROGRES[T.replace('_',' ')].p_capacity<80 && PROGRES[T.replace('_',' ')].p_capacity!=0 ? 'red' : 'black')}} className="bg-white border border-gray-800 text-gray-800 text-center p-[3px]">{PROGRES[T.replace('_',' ')] && formatNumber(Math.abs(PROGRES[T.replace('_',' ')].p_capacity)) || 0}%</td>
+                                    <td onClick={()=>PopTable(T.replace('_',' '),'Impact Gamas')} style={{fontWeight:'400'}} className="bg-white border border-gray-800 text-gray-800 text-center p-[3px]">{PROGRES[T.replace('_',' ')] && PROGRES[T.replace('_',' ')].t_gamas || 0}</td>
+                                    <td style={{fontWeight:'400',color:PROGRES[T.replace('_',' ')] && PROGRES[T.replace('_',' ')].p_gamas>80? 'green' : (PROGRES[T.replace('_',' ')] && PROGRES[T.replace('_',' ')].p_gamas<80 && PROGRES[T.replace('_',' ')].p_gamas!=0 ? 'red' : 'black')}} className="bg-white border border-gray-800 text-gray-800 text-center p-[3px]">{PROGRES[T.replace('_',' ')] && formatNumber(Math.abs(PROGRES[T.replace('_',' ')].p_gamas)) || 0}%</td>
+                                    <td onClick={()=>PopTable(T.replace('_',' '),'Technical')} style={{fontWeight:'400'}} className="bg-white border border-gray-800 text-gray-800 text-center p-[3px]">{PROGRES[T.replace('_',' ')] && PROGRES[T.replace('_',' ')].t_technical || 0}</td>
+                                    <td style={{fontWeight:'400',color:PROGRES[T.replace('_',' ')] && PROGRES[T.replace('_',' ')].p_technical>80? 'green' : (PROGRES[T.replace('_',' ')] && PROGRES[T.replace('_',' ')].p_technical<80 && PROGRES[T.replace('_',' ')].p_technical!=0 ? 'red' : 'black')}} className="bg-white border border-gray-800 text-gray-800 text-center p-[3px]">{PROGRES[T.replace('_',' ')] && formatNumber(Math.abs(PROGRES[T.replace('_',' ')].p_technical)) || 0}%</td>
+                                    <td onClick={()=>PopTable(T.replace('_',' '),'Issue TSEL')} style={{fontWeight:'400'}} className="bg-white border border-gray-800 text-gray-800 text-center p-[3px]">{PROGRES[T.replace('_',' ')] && PROGRES[T.replace('_',' ')].t_tsel || 0}</td>
+                                    <td style={{fontWeight:'400',color:PROGRES[T.replace('_',' ')] && PROGRES[T.replace('_',' ')].p_tsel>80? 'green' : (PROGRES[T.replace('_',' ')] && PROGRES[T.replace('_',' ')].p_tsel<80 && PROGRES[T.replace('_',' ')].p_tsel!=0 ? 'red' : 'black')}} className="bg-white border border-gray-800 text-gray-800 text-center p-[3px]">{PROGRES[T.replace('_',' ')] && formatNumber(Math.abs(PROGRES[T.replace('_',' ')].p_tsel)) || 0}%</td>
                                     </tr>
                                 )})}
-                                <tr onClick={ShowPopup}>
+                                <tr>
                                     <td style={{fontWeight:'700'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-left p-[3px]">Nationwide</td>
                                     <td style={{fontWeight:'400'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3px]">{Object.keys(DATATABLE.sites).length>0 ? Object.keys(DATATABLE.sites).map(a=>DATATABLE.sites[a].length).reduce((a,b)=>a+b) : 0}</td>
                                     <td style={{fontWeight:'400'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3px]">{Object.keys(PROGRES).map(a=>PROGRES[a].t_capacity).reduce((a,b)=>a+b) || 0}</td>
-                                    <td style={{fontWeight:'400'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3px]">{Object.keys(PROGRES).map(a=>PROGRES[a].p_capacity).reduce((a,b)=>a+b) || 0}</td>
+                                    <td style={{fontWeight:'400'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3px]">{formatNumber(Object.keys(PROGRES).map(a=>PROGRES[a].p_capacity).reduce((a,b)=>a+b)/Object.keys(PROGRES).map(a=>PROGRES[a].p_capacity!=0?1:0).reduce((a,b)=>a+b) || 0)}%</td>
                                     <td style={{fontWeight:'400'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3px]">{Object.keys(PROGRES).map(a=>PROGRES[a].t_gamas).reduce((a,b)=>a+b) || 0}</td>
-                                    <td style={{fontWeight:'400'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3px]">{Object.keys(PROGRES).map(a=>PROGRES[a].p_gamas).reduce((a,b)=>a+b) || 0}</td>
+                                    <td style={{fontWeight:'400'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3px]">{formatNumber(Object.keys(PROGRES).map(a=>PROGRES[a].p_gamas).reduce((a,b)=>a+b)/Object.keys(PROGRES).map(a=>PROGRES[a].p_gamas!=0?1:0).reduce((a,b)=>a+b) || 0)}%</td>
                                     <td style={{fontWeight:'400'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3px]">{Object.keys(PROGRES).map(a=>PROGRES[a].t_technical).reduce((a,b)=>a+b) || 0}</td>
-                                    <td style={{fontWeight:'400'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3px]">{Object.keys(PROGRES).map(a=>PROGRES[a].p_technical).reduce((a,b)=>a+b) || 0}</td>
+                                    <td style={{fontWeight:'400'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3px]">{formatNumber(Object.keys(PROGRES).map(a=>PROGRES[a].p_technical).reduce((a,b)=>a+b)/Object.keys(PROGRES).map(a=>PROGRES[a].p_technical!=0?1:0).reduce((a,b)=>a+b) || 0)}%</td>
                                     <td style={{fontWeight:'400'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3px]">{Object.keys(PROGRES).map(a=>PROGRES[a].t_tsel).reduce((a,b)=>a+b) || 0}</td>
-                                    <td style={{fontWeight:'400'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3px]">{Object.keys(PROGRES).map(a=>PROGRES[a].p_tsel).reduce((a,b)=>a+b) || 0}</td>
+                                    <td style={{fontWeight:'400'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3px]">{formatNumber(Object.keys(PROGRES).map(a=>PROGRES[a].p_tsel).reduce((a,b)=>a+b)/Object.keys(PROGRES).map(a=>PROGRES[a].p_tsel!=0?1:0).reduce((a,b)=>a+b) || 0)}%</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
-            <ActionPlanProgress mode={mode} week={week}></ActionPlanProgress>
+            {week && <ActionPlanProgress mode={mode} week={week} DATATABLE={DATATABLE}></ActionPlanProgress>}
     </React.Fragment>
     )
-}
+})
+
+export default TRAFFIC
