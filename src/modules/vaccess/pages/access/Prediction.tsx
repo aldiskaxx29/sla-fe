@@ -24,19 +24,19 @@ function getStartEnd(date = new Date(),max_date=new Date()) {
   // akhir minggu (Kamis)
   const end = new Date(start);
   end.setDate(start.getDate() + 6);
-    // let currentText = ""
-    // let now = new Date()
-    // if(end.getUTCMilliseconds()<now.getUTCMilliseconds()){
-    //     currentText = formatID(end)
-    // }else{
-    //     currentText = formatID(date)
-    // }
+    let currentText = ""
+    let now = new Date()
+    if(end<now){
+        currentText = formatID(end)
+    }else{
+        currentText = formatID(date)
+    }
   return {
     start: formatYMD(start),
     end: formatYMD(end),
     startText: formatID(start),
     endText: formatID(end),
-    currentText: formatID(max_date)
+    currentText: currentText
   };
 }
 
@@ -59,23 +59,22 @@ function formatID(date) {
 function getWeek(date = new Date()) {
   const year = date.getFullYear();
 
-  // Cari Jumat pertama di tahun
   const firstDayOfYear = new Date(year, 0, 1);
   const firstFriday = new Date(firstDayOfYear);
 
-  const day = firstDayOfYear.getDay(); // 0=Min, 1=Sen, ..., 5=Jum
-  const offset = (5 - day + 7) % 7;
-  firstFriday.setDate(firstDayOfYear.getDate() + offset);
+  // Cari Jumat pertama
+  const offset = (5 - firstFriday.getDay() + 7) % 7;
+  firstFriday.setDate(firstFriday.getDate() + offset);
 
-  // Jika tanggal sebelum Jumat pertama → dianggap week 1
-  if (date < firstFriday) return 1;
+  // Kalau sebelum Jumat pertama → hitung dari tahun sebelumnya
+  if (date < firstFriday) {
+    return getWeek(new Date(year - 1, 11, 31));
+  }
 
-  // Hitung selisih hari
   const diffDays = Math.floor(
     (date - firstFriday) / (1000 * 60 * 60 * 24)
   );
 
-  // Setiap 7 hari = 1 week
   return Math.floor(diffDays / 7) + 1;
 }
 
@@ -195,7 +194,7 @@ const Prediction = ()=>{
                     TBT[a.region.replace(" ","_")].r_jit+=1
                 }
             } catch (error) {
-                console.log(error)
+                // console.log(error)
             }
         })        
         setTB({...TBT})
@@ -290,7 +289,7 @@ const Prediction = ()=>{
             {POP && <Popup title={TITLEPOP} close={setPOP} data={POPDATA} mode={POPMODE}></Popup>}
             <div className="grid grid-cols-7 mb-1">
                 <div className="col-span-6 flex justify-between items-center">
-                    <div className="text-md font-bold text-red-700 flex gap-2">PREDIKSI <div>W{getWeek(new Date(getStartEnd(new Date(MAX_DATE)).currentText))} ({getStartEnd(new Date(MAX_DATE)).startText} - {getStartEnd(new Date(MAX_DATE),new Date(MAX_DATE)).currentText})</div></div>
+                    <div className="text-md font-bold text-red-700 flex gap-2">PREDIKSI <div>W{getWeek(new Date(getStartEnd(new  Date(MAX_DATE)).currentText))} ({getStartEnd(new Date(MAX_DATE)).startText} - {getStartEnd(new Date(MAX_DATE),new Date(MAX_DATE)).currentText})</div></div>
                     <div onClick={exportExcel} className="cursor-pointer flex items-center gap-1" style={{fontSize:'0.8em'}}>
                         Export As Excel
                         <FileExcelFilled style={{color:'green',fontSize:'1.7em'}}></FileExcelFilled>
