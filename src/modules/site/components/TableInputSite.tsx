@@ -196,19 +196,22 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
   } as const;
   const groupingRcaCnq : Record<"packetloss" | "latency" | "jitter", any> = {
     packetloss: {
-      title: `Update Progres CNQ`,
-      key: `grouping_rca_packetloss_cnq_2`,
-      dataIndex: `grouping_rca_packetloss_cnq_2`,
+      title: `Update Progres`,
+      key: `update_progress_packetloss`,
+      dataIndex: `update_progress_packetloss`,
+      search: true,
     },
     latency: {
-      title: `Update Progres CNQ`,
-      key: `grouping_rca_latency_cnq_2`,
-      dataIndex: `grouping_rca_latency_cnq_2`,
+      title: `Update Progres`,
+      key: `update_progress_latency`,
+      dataIndex: `update_progress_latency`,
+      search: true,
     },
     jitter: {
-      title: `Update Progres CNQ`,
-      key: `grouping_rca_jitter_cnq_2`,
-      dataIndex: `grouping_rca_jitter_cnq_2`,
+      title: `Update Progres`,
+      key: `update_progress_jitter`,
+      dataIndex: `update_progress_jitter`,
+      search: true,
     }
   } as const;
 
@@ -309,13 +312,13 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
         : [])
       ,
       {
-        title: `Last Update CNQ`,
+        title: `Last Update`,
         key: `last_update_${dynamicKey}_cnq`,
         dataIndex: `last_update_${dynamicKey}_cnq`,
       },
 
       {
-        title: `User Update CNQ`,
+        title: `User Update`,
         key: `user_update_${dynamicKey}_cnq`,
         dataIndex: `user_update_${dynamicKey}_cnq`,
       },
@@ -473,6 +476,9 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
       formData.append("month", payload.month);
       formData.append("week", payload.week);
 
+      formData.append("rca_rekonsiliasi", payload.rca_cnq);
+      formData.append("update_progress", payload.update_progress);
+      
       formData.append("grouping_rca", payload.grouping_rca);
       // formData.append("grouping_rca_regional", payload.grouping_rca_regional);
 

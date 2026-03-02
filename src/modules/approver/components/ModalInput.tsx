@@ -150,7 +150,7 @@ const ModalInput = ({ open, onCancel, onSave, dataModal }) => {
               rules={[{ required: true, message: "Masukkan Grouping RCA" }]}
             >
               <Select placeholder="Pilih Grouping RCA">
-                <Option value="Cap End Site No Order">
+                {/* <Option value="Cap End Site No Order">
                   Cap End Site No Order
                 </Option>
                 <Option value="Capacity - Intermediate">
@@ -177,7 +177,7 @@ const ModalInput = ({ open, onCancel, onSave, dataModal }) => {
                 <Option value="Temperature TSEL">Temperature TSEL</Option>
                 <Option value="Routing TSEL">Routing TSEL</Option>
                 <Option value="Quality TSEL">Quality TSEL</Option>
-                <Option value="Issue Tower">Issue Tower</Option>
+                <Option value="Issue Tower">Issue Tower</Option> */}
               </Select>
             </Form.Item>
           ) : (

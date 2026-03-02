@@ -29,46 +29,69 @@ type SiteDetail = {
 };
 
 const GroupingOptions = [
-  { group1: "Capacity", group2: "Cap End Site Need Order" },
-  { group1: "Capacity", group2: "Cap End Site Order" },
-  { group1: "Capacity", group2: "Cap Intermediate / Hub" },
-  { group1: "Capacity", group2: "Cap 3rd Party" },
-  { group1: "Capacity", group2: "Cap OLT" },
-  { group1: "Capacity", group2: "Cap Link Backup" },
+  // { group1: "Capacity", group2: "Cap End Site Need Order" },
+  // { group1: "Capacity", group2: "Cap End Site Order" },
+  // { group1: "Capacity", group2: "Cap Intermediate / Hub" },
+  // { group1: "Capacity", group2: "Cap 3rd Party" },
+  // { group1: "Capacity", group2: "Cap OLT" },
+  // { group1: "Capacity", group2: "Cap Link Backup" },
 
-  { group1: "Hardware / Software Capab", group2: "Hardware / Software Capab" },
+  // { group1: "Hardware / Software Capab", group2: "Hardware / Software Capab" },
 
-  { group1: "Power", group2: "Power TSEL" },
-  { group1: "Power", group2: "Power Non TSEL" },
+  // { group1: "Power", group2: "Power TSEL" },
+  // { group1: "Power", group2: "Power Non TSEL" },
 
-  { group1: "QE", group2: "QE Redaman" },
-  { group1: "QE", group2: "QE Jarak" },
+  // { group1: "QE", group2: "QE Redaman" },
+  // { group1: "QE", group2: "QE Jarak" },
 
-  { group1: "ISR", group2: "ISR Segel Balmon" },
-  { group1: "ISR", group2: "ISR Interference Internal" },
-  { group1: "ISR", group2: "ISR Interference External" },
+  // { group1: "ISR", group2: "ISR Segel Balmon" },
+  // { group1: "ISR", group2: "ISR Interference Internal" },
+  // { group1: "ISR", group2: "ISR Interference External" },
 
-  { group1: "Warranty", group2: "Warranty New Link" },
-  { group1: "Warranty", group2: "Warranty Redeploy" },
+  // { group1: "Warranty", group2: "Warranty New Link" },
+  // { group1: "Warranty", group2: "Warranty Redeploy" },
 
-  { group1: "Gamas", group2: "Gamas SKKL" },
-  { group1: "Gamas", group2: "Gamas FO Darat / SKSO" },
-  { group1: "Gamas", group2: "Gamas Repetitive" },
+  // { group1: "Gamas", group2: "Gamas SKKL" },
+  // { group1: "Gamas", group2: "Gamas FO Darat / SKSO" },
+  // { group1: "Gamas", group2: "Gamas Repetitive" },
 
-  { group1: "Temperature", group2: "Temperature TSEL" },
-  { group1: "Temperature", group2: "Temperature Non TSEL" },
+  // { group1: "Temperature", group2: "Temperature TSEL" },
+  // { group1: "Temperature", group2: "Temperature Non TSEL" },
 
-  { group1: "Technical", group2: "Comcase Quality" },
-  { group1: "Technical", group2: "Force Majeur" },
-  { group1: "Technical", group2: "Routing TSEL" },
-  { group1: "Technical", group2: "Routing TIF" },
-  { group1: "Technical", group2: "Technical TSEL" },
-  { group1: "Technical", group2: "Technical TIF" },
-  { group1: "Technical", group2: "Technical Unknown" },
-  { group1: "Technical", group2: "Vandalisme" },
-  { group1: "Technical", group2: "Issue Tower" },
-  { group1: "Technical", group2: "Obstacle" },
-  { group1: "Technical", group2: "Sparepart Readiness" },
+  // { group1: "Technical", group2: "Comcase Quality" },
+  // { group1: "Technical", group2: "Force Majeur" },
+  // { group1: "Technical", group2: "Routing TSEL" },
+  // { group1: "Technical", group2: "Routing TIF" },
+  // { group1: "Technical", group2: "Technical TSEL" },
+  // { group1: "Technical", group2: "Technical TIF" },
+  // { group1: "Technical", group2: "Technical Unknown" },
+  // { group1: "Technical", group2: "Vandalisme" },
+  // { group1: "Technical", group2: "Issue Tower" },
+  // { group1: "Technical", group2: "Obstacle" },
+  // { group1: "Technical", group2: "Sparepart Readiness" },
+  { group1: "Capacity", group2: "Channel Spacing" },
+  { group1: "Capacity", group2: "Upgrade Redeploy" },
+  { group1: "Capacity", group2: "New Redeploy" },
+
+  { group1: "Hardware / Software Capab", group2: "CRC Counting" },
+
+  { group1: "Power", group2: "Perbaikan Power" },
+
+  { group1: "QE", group2: "Request QE" },
+
+  { group1: "ISR", group2: "ISR" },
+
+  { group1: "Warranty", group2: "FU to DWS" },
+
+  { group1: "Gamas", group2: "Gamas Close, Link back to Normal" },
+  { group1: "Gamas", group2: "Gamas Close, Link NY back to Normal" },
+  { group1: "Gamas", group2: "Gamas Open" },
+
+  { group1: "Temperature", group2: "Perbaikan Suhu" },
+
+  { group1: "Technical", group2: "Perbaikan Redaman" },
+  { group1: "Technical", group2: "Perbaikan Routing" },
+  { group1: "Technical", group2: "Perbaikan Tcont" },
 ];
 
 const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week, year }) => {
@@ -93,21 +116,33 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week, year }
   //   ? "grouping_rca_regional"
   //   : "grouping_rca";
   let nameField = "";
+  let nameField2 = "";
   switch (parameter) {
     case "packetloss ran to core":
       nameField = isRegional
-        ? "grouping_rca_packetloss_regional"
-        : "grouping_rca_packetloss_cnq";
+        ? "grouping_rca_packetloss_regional_1"
+        : "rca_packetloss";
+      nameField2 = isRegional
+        ? "grouping_rca_packetloss_regional_2"
+        : "update_progress_packetloss";
       break;
     case "jitter ran to core":
       nameField = isRegional
-        ? "grouping_rca_latency_regional"
-        : "grouping_rca_latency_cnq";
+        ? "grouping_rca_latency_regional_1"
+        : "rca_jitter";
+
+      nameField2 = isRegional
+        ? "grouping_rca_latency_regional_2"
+        : "update_progress_latency";
       break;
     case "latency ran to core":
       nameField = isRegional
-        ? "grouping_rca_jitter_regional"
-        : "grouping_rca_jitter_cnq";
+        ? "grouping_rca_jitter_regional_1"
+        : "rca_latency";
+
+      nameField2 = isRegional
+        ? "grouping_rca_jitter_regional_2"
+        : "update_progress_jitter";
       break;
 
     default:
@@ -318,8 +353,10 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week, year }
           {!dataModal?.parameter?.includes("mttrq") ? (
             <div>
               <Form.Item
-                label={labelText + " 1"}
-                name={nameField + "_1"}
+                // label={labelText + " 1"}
+                label="Rca Rekonsiliasi"
+                name={nameField}
+                // name="rca_rekonsiliasi"
                 rules={[{ required: true, message: "Masukkan Grouping RCA" }]}
               >
                 <Select
@@ -334,8 +371,11 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week, year }
                 </Select>
               </Form.Item>
               <Form.Item
-                label={labelText + " 2"}
-                name={nameField + "_2"}
+                // label={labelText + " 2"}
+                // name={nameField + "_2"}
+                label="Update Progress"
+                // name="update_progress"
+                name={nameField2}
                 rules={[{ required: true, message: "Masukkan Grouping RCA" }]}
               >
                 <Select
