@@ -40,7 +40,7 @@ const Popup = ({title,close,data,mode}) =>{
                 </div>
                 <div className="h-full py-2">
                 <div className="overflow-y-auto scrollbar-thin mb-2" style={{minHeight:'fit-content',maxHeight:'60vh'}}>
-                    <table className="w-220 border" id="excel">
+                    <table className="w-250 border" id="excel">
                         <thead>
                             <tr>
                                 <th className="py-0.5 px-2 sticky top-0 text-center border border-gray-800 bg-blue-200 text-gray-800" style={{boxShadow:'inset 0px 0.2px 0px #000,inset 0px -0.2px 0px #000'}}>No</th>
@@ -50,6 +50,7 @@ const Popup = ({title,close,data,mode}) =>{
                                 {(mode!='lat' && mode!='jit') && <th className="py-0.5 px-2 sticky top-0 text-center border border-gray-800 bg-blue-200 text-gray-800" style={{boxShadow:'inset 0px 0.2px 0px #000,inset 0px -0.2px 0px #000'}}>Status This Week</th>}
                                 {(mode!='lat' && mode!='jit') && <th className="py-0.5 px-2 sticky top-0 text-center border border-gray-800 bg-blue-200 text-gray-800" style={{boxShadow:'inset 0px 0.2px 0px #000,inset 0px -0.2px 0px #000'}}>PL Last Week</th>}
                                 {(mode!='lat' && mode!='jit') && <th className="py-0.5 px-2 sticky top-0 text-center border border-gray-800 bg-blue-200 text-gray-800" style={{boxShadow:'inset 0px 0.2px 0px #000,inset 0px -0.2px 0px #000'}}>Status Last Week</th>}
+                                <th className="py-0.5 px-2 sticky top-0 text-center border border-gray-800 bg-blue-200 text-gray-800" style={{boxShadow:'inset 0px 0.2px 0px #000,inset 0px -0.2px 0px #000'}}>Status Unspec</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -62,6 +63,7 @@ const Popup = ({title,close,data,mode}) =>{
                                 {(mode!='lat' && mode!='jit') && <td className="py-0.5 px-2 border border-gray-800 text-center">{a.status_pl}</td>}
                                 {(mode!='lat' && mode!='jit') && <td className="py-0.5 px-2 border border-gray-800 text-center">{Number(a.pl_last).toFixed(2)??0}</td>}
                                 {(mode!='lat' && mode!='jit') && <td className="py-0.5 px-2 border border-gray-800 text-center">{a.status_pl_last}</td>}
+                                <td className="py-0.5 px-2 border border-gray-800 text-center">{a.status_unspec}</td>
                                 </tr>)
                             })}
                         </tbody>
