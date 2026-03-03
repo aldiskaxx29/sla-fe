@@ -39,14 +39,9 @@ const Popup = ({title,close,data,mode}) =>{
                 </div>
                 </div>
                 <div className="h-full py-2">
-<<<<<<< HEAD
                 {/* <div className="overflow-y-auto scrollbar-thin mb-2" style={{minHeight:'fit-content',maxHeight:'60vh'}}> */}
                 <div className="overflow-y-auto scrollbar-thin mb-2" style={{minHeight:'500px',maxHeight:'700px'}}>
                     <table className="w-220 border" id="excel">
-=======
-                <div className="overflow-y-auto scrollbar-thin mb-2" style={{minHeight:'fit-content',maxHeight:'60vh'}}>
-                    <table className="w-250 border" id="excel">
->>>>>>> bcfb16ffa2218ee11553fe95ca777a65249fd252
                         <thead>
                             <tr>
                                 <th className="py-0.5 px-2 sticky top-0 text-center border border-gray-800 bg-blue-200 text-gray-800" style={{boxShadow:'inset 0px 0.2px 0px #000,inset 0px -0.2px 0px #000'}}>No</th>
