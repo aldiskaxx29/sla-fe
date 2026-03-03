@@ -151,22 +151,27 @@ function generateWeeksByMonth(year, month) {
   const firstDayOfMonth = new Date(year, month - 1, 1);
   const lastDayOfMonth = new Date(year, month, 0);
 
-  let cursor = new Date(jan1);
+  // Cari Kamis pertama di tahun itu
+  const firstThursday = new Date(jan1);
+  const day = firstThursday.getDay();
+  const diff = (4 - day + 7) % 7; // 4 = Kamis
+  firstThursday.setDate(firstThursday.getDate() + diff);
+
+  let cursor = new Date(firstThursday);
   let week = 1;
 
   while (cursor <= lastDayOfMonth) {
     const start = new Date(cursor);
-    const end = new Date(start);
-    end.setDate(start.getDate() + 6);
-
-    // cek apakah week ini bersinggungan dengan bulan yg dipilih
+    const end = new Date(cursor);
+    end.setDate(start.getDate() + 6); // Kamis → Rabu
+    // Kalau bersinggungan dengan bulan
     if (end >= firstDayOfMonth && start <= lastDayOfMonth) {
       result.push({
         year,
         month,
         week,
         label: `W${week}`,
-        start: formatYMD(start),
+        start: formatYMD(start < firstDayOfMonth ? firstDayOfMonth : start),
         end: formatYMD(end > lastDayOfMonth ? lastDayOfMonth : end)
       });
     }
@@ -175,7 +180,7 @@ function generateWeeksByMonth(year, month) {
     cursor.setDate(cursor.getDate() + 7);
   }
 
-  // Tambah FM (Full Month)
+  // Full Month
   result.push({
     year,
     month,
@@ -192,11 +197,13 @@ const ResumeRCA = ()=>{
     const [PARAMETER,setParameter] = useState('MTTRq Critical')
      const [FILTER] = useState({max_year:0,max_week:0,years:[]})
     const [WEEK,setWeek] = useState("")
-    const [WEEKTTR,setWeekTTR] = useState("")
+    const [WEEKStart,setWeekStart] = useState("")
+    const [WEEKEnd,setWeekEnd] = useState("")
     const [YEAR,setYear] = useState(0)
     const [MONTH,setMonth] = useState(1)
     const [MAXYEAR,setMaxYear] = useState(0)
     const [MAXWEEK,setMaxWeek] = useState(0)
+    const [MAXMONTH,setMaxMonth] = useState(0)
     const [YEARS,setYEARS] = useState([])
     const [POPUPLOAD,setPOPUPLOAD] = useState(false)
     const MONTHS = [
@@ -238,6 +245,10 @@ const ResumeRCA = ()=>{
       setYear(D.max_year)
       setMaxYear(Number(maxYear))
       setMaxWeek(Number(maxWeek))
+      if(PARAMETER.includes('MTTR')){
+        setMaxMonth(Number(D.max_month))
+        setMonth(Number(D.max_month))
+      }
       setWeek(`${maxWeek}-${maxYear}`)
     }
 
@@ -247,12 +258,18 @@ const ResumeRCA = ()=>{
         for(let i=Number(now.getFullYear());i>=2025;i--){
           YEARS.push(i)
         }
-          setMonth(now.getMonth()+1)
+        setMonth(now.getMonth()+1)
     },[])
 
     useEffect(()=>{
-        let wrca = generateWeeksByMonth(2026,MONTH)
-        setWeekRCA([...wrca])
+        let wrca = (generateWeeksByMonth(2026,MONTH)).filter(a=>a.week<MAXWEEK || a.week=='FM').map(a=>a).reverse()
+        if(wrca[1]){
+          setWeekRCA([...wrca])
+          setWeek(`${wrca[1].week>MAXWEEK ? MAXWEEK : wrca[1].week}-${YEAR}`)
+          setWeekStart(wrca.at(-1).week)
+          setWeekEnd(wrca[1].week)
+          // console.log(wrca)
+        }
     },[MONTH])
 
     
@@ -277,7 +294,7 @@ const ResumeRCA = ()=>{
                 {PARAMETER.includes('MTTR') && (<React.Fragment>
                   <div className="flex">
                       <div className="border px-4 py-1 rounded-l-sm">Year</div>
-                      <select onChange={(e)=>setYear(e.target.value)} name="" id="" className="border-r border-t border-b px-4 py-1 rounded-r-sm bg-gray-100">
+                      <select onChange={(e)=>setYear(e.target.value)} value={YEAR} className="border-r border-t border-b px-4 py-1 rounded-r-sm bg-gray-100">
                           {YEARS.map((a,i)=>{
                               return(<option value={a} key={i}>{a}</option>)
                           })}
@@ -287,7 +304,7 @@ const ResumeRCA = ()=>{
                       <div className="border px-4 py-1 rounded-l-sm">Month</div>
                       <select onChange={(e)=>setMonth(e.target.value)} value={MONTH} name="" id="" className="border-r border-t border-b px-4 py-1 rounded-r-sm bg-gray-100">
                           {MONTHS.map((a,i)=>{
-                            if(YEAR==(new Date()).getFullYear() && a.month<=(new Date()).getMonth()+1){
+                            if(YEAR==(new Date()).getFullYear() && a.month<=MAXMONTH){
                               return(<option value={a.month} key={i} selected={MONTH==a.month ? true :false}>{a.name}</option>)
                             }else if(YEAR<(new Date()).getFullYear()){
                               return(<option value={a.month} key={i} selected={MONTH==a.month ? true :false}>{a.name}</option>)
@@ -297,9 +314,11 @@ const ResumeRCA = ()=>{
                   </div>
                   <div className="flex">
                       <div className="border px-4 py-1 rounded-l-sm">WEEK</div>
-                      <select onChange={(e)=>setWeek(e.target.value)} name="" id="" className="border-r border-t border-b px-4 py-1 rounded-r-sm bg-gray-100">
+                      <select onChange={(e)=>setWeek(e.target.value)} value={WEEK} className="border-r border-t border-b px-4 py-1 rounded-r-sm bg-gray-100">
                           {WEEKSRCA.map((a,i)=>{
-                              if(YEAR==(new Date()).getFullYear() && Number(a.week)<=MAXWEEK){
+                              if(String(a.week).includes('FM')){
+                                return(<option value={`${a.week}-${YEAR}`} key={i}>{`${a.week} ${YEAR}`}</option>)
+                              }else if(YEAR==(new Date()).getFullYear() && Number(a.week)<=MAXWEEK){
                                 return(<option value={`${a.week}-${YEAR}`} key={i}>{`W${a.week} ${YEAR}`}</option>)
                               }else if(YEAR<(new Date()).getFullYear()){
                                 return(<option value={`${a.week}-${YEAR}`} key={i}>{`W${a.week} ${YEAR}`}</option>)
@@ -312,7 +331,7 @@ const ResumeRCA = ()=>{
                 {
                   !PARAMETER.includes('MTTR') && <div className="flex">
                     <div className="border px-4 py-1 rounded-l-sm">WEEK</div>
-                    <select onChange={(e)=> setWeek(e.target.value)} className="border-r border-t border-b px-4 py-1 rounded-r-sm bg-gray-100">
+                    <select onChange={(e)=> setWeek(e.target.value)} value={WEEK} className="border-r border-t border-b px-4 py-1 rounded-r-sm bg-gray-100">
                         {WEEKS52.map((a,i)=>{
                             if((Number(a.year)<MAXYEAR) || (Number(a.year)==MAXYEAR && a.week<=MAXWEEK)){
                               return(<option value={`${a.week}-${a.year}`} key={i}>{`W${a.week} ${a.year}`}</option>)
@@ -328,7 +347,7 @@ const ResumeRCA = ()=>{
                 }
             </div>
             <div></div>
-            {(PARAMETER!='MTTRq Major' && PARAMETER!='MTTRq Minor' && PARAMETER!='MTTRq Critical') ? <Traffic mode={PARAMETER} week={WEEK}/> : <MTTR parameter={PARAMETER} week={WEEK}/>}
+            {(PARAMETER!='MTTRq Major' && PARAMETER!='MTTRq Minor' && PARAMETER!='MTTRq Critical') ? <Traffic mode={PARAMETER} week={WEEK}/> : <MTTR parameter={PARAMETER} week={WEEK} weekstart={WEEKStart} weekend={WEEKEnd}/>}
         </div>
 );}
 }
