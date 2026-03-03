@@ -150,11 +150,11 @@ const TOPOLDEST =({sitegroup,week})=>{
     )
 }
 
-const RCACHART = React.memo(({sitegroup,week})=>{
+const RCACHART = React.memo(({sitegroup,week,weekstart,weekend})=>{
     const [DATA,setData] = useState({SPMS:0,ISR:0,TRANSPORT:0,QE:0,COMCASE:0,CERAGON:0,"LATE RESPONSE":0,"ISSUE DWS":0,"ISSUE TSEL":0,WARRANTY:0,"WAITING CRA/CRQ":0})
     const [DATACHART,setDataChart] = useState([])
     async function ChartData(){
-        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vrca.php?cmd=chart-rca-not-clear&week=${week.split('-')[0]}&year=${week.split('-')[1]}&sitegroup=${sitegroup}`)
+        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vrca.php?cmd=chart-rca-not-clear&weekstart=${weekstart}&weekend=${weekend}&week=${week.split('-')[0]}&year=${week.split('-')[1]}&sitegroup=${sitegroup}`)
         let {data} = await res.json()
         let d = []
         Object.keys(DATA).forEach((a,i)=>{
@@ -175,11 +175,11 @@ const RCACHART = React.memo(({sitegroup,week})=>{
         </div>
     )
 })
-const RESUME = React.memo(({week,sitegroup})=>{
+const RESUME = React.memo(({week,weekstart,weekend,sitegroup})=>{
     const [CLOSED,setCLOSED] = useState([])
     const [OPEN,setOPEN] = useState([])
     async function ChartData(){
-        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vrca.php?cmd=resume&week=${week.split('-')[0]}&year=${week.split('-')[1]}&sitegroup=${sitegroup}`)
+        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vrca.php?cmd=resume&weekstart=${weekstart}&weekend=${weekend}&week=${week.split('-')[0]}&year=${week.split('-')[1]}&sitegroup=${sitegroup}`)
         let {data} = await res.json()
         setCLOSED([...data.CLOSED])
         setOPEN([...data.OPEN])
@@ -209,7 +209,7 @@ const RESUME = React.memo(({week,sitegroup})=>{
     )
 })
 
-const TABLERCANOTCLEAR = React.memo(({sitegroup,week})=>{
+const TABLERCANOTCLEAR = React.memo(({sitegroup,week,weekstart,weekend})=>{
     const RESETTB = {
         SUMBAGUT : {total_ticket:0},
         SUMBAGSEL : {total_ticket:0},
@@ -245,7 +245,7 @@ const TABLERCANOTCLEAR = React.memo(({sitegroup,week})=>{
     const [POPDATA,setPOPDATA] = useState({})
     const [DETAIL,setDETAIL]=useState(RESETDETAIL)
     async function TableData(){
-        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vrca.php?cmd=detail-rca-not-clear&week=${week.split('-')[0]}&year=${week.split('-')[1]}&sitegroup=${sitegroup}`)
+        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vrca.php?cmd=detail-rca-not-clear&weekstart=${weekstart}&weekend=${weekend}&week=${week.split('-')[0]}&year=${week.split('-')[1]}&sitegroup=${sitegroup}`)
         let {data} = await res.json()
         let d = RESETTB
         data.total_ticket && Object.keys(data.total_ticket).forEach(a=>{
@@ -341,7 +341,7 @@ const TABLERCANOTCLEAR = React.memo(({sitegroup,week})=>{
         </div>
     )
 })
-const MTTR=({parameter,week})=>{
+const MTTR=({parameter,week,weekstart,weekend})=>{
     const [refresh,setRefresh] = useState(false)
     useEffect(()=>{
         setRefresh(!refresh)
@@ -349,10 +349,10 @@ const MTTR=({parameter,week})=>{
     if(week)
     return(
             <div className="grid w-full col-span-2 gap-2" style={{gridTemplateColumns:'0.5fr 1fr'}}>
-                <RESUME week={week} sitegroup={parameter.split(' ')[1]}></RESUME>
-                <RCACHART week={week} sitegroup={parameter.split(' ')[1]}></RCACHART>
-                <TOPOLDEST week={week} sitegroup={parameter.split(' ')[1]}></TOPOLDEST>
-                <TABLERCANOTCLEAR week={week} sitegroup={parameter.split(' ')[1]}></TABLERCANOTCLEAR>
+                <RESUME week={week} weekstart={weekstart} weekend={weekend} sitegroup={parameter.split(' ')[1]}></RESUME>
+                <RCACHART week={week} weekstart={weekstart} weekend={weekend} sitegroup={parameter.split(' ')[1]}></RCACHART>
+                <TOPOLDEST week={week} weekstart={weekstart} weekend={weekend} sitegroup={parameter.split(' ')[1]}></TOPOLDEST>
+                <TABLERCANOTCLEAR week={week} weekstart={weekstart} weekend={weekend} sitegroup={parameter.split(' ')[1]}></TABLERCANOTCLEAR>
             </div>
     )
 }
