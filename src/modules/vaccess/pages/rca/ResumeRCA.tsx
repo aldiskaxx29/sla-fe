@@ -194,13 +194,15 @@ function generateWeeksByMonth(year, month) {
 }
 
 const ResumeRCA = ()=>{
-    const [PARAMETER,setParameter] = useState('MTTRq Critical')
+    // const [PARAMETER,setParameter] = useState('MTTRq Critical')
+    const [PARAMETER,setParameter] = useState('packetloss_>5%')
      const [FILTER] = useState({max_year:0,max_week:0,years:[]})
+    const [LOADING,setLOADING] = useState(false)
     const [WEEK,setWeek] = useState("")
     const [WEEKStart,setWeekStart] = useState("")
     const [WEEKEnd,setWeekEnd] = useState("")
     const [YEAR,setYear] = useState(0)
-    const [MONTH,setMonth] = useState(1)
+    const [MONTH,setMonth] = useState(0)
     const [MAXYEAR,setMaxYear] = useState(0)
     const [MAXWEEK,setMaxWeek] = useState(0)
     const [MAXMONTH,setMaxMonth] = useState(0)
@@ -256,29 +258,33 @@ const ResumeRCA = ()=>{
         setWeekFilter()
         let now = new Date()
         for(let i=Number(now.getFullYear());i>=2025;i--){
-          YEARS.push(i)
+          if(!YEARS.includes(i)){
+            YEARS.push(i)
+          }
         }
-        setMonth(now.getMonth()+1)
-    },[])
+    },[PARAMETER])
 
     useEffect(()=>{
+      if(PARAMETER.includes('MTTR')){
         let wrca = (generateWeeksByMonth(2026,MONTH)).filter(a=>a.week<MAXWEEK || a.week=='FM').map(a=>a).reverse()
         if(wrca[1]){
           setWeekRCA([...wrca])
           setWeek(`${wrca[1].week>MAXWEEK ? MAXWEEK : wrca[1].week}-${YEAR}`)
           setWeekStart(wrca.at(-1).week)
           setWeekEnd(wrca[1].week)
-          // console.log(wrca)
         }
-    },[MONTH])
-
-    
+      }
+        // console.log(wrca)
+    },[MONTH,PARAMETER])    
     
     if(WEEK){
     return (
-        <div className="bg-white text-gray-800 p-2 grid grid-cols-2 gap-2" style={{fontFamily:'Poppins'}}>
+        <div className="bg-white text-gray-800 p-2 grid grid-cols-2 gap-2 overflow-hidden" style={{fontFamily:'Poppins',height:'90vh'}}>
             {POPUPLOAD && <PopupUpload close={()=>setPOPUPLOAD(false)}></PopupUpload>}
-            <div className="flex gap-2" style={{fontSize:'0.8em'}}>
+            {LOADING && <div className="fixed left-0 top-0 bottom-0 right-0 flex items-center justify-center" style={{background:'rgba(0,0,0,0.7)'}}>
+              <span id="loader" className="loader"></span>
+            </div>}
+            <div className="flex gap-2" style={{fontSize:'0.8em',height:'fit-content'}}>
                 <div className="flex">
                     <div className="border px-4 py-1 rounded-l-sm">PARAMETER</div>
                     <select onChange={(e)=>setParameter(e.target.value)} value={PARAMETER} className="border-r border-t border-b px-4 py-1 rounded-r-sm bg-gray-100">
@@ -302,12 +308,12 @@ const ResumeRCA = ()=>{
                   </div>
                   <div className="flex">
                       <div className="border px-4 py-1 rounded-l-sm">Month</div>
-                      <select onChange={(e)=>setMonth(e.target.value)} value={MONTH} name="" id="" className="border-r border-t border-b px-4 py-1 rounded-r-sm bg-gray-100">
+                      <select onChange={(e)=>setMonth(e.target.value)}value={MONTH} name="" id="" className="border-r border-t border-b px-4 py-1 rounded-r-sm bg-gray-100">
                           {MONTHS.map((a,i)=>{
                             if(YEAR==(new Date()).getFullYear() && a.month<=MAXMONTH){
-                              return(<option value={a.month} key={i} selected={MONTH==a.month ? true :false}>{a.name}</option>)
+                              return(<option value={a.month} key={i}>{a.name}</option>)
                             }else if(YEAR<(new Date()).getFullYear()){
-                              return(<option value={a.month} key={i} selected={MONTH==a.month ? true :false}>{a.name}</option>)
+                              return(<option value={a.month} key={i}>{a.name}</option>)
                             }
                           })}
                       </select>
@@ -347,7 +353,7 @@ const ResumeRCA = ()=>{
                 }
             </div>
             <div></div>
-            {(PARAMETER!='MTTRq Major' && PARAMETER!='MTTRq Minor' && PARAMETER!='MTTRq Critical') ? <Traffic mode={PARAMETER} week={WEEK}/> : <MTTR parameter={PARAMETER} week={WEEK} weekstart={WEEKStart} weekend={WEEKEnd}/>}
+            {(PARAMETER!='MTTRq Major' && PARAMETER!='MTTRq Minor' && PARAMETER!='MTTRq Critical') ? <Traffic mode={PARAMETER} week={WEEK} setLOADING={setLOADING}/> : <MTTR parameter={PARAMETER} week={WEEK} weekstart={WEEKStart} weekend={WEEKEnd} setLOADING={setLOADING}/>}
         </div>
 );}
 }
