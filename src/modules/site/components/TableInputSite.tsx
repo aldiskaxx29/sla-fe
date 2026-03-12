@@ -463,7 +463,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
 
   const handleSave = async (payload) => {
     try {
-      console.log("payload", payload?.evidance, payload.evidence.file);
+      console.log("payload", payload);
       console.log(
         "evidence",
         payload.evidence.file,
@@ -476,60 +476,79 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
       formData.append("month", payload.month);
       formData.append("week", payload.week);
 
-      formData.append("rca_rekonsiliasi", payload.rca_cnq);
-      formData.append("update_progress", payload.update_progress);
+      formData.append("rca_rekonsiliasi", payload?.rca_packetloss ?? payload?.rca_latency ?? payload?.rca_jitter);
+      // formData.append("update_progress", payload?.update_progress_packetloss ?? payload?.update_progress_latency ?? payload?.update_progress_jitter);
+      formData.append("update_progress", payload?.group22);
       
       formData.append("grouping_rca", payload.grouping_rca);
       // formData.append("grouping_rca_regional", payload.grouping_rca_regional);
 
-      formData.append(
-        "grouping_rca_packetloss_cnq_1",
-        payload?.grouping_rca_packetloss_cnq_1 ?? ""
-      );
-      formData.append(
-        "grouping_rca_packetloss_regional_1",
-        payload?.grouping_rca_packetloss_regional_1 ?? ""
-      );
-      formData.append(
-        "grouping_rca_latency_cnq_1",
-        payload?.grouping_rca_latency_cnq_1 ?? ""
-      );
-      formData.append(
-        "grouping_rca_latency_regional_1",
-        payload?.grouping_rca_latency_regional_1 ?? ""
-      );
-      formData.append(
-        "grouping_rca_jitter_cnq_1",
-        payload?.grouping_rca_jitter_cnq_1 ?? ""
-      );
-      formData.append(
-        "grouping_rca_jitter_regional_1",
-        payload?.grouping_rca_jitter_regional_1 ?? ""
-      );
-      formData.append(
-        "grouping_rca_packetloss_cnq_2",
-        payload?.grouping_rca_packetloss_cnq_2 ?? ""
-      );
-      formData.append(
-        "grouping_rca_packetloss_regional_2",
-        payload?.grouping_rca_packetloss_regional_2 ?? ""
-      );
-      formData.append(
-        "grouping_rca_latency_cnq_2",
-        payload?.grouping_rca_latency_cnq_2 ?? ""
-      );
-      formData.append(
-        "grouping_rca_latency_regional_2",
-        payload?.grouping_rca_latency_regional_2 ?? ""
-      );
-      formData.append(
-        "grouping_rca_jitter_cnq_2",
-        payload?.grouping_rca_jitter_cnq_2 ?? ""
-      );
-      formData.append(
-        "grouping_rca_jitter_regional_2",
-        payload?.grouping_rca_jitter_regional_2 ?? ""
-      );
+      switch (parameter) {
+        case 'packetloss ran to core':
+          formData.append(
+            "grouping_rca_packetloss_cnq_1",
+            payload?.group1 ?? ""
+          );
+
+          // formData.append(
+          //   "grouping_rca_packetloss_regional_1",
+          //   payload?.group1 ?? ""
+          // );
+          formData.append(
+            "grouping_rca_packetloss_cnq_2",
+            payload?.group2 ?? ""
+          );
+          // formData.append(
+          //   "grouping_rca_packetloss_regional_2",
+          //   payload?.group2 ?? ""
+          // );
+          // formData.append("update_progress_packetloss", payload?.group22);
+          break;
+        case 'latency ran to core':
+          formData.append(
+            "grouping_rca_latency_cnq_1",
+            payload?.group1 ?? ""
+          );
+          // formData.append(
+          //   "grouping_rca_latency_regional_1",
+          //   payload?.grouping_rca_latency_regional_1 ?? ""
+          // );
+          formData.append(
+            "grouping_rca_latency_cnq_2",
+            payload?.group2 ?? ""
+          );
+          // formData.append(
+          //   "grouping_rca_latency_regional_2",
+          //   payload?.grouping_rca_latency_regional_2 ?? ""
+          // );
+          // formData.append("update_progress_latency", payload?.group22);
+          break;
+        case 'jitter ran to core':
+          formData.append(
+            "grouping_rca_jitter_cnq_1",
+            payload?.group1 ?? ""
+          );
+          // formData.append(
+          //   "grouping_rca_jitter_regional_1",
+          //   payload?.grouping_rca_jitter_regional_1 ?? ""
+          // );
+          formData.append(
+            "grouping_rca_jitter_cnq_2",
+            payload?.group2 ?? ""
+          );
+          // formData.append(
+          //   "grouping_rca_jitter_regional_2",
+          //   payload?.grouping_rca_jitter_regional_2 ?? ""
+          // );
+          // formData.append("update_progress_jitter", payload?.group22);
+          break;
+      
+        default:
+          break;
+      }
+      
+      
+      
 
       formData.append("detail_rca", payload.detail_rca);
       formData.append(
@@ -609,8 +628,8 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
                   record.exclude > 1 ||
                   record.status_latency > 1 ||
                   record.status_jitter > 1 ||
-                  record.status_packetloss_15 > 1 ||
-                  record.status_packetloss_5 > 1;
+                  // record.status_packetloss_15 > 1 ||
+                  record.status_packetloss > 1;
                 if (column.dataIndex?.startsWith("site") && statusDouble)
                   return (
                     <div className="flex justify-center items-center gap-2">
@@ -625,8 +644,8 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
                       checked={
                         record.exclude === 2 ||
                         record.status_latency === 2 ||
-                        record.status_packetloss_5 === 2 ||
-                        record.status_packetloss_15 === 2 ||
+                        record.status_packetloss === 2 ||
+                        // record.status_packetloss_15 === 2 ||
                         record.status_jitter === 2
                       }
                       // disabled={!editable} // optional: bisa dibuat conditional

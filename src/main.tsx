@@ -10,6 +10,7 @@ import "mapbox-gl/dist/mapbox-gl.css";
 
 createRoot(document.getElementById("root")!).render(
   // <StrictMode>
+    // <BrowserRouter basename="/devqosmo">
     <BrowserRouter>
       {/* Redux, Persist, and Router */}
       <Provider store={store}>

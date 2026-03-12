@@ -29,75 +29,78 @@ type SiteDetail = {
 };
 
 const GroupingOptions = [
-  // { group1: "Capacity", group2: "Cap End Site Need Order" },
-  // { group1: "Capacity", group2: "Cap End Site Order" },
-  // { group1: "Capacity", group2: "Cap Intermediate / Hub" },
-  // { group1: "Capacity", group2: "Cap 3rd Party" },
-  // { group1: "Capacity", group2: "Cap OLT" },
-  // { group1: "Capacity", group2: "Cap Link Backup" },
+  { group1: "Capacity", group2: "Cap End Site Need Order" },
+  { group1: "Capacity", group2: "Cap End Site Order" },
+  { group1: "Capacity", group2: "Cap Intermediate / Hub" },
+  { group1: "Capacity", group2: "Cap 3rd Party" },
+  { group1: "Capacity", group2: "Cap OLT" },
+  { group1: "Capacity", group2: "Cap Link Backup" },
 
-  // { group1: "Hardware / Software Capab", group2: "Hardware / Software Capab" },
+  { group1: "Hardware / Software Capab", group2: "Hardware / Software Capab" },
 
-  // { group1: "Power", group2: "Power TSEL" },
-  // { group1: "Power", group2: "Power Non TSEL" },
+  { group1: "Power", group2: "Power TSEL" },
+  { group1: "Power", group2: "Power Non TSEL" },
 
-  // { group1: "QE", group2: "QE Redaman" },
-  // { group1: "QE", group2: "QE Jarak" },
+  { group1: "QE", group2: "QE Redaman" },
+  { group1: "QE", group2: "QE Jarak" },
 
-  // { group1: "ISR", group2: "ISR Segel Balmon" },
-  // { group1: "ISR", group2: "ISR Interference Internal" },
-  // { group1: "ISR", group2: "ISR Interference External" },
+  { group1: "ISR", group2: "ISR Segel Balmon" },
+  { group1: "ISR", group2: "ISR Interference Internal" },
+  { group1: "ISR", group2: "ISR Interference External" },
 
-  // { group1: "Warranty", group2: "Warranty New Link" },
-  // { group1: "Warranty", group2: "Warranty Redeploy" },
+  { group1: "Warranty", group2: "Warranty New Link" },
+  { group1: "Warranty", group2: "Warranty Redeploy" },
 
-  // { group1: "Gamas", group2: "Gamas SKKL" },
-  // { group1: "Gamas", group2: "Gamas FO Darat / SKSO" },
-  // { group1: "Gamas", group2: "Gamas Repetitive" },
+  { group1: "Gamas", group2: "Gamas SKKL" },
+  { group1: "Gamas", group2: "Gamas FO Darat / SKSO" },
+  { group1: "Gamas", group2: "Gamas Repetitive" },
 
-  // { group1: "Temperature", group2: "Temperature TSEL" },
-  // { group1: "Temperature", group2: "Temperature Non TSEL" },
+  { group1: "Temperature", group2: "Temperature TSEL" },
+  { group1: "Temperature", group2: "Temperature Non TSEL" },
 
-  // { group1: "Technical", group2: "Comcase Quality" },
-  // { group1: "Technical", group2: "Force Majeur" },
-  // { group1: "Technical", group2: "Routing TSEL" },
-  // { group1: "Technical", group2: "Routing TIF" },
-  // { group1: "Technical", group2: "Technical TSEL" },
-  // { group1: "Technical", group2: "Technical TIF" },
-  // { group1: "Technical", group2: "Technical Unknown" },
-  // { group1: "Technical", group2: "Vandalisme" },
-  // { group1: "Technical", group2: "Issue Tower" },
-  // { group1: "Technical", group2: "Obstacle" },
-  // { group1: "Technical", group2: "Sparepart Readiness" },
-  { group1: "Capacity", group2: "Channel Spacing" },
-  { group1: "Capacity", group2: "Upgrade Redeploy" },
-  { group1: "Capacity", group2: "New Redeploy" },
-
-  { group1: "Hardware / Software Capab", group2: "CRC Counting" },
-
-  { group1: "Power", group2: "Perbaikan Power" },
-
-  { group1: "QE", group2: "Request QE" },
-
-  { group1: "ISR", group2: "ISR" },
-
-  { group1: "Warranty", group2: "FU to DWS" },
-
-  { group1: "Gamas", group2: "Gamas Close, Link back to Normal" },
-  { group1: "Gamas", group2: "Gamas Close, Link NY back to Normal" },
-  { group1: "Gamas", group2: "Gamas Open" },
-
-  { group1: "Temperature", group2: "Perbaikan Suhu" },
-
-  { group1: "Technical", group2: "Perbaikan Redaman" },
-  { group1: "Technical", group2: "Perbaikan Routing" },
-  { group1: "Technical", group2: "Perbaikan Tcont" },
+  { group1: "Technical", group2: "Comcase Quality" },
+  { group1: "Technical", group2: "Force Majeur" },
+  { group1: "Technical", group2: "Routing TSEL" },
+  { group1: "Technical", group2: "Routing TIF" },
+  { group1: "Technical", group2: "Technical TSEL" },
+  { group1: "Technical", group2: "Technical TIF" },
+  { group1: "Technical", group2: "Technical Unknown" },
+  { group1: "Technical", group2: "Vandalisme" },
+  { group1: "Technical", group2: "Issue Tower" },
+  { group1: "Technical", group2: "Obstacle" },
+  { group1: "Technical", group2: "Sparepart Readiness" },
 ];
+
+const ProgressOptions = [
+  { group11: "Capacity", group22: "Channel Spacing" },
+  { group11: "Capacity", group22: "Upgrade Redeploy" },
+  { group11: "Capacity", group22: "New Redeploy" },
+
+  { group11: "Hardware / Software Capab", group22: "CRC Counting" },
+
+  { group11: "Power", group22: "Perbaikan Power" },
+
+  { group11: "QE", group22: "Request QE" },
+
+  { group11: "ISR", group22: "ISR" },
+
+  { group11: "Warranty", group22: "FU to DWS" },
+
+  { group11: "Gamas", group22: "Gamas Close, Link back to Normal" },
+  { group11: "Gamas", group22: "Gamas Close, Link NY back to Normal" },
+  { group11: "Gamas", group22: "Gamas Open" },
+
+  { group11: "Temperature", group22: "Perbaikan Suhu" },
+
+  { group11: "Technical", group22: "Perbaikan Redaman" },
+  { group11: "Technical", group22: "Perbaikan Routing" },
+  { group11: "Technical", group22: "Perbaikan Tcont" },
+]
 
 const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week, year }) => {
   const [form] = Form.useForm();
   const { getDetailSite } = useSite();
-  const [selectedGroup1, setSelectedGroup1] = useState("");
+  // const [selectedGroup1, setSelectedGroup1] = useState("");
   const [preview, setPreview] = useState("");
   const [fileList, setFileList] = useState<any[]>([]);
   const [checked, setChecked] = useState(false);
@@ -105,6 +108,9 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week, year }
   const [optionsKpi, setOptionsKpi] = useState([]);
 
   const [downloadEvidance] = useLazyDownload_evidanceQuery();
+
+  const [selectedGroup2, setSelectedGroup2] = useState(null);
+  const [selectedGroup1, setSelectedGroup1] = useState(null);
 
   const userData = localStorage.getItem("user_data");
   const user = JSON.parse(userData);
@@ -146,7 +152,7 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week, year }
       break;
 
     default:
-      
+
       break;
   }
 
@@ -258,6 +264,7 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week, year }
       toast.error("Failed to download the file:", error);
     }
   };
+
   const getGroup2 = (group1) => {
     return GroupingOptions.filter((item) => item.group1 === group1).map(
       (item) => item.group2
@@ -266,9 +273,27 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week, year }
 
   const group1Options = [...new Set(GroupingOptions.map((i) => i.group1))];
 
-  const group2Options = GroupingOptions.filter(
-    (i) => i.group1 === selectedGroup1
-  ).map((i) => i.group2);
+  // const group2Options = GroupingOptions.filter(
+  //   (i) => i.group1 === selectedGroup1
+  // ).map((i) => i.group2);
+
+
+  const group2Options = GroupingOptions.map((i) => i.group2);
+
+  const group22Options = ProgressOptions.filter(
+    (i) => i.group11 === selectedGroup1
+  ).map((i) => i.group22);
+
+  const handleGroup2Change = (value) => {
+    const data = GroupingOptions.find((i) => i.group2 === value);
+
+    setSelectedGroup2(value);
+    setSelectedGroup1(data?.group1);
+
+    form.setFieldsValue({
+      group1: data?.group1,
+    });
+  };
 
   return (
     <Modal open={open} onCancel={onCancel} footer={null} centered>
@@ -322,25 +347,25 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week, year }
           {(dataModal?.parameter == "mttrq critical" ||
             dataModal?.parameter == "mttrq major" ||
             dataModal?.parameter == "mttrq minor") && (
-            <Form.Item
-              label="Ttr Selisih"
-              name="ttr_selisih"
-              rules={[{ required: true, message: "Masukkan Ttr Selisih" }]}
-            >
-              <Input type="text" placeholder="Masukkan Ttr Selisih" />
-            </Form.Item>
-          )}
+              <Form.Item
+                label="Ttr Selisih"
+                name="ttr_selisih"
+                rules={[{ required: true, message: "Masukkan Ttr Selisih" }]}
+              >
+                <Input type="text" placeholder="Masukkan Ttr Selisih" />
+              </Form.Item>
+            )}
           {(dataModal?.parameter == "mttrq critical" ||
             dataModal?.parameter == "mttrq major" ||
             dataModal?.parameter == "mttrq minor") && (
-            <Form.Item
-              label="Ticket Id"
-              name="ticket_id"
-              rules={[{ required: true, message: "Masukkan Ticket Id" }]}
-            >
-              <Input type="text" placeholder="Masukkan Ticket Id" readOnly />
-            </Form.Item>
-          )}
+              <Form.Item
+                label="Ticket Id"
+                name="ticket_id"
+                rules={[{ required: true, message: "Masukkan Ticket Id" }]}
+              >
+                <Input type="text" placeholder="Masukkan Ticket Id" readOnly />
+              </Form.Item>
+            )}
           {dataModal?.parameter != "mttrq critical" &&
             dataModal?.parameter != "mttrq major" &&
             dataModal?.parameter != "mttrq minor" && (
@@ -352,7 +377,7 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week, year }
             )}
           {!dataModal?.parameter?.includes("mttrq") ? (
             <div>
-              <Form.Item
+              {/* <Form.Item
                 // label={labelText + " 1"}
                 label="Rca Rekonsiliasi"
                 name={nameField}
@@ -360,7 +385,8 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week, year }
                 rules={[{ required: true, message: "Masukkan Grouping RCA" }]}
               >
                 <Select
-                  placeholder="Pilih Grouping RCA 1"
+                  // placeholder="Pilih Grouping RCA 1"
+                  placeholder="Rca Rekonsiliasi"
                   onChange={(value) => setSelectedGroup1(value)}
                 >
                   {group1Options.map((g1) => (
@@ -379,7 +405,8 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week, year }
                 rules={[{ required: true, message: "Masukkan Grouping RCA" }]}
               >
                 <Select
-                  placeholder="Pilih Grouping RCA 2"
+                  // placeholder="Pilih Grouping RCA 2"
+                  placeholder="Update Progress"
                   disabled={!selectedGroup1}
                 >
                   {group2Options.map((g2) => (
@@ -388,7 +415,55 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week, year }
                     </Option>
                   ))}
                 </Select>
-              </Form.Item>
+              </Form.Item> */}
+
+              <Form form={form} layout="vertical">
+
+                {/* FORM 1 */}
+                <Form.Item
+                  label="RCA Rekonsiliasi"
+                  name="group2"
+                  rules={[{ required: true, message: "Pilih RCA Rekonsiliasi" }]}
+                >
+                  <Select
+                    placeholder="Pilih RCA Rekonsiliasi"
+                    onChange={handleGroup2Change}
+                  >
+                    {group2Options.map((g2) => (
+                      <Option key={g2} value={g2}>
+                        {g2}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+
+                {/* FORM 2 */}
+                <Form.Item
+                  label="Grouping RCA"
+                  name="group1"
+                >
+                  <Input disabled />
+                </Form.Item>
+
+                {/* FORM 3 */}
+                <Form.Item
+                  label="Update Progress"
+                  name="group22"
+                  rules={[{ required: true, message: "Pilih Update Progress" }]}
+                >
+                  <Select
+                    placeholder="Pilih Update Progress"
+                    disabled={!selectedGroup1}
+                  >
+                    {group22Options.map((g22) => (
+                      <Option key={g22} value={g22}>
+                        {g22}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+
+              </Form>
             </div>
           ) : (
             <Form.Item
