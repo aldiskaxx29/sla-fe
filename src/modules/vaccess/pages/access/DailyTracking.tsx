@@ -125,7 +125,7 @@ let dataset = [
     },
   };
 
-  return <div style={{ height: "205px",width:"100%" }}><Bar data={data} style={{width:1000}} options={options} /></div>;
+  return <div style={{ height: "88%",width:"100%" }}><Bar data={data} style={{width:1000}} options={options} /></div>;
 };
 const DailyTracking=({start,end})=>{
     const [DAILYTRACKING,setDailyTracking] = useState({})
@@ -216,7 +216,7 @@ const DailyTracking=({start,end})=>{
                         </select>
                     </div>
                 </div>
-         <div className="px-10">
+         <div className="px-10" style={{height:'35vh'}}>
             <StackedBarChart POP={PopDailyTracking} DATE={DDate} MODE={DAILYMODE} CLEAR={DCLEAR} SPIKE={DSPIKE} CONSC={DCONSC}></StackedBarChart>
         </div>
         </div>

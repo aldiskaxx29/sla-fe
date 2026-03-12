@@ -23,7 +23,7 @@ ChartJS.register(
 );
 const StackedBarChart = ({datachart}) => {
   const data = {
-    labels: ["SPMS", "ISR", "QE", "ISSUE TSEL","WARRANTY","COMCASE","WAITING CRA/CRQ","ISSUE DWS","LATE RESPONSE TIF"],
+    labels: ["SPMS", "ISR", "TRANSPORT","QE", "COMCASE","CERAGON","LATE RESPON","WARRANTY","ISSUE DWS","ISSUE TSEL","WAITING CRA/CRQ"],
     datasets: [
       {
         data: datachart,
@@ -38,7 +38,7 @@ const StackedBarChart = ({datachart}) => {
     maintainAspectRatio: false,
     layout:{
         padding:{
-            top:20,
+            top:30,
             bottom:0
         }
     },
@@ -57,9 +57,9 @@ const StackedBarChart = ({datachart}) => {
       },
       y: {
         min: 0,
-        max: Math.max(...datachart),
+        suggestedMax: Math.max(...datachart)+1,
         ticks: {
-            stepSize: 2,
+            stepSize: 1,
             autoSkip:true,
             callback: (value) => value,
         },
@@ -110,40 +110,37 @@ const TOPOLDEST =({sitegroup,week})=>{
     return(
             <div>
                     <div className="text-md font-bold text-red-700 flex gap-2 italic">TOP 15 OLDEST TICKET</div>
-                      <table className="w-full border border-gray-800 py-2 table-fixed" style={{fontWeight:'300 !important',fontSize:'0.7em'}}>
-                            <thead>
-                                <tr className="uppercase">
-                                    <th style={{fontWeight:'600'}} className="bg-linear-to-b w-8 from-sky-900 to-sky-700 border border-gray-800 text-white p-[2px]">NO</th>
-                                    <th style={{fontWeight:'600'}} className="bg-linear-to-b w-20 from-sky-900 to-sky-700 border border-gray-800 text-white p-[2px]">NO TICKET</th>
-                                    <th style={{fontWeight:'600'}} className="bg-linear-to-b from-sky-900 to-sky-700 border border-gray-800 text-white p-[2px]">REGION</th>
-                                    <th style={{fontWeight:'600'}} className="bg-linear-to-b from-sky-900 to-sky-700 border border-gray-800 text-white p-[2px]">RCA</th>
-                                    <th style={{fontWeight:'600'}} className="bg-linear-to-b from-sky-900 to-sky-700 border border-gray-800 text-white p-[2px]">TTR</th>
-                                    <th style={{fontWeight:'600'}} className="bg-linear-to-b from-sky-900 to-sky-700 border border-gray-800 text-white p-[2px]">LAST UPDATE</th>
-                                </tr>
-                            </thead>
+                        <table className="w-full border border-gray-800 py-2 table-fixed" style={{fontWeight:'300 !important',fontSize:'0.7em'}}>
+                                <thead>
+                                    <tr className="uppercase h-7">
+                                        <th style={{fontWeight:'600',height:10}} className="bg-linear-to-b h-7 w-8 from-sky-900 to-sky-700 border border-gray-800 text-white p-[2px]">NO</th>
+                                        <th style={{fontWeight:'600',height:10}} className="bg-linear-to-b h-7 w-20 from-sky-900 to-sky-700 border border-gray-800 text-white p-[2px]">NO TICKET</th>
+                                        <th style={{fontWeight:'600',height:10}} className="bg-linear-to-b h-7 from-sky-900 to-sky-700 border border-gray-800 text-white p-[2px]">REGION</th>
+                                        <th style={{fontWeight:'600',height:10}} className="bg-linear-to-b h-7 from-sky-900 to-sky-700 border border-gray-800 text-white p-[2px]">RCA</th>
+                                        <th style={{fontWeight:'600',height:10}} className="bg-linear-to-b h-7 from-sky-900 to-sky-700 border border-gray-800 text-white p-[2px]">TTR</th>
+                                        <th style={{fontWeight:'600',height:10}} className="bg-linear-to-b h-7 from-sky-900 to-sky-700 border border-gray-800 text-white p-[2px]">LAST UPDATE</th>
+                                    </tr>
+                                </thead>
                             <tbody>
-                                {TOP.length && TOP.map((T,i)=>{
+                                {TOP.length>0 && TOP.map((T,i)=>{
                                     return(
-                                    <tr key={i} style={{height:15}}>
+                                    <tr key={i} style={{height:'3.2vh'}}>
                                         <td style={{fontWeight:'400'}} className="bg-white border border-gray-800 text-gray-800 text-center p-[2px]">{i+1}</td>
                                         <td style={{fontWeight:'400'}} className="bg-white border border-gray-800 text-gray-800 text-center p-[2px]">{T.ticket_id}</td>
                                         <td style={{fontWeight:'400'}} className="bg-white border border-gray-800 text-gray-800 text-center p-[2px]">{T.region.split("-")[1]}</td>
                                         <td style={{fontWeight:'400'}} className="bg-white border border-gray-800 text-gray-800 text-center p-[2px]">{T.rca}</td>
                                         <td style={{fontWeight:'400'}} className="bg-white border border-gray-800 text-gray-800 text-center p-[2px]">{Number(T.ttr).toFixed(2)}</td>
                                         <td
-                                        style={{
-                                            fontWeight: 400,
-                                            height: 10,
-                                            width: 50,
-                                            whiteSpace: 'nowrap',
-                                            textOverflow: 'ellipsis',
-                                            overflow: 'hidden'
-                                        }}
-                                        className="bg-white border border-gray-800 text-gray-800 text-center p-[2px]"
-                                        >
-                                        {T.last_update
-                                            ? `${T.last_update.slice(0, 15)}...`
-                                            : ''}
+                                            style={{
+                                                fontWeight: 400,
+                                                height: 10,
+                                                width: 50,
+                                                whiteSpace: 'nowrap',
+                                                textOverflow: 'ellipsis',
+                                                overflow: 'hidden'
+                                            }}
+                                            className="bg-white border border-gray-800 text-gray-800 text-center p-[2px]"
+                                        > {T.last_update ? `${T.last_update.slice(0, 15)}...`: ''}
                                         </td>
                                     </tr>
                                 )})}
@@ -153,21 +150,29 @@ const TOPOLDEST =({sitegroup,week})=>{
     )
 }
 
-const RCACHART = React.memo(({sitegroup,week})=>{
-    const [DATA,setData] = useState({SPMS:0,ISR:0,QE:0,"ISSUE TSEL":0,WARRANTY:0,COMCASE:0,"WAITING CRA/CRQ":0,"ISSUE DWS":0,"LATE RESPONSE TIF":0})
+const RCACHART = React.memo(({sitegroup,week,weekstart,weekend})=>{
+    const [DATA,setData] = useState({SPMS:0,ISR:0,TRANSPORT:0,QE:0,COMCASE:0,CERAGON:0,"LATE RESPONSE":0,"ISSUE DWS":0,"ISSUE TSEL":0,WARRANTY:0,"WAITING CRA/CRQ":0})
     const [DATACHART,setDataChart] = useState([])
     async function ChartData(){
-        let res = await fetch('https://qosmo.telkom.co.id/baseapi/vrca.php?cmd=chart-rca-not-clear&sitegroup='+sitegroup)
-        let {data} = await res.json()
-        let d = []
-        Object.keys(DATA).forEach((a,i)=>{
-            d[i] = data[a]
-        })
-        setDataChart([...d])
+        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vrca.php?cmd=chart-rca-not-clear&weekstart=${weekstart}&weekend=${weekend}&week=${week.split('-')[0]}&year=${week.split('-')[1]}&sitegroup=${sitegroup}`)
+        let {data} = await res.json() || []
+        try {
+            
+            let d = []
+            Object.keys(DATA).forEach((a,i)=>{
+                d[i] = data[a]
+            })
+            // console.log(d,data)
+            setDataChart([...d])
+        } catch (error) {
+            
+        }
         // setData({...d})
     }
     useEffect(()=>{
-        ChartData()
+        if(week){
+            ChartData()
+        }
     },[sitegroup,week])
     return(
         <div>
@@ -176,14 +181,22 @@ const RCACHART = React.memo(({sitegroup,week})=>{
         </div>
     )
 })
-const RESUME = React.memo(({week,sitegroup})=>{
+const RESUME = React.memo(({week,weekstart,weekend,sitegroup,setLOADING})=>{
     const [CLOSED,setCLOSED] = useState([])
     const [OPEN,setOPEN] = useState([])
     async function ChartData(){
-        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vrca.php?cmd=resume&week=${week.split('-')[0]}&year=${week.split('-')[1]}&sitegroup=${sitegroup}`)
-        let {data} = await res.json()
-        setCLOSED([...data.CLOSED])
-        setOPEN([...data.OPEN])
+        setLOADING(true)
+        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vrca.php?cmd=resume&weekstart=${weekstart}&weekend=${weekend}&week=${week.split('-')[0]}&year=${week.split('-')[1]}&sitegroup=${sitegroup}`)
+        try {    
+            let {data} = await res.json() || []
+            if(data){
+                setCLOSED([...data.CLOSED])
+                setOPEN([...data.OPEN])
+                setLOADING(false)
+            }
+        } catch (error) {
+            
+        }
     }
     useEffect(()=>{
         ChartData()
@@ -202,15 +215,15 @@ const RESUME = React.memo(({week,sitegroup})=>{
                     <div className="text-3xl cursor-pointer pt-2 font-bold text-green-700 border-l border-r border-white">{CLOSED.length}</div>
                     <div className="text-3xl cursor-pointer pt-2 font-bold text-red-600">{OPEN.length}</div>
                     <div className="text-3xl pb-2 text-white"></div>
-                    <div className="text-md pb-2 text-gray-800 border-l border-r border-white">{(CLOSED.length/(CLOSED.length+OPEN.length)*100).toFixed(2)}%</div>
-                    <div className="text-md pb-2 text-gray-800">{(OPEN.length/(CLOSED.length+OPEN.length)*100).toFixed(2)}%</div>
+                    <div className="text-md pb-2 text-gray-800 border-l border-r border-white">{((CLOSED.length/(CLOSED.length+OPEN.length)*100) ||0).toFixed(2)}%</div>
+                    <div className="text-md pb-2 text-gray-800">{((OPEN.length/(CLOSED.length+OPEN.length)*100) || 0).toFixed(2)}%</div>
                 </div>
             </div>
         </div>
     )
 })
 
-const TABLERCANOTCLEAR = React.memo(({sitegroup,week})=>{
+const TABLERCANOTCLEAR = React.memo(({sitegroup,week,weekstart,weekend})=>{
     const RESETTB = {
         SUMBAGUT : {total_ticket:0},
         SUMBAGSEL : {total_ticket:0},
@@ -246,31 +259,33 @@ const TABLERCANOTCLEAR = React.memo(({sitegroup,week})=>{
     const [POPDATA,setPOPDATA] = useState({})
     const [DETAIL,setDETAIL]=useState(RESETDETAIL)
     async function TableData(){
-        let res = await fetch('https://qosmo.telkom.co.id/baseapi/vrca.php?cmd=detail-rca-not-clear&sitegroup='+sitegroup)
-        let {data} = await res.json()
+        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vrca.php?cmd=detail-rca-not-clear&weekstart=${weekstart}&weekend=${weekend}&week=${week.split('-')[0]}&year=${week.split('-')[1]}&sitegroup=${sitegroup}`)
+        try {
+        let {data} = await res.json() || []
         let d = RESETTB
-        Object.keys(data.total_ticket).forEach(a=>{
+        data.total_ticket && Object.keys(data.total_ticket).forEach(a=>{
             d[a.split("-")[1]] && (d[a.split("-")[1]].total_ticket=data.total_ticket[a])
         })
 
         let e = RESETDETAIL
-        Object.keys(data.detail).forEach(a=>{
+        data.detail && Object.keys(data.detail).forEach(a=>{
             Object.keys(data.detail[a]).forEach(b=>{
                 e[a.split("-")[1]]&& (e[a.split("-")[1]][b]=data.detail[a][b])
             })
         })
         setDETAIL(e)
         setTB({...d})
-        // console.log(DETAIL,e)
+        } catch (error) {
+            
+        }
     }
 
     async function PopTable(region,rca){
-        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vrca.php?cmd=pop-not-clear&region=${region}&rca=${rca}&sitegroup=${sitegroup}`)
+        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vrca.php?cmd=pop-not-clear&region=${region}&rca=${rca}&week=${week.split('-')[0]}&year=${week.split('-')[1]}&sitegroup=${sitegroup}`)
         let {data} = await res.json()
         setPOPDATA(data)
         
         setPOP(true);
-        // setTITLEPOP("SITE POTENTIAL PACKET LOSS 5%")
     }
 
 
@@ -281,7 +296,7 @@ const TABLERCANOTCLEAR = React.memo(({sitegroup,week})=>{
         <div>
             {POP && <PopupTTR close={()=>setPOP(!POP)} data={POPDATA}></PopupTTR>}
             <div className="text-md font-bold text-red-700 flex gap-2 italic">RCA TICKET NOT CLEAR</div>
-            <table className="w-full border border-gray-800 py-2 table-fixed" style={{fontWeight:'300 !important',fontSize:'0.7em'}}>
+            <table className="w-full border border-gray-800 py-2 table-fixed" style={{fontWeight:'300 !important',fontSize:'0.7em',height:'52vh'}}>
                     <thead>
                         <tr className="uppercase">
                             <th style={{fontWeight:'600'}} rowSpan={2} className="bg-linear-to-b w-40 from-sky-900 to-sky-700 border border-gray-800 text-white p-[3px]">Region</th>
@@ -343,30 +358,20 @@ const TABLERCANOTCLEAR = React.memo(({sitegroup,week})=>{
         </div>
     )
 })
-const MTTR=({parameter,week})=>{
+const MTTR=({parameter,week,weekstart,weekend,setLOADING})=>{
     const [refresh,setRefresh] = useState(false)
-    const [TOP,setTOP] = useState([
-        {ticket:'aksdkjasd',region:'SUMBAGUT',rca:'ISR',last_update:''},
-        {ticket:'aksdkjasd',region:'SUMBAGUT',rca:'ISR',last_update:''},
-        {ticket:'aksdkjasd',region:'SUMBAGUT',rca:'ISR',last_update:''},
-        {ticket:'aksdkjasd',region:'SUMBAGUT',rca:'ISR',last_update:''},
-        {ticket:'aksdkjasd',region:'SUMBAGUT',rca:'ISR',last_update:''},
-        {ticket:'aksdkjasd',region:'SUMBAGUT',rca:'ISR',last_update:''},
-        {ticket:'aksdkjasd',region:'SUMBAGUT',rca:'ISR',last_update:''},
-        {ticket:'aksdkjasd',region:'SUMBAGUT',rca:'ISR',last_update:''},
-        {ticket:'aksdkjasd',region:'SUMBAGUT',rca:'ISR',last_update:''},
-    ]) 
-
     useEffect(()=>{
         setRefresh(!refresh)
     },[week])
-    
+    if(week)
     return(
+          <div className="pr-5" style={{height:'100vh',width:'100vw'}}>
             <div className="grid w-full col-span-2 gap-2" style={{gridTemplateColumns:'0.5fr 1fr'}}>
-                <RESUME week={week} sitegroup={parameter.split(' ')[1]}></RESUME>
-                <RCACHART week={week} sitegroup={parameter.split(' ')[1]}></RCACHART>
-                <TOPOLDEST week={week} sitegroup={parameter.split(' ')[1]}></TOPOLDEST>
-                <TABLERCANOTCLEAR week={week} sitegroup={parameter.split(' ')[1]}></TABLERCANOTCLEAR>
+                <RESUME week={week} weekstart={weekstart} weekend={weekend} sitegroup={parameter.split(' ')[1]} setLOADING={setLOADING}></RESUME>
+                <RCACHART week={week} weekstart={weekstart} weekend={weekend} sitegroup={parameter.split(' ')[1]}></RCACHART>
+                <TOPOLDEST week={week} weekstart={weekstart} weekend={weekend} sitegroup={parameter.split(' ')[1]}></TOPOLDEST>
+                <TABLERCANOTCLEAR week={week} weekstart={weekstart} weekend={weekend} sitegroup={parameter.split(' ')[1]}></TABLERCANOTCLEAR>
+            </div>
             </div>
     )
 }
