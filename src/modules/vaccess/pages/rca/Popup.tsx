@@ -4,9 +4,6 @@ import {
 import { useEffect } from "react";
 
 const Popup = ({close,data}) =>{
-    useEffect(()=>{
-        console.log(data)
-    },[])
     return(
          <div className="fixed flex top-20 justify-center left-0 right-0 bottom-0">
             <div className="bg-gray-900 opacity-70 absolute h-full w-full"></div>
@@ -19,11 +16,13 @@ const Popup = ({close,data}) =>{
                         <thead>
                             <tr>
                                 <th className="py-0.5 px-2 sticky top-0 text-center border border-gray-800 bg-blue-200 text-gray-800" style={{boxShadow:'inset 0px 0.2px 0px #000,inset 0px -0.2px 0px #000'}}>No</th>
-                                <th className="py-0.5 px-2 sticky top-0 text-center border border-gray-800 bg-blue-200 text-gray-800" style={{boxShadow:'inset 0px 0.2px 0px #000,inset 0px -0.2px 0px #000'}}>Site ID</th>
-                                <th className="py-0.5 px-2 sticky top-0 text-center border border-gray-800 bg-blue-200 text-gray-800" style={{boxShadow:'inset 0px 0.2px 0px #000,inset 0px -0.2px 0px #000'}}>Regional</th>
-                                <th className="py-0.5 px-2 sticky top-0 text-center border border-gray-800 bg-blue-200 text-gray-800" style={{boxShadow:'inset 0px 0.2px 0px #000,inset 0px -0.2px 0px #000'}}>Witel</th>
-                                <th className="py-0.5 px-2 sticky top-0 text-center border border-gray-800 bg-blue-200 text-gray-800" style={{boxShadow:'inset 0px 0.2px 0px #000,inset 0px -0.2px 0px #000'}}>Packetloss Status</th>
+                                <th className="py-0.5 px-2 sticky top-0 text-center border border-gray-800 bg-blue-200 text-gray-800" style={{boxShadow:'inset 0px 0.2px 0px #000,inset 0px -0.2px 0px #000'}}>Site</th>
+                                <th className="py-0.5 px-2 sticky top-0 text-center border border-gray-800 bg-blue-200 text-gray-800" style={{boxShadow:'inset 0px 0.2px 0px #000,inset 0px -0.2px 0px #000'}}>Region</th>
+                                <th className="py-0.5 px-2 sticky top-0 text-center border border-gray-800 bg-blue-200 text-gray-800" style={{boxShadow:'inset 0px 0.2px 0px #000,inset 0px -0.2px 0px #000'}}>District</th>
                                 <th className="py-0.5 px-2 sticky top-0 text-center border border-gray-800 bg-blue-200 text-gray-800" style={{boxShadow:'inset 0px 0.2px 0px #000,inset 0px -0.2px 0px #000'}}>Packetloss</th>
+                                <th className="py-0.5 px-2 sticky top-0 text-center border border-gray-800 bg-blue-200 text-gray-800" style={{boxShadow:'inset 0px 0.2px 0px #000,inset 0px -0.2px 0px #000'}}>RCA</th>
+                                <th className="py-0.5 px-2 sticky top-0 text-center border border-gray-800 bg-blue-200 text-gray-800" style={{boxShadow:'inset 0px 0.2px 0px #000,inset 0px -0.2px 0px #000'}}>Action Plan</th>
+                                <th className="py-0.5 px-2 sticky top-0 text-center border border-gray-800 bg-blue-200 text-gray-800" style={{boxShadow:'inset 0px 0.2px 0px #000,inset 0px -0.2px 0px #000'}}>Progress Status</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -33,8 +32,10 @@ const Popup = ({close,data}) =>{
                                     <td className="py-0.5 px-2 border border-gray-800 text-center">{a.site_id}</td>
                                     <td className="py-0.5 px-2 border border-gray-800 text-center">{a.region}</td>
                                     <td className="py-0.5 px-2 border border-gray-800 text-center">{a.witel}</td>
-                                    <td className="py-0.5 px-2 border border-gray-800 text-center">{a.status}</td>
                                     <td className="py-0.5 px-2 border border-gray-800 text-center">{a.av}</td>
+                                    <td className="py-0.5 px-2 border border-gray-800 text-center">{a.rca || '-'}</td>
+                                    <td className="py-0.5 px-2 border border-gray-800 text-center">{a.rca2 || '-'}</td>
+                                    <td className="py-0.5 px-2 border border-gray-800 text-center">{a.status || '-'}</td>
                                 </tr>)
                             })}
                         </tbody>
