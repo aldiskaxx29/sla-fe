@@ -185,12 +185,19 @@ const SitePage = () => {
               value={month}
             />
           ) : (
+            // <AppDropdown
+            //   title="Week"
+            //   placeholder="All"
+            //   options={filterWeek}
+            //   onChange={(value) => setWeek(value)}
+            //   value={week}
+            // />
             <AppDropdown
-              title="Week"
+              title="Month"
               placeholder="All"
-              options={filterWeek}
-              onChange={(value) => setWeek(value)}
-              value={week}
+              options={filterMonth}
+              onChange={(value) => setMonth(value)}
+              value={month}
             />
           )}
           <AppDropdown
