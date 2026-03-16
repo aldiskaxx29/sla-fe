@@ -3,6 +3,7 @@ import Popup from "./Popup";
 import { FileExcelFilled } from "@ant-design/icons";
 import DailyTracking from "./DailyTracking";
 import * as XLSX from "xlsx";
+import PopupDownload from "./PopupDownload";
 
 
 function getStartEnd(date = new Date(),max_date=new Date()) {
@@ -88,6 +89,10 @@ const Prediction = ()=>{
     const [PDETAIL,setPDetail] = useState([])
     const [POPDATA,setPOPDATA] = useState([])
     const [RAWDATA,setRAWDATA] = useState([])
+    const [RAWDATALAST,setRAWDATALAST] = useState([])
+    const [LAST,setLAST] = useState([])
+    const [NOW,setNOW] = useState([])
+    const [POPDOWNLOAD,setPOPDOWNLOAD] = useState(false)
     const [POPMODE,setPOPMODE] = useState("")
     
     const [POP,setPOP] = useState(false)
@@ -153,13 +158,38 @@ const Prediction = ()=>{
     })
 
     async function RAW(start,end){
-        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vaccess.php?cmd=raw-access&week=${getWeek(new Date(MAX_DATE))}&start=${start}&end=${end}`)
+        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vaccess.php?cmd=raw-access&start=${start}&end=${end}`)
         let {data} = await res.json()
         setRAWDATA(data)
     }
+    function getRange7Hari(tanggal){
+
+        const end = new Date(tanggal);
+        const start = new Date(tanggal);
+
+        end.setDate(end.getDate() - 1);
+        start.setDate(start.getDate() - 7);
+
+        const format = (date)=>{
+            const y = date.getFullYear();
+            const m = String(date.getMonth()+1).padStart(2,'0');
+            const d = String(date.getDate()).padStart(2,'0');
+            return `${y}-${m}-${d}`;
+        }
+
+        return {
+            start_date: format(start),
+            end_date: format(end)
+        }
+    }
+    async function RAWLAST(start){
+        let {start_date,end_date} = getRange7Hari(start)
+        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vaccess.php?cmd=raw-access&start=${start_date}&end=${end_date}`)
+        let {data} = await res.json()
+        setRAWDATALAST(data)
+    }
 
     function exportRAW() {
-
         if (!RAWDATA || RAWDATA.length === 0) {
             return;
             alert('Data Raw Not Ready Yet')
@@ -178,7 +208,32 @@ const Prediction = ()=>{
         XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet 1");
 
         // download file
-        let filename = "RAW W"+getWeek(new Date(MAX_DATE))+"_"+Date.now()
+        let {start,end}= getStartEnd(new Date(MAX_DATE))
+        let filename = "RAW THIS WEEK-"+`${start}`+`-${end}`
+        XLSX.writeFile(workbook, filename+".xlsx");
+    }
+     function exportRAWLAST() {
+        if (!RAWDATALAST || RAWDATALAST.length === 0) {
+            return;
+            alert('Data Raw Not Ready Yet')
+        }
+
+        // ambil header dari key object pertama
+        const headers = Object.keys(RAWDATALAST[0]);
+
+        // convert ke worksheet
+        const worksheet = XLSX.utils.json_to_sheet(RAWDATALAST, { header: headers });
+
+        // buat workbook
+        const workbook = XLSX.utils.book_new();
+
+        // tambahkan sheet
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet 1");
+
+        // download file
+        let {start,end}= getStartEnd(new Date(MAX_DATE))
+        let {start_date,end_date} = getRange7Hari(start)
+        let filename = "RAW LAST WEEK-"+`${start_date}`+`-${end_date}`
         XLSX.writeFile(workbook, filename+".xlsx");
     }
     async function SitePL18(start,end){
@@ -309,19 +364,20 @@ const Prediction = ()=>{
             let {start,end}= getStartEnd(new Date(MAX_DATE))
             SitePL18(start,end)
             RAW(start,end)
+            RAWLAST(start)
             PredictionWeekDetail(start,end)
         }
     },[MAX_DATE])
 
- 
     if(MAX_DATE)
     return (
         <div className="bg-white h-full text-gray-800 p-2" style={{fontFamily:'Poppins'}}>
             {POP && <Popup title={TITLEPOP} close={setPOP} data={POPDATA} mode={POPMODE}></Popup>}
+            {POPDOWNLOAD && <PopupDownload RAWDATA={RAWDATA} RAWDATALAST={RAWDATALAST} LAST={exportRAWLAST} NOW={exportRAW} close={setPOPDOWNLOAD}></PopupDownload>}
             <div className="grid grid-cols-7 mb-1">
                 <div className="col-span-6 flex justify-between items-center">
                     <div className="text-md font-bold text-red-700 flex gap-2">PREDIKSI <div>W{getWeek(new Date(getStartEnd(new  Date(MAX_DATE)).currentText))} ({getStartEnd(new Date(MAX_DATE)).startText} - {getStartEnd(new Date(MAX_DATE),new Date(MAX_DATE)).currentText})</div></div>
-                    <div onClick={exportRAW} className="cursor-pointer flex items-center gap-1" style={{fontSize:'0.8em',color:RAWDATA.length ? 'black' :'gray'}}>
+                    <div onClick={()=>setPOPDOWNLOAD(true)} className="cursor-pointer flex items-center gap-1" style={{fontSize:'0.8em',color:RAWDATA.length ? 'black' :'gray'}}>
                         Export As Excel
                         <FileExcelFilled style={{color:'green',fontSize:'1.7em'}}></FileExcelFilled>
                     </div>
