@@ -87,6 +87,7 @@ const Prediction = ()=>{
     const [JITTER2,setJITTER2] = useState(0)
     const [PDETAIL,setPDetail] = useState([])
     const [POPDATA,setPOPDATA] = useState([])
+    const [RAWDATA,setRAWDATA] = useState([])
     const [POPMODE,setPOPMODE] = useState("")
     
     const [POP,setPOP] = useState(false)
@@ -151,6 +152,35 @@ const Prediction = ()=>{
         JABOTABEK_OUTER : {total_site:0,t_pl5:0,t_pl15:2,t_lat:25,t_jit:25,r_pl5:0,r_pl15:0,r_lat:0,r_jit:0},
     })
 
+    async function RAW(start,end){
+        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vaccess.php?cmd=raw-access&week=${getWeek(new Date(MAX_DATE))}&start=${start}&end=${end}`)
+        let {data} = await res.json()
+        setRAWDATA(data)
+    }
+
+    function exportRAW() {
+
+        if (!RAWDATA || RAWDATA.length === 0) {
+            return;
+            alert('Data Raw Not Ready Yet')
+        }
+
+        // ambil header dari key object pertama
+        const headers = Object.keys(RAWDATA[0]);
+
+        // convert ke worksheet
+        const worksheet = XLSX.utils.json_to_sheet(RAWDATA, { header: headers });
+
+        // buat workbook
+        const workbook = XLSX.utils.book_new();
+
+        // tambahkan sheet
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet 1");
+
+        // download file
+        let filename = "RAW W"+getWeek(new Date(MAX_DATE))+"_"+Date.now()
+        XLSX.writeFile(workbook, filename+".xlsx");
+    }
     async function SitePL18(start,end){
         let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vaccess.php?cmd=site-pl-18-hours&week=${getWeek(new Date(MAX_DATE))}&start=${start}&end=${end}`)
         let {data} = await res.json()
@@ -278,6 +308,7 @@ const Prediction = ()=>{
         if(MAX_DATE){
             let {start,end}= getStartEnd(new Date(MAX_DATE))
             SitePL18(start,end)
+            RAW(start,end)
             PredictionWeekDetail(start,end)
         }
     },[MAX_DATE])
@@ -290,7 +321,7 @@ const Prediction = ()=>{
             <div className="grid grid-cols-7 mb-1">
                 <div className="col-span-6 flex justify-between items-center">
                     <div className="text-md font-bold text-red-700 flex gap-2">PREDIKSI <div>W{getWeek(new Date(getStartEnd(new  Date(MAX_DATE)).currentText))} ({getStartEnd(new Date(MAX_DATE)).startText} - {getStartEnd(new Date(MAX_DATE),new Date(MAX_DATE)).currentText})</div></div>
-                    <div onClick={exportExcel} className="cursor-pointer flex items-center gap-1" style={{fontSize:'0.8em'}}>
+                    <div onClick={exportRAW} className="cursor-pointer flex items-center gap-1" style={{fontSize:'0.8em',color:RAWDATA.length ? 'black' :'gray'}}>
                         Export As Excel
                         <FileExcelFilled style={{color:'green',fontSize:'1.7em'}}></FileExcelFilled>
                     </div>
