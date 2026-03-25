@@ -373,10 +373,16 @@ const TableHistory: React.FC<TableHistoryProps> = ({
                       if (
                         (record.parameter
                           ?.toLowerCase()
-                          .includes("packetloss ran to core") ||
+                          .includes("packetloss 1-5% ran to core") ||
+                          record.parameter
+                          ?.toLowerCase()
+                          .includes("packetloss >5% ran to core") ||
                           record.mini_parameter
-                            ?.toLowerCase()
-                            .includes("packetloss ran to core")) &&
+                          ?.toLowerCase()
+                          .includes("packetloss 1-5% ran to core") ||
+                          record.mini_parameter
+                          ?.toLowerCase()
+                          .includes("packetloss >5% ran to core")) &&
                         !record.parameter?.toLowerCase().includes("internet")
                       ) {
                         return (

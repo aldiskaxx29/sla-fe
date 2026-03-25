@@ -212,7 +212,7 @@ const TableHistoryCNOP: React.FC<TableHistoryCNOPProps> = ({
                       const targetValue = Number(record[`target_q${quarter}`]);
 
                       // 4) compare!
-                      const isBelowTarget = Number(text) < targetValue;
+                      const isBelowTarget = Number(text) <= targetValue;
                       const packetloss = parameter
                         ?.toLowerCase()
                         .includes("pl");
