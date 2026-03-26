@@ -429,11 +429,12 @@ const TableParentChildCNOP: React.FC<TableParentChildCNOPProps> = ({
 
                       let textBigger;
                       if (
-                        record.parameter?.includes("PACKETLOSS")
-                        // record.parameter?.includes("LATENCY RAN TO CORE")
+                        record.parameter?.includes("PACKETLOSS") || 
+                        record.parameter?.includes("LATENCY RAN TO CORE") ||
+                        record.paramter?.includes("JITTER RAN TO CORE") 
                       ) {
                         textBigger =
-                          parseNumber(text) < parseNumber(record.target);
+                          parseNumber(text) <= parseNumber(record.target);
                         if (!record.target) {
                           return <span>{text}</span>;
                         }
