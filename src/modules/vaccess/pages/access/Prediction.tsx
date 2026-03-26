@@ -363,8 +363,8 @@ const Prediction = ()=>{
         if(MAX_DATE){
             let {start,end}= getStartEnd(new Date(MAX_DATE))
             SitePL18(start,end)
-            RAW(start,end)
-            RAWLAST(start)
+            // RAW(start,end)
+            // RAWLAST(start)
             PredictionWeekDetail(start,end)
         }
     },[MAX_DATE])
