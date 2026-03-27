@@ -7,7 +7,7 @@ import PopupDownload from "./PopupDownload";
 
 
 function getStartEnd(date = new Date(),max_date=new Date()) {
-    if([5,6,0].includes(date.getDay())){
+    if([5,6,0,1].includes(date.getDay())){
         date.setDate(date.getDate()-4)
     }
   const current = new Date(date);
