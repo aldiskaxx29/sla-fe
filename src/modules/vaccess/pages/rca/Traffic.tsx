@@ -20,9 +20,9 @@ ChartJS.register(
   Tooltip,
   Legend
 );
-const StackedBarChart = ({chartdata,PopChart}) => {
+const StackedBarChart = ({labels,chartdata,PopChart}) => {
   const data = {
-    labels: ["Capacity", "Technical", "Impact Gamas", "Issue TSEL"],
+    labels: labels,
     datasets: [
       {
         label: "OGP",
@@ -154,24 +154,26 @@ const StackedBarChart = ({chartdata,PopChart}) => {
   return <div style={{ height: "25vh",width:"100%" }}><Bar data={data} style={{width:1000}} options={options} /></div>;
 };
 const TRAFFIC = React.memo(({ShowPopup,mode,week,setLOADING})=>{
+    const [refresh,setRefresh] = useState(false)
     const [POPUP,setPOPUP] = useState(false)
     const [POPDATA,setPOPDATA] = useState([])
     const [NASIONAL,setNasional] = useState(0)
+    const [LABELS,setLabels] = useState([])
     const [DATACHART,setDataChart] = useState({})
     const [DATATABLE,setDataTable] = useState({progress:{},sites:{}})
     const TB = {
-        SUMBAGUT : {total_site:0,t_capacity:0,p_capacity:0,t_gamas:0,p_gamas:0,t_technical:0,p_technical:0,t_tsel:0,p_tsel:0},
-        SUMBAGSEL : {total_site:0,t_capacity:0,p_capacity:0,t_gamas:0,p_gamas:0,t_technical:0,p_technical:0,t_tsel:0,p_tsel:0},
-        JABOTABEK_INNER : {total_site:0,t_capacity:0,p_capacity:0,t_gamas:0,p_gamas:0,t_technical:0,p_technical:0,t_tsel:0,p_tsel:0},
-        JAWA_BARAT : {total_site:0,t_capacity:0,p_capacity:0,t_gamas:0,p_gamas:0,t_technical:0,p_technical:0,t_tsel:0,p_tsel:0},
-        JAWA_TENGAH : {total_site:0,t_capacity:0,p_capacity:0,t_gamas:0,p_gamas:0,t_technical:0,p_technical:0,t_tsel:0,p_tsel:0},
-        JAWA_TIMUR : {total_site:0,t_capacity:0,p_capacity:0,t_gamas:0,p_gamas:0,t_technical:0,p_technical:0,t_tsel:0,p_tsel:0},
-        BALI_NUSRA : {total_site:0,t_capacity:0,p_capacity:0,t_gamas:0,p_gamas:0,t_technical:0,p_technical:0,t_tsel:0,p_tsel:0},
-        KALIMANTAN : {total_site:0,t_capacity:0,p_capacity:0,t_gamas:0,p_gamas:0,t_technical:0,p_technical:0,t_tsel:0,p_tsel:0},
-        SULAWESI : {total_site:0,t_capacity:0,p_capacity:0,t_gamas:0,p_gamas:0,t_technical:0,p_technical:0,t_tsel:0,p_tsel:0},
-        SUMBAGTENG : {total_site:0,t_capacity:0,p_capacity:0,t_gamas:0,p_gamas:0,t_technical:0,p_technical:0,t_tsel:0,p_tsel:0},
-        PUMA : {total_site:0,t_capacity:0,p_capacity:0,t_gamas:0,p_gamas:0,t_technical:0,p_technical:0,t_tsel:0,p_tsel:0},
-        JABOTABEK_OUTER : {total_site:0,t_capacity:0,p_capacity:0,t_gamas:0,p_gamas:0,t_technical:0,p_technical:0,t_tsel:0,p_tsel:0},
+        SUMBAGUT :{},
+        SUMBAGSEL :{},
+        JABOTABEK_INNER :{},
+        JAWA_BARAT :{},
+        JAWA_TENGAH :{},
+        JAWA_TIMUR :{},
+        BALI_NUSRA :{},
+        KALIMANTAN :{},
+        SULAWESI :{},
+        SUMBAGTENG :{},
+        PUMA :{},
+        JABOTABEK_OUTER :{},
     }
 
     const [PROGRES,setProgress] = useState(TB)
@@ -202,58 +204,36 @@ const TRAFFIC = React.memo(({ShowPopup,mode,week,setLOADING})=>{
 
             Object.keys(TB).forEach(b=>{
                 try {
-                    
-               
                 c[b].total_site = d.sites.hasOwnProperty(b.replace('_',' ')) ? DATATABLE.sites[b.replace('_',' ')].length : 0
-                c[b].t_capacity = d.sites.hasOwnProperty(b.replace('_',' ')) ? DATATABLE.sites[b.replace('_',' ')].filter(a=>a.rca=='Capacity').length : 0
-                c[b].t_gamas = d.sites.hasOwnProperty(b.replace('_',' ')) ? DATATABLE.sites[b.replace('_',' ')].filter(a=>a.rca=='Impact Gamas').length : 0
-                c[b].t_technical = d.sites.hasOwnProperty(b.replace('_',' ')) ? DATATABLE.sites[b.replace('_',' ')].filter(a=>a.rca=='Technical').length : 0
-                c[b].t_tsel = d.sites.hasOwnProperty(b.replace('_',' ')) ? DATATABLE.sites[b.replace('_',' ')].filter(a=>a.rca=='Issue TSEL').length : 0
-                if(d.progress.hasOwnProperty(b.replace('_',' '))){
-                  if(DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Capacity' && a.status=='CLOSED').length>0 && DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Capacity' && a.status=='OGP').length>0){
-                      c[b].p_capacity = DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Capacity' && a.status=='CLOSED').length/(DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Capacity' && a.status=='CLOSED').length+DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Capacity' && a.status=='OGP').length)*100
-                  }else if(DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Capacity' && a.status=='CLOSED').length>0 && DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Capacity' && a.status=='OGP').length==0){
-                      c[b].p_capacity = 100
-                  }else if(DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Capacity' && a.status=='CLOSED').length==0 && DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Capacity' && a.status=='OGP').length>0){
-                      c[b].p_capacity = 0
-                  }
-                  
-                  if(DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Impact Gamas' && a.status=='CLOSED').length>0 && DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Impact Gamas' && a.status=='OGP').length>0){
-                      c[b].p_gamas = DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Impact Gamas' && a.status=='CLOSED').length/(DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Impact Gamas' && a.status=='CLOSED').length+DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Impact Gamas' && a.status=='OGP').length)*100
-                  }else if(DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Impact Gamas' && a.status=='CLOSED').length>0 && DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Impact Gamas' && a.status=='OGP').length==0){
-                      c[b].p_gamas = 100
-                  }else if(DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Impact Gamas' && a.status=='CLOSED').length==0 && DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Impact Gamas' && a.status=='OGP').length>0){
-                      c[b].p_gamas = 0
-                  }
-
-                  if(DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Technical' && a.status=='CLOSED').length>0 && DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Technical' && a.status=='OGP').length>0){
-                      c[b].p_technical = DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Technical' && a.status=='CLOSED').length/(DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Technical' && a.status=='CLOSED').length+DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Technical' && a.status=='OGP').length)*100
-                  }else if(DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Technical' && a.status=='CLOSED').length>0 && DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Technical' && a.status=='OGP').length==0){
-                      c[b].p_technical = 100
-                  }else if(DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Technical' && a.status=='CLOSED').length==0 && DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Technical' && a.status=='OGP').length>0){
-                      c[b].p_technical = 0
-                  }
-                  
-                  if(DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Issue TSEL' && a.status=='CLOSED').length>0 && DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Issue TSEL' && a.status=='OGP').length>0){
-                      c[b].p_tsel = DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Issue TSEL' && a.status=='CLOSED').length/(DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Issue TSEL' && a.status=='CLOSED').length+DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Issue TSEL' && a.status=='OGP').length)*100
-                  }else if(DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Issue TSEL' && a.status=='CLOSED').length>0 && DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Issue TSEL' && a.status=='OGP').length==0){
-                      c[b].p_tsel = 100
-                  }else if(DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Issue TSEL' && a.status=='CLOSED').length==0 && DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca=='Issue TSEL' && a.status=='OGP').length>0){
-                      c[b].p_tsel = 0
-                  }
-                }else{
-                //   c[b.replace('_',' ')].p_capacity = 100
-                }
+                LABELS.forEach(m=>{
+                    if(!c.hasOwnProperty(b)){
+                        c[b]={}
+                    }
+                    c[b]['t_'+m.toLowerCase()] = 0
+                    c[b]['p_'+m.toLowerCase()] = 0
+                    c[b]['t_'+m.toLowerCase()] = d.sites.hasOwnProperty(b.replace('_',' ')) ? DATATABLE.sites[b.replace('_',' ')].filter(a=>a.rca==m).length : 0
+                        if(d.progress.hasOwnProperty(b.replace('_',' '))){
+                            if(DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca==m && a.status=='CLOSED').length>0 && DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca==m && a.status=='OGP').length>0){
+                                c[b]['p_'+m.toLowerCase()] = DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca==m && a.status=='CLOSED').length/(DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca==m && a.status=='CLOSED').length+DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca==m && a.status=='OGP').length)*100
+                            }else if(DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca==m && a.status=='CLOSED').length>0 && DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca==m && a.status=='OGP').length==0){
+                                c[b]['p_'+m.toLowerCase()] = 100
+                            }else if(DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca==m && a.status=='CLOSED').length==0 && DATATABLE.progress[b.replace('_',' ')].filter(a=>a.rca==m && a.status=='OGP').length>0){
+                                c[b]['p_'+m.toLowerCase()] = 0
+                            }
+                        }else{
+                        //   c[b.replace('_',' ')].p_capacity = 100
+                        }
+                    })
                  } catch (error) {
                     // console.log(error,b)
                 }
             })
 
-            // console.log(c)
             setProgress(c)
             if(data){
                 setLOADING(false)
             }
+            setRefresh(!refresh)
 
         } catch (error) {
             
@@ -269,9 +249,20 @@ const TRAFFIC = React.memo(({ShowPopup,mode,week,setLOADING})=>{
         let res = await fetch('https://qosmo.telkom.co.id/baseapi/vrecon.php?cmd=chart-recon&traffic='+mode.split('_')[0].toLowerCase()+`&week=${week.split('-')[0]}&year=${week.split('-')[1]}&dist=${mode.split('_')[1]}`)
         let {data} = await res.json()
         let chart = {OGP:[],close:[]}
-        let group = ['Capacity','Technical','Impact Gamas','Issue TSEL']
+        let group = []
+
+        Object.keys(data).forEach(a=>{
+            group.push(a)
+        });
+        let blankI = group.findIndex(a => a === 'BLANK');
+
+        if (blankI !== -1) {
+            group.splice(blankI, 1); // hapus BLANK
+            group.push('BLANK');     // tambah ke akhir
+        }
+        setLabels(group)
+
         group.forEach((a,i)=>{
-            // if(data[a]){
                 try {
                     chart['OGP'].push(data[a]['OGP'] || 0)
                 } catch (error) {
@@ -283,10 +274,8 @@ const TRAFFIC = React.memo(({ShowPopup,mode,week,setLOADING})=>{
                 } catch (error) {
                     chart['close'].push(0)
                 }
-            // }
-
-
         })
+
         setDataChart({OGP:chart.OGP,close:chart.close})
     }
 
@@ -322,15 +311,20 @@ const TRAFFIC = React.memo(({ShowPopup,mode,week,setLOADING})=>{
         if(week){
             Nasional()
             ChartData()
-            Table()
         }
     },[mode,week])
+    useEffect(()=>{
+        if(week){
+            Table()
+        }
+    },[LABELS])
+    if(LABELS.length)
     return(
     <React.Fragment>
-          <div style={{height:'100vh'}}>
+          <div style={{height:'88vh'}}>
                 {POPUP && <Popup close={()=>setPOPUP(false)} data={POPDATA}></Popup>}
                 <div className="text-md font-bold text-red-700 flex gap-2">RESUME RCA</div>
-                <div className="grid grid-cols-6" style={{height:'25%'}}>
+                <div className="grid grid-cols-6" style={{height:'30%'}}>
                     <div className="flex flex-col items-center justify-center w-full">
                         <div className="py-2 bg-sky-700 text-white rounded-t-lg text-lg w-full text-center">NASIONAL</div>
                         <div className="rounded-b-lg flex flex-col items-center bg-linear-to-r from-sky-600 to-gray-300 w-full justify-center py-2" style={{height:'55%'}}>
@@ -341,7 +335,7 @@ const TRAFFIC = React.memo(({ShowPopup,mode,week,setLOADING})=>{
                     </div>
                     <div className="col-span-5">
                         <div className="px-10">
-                            <StackedBarChart chartdata={DATACHART} PopChart={PopChart}></StackedBarChart>
+                            <StackedBarChart labels={LABELS} chartdata={DATACHART} PopChart={PopChart}></StackedBarChart>
                         </div>
                     </div>
                 </div>
@@ -352,20 +346,19 @@ const TRAFFIC = React.memo(({ShowPopup,mode,week,setLOADING})=>{
                                 <tr className="uppercase">
                                     <th style={{fontWeight:'400'}} rowSpan={2} className="bg-linear-to-b from-sky-900 to-sky-700 border border-gray-800 text-white p-[3px]">Region</th>
                                     <th style={{fontWeight:'400'}} rowSpan={2} className="bg-linear-to-b from-sky-900 to-sky-700 border border-gray-800 text-white p-[3px]">Total Site Not Clear</th>
-                                    <th style={{fontWeight:'400'}} colSpan={2} className="bg-linear-to-b from-sky-900 to-sky-700 border border-gray-800 text-white p-[3px]">Capacity</th>
-                                    <th style={{fontWeight:'400'}} colSpan={2} className="bg-linear-to-b from-sky-900 to-sky-700 border border-gray-800 text-white p-[3px]">Impact Gamas</th>
-                                    <th style={{fontWeight:'400'}} colSpan={2} className="bg-linear-to-b from-sky-900 to-sky-700 border border-gray-800 text-white p-[3px]">Technical</th>
-                                    <th style={{fontWeight:'400'}} colSpan={2} className="bg-linear-to-b from-sky-900 to-sky-700 border border-gray-800 text-white p-[3px]">Issue TSEL</th>
+                                    {LABELS.map((a,i)=>{
+                                        return(
+                                        <th key={i} style={{fontWeight:'400'}} colSpan={2} className="bg-linear-to-b from-sky-900 to-sky-700 border border-gray-800 text-white p-[3px]">{a}</th>
+                                    )})}
                                 </tr>
                                 <tr className="uppercase">
-                                    <th style={{fontWeight:'400'}} className="bg-linear-to-b from-sky-900 to-sky-700 border border-gray-800 text-white p-[3px]">Total Site</th>
-                                    <th style={{fontWeight:'400'}} className="bg-linear-to-b from-sky-900 to-sky-700 border border-gray-800 text-white p-[3px]">Progress</th>
-                                    <th style={{fontWeight:'400'}} className="bg-linear-to-b from-sky-900 to-sky-700 border border-gray-800 text-white p-[3px]">Total Site</th>
-                                    <th style={{fontWeight:'400'}} className="bg-linear-to-b from-sky-900 to-sky-700 border border-gray-800 text-white p-[3px]">Progress</th>
-                                    <th style={{fontWeight:'400'}} className="bg-linear-to-b from-sky-900 to-sky-700 border border-gray-800 text-white p-[3px]">Total Site</th>
-                                    <th style={{fontWeight:'400'}} className="bg-linear-to-b from-sky-900 to-sky-700 border border-gray-800 text-white p-[3px]">Progress</th>
-                                    <th style={{fontWeight:'400'}} className="bg-linear-to-b from-sky-900 to-sky-700 border border-gray-800 text-white p-[3px]">Total Site</th>
-                                    <th style={{fontWeight:'400'}} className="bg-linear-to-b from-sky-900 to-sky-700 border border-gray-800 text-white p-[3px]">Progress</th>
+                                    {LABELS.map((a,i)=>{
+                                        return(
+                                        <React.Fragment key={i}>
+                                            <th style={{fontWeight:'400'}} className="bg-linear-to-b from-sky-900 to-sky-700 border border-gray-800 text-white p-[3px]">Total Site</th>
+                                            <th style={{fontWeight:'400'}} className="bg-linear-to-b from-sky-900 to-sky-700 border border-gray-800 text-white p-[3px]">Progress</th>
+                                        </React.Fragment>
+                                    )})}
                                 </tr>
                             </thead>
                             <tbody>
@@ -374,34 +367,31 @@ const TRAFFIC = React.memo(({ShowPopup,mode,week,setLOADING})=>{
                                     <tr key={i} onClick={ShowPopup}>
                                     <td style={{fontWeight:'400'}} className="bg-white border border-gray-800 text-gray-800 text-left p-[3px]">{String(i+1).padStart(2,'0')+'-'+T.replace('_',' ')}</td>
                                     <td onClick={()=>PopTable(T.replace('_',' '),'')} style={{fontWeight:'400'}} className="cursor-pointer bg-white border border-gray-800 text-gray-800 text-center p-[3px]">{PROGRES[T] && PROGRES[T].total_site || 0}</td>
-                                    <td onClick={()=>PopTable(T.replace('_',' '),'Capacity')} style={{fontWeight:'400'}} className="bg-white border border-gray-800 text-gray-800 text-center p-[3px] cursor-pointer">{PROGRES[T] && PROGRES[T].t_capacity || 0}</td>
-                                    <td style={{fontWeight:'400',color:PROGRES[T] && PROGRES[T].p_capacity>80? 'green' : (PROGRES[T] && PROGRES[T].p_capacity<80 && PROGRES[T].p_capacity!=0 ? 'red' : 'black')}} className="bg-white border border-gray-800 text-gray-800 text-center p-[3px]">{PROGRES[T] && formatNumber(Math.abs(PROGRES[T].p_capacity)) || 0}%</td>
-                                    <td onClick={()=>PopTable(T.replace('_',' '),'Impact Gamas')} style={{fontWeight:'400'}} className="bg-white border border-gray-800 text-gray-800 text-center p-[3px] cursor-pointer">{PROGRES[T] && PROGRES[T].t_gamas || 0}</td>
-                                    <td style={{fontWeight:'400',color:PROGRES[T] && PROGRES[T].p_gamas>80? 'green' : (PROGRES[T] && PROGRES[T].p_gamas<80 && PROGRES[T].p_gamas!=0 ? 'red' : 'black')}} className="bg-white border border-gray-800 text-gray-800 text-center p-[3px]">{PROGRES[T] && formatNumber(Math.abs(PROGRES[T].p_gamas)) || 0}%</td>
-                                    <td onClick={()=>PopTable(T.replace('_',' '),'Technical')} style={{fontWeight:'400'}} className="bg-white border border-gray-800 text-gray-800 text-center p-[3px] cursor-pointer">{PROGRES[T] && PROGRES[T].t_technical || 0}</td>
-                                    <td style={{fontWeight:'400',color:PROGRES[T] && PROGRES[T].p_technical>80? 'green' : (PROGRES[T] && PROGRES[T].p_technical<80 && PROGRES[T].p_technical!=0 ? 'red' : 'black')}} className="bg-white border border-gray-800 text-gray-800 text-center p-[3px]">{PROGRES[T] && formatNumber(Math.abs(PROGRES[T].p_technical)) || 0}%</td>
-                                    <td onClick={()=>PopTable(T.replace('_',' '),'Issue TSEL')} style={{fontWeight:'400'}} className="bg-white border border-gray-800 text-gray-800 text-center p-[3px] cursor-pointer">{PROGRES[T] && PROGRES[T].t_tsel || 0}</td>
-                                    <td style={{fontWeight:'400',color:PROGRES[T] && PROGRES[T].p_tsel>80? 'green' : (PROGRES[T] && PROGRES[T].p_tsel<80 && PROGRES[T].p_tsel!=0 ? 'red' : 'black')}} className="bg-white border border-gray-800 text-gray-800 text-center p-[3px]">{PROGRES[T] && formatNumber(Math.abs(PROGRES[T].p_tsel)) || 0}%</td>
+                                    {LABELS.map(a=>{
+                                        return(<React.Fragment key={a}>
+                                            <td onClick={()=>PopTable(T.replace('_',' '),a)} style={{fontWeight:'400'}} className="bg-white border border-gray-800 text-gray-800 text-center p-[3px] cursor-pointer">{PROGRES[T] && PROGRES[T]['t_'+a.toLowerCase()] || 0}</td>
+                                            <td style={{fontWeight:'400',color:PROGRES[T] && PROGRES[T]['p_'+a.toLowerCase()]>80? 'green' : (PROGRES[T] && PROGRES[T]['p_'+a.toLowerCase()]<80 && PROGRES[T]['p_'+a.toLowerCase()]!=0 ? 'red' : 'black')}} className="bg-white border border-gray-800 text-gray-800 text-center p-[3px]">{PROGRES[T] && formatNumber(Math.abs(PROGRES[T]['p_'+a.toLowerCase()])) || 0}%</td>
+                                        </React.Fragment>
+                                    )})}
                                     </tr>
                                 )})}
                                 <tr>
                                     <td style={{fontWeight:'700'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-left p-[3px]">Nationwide</td>
                                     <td onClick={()=>PopTable('nationwide','')} style={{fontWeight:'400'}} className="cursor-pointer bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3px]">{Object.keys(DATATABLE.sites).length>0 ? Object.keys(DATATABLE.sites).map(a=>DATATABLE.sites[a].length).reduce((a,b)=>a+b) : 0}</td>
-                                    <td onClick={()=>PopTable('nationwide','Capacity')} style={{fontWeight:'400'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3px] cursor-pointer">{Object.keys(PROGRES).map(a=>PROGRES[a].t_capacity).reduce((a,b)=>a+b) || 0}</td>
-                                    <td style={{fontWeight:'400'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3px]">{formatNumber(Object.keys(PROGRES).map(a=>PROGRES[a].p_capacity).reduce((a,b)=>a+b)/Object.keys(PROGRES).map(a=>PROGRES[a].p_capacity!=0?1:0).reduce((a,b)=>a+b) || 0)}%</td>
-                                    <td onClick={()=>PopTable('nationwide','Impact Gamas')} style={{fontWeight:'400'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3px] cursor-pointer">{Object.keys(PROGRES).map(a=>PROGRES[a].t_gamas).reduce((a,b)=>a+b) || 0}</td>
-                                    <td style={{fontWeight:'400'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3px]">{formatNumber(Object.keys(PROGRES).map(a=>PROGRES[a].p_gamas).reduce((a,b)=>a+b)/Object.keys(PROGRES).map(a=>PROGRES[a].p_gamas!=0?1:0).reduce((a,b)=>a+b) || 0)}%</td>
-                                    <td onClick={()=>PopTable('nationwide','Technical')} style={{fontWeight:'400'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3px] cursor-pointer">{Object.keys(PROGRES).map(a=>PROGRES[a].t_technical).reduce((a,b)=>a+b) || 0}</td>
-                                    <td style={{fontWeight:'400'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3px]">{formatNumber(Object.keys(PROGRES).map(a=>PROGRES[a].p_technical).reduce((a,b)=>a+b)/Object.keys(PROGRES).map(a=>PROGRES[a].p_technical!=0?1:0).reduce((a,b)=>a+b) || 0)}%</td>
-                                    <td onClick={()=>PopTable('nationwide','Issue TSEL')} style={{fontWeight:'400'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3px] cursor-pointer">{Object.keys(PROGRES).map(a=>PROGRES[a].t_tsel).reduce((a,b)=>a+b) || 0}</td>
-                                    <td style={{fontWeight:'400'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3px]">{formatNumber(Object.keys(PROGRES).map(a=>PROGRES[a].p_tsel).reduce((a,b)=>a+b)/Object.keys(PROGRES).map(a=>PROGRES[a].p_tsel!=0?1:0).reduce((a,b)=>a+b) || 0)}%</td>
-                                </tr>
+                                    {LABELS.map(c=>{
+                                        return(
+                                        <React.Fragment key={c}>
+                                            <td onClick={()=>PopTable('nationwide',c)} style={{fontWeight:'400'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3px] cursor-pointer">{Object.keys(PROGRES).map(a=>PROGRES[a]['t_'+c.toLowerCase()]).reduce((a,b)=>a+b) || 0}</td>
+                                            <td style={{fontWeight:'400'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3px]">{formatNumber(Object.keys(PROGRES).map(a=>PROGRES[a]['p_'+c.toLowerCase()]).reduce((a,b)=>a+b)/Object.keys(PROGRES).map(a=>PROGRES[a]['p_'+c.toLowerCase()]!=0?1:0).reduce((a,b)=>a+b) || 0)}%</td>
+                                        </React.Fragment>
+                                    )})}
+                               </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
-            {week && <ActionPlanProgress mode={mode} week={week} DATATABLE={DATATABLE}></ActionPlanProgress>}
+            {week && <ActionPlanProgress mode={mode} week={week} DATATABLE={DATATABLE} LABELS={LABELS}></ActionPlanProgress>}
     </React.Fragment>
     )
 })

@@ -279,7 +279,7 @@ const ResumeRCA = ()=>{
     
     if(WEEK){
     return (
-        <div className="bg-white text-gray-800 p-2 grid grid-cols-2 gap-2 overflow-hidden" style={{fontFamily:'Poppins',height:'90vh'}}>
+        <div className="bg-white text-gray-800 p-2 grid grid-cols-2 gap-2 overflow-hidde" style={{fontFamily:'Poppins',height:'auto'}}>
             {POPUPLOAD && <PopupUpload close={()=>setPOPUPLOAD(false)}></PopupUpload>}
             {LOADING && <div className="fixed left-0 top-0 bottom-0 right-0 flex items-center justify-center" style={{background:'rgba(0,0,0,0.7)'}}>
               <span id="loader" className="loader"></span>
