@@ -22,6 +22,11 @@ const SitePage = () => {
   const { dataSite, getSite } = useSite();
   const [trigger, setTrigger] = useState(0);
 
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 10,
+  });
+
   const fetchSite = useCallback(async () => {
     setLoading(true);
     try {
@@ -266,6 +271,9 @@ const SitePage = () => {
             month={month}
             year={year}
             setTrigger={setTrigger}
+            pagination={pagination}
+            onChange={(pag) => setPagination(pag)}
+            setPagination={setPagination}
           />
         )}
       </div>

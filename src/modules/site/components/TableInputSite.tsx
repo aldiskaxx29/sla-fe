@@ -17,6 +17,8 @@ interface TableHistoryProps {
   month;
   year;
   setTrigger: React.Dispatch<React.SetStateAction<number>>;
+  pagination;
+  setPagination: React.Dispatch<any>;
 }
 
 const TableInputSite: React.FC<TableHistoryProps> = ({
@@ -26,6 +28,8 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
   month,
   year,
   setTrigger,
+  pagination,
+  setPagination
 }) => {
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -220,6 +224,12 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
   const columns1 = useMemo(
     () => [
       {
+        title: "No",
+        key: "no",
+        render: (text, record, index) =>
+          (pagination.current - 1) * pagination.pageSize + index + 1,
+      },
+      {
         title: `${titleMonthOrWeek}`,
         dataIndex: `${monthOrWeek}`,
         key: `${monthOrWeek}`,
@@ -355,6 +365,12 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
 
   const columns2 = useMemo(
     () => [
+      {
+        title: "No",
+        key: "no",
+        render: (text, record, index) =>
+          (pagination.current - 1) * pagination.pageSize + index + 1,
+      },
       {
         title: "Month",
         dataIndex: "month",
@@ -584,7 +600,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
 
   return (
     <div className="mt-8">
-      <Table dataSource={dataSource} bordered className="rounded-xl">
+      <Table dataSource={dataSource} bordered className="rounded-xl" pagination={pagination} onChange={(pag) => setPagination(pag)} >
         {columns.map((column) =>
           column.children ? (
             <ColumnGroup
@@ -623,7 +639,10 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
               fixed={column.fixed}
               align={column.align}
               {...(column.search ? getColumnSearchProps(column.dataIndex) : {})}
-              render={(text, record) => {
+              render={(text, record, index) => {
+                if (column.key === "no") {
+                  return (pagination.current - 1) * pagination.pageSize + index + 1;
+                }
                 const statusDouble =
                   record.exclude > 1 ||
                   record.status_latency > 1 ||

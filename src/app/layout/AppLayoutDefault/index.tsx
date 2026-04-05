@@ -252,39 +252,6 @@ const AppLayoutDefault = () => {
                     Monday Monitoring
                   </p>
                 </Button>
-                
-                <div
-                  ref={containerRef}
-                  onMouseEnter={() => setOpen1(true)}
-                  onMouseLeave={() => setOpen1(false)}
-                  className={`relative inline-block px-4 py-2 rounded-full cursor-pointer ${
-                    location.pathname?.includes("network")
-                      ? "!bg-[#A6AEC1] text-white"
-                      : "!bg-[#576278] text-[#C6C6C6]"
-                  }`}
-                >
-                  Network Performance
-                  {open1 && (
-                    <div className="absolute left-0 top-full -mt-2 w-full bg-[#576278] border rounded shadow z-10">
-                      {networkOpt.map((option) => (
-                        <p
-                          key={option.value}
-                          className={`px-4 py-2 hover:bg-gray-500 cursor-pointer ${
-                            location.pathname?.includes(option.value)
-                              ? "!bg-[#A6AEC1] text-white"
-                              : "!bg-[#576278] text-[#C6C6C6]"
-                          }`}
-                          onClick={() => {
-                            handleMenuSelect(option.value);
-                            setOpen1(false);
-                          }}
-                        >
-                          {option.label}
-                        </p>
-                      ))}
-                    </div>
-                  )}
-                </div>
 
                 <div
                   ref={containerRef}
@@ -320,6 +287,40 @@ const AppLayoutDefault = () => {
                     </div>
                   )}
                 </div>
+                
+                <div
+                  ref={containerRef}
+                  onMouseEnter={() => setOpen1(true)}
+                  onMouseLeave={() => setOpen1(false)}
+                  className={`relative inline-block px-4 py-2 rounded-full cursor-pointer ${
+                    location.pathname?.includes("network")
+                      ? "!bg-[#A6AEC1] text-white"
+                      : "!bg-[#576278] text-[#C6C6C6]"
+                  }`}
+                >
+                  Network Performance
+                  {open1 && (
+                    <div className="absolute left-0 top-full -mt-2 w-full bg-[#576278] border rounded shadow z-10">
+                      {networkOpt.map((option) => (
+                        <p
+                          key={option.value}
+                          className={`px-4 py-2 hover:bg-gray-500 cursor-pointer ${
+                            location.pathname?.includes(option.value)
+                              ? "!bg-[#A6AEC1] text-white"
+                              : "!bg-[#576278] text-[#C6C6C6]"
+                          }`}
+                          onClick={() => {
+                            handleMenuSelect(option.value);
+                            setOpen1(false);
+                          }}
+                        >
+                          {option.label}
+                        </p>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
                 
                 <Button
                   className={`${
@@ -425,7 +426,7 @@ const AppLayoutDefault = () => {
                       window.open("http://10.60.174.188:8008/", "_blank")
                     }
                   >
-                    Dashboard Ta
+                    Telkom Akses
                   </p>
                 </Button>
               </div>
