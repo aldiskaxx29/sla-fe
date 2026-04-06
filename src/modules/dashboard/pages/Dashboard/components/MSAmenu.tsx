@@ -104,7 +104,7 @@ const MSAmenu = ({
         </div>
         <div className="flex justify-between items-end my-4">
           <div className="flex gap-5">
-            <div className="flex bg-green-50 px-4 py-2 rounded-xl">
+            {/* <div className="flex bg-green-50 px-4 py-2 rounded-xl">
               <Image src={checkIcon} alt="icon" width={36} preview={false} />
               <div className="ml-2 ">
                 <p className="text-sm text-primary-1 font-bold">
@@ -114,11 +114,11 @@ const MSAmenu = ({
                   Rp. {dataComply && dataComply[0].service_creadir}
                 </p>
               </div>
-            </div>
+            </div> */}
             {/* <div className="flex bg-green-50 px-4 py-2 rounded-xl"> */}
             <div className="flex bg-yellow-50 px-4 py-2 rounded-xl">
               {/* <Image src={checkIcon} alt="icon" width={36} preview={false} /> */}
-              <Image src={warningIcon} alt="icon" width={36} preview={false} />
+              <Image src={warningIcon} alt="icon" width={40} preview={false} />
               <div className="ml-2 ">
                 <p className="text-sm text-primary-1 font-bold">
                   {dataComply && dataComply[1].parameter}
@@ -128,7 +128,7 @@ const MSAmenu = ({
                 </p>
               </div>
             </div>
-            <div className="flex bg-yellow-50 px-4 py-2 rounded-xl">
+            {/* <div className="flex bg-yellow-50 px-4 py-2 rounded-xl">
               <Image src={warningIcon} alt="icon" width={36} preview={false} />
               <div className="ml-2">
                 <p className="text-sm text-primary-1 font-bold">
@@ -138,7 +138,7 @@ const MSAmenu = ({
                   {dataComply && dataComply[2].jumlah} Parameter
                 </p>
               </div>
-            </div>
+            </div> */}
           </div>
           <div className="flex gap-6">
             <AppDropdown

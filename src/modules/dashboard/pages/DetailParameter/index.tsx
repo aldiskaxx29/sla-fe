@@ -94,7 +94,7 @@ const DetailParameter = () => {
                 </p>
               </div>
             </div>
-            <div className="flex bg-gray-50 rounded-lg p-2">
+            {/* <div className="flex bg-gray-50 rounded-lg p-2">
               <Image src={warningIcon} alt="icon" width={36} preview={false} />
               <div className="ml-2">
                 <p className="text-[10px] text-gray-600 font-bold">
@@ -104,7 +104,7 @@ const DetailParameter = () => {
                   12 Parameter
                 </p>
               </div>
-            </div>
+            </div> */}
           </div>
           {menuId == "cnop" && (
             <Button

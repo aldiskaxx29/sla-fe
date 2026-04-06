@@ -62,7 +62,7 @@ const AppLayoutDefault = () => {
   ];
   const slaOpt = [
     { label: "Achievement WISA", value: "msa" },
-    { label: "Achievement CNOP", value: "cnop" },
+    // { label: "Achievement CNOP", value: "cnop" },
     // { label: "Reconsiliation", value: "input-site" },
     { label: "Report Reconsilation", value: "report-site" },
     // { label: "Report Support Needed", value: "report-support-needed" },
