@@ -377,45 +377,6 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week, year }
             )}
           {!dataModal?.parameter?.includes("mttrq") ? (
             <div>
-              {/* <Form.Item
-                // label={labelText + " 1"}
-                label="Rca Rekonsiliasi"
-                name={nameField}
-                // name="rca_rekonsiliasi"
-                rules={[{ required: true, message: "Masukkan Grouping RCA" }]}
-              >
-                <Select
-                  // placeholder="Pilih Grouping RCA 1"
-                  placeholder="Rca Rekonsiliasi"
-                  onChange={(value) => setSelectedGroup1(value)}
-                >
-                  {group1Options.map((g1) => (
-                    <Option key={g1} value={g1}>
-                      {g1}
-                    </Option>
-                  ))}
-                </Select>
-              </Form.Item>
-              <Form.Item
-                // label={labelText + " 2"}
-                // name={nameField + "_2"}
-                label="Update Progress"
-                // name="update_progress"
-                name={nameField2}
-                rules={[{ required: true, message: "Masukkan Grouping RCA" }]}
-              >
-                <Select
-                  // placeholder="Pilih Grouping RCA 2"
-                  placeholder="Update Progress"
-                  disabled={!selectedGroup1}
-                >
-                  {group2Options.map((g2) => (
-                    <Option key={g2} value={g2}>
-                      {g2}
-                    </Option>
-                  ))}
-                </Select>
-              </Form.Item> */}
 
               <Form form={form} layout="vertical">
 
