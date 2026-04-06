@@ -56,7 +56,7 @@ const ActionPlanProgress = React.memo(({mode,week,DATATABLE,LABELS})=>{
             //     sites = [...sites,...POPD]
             // }
         }
-        console.log(rca,rca2,status,sites)
+        // console.log(rca,rca2,status,sites)
         setPOPUP(true);
         setPOPDATA(sites)
     }
@@ -72,11 +72,18 @@ const ActionPlanProgress = React.memo(({mode,week,DATATABLE,LABELS})=>{
             let blank = {BLANK:{}}
             if(d.hasOwnProperty('BLANK')){
                 blank.BLANK = d.BLANK
-                // delete d.BLANK
             }
             d = {...data}
             delete d.BLANK
             d = {...d,...blank}
+            Object.keys(d).forEach(a=>{
+                let temp = {BLANK:{}}
+                if(d[a].hasOwnProperty('BLANK')){
+                    temp.BLANK = d[a].BLANK
+                    delete d[a].BLANK
+                    d[a] = {...d[a],...temp}
+                }
+            })
             // console.log(d,blank)
             setData(d)            
         } catch (error) {
