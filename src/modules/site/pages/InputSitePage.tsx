@@ -13,7 +13,8 @@ import { toast } from "react-toastify";
 
 const SitePage = () => {
   const [week, setWeek] = useState("");
-  const [month, setMonth] = useState(dayjs().format("M"));
+  // const [month, setMonth] = useState(dayjs().format("M"));
+  const [month, setMonth] = useState("3");
   const [year, setYear] = useState(dayjs(new Date()).year());
   const [exclude, setExclude] = useState("all");
   const [prev, setPrev] = useState("corrective");
@@ -114,7 +115,8 @@ const SitePage = () => {
   }, [month]);
 
   useEffect(() => {
-    setWeek(filterWeeks.find((item) => item.month === month)?.value[0] ?? "1");
+    // setWeek(filterWeeks.find((item) => item.month === month)?.value[0] ?? "1");
+    setWeek("13");
   }, [month]);
 
   const [downloadTemplate] = useLazyDownload_templateQuery();

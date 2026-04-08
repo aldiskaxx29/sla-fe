@@ -235,12 +235,28 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
         key: `${monthOrWeek}`,
         search: true,
       },
-      {
-        title: "Region",
-        dataIndex: "region_tsel",
-        key: "region_tsel",
-        search: true,
-      },
+      // {
+      //   title: "Region",
+      //   dataIndex: "region_tsel",
+      //   key: "region_tsel",
+      //   filters: [
+      //     { text: "SUMBAGUT", value: "SUMBAGUT" },
+      //     { text: "SUMBAGTENG", value: "SUMBAGTENG" },
+      //     { text: "SUMBAGSEL", value: "SUMBAGSEL" },
+      //     { text: "JABOTABEK INNER", value: "JABOTABEK INNER" },
+      //     { text: "JAWA BARAT", value: "JAWA BARAT" },
+      //     { text: "JAWA TENGAH", value: "JAWA TENGAH" },
+      //     { text: "JAWA TIMUR", value: "JAWA TIMUR" },
+      //     { text: "BALI NUSRA", value: "BALI NUSRA" },
+      //     { text: "KALIMANTAN", value: "KALIMANTAN" },
+      //     { text: "SULAWESI", value: "SULAWESI" },
+      //     { text: "PUMA", value: "PUMA" },
+      //     { text: "JABOTABEK OUTER", value: "JABOTABEK OUTER" },
+      //   ],
+      //   filterMultiple: true, // ini penting (multi select)
+      //   onFilter: (value, record) => record.region_tsel === value,
+      // },
+      { title: "Region", dataIndex: "region_tsel", key: "region_tsel", search: true, },
       {
         title: "Site ID",
         dataIndex: "site_id",
@@ -480,12 +496,12 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
   const handleSave = async (payload) => {
     try {
       console.log("payload", payload);
-      console.log(
-        "evidence",
-        payload.evidence.file,
-        payload.evidence,
-        payload.evidence[0].originFileObj
-      );
+      // console.log(
+      //   "evidence",
+      //   payload.evidence.file,
+      //   payload.evidence,
+      //   payload.evidence[0].originFileObj
+      // );
       const formData = new FormData();
       formData.append("id", payload.id);
       formData.append("year", payload.year);
@@ -566,13 +582,25 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
       
       
 
-      formData.append("detail_rca", payload.detail_rca);
-      formData.append(
-        "evidence",
-        payload.evidence[0].originFileObj ||
-          payload.evidence.file ||
-          payload.evidence
-      );
+      formData.append("detail_rca", payload?.detail_rca);
+      // formData.append(
+      //   "evidence",
+      //   payload?.evidence[0]?.originFileObj ||
+      //     payload?.evidence?.file ||
+      //     payload?.evidence
+      // );
+      let evidenceFile = null;
+      if (Array.isArray(payload?.evidence) && payload.evidence.length > 0) {
+        evidenceFile = payload.evidence[0]?.originFileObj;
+      } else if (payload?.evidence?.file) {
+        evidenceFile = payload.evidence.file;
+      } else if (payload?.evidence) {
+        evidenceFile = payload.evidence;
+      }
+
+      if (evidenceFile) {
+        formData.append("evidence", evidenceFile);
+      }
       formData.append("site_id", payload.site_id);
       formData.append("ttr_selisih", payload.ttr_selisih);
       formData.append("note", payload.note);

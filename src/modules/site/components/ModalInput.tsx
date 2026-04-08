@@ -299,7 +299,7 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week, year }
     <Modal open={open} onCancel={onCancel} footer={null} centered>
       <div>
         <p className="text-xl font-bold text-center w-full my-6">
-          Update Site Exlcude
+          Upsdate Site Exlcude
         </p>
         <Form form={form} layout="vertical">
           <Form.Item name="id" className="hidden">
@@ -483,7 +483,7 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week, year }
           <Form.Item
             label="Keterangan Rekon"
             name="note"
-            rules={[{ required: true, message: "Masukkan Keterangan Rekon" }]}
+            // rules={[{ required: true, message: "Masukkan Keterangan Rekon" }]}
           >
             <TextArea placeholder="Masukkan Keterangan Rekon" />
           </Form.Item>
@@ -491,7 +491,7 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week, year }
           <Form.Item
             label="Evidence"
             name="evidence"
-            rules={[{ required: true, message: "Masukkan Evidance" }]}
+            // rules={[{ required: true, message: "Masukkan Evidance" }]}
           >
             <Upload.Dragger
               name="evidence"
