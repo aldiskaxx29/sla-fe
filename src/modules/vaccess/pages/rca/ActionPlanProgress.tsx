@@ -74,8 +74,10 @@ const ActionPlanProgress = React.memo(({mode,week,DATATABLE,LABELS})=>{
                 blank.Blank = d.Blank
             }
             d = {...data}
-            delete d.Blank
-            d = {...d,...blank}
+            if(d.hasOwnProperty('Blank')){
+                delete d.Blank
+                d = {...d,...blank}
+            }
             Object.keys(d).forEach(a=>{
                 let temp = {Blank:{}}
                 if(d[a].hasOwnProperty('Blank')){
