@@ -105,7 +105,7 @@ const ActionPlanProgress = React.memo(({mode,week,DATATABLE,LABELS})=>{
                     let num=1
                     return(
                     <div className="flex flex-col break-inside-avoid mb-2 items-cente ustify-center w-full" key={i}>
-                        <div className="py-2 bg-sky-700 text-white rounded-t-lg text-md font-bold w-full text-center">{a} ISSUE</div>
+                        <div className="py-2 bg-sky-700 text-white rounded-t-lg text-md font-bold w-full text-center">{a} Issue</div>
                         <div className="rounded-b-lg flex flex-col bg-gray-300 to-sky-200 w-full py-1 px-4" style={{height:'auto'}}>
                                 <div className="uppercase w-full grid whitespace-nowrap items-center text-center" style={{gridTemplateColumns:'5% 47% 16% 16% 16%',fontSize:'0.8em'}}>
                                     <div className="px-2 py-2 font-bold border-b-2 border-gray-800"> &nbsp;</div>
