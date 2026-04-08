@@ -53,6 +53,12 @@ const StackedBarChart = ({labels,chartdata,PopChart}) => {
     scales: {
       x: {
         stacked: true,
+        ticks:{
+            font:{
+                weight:'bold',
+            },
+            // color: 'black'
+        }
       },
       y: {
         min: 0,
@@ -254,11 +260,11 @@ const TRAFFIC = React.memo(({ShowPopup,mode,week,setLOADING})=>{
         Object.keys(data).forEach(a=>{
             group.push(a)
         });
-        let blankI = group.findIndex(a => a === 'BLANK');
+        let blankI = group.findIndex(a => a === 'Blank');
 
         if (blankI !== -1) {
             group.splice(blankI, 1); // hapus BLANK
-            group.push('BLANK');     // tambah ke akhir
+            group.push('Blank');     // tambah ke akhir
         }
         setLabels(group)
 
@@ -329,8 +335,8 @@ const TRAFFIC = React.memo(({ShowPopup,mode,week,setLOADING})=>{
                         <div className="py-2 bg-sky-700 text-white rounded-t-lg text-lg w-full text-center">NASIONAL</div>
                         <div className="rounded-b-lg flex flex-col items-center bg-linear-to-r from-sky-600 to-gray-300 w-full justify-center py-2" style={{height:'55%'}}>
                             <div onClick={ShowPopup} className="cursor-pointer text-3xl py-2 font-bold text-red-600">{NASIONAL}</div>
-                            <div>SITE</div>
-                            <div>NOT CLEAR</div>
+                            <div className="font-semibold">SITE</div>
+                            <div className="font-semibold">NOT CLEAR</div>
                         </div>
                     </div>
                     <div className="col-span-5">
@@ -341,22 +347,22 @@ const TRAFFIC = React.memo(({ShowPopup,mode,week,setLOADING})=>{
                 </div>
                 <div className="grid grid-cols-7 gap-4">
                     <div className="col-span-7">
-                        <table className="w-full border border-gray-800 py-2" style={{fontWeight:'300 !important',fontSize:'0.7em',height:'55vh'}}>
-                            <thead>
-                                <tr className="uppercase">
-                                    <th style={{fontWeight:'400'}} rowSpan={2} className="bg-linear-to-b from-sky-900 to-sky-700 border border-gray-800 text-white p-[3px]">Region</th>
-                                    <th style={{fontWeight:'400'}} rowSpan={2} className="bg-linear-to-b from-sky-900 to-sky-700 border border-gray-800 text-white p-[3px]">Total Site Not Clear</th>
+                        <table className="w-full border border-white py-2" style={{fontWeight:'300 !important',fontSize:'0.7em',height:'55vh'}}>
+                            <thead className="font-bold">
+                                <tr className="uppercas">
+                                    <th style={{fontWeight:'500'}} rowSpan={2} className="bg-linear-to-b from-sky-900 to-sky-700 border border-white text-white p-[3px]">Region</th>
+                                    <th style={{fontWeight:'500'}} rowSpan={2} className="bg-linear-to-b from-sky-900 to-sky-700 border border-white text-white p-[3px]">Total Site Not Clear</th>
                                     {LABELS.map((a,i)=>{
                                         return(
-                                        <th key={i} style={{fontWeight:'400'}} colSpan={2} className="bg-linear-to-b from-sky-900 to-sky-700 border border-gray-800 text-white p-[3px]">{a}</th>
+                                        <th key={i} style={{fontWeight:'500'}} colSpan={2} className="bg-linear-to-b from-sky-900 to-sky-700 border border-white text-white p-[3px]">{a}</th>
                                     )})}
                                 </tr>
-                                <tr className="uppercase">
+                                <tr className="uppercas">
                                     {LABELS.map((a,i)=>{
                                         return(
                                         <React.Fragment key={i}>
-                                            <th style={{fontWeight:'400'}} className="bg-linear-to-b from-sky-900 to-sky-700 border border-gray-800 text-white p-[3px]">Total Site</th>
-                                            <th style={{fontWeight:'400'}} className="bg-linear-to-b from-sky-900 to-sky-700 border border-gray-800 text-white p-[3px]">Progress</th>
+                                            <th style={{fontWeight:'500'}} className="bg-sky-500 border border-white text-white p-[3px]">Total Site</th>
+                                            <th style={{fontWeight:'500'}} className="bg-sky-500 border border-white text-white p-[3px]">Progress</th>
                                         </React.Fragment>
                                     )})}
                                 </tr>
@@ -365,24 +371,24 @@ const TRAFFIC = React.memo(({ShowPopup,mode,week,setLOADING})=>{
                                 {Object.keys(TB).map((T,i)=>{
                                     return(
                                     <tr key={i} onClick={ShowPopup}>
-                                    <td style={{fontWeight:'400'}} className="bg-white border border-gray-800 text-gray-800 text-left p-[3px]">{String(i+1).padStart(2,'0')+'-'+T.replace('_',' ')}</td>
-                                    <td onClick={()=>PopTable(T.replace('_',' '),'')} style={{fontWeight:'400'}} className="cursor-pointer bg-white border border-gray-800 text-gray-800 text-center p-[3px]">{PROGRES[T] && PROGRES[T].total_site || 0}</td>
-                                    {LABELS.map(a=>{
+                                    <td style={{fontWeight:'400'}} className="bg-white border border-white text-gray-800 text-left p-[3px]">{String(i+1).padStart(2,'0')+'-'+T.replace('_',' ')}</td>
+                                    <td onClick={()=>PopTable(T.replace('_',' '),'')} style={{fontWeight:'400'}} className="cursor-pointer bg-white border border-white text-gray-800 text-center p-[3px]">{PROGRES[T] && PROGRES[T].total_site || 0}</td>
+                                    {LABELS.map((a,x)=>{
                                         return(<React.Fragment key={a}>
-                                            <td onClick={()=>PopTable(T.replace('_',' '),a)} style={{fontWeight:'400'}} className="bg-white border border-gray-800 text-gray-800 text-center p-[3px] cursor-pointer">{PROGRES[T] && PROGRES[T]['t_'+a.toLowerCase()] || 0}</td>
-                                            <td style={{fontWeight:'400',color:PROGRES[T] && PROGRES[T]['p_'+a.toLowerCase()]>80? 'green' : (PROGRES[T] && PROGRES[T]['p_'+a.toLowerCase()]<80 && PROGRES[T]['p_'+a.toLowerCase()]!=0 ? 'red' : 'black')}} className="bg-white border border-gray-800 text-gray-800 text-center p-[3px]">{PROGRES[T] && formatNumber(Math.abs(PROGRES[T]['p_'+a.toLowerCase()])) || 0}%</td>
+                                            <td onClick={()=>PopTable(T.replace('_',' '),a)} style={{fontWeight:'400'}} className={`${x%2 ? 'bg-white' : 'bg-gray-200'} border border-white text-gray-800 text-center p-[3px] cursor-pointer`}>{PROGRES[T] && PROGRES[T]['t_'+a.toLowerCase()] || 0}</td>
+                                            <td style={{fontWeight:'400',color:PROGRES[T] && PROGRES[T]['p_'+a.toLowerCase()]>80? 'green' : (PROGRES[T] && PROGRES[T]['p_'+a.toLowerCase()]<80 && PROGRES[T]['p_'+a.toLowerCase()]!=0 ? 'red' : 'black')}} className={`${x%2 ? 'bg-white' : 'bg-gray-200'} border border-white text-gray-800 text-center p-[3px] cursor-pointer`}>{PROGRES[T] && formatNumber(Math.abs(PROGRES[T]['p_'+a.toLowerCase()])) || 0}%</td>
                                         </React.Fragment>
                                     )})}
                                     </tr>
                                 )})}
                                 <tr>
-                                    <td style={{fontWeight:'700'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-left p-[3px]">Nationwide</td>
-                                    <td onClick={()=>PopTable('nationwide','')} style={{fontWeight:'400'}} className="cursor-pointer bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3px]">{Object.keys(DATATABLE.sites).length>0 ? Object.keys(DATATABLE.sites).map(a=>DATATABLE.sites[a].length).reduce((a,b)=>a+b) : 0}</td>
+                                    <td style={{fontWeight:'700'}} className="bg-yellow-400 border border-white text-gray-800 text-left p-[3px]">Nationwide</td>
+                                    <td onClick={()=>PopTable('nationwide','')} style={{fontWeight:'400'}} className="cursor-pointer bg-yellow-400 border border-white text-gray-800 text-center p-[3px]">{Object.keys(DATATABLE.sites).length>0 ? Object.keys(DATATABLE.sites).map(a=>DATATABLE.sites[a].length).reduce((a,b)=>a+b) : 0}</td>
                                     {LABELS.map(c=>{
                                         return(
                                         <React.Fragment key={c}>
-                                            <td onClick={()=>PopTable('nationwide',c)} style={{fontWeight:'400'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3px] cursor-pointer">{Object.keys(PROGRES).map(a=>PROGRES[a]['t_'+c.toLowerCase()]).reduce((a,b)=>a+b) || 0}</td>
-                                            <td style={{fontWeight:'400'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3px]">{formatNumber(Object.keys(PROGRES).map(a=>PROGRES[a]['p_'+c.toLowerCase()]).reduce((a,b)=>a+b)/Object.keys(PROGRES).map(a=>PROGRES[a]['p_'+c.toLowerCase()]!=0?1:0).reduce((a,b)=>a+b) || 0)}%</td>
+                                            <td onClick={()=>PopTable('nationwide',c)} style={{fontWeight:'600'}} className="bg-yellow-400 border border-white text-gray-800 text-center p-[3px] cursor-pointer">{Object.keys(PROGRES).map(a=>PROGRES[a]['t_'+c.toLowerCase()]).reduce((a,b)=>a+b) || 0}</td>
+                                            <td style={{fontWeight:'600'}} className="bg-yellow-400 border border-white text-gray-800 text-center p-[3px]">{formatNumber(Object.keys(PROGRES).map(a=>PROGRES[a]['p_'+c.toLowerCase()]).reduce((a,b)=>a+b)/Object.keys(PROGRES).map(a=>PROGRES[a]['p_'+c.toLowerCase()]!=0?1:0).reduce((a,b)=>a+b) || 0)}%</td>
                                         </React.Fragment>
                                     )})}
                                </tr>
