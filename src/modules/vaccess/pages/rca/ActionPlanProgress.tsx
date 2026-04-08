@@ -69,18 +69,18 @@ const ActionPlanProgress = React.memo(({mode,week,DATATABLE,LABELS})=>{
             if(data){
                 d=data
             }
-            let blank = {BLANK:{}}
-            if(d.hasOwnProperty('BLANK')){
-                blank.BLANK = d.BLANK
+            let blank = {Blank:{}}
+            if(d.hasOwnProperty('Blank')){
+                blank.Blank = d.Blank
             }
             d = {...data}
-            delete d.BLANK
+            delete d.Blank
             d = {...d,...blank}
             Object.keys(d).forEach(a=>{
-                let temp = {BLANK:{}}
-                if(d[a].hasOwnProperty('BLANK')){
-                    temp.BLANK = d[a].BLANK
-                    delete d[a].BLANK
+                let temp = {Blank:{}}
+                if(d[a].hasOwnProperty('Blank')){
+                    temp.Blank = d[a].Blank
+                    delete d[a].Blank
                     d[a] = {...d[a],...temp}
                 }
             })
@@ -117,7 +117,7 @@ const ActionPlanProgress = React.memo(({mode,week,DATATABLE,LABELS})=>{
                                 {Object.keys(DATA[a]).map((b,u)=>{
                                 if(!['OGP','CLOSED'].includes(b))
                                 return(
-                                <div key={a+b} className="uppercase w-full grid whitespace-nowrap items-center overflow-y-auto" style={{gridTemplateColumns:'5% 47% 16% 16% 16%',fontSize:'0.8em'}}>
+                                <div key={a+b} className="uppercas w-full grid whitespace-nowrap items-center overflow-y-auto" style={{gridTemplateColumns:'5% 47% 16% 16% 16%',fontSize:'0.8em'}}>
                                     <div className="px-2 py-2 h-full flex items-center justify-center border-b-2 border-gray-800">{num++}</div>
                                     <div className="px-2 py-2 h-full flex items-center border-b-2 border-gray-800 cursor-pointer" onClick={()=>DropdownSelect(a+b)}><RightOutlined/>{b}</div>
                                     <div onClick={()=>PopTableAction(a,b,'OGP')} className="px-2 py-2 h-full flex items-center justify-center cursor-pointer text-center border-b-2 border-gray-800">{[0,0,...(Object.keys(DATA[a][b] && DATA[a][b].OGP || {}).map(x=>DATA[a][b].OGP[x]))].reduce((z,x)=>z+x)}</div>

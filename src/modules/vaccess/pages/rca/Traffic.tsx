@@ -260,11 +260,11 @@ const TRAFFIC = React.memo(({ShowPopup,mode,week,setLOADING})=>{
         Object.keys(data).forEach(a=>{
             group.push(a)
         });
-        let blankI = group.findIndex(a => a === 'BLANK');
+        let blankI = group.findIndex(a => a === 'Blank');
 
         if (blankI !== -1) {
             group.splice(blankI, 1); // hapus BLANK
-            group.push('BLANK');     // tambah ke akhir
+            group.push('Blank');     // tambah ke akhir
         }
         setLabels(group)
 
@@ -349,7 +349,7 @@ const TRAFFIC = React.memo(({ShowPopup,mode,week,setLOADING})=>{
                     <div className="col-span-7">
                         <table className="w-full border border-white py-2" style={{fontWeight:'300 !important',fontSize:'0.7em',height:'55vh'}}>
                             <thead className="font-bold">
-                                <tr className="uppercase">
+                                <tr className="uppercas">
                                     <th style={{fontWeight:'500'}} rowSpan={2} className="bg-linear-to-b from-sky-900 to-sky-700 border border-white text-white p-[3px]">Region</th>
                                     <th style={{fontWeight:'500'}} rowSpan={2} className="bg-linear-to-b from-sky-900 to-sky-700 border border-white text-white p-[3px]">Total Site Not Clear</th>
                                     {LABELS.map((a,i)=>{
@@ -357,7 +357,7 @@ const TRAFFIC = React.memo(({ShowPopup,mode,week,setLOADING})=>{
                                         <th key={i} style={{fontWeight:'500'}} colSpan={2} className="bg-linear-to-b from-sky-900 to-sky-700 border border-white text-white p-[3px]">{a}</th>
                                     )})}
                                 </tr>
-                                <tr className="uppercase">
+                                <tr className="uppercas">
                                     {LABELS.map((a,i)=>{
                                         return(
                                         <React.Fragment key={i}>
