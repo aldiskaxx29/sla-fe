@@ -235,30 +235,29 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
         key: `${monthOrWeek}`,
         search: true,
       },
-      // {
-      //   title: "Region",
-      //   dataIndex: "region_tsel",
-      //   key: "region_tsel",
-      //   filters: [
-      //     { text: "SUMBAGUT", value: "SUMBAGUT" },
-      //     { text: "SUMBAGTENG", value: "SUMBAGTENG" },
-      //     { text: "SUMBAGSEL", value: "SUMBAGSEL" },
-      //     { text: "JABOTABEK INNER", value: "JABOTABEK INNER" },
-      //     { text: "JABOTABEK OUTER", value: "JABOTABEK OUTER" },
-      //     { text: "JAWA BARAT", value: "JAWA BARAT" },
-      //     { text: "JAWA TENGAH", value: "JAWA TENGAH" },
-      //     { text: "JAWA TIMUR", value: "JAWA TIMUR" },
-      //     { text: "BALI NUSRA", value: "BALI NUSRA" },
-      //     { text: "KALIMANTAN", value: "KALIMANTAN" },
-      //     { text: "SULAWESI", value: "SULAWESI" },
-      //     { text: "PUMA", value: "PUMA" },
-      //   ],
-      //   filterSearch: true,
-      //   filterMultiple: true,
-      //   onFilter: (value, record) =>
-      //     record.region_tsel === value,
-      // },
-      { title: "Region", dataIndex: "region_tsel", key: "region_tsel", search: true, },
+      {
+        title: "Region",
+        dataIndex: "region_tsel",
+        key: "region_tsel",
+        filters: [
+          { text: "SUMBAGUT", value: "SUMBAGUT" },
+          { text: "SUMBAGTENG", value: "SUMBAGTENG" },
+          { text: "SUMBAGSEL", value: "SUMBAGSEL" },
+          { text: "JABOTABEK INNER", value: "JABOTABEK INNER" },
+          { text: "JABOTABEK OUTER", value: "JABOTABEK OUTER" },
+          { text: "JAWA BARAT", value: "JAWA BARAT" },
+          { text: "JAWA TENGAH", value: "JAWA TENGAH" },
+          { text: "JAWA TIMUR", value: "JAWA TIMUR" },
+          { text: "BALI NUSRA", value: "BALI NUSRA" },
+          { text: "KALIMANTAN", value: "KALIMANTAN" },
+          { text: "SULAWESI", value: "SULAWESI" },
+          { text: "PUMA", value: "PUMA" },
+        ],
+        filterSearch: true,
+        filterMultiple: true,
+        onFilter: (value, record) =>
+          record.region_tsel === value,
+      },
       { title: "Area", dataIndex: "area", key: "area", search: true, },
       {
         title: "Site ID",
@@ -684,6 +683,10 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
               })}
               fixed={column.fixed}
               align={column.align}
+              filters={column.filters}
+              filterSearch={column.filterSearch}
+              filterMultiple={column.filterMultiple}
+              onFilter={column.onFilter}
               {...(column.search ? getColumnSearchProps(column.dataIndex) : {})}
               render={(text, record, index) => {
                 if (column.key === "no") {
