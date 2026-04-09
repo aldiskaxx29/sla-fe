@@ -154,6 +154,30 @@ export const dashboardApi = emptySplitApi.injectEndpoints({
         return response;
       },
     }),
+    detailsite_notclear: builder.query({
+      query: (payload) => {
+        return {
+          method: "GET",
+          url: "detailsite/notclear",
+          params: payload?.query,
+        };
+      },
+      transformResponse: (response: unknown) => {
+        return response;
+      },
+    }),
+    weeklyMonth: builder.query({
+      query: (payload) => {
+        return {
+          method: "GET",
+          url: "weeklyMonth",
+          params: payload?.query,
+        };
+      },
+      transformResponse: (response: unknown) => {
+        return response;
+      },
+    }),
   }),
   overrideExisting: false,
 });
@@ -171,4 +195,6 @@ export const {
   useLazyWitel_dataQuery,
   useLazyModal_detailQuery,
   useLazyDashboard_complyQuery,
+  useLazyDetailsite_notclearQuery,
+  useLazyWeeklyMonthQuery,
 } = dashboardApi;
