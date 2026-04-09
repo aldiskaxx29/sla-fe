@@ -235,28 +235,30 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
         key: `${monthOrWeek}`,
         search: true,
       },
-      // {
-      //   title: "Region",
-      //   dataIndex: "region_tsel",
-      //   key: "region_tsel",
-      //   filters: [
-      //     { text: "SUMBAGUT", value: "SUMBAGUT" },
-      //     { text: "SUMBAGTENG", value: "SUMBAGTENG" },
-      //     { text: "SUMBAGSEL", value: "SUMBAGSEL" },
-      //     { text: "JABOTABEK INNER", value: "JABOTABEK INNER" },
-      //     { text: "JAWA BARAT", value: "JAWA BARAT" },
-      //     { text: "JAWA TENGAH", value: "JAWA TENGAH" },
-      //     { text: "JAWA TIMUR", value: "JAWA TIMUR" },
-      //     { text: "BALI NUSRA", value: "BALI NUSRA" },
-      //     { text: "KALIMANTAN", value: "KALIMANTAN" },
-      //     { text: "SULAWESI", value: "SULAWESI" },
-      //     { text: "PUMA", value: "PUMA" },
-      //     { text: "JABOTABEK OUTER", value: "JABOTABEK OUTER" },
-      //   ],
-      //   filterMultiple: true, // ini penting (multi select)
-      //   onFilter: (value, record) => record.region_tsel === value,
-      // },
-      { title: "Region", dataIndex: "region_tsel", key: "region_tsel", search: true, },
+      {
+        title: "Region",
+        dataIndex: "region_tsel",
+        key: "region_tsel",
+        filters: [
+          { text: "SUMBAGUT", value: "SUMBAGUT" },
+          { text: "SUMBAGTENG", value: "SUMBAGTENG" },
+          { text: "SUMBAGSEL", value: "SUMBAGSEL" },
+          { text: "JABOTABEK INNER", value: "JABOTABEK INNER" },
+          { text: "JABOTABEK OUTER", value: "JABOTABEK OUTER" },
+          { text: "JAWA BARAT", value: "JAWA BARAT" },
+          { text: "JAWA TENGAH", value: "JAWA TENGAH" },
+          { text: "JAWA TIMUR", value: "JAWA TIMUR" },
+          { text: "BALI NUSRA", value: "BALI NUSRA" },
+          { text: "KALIMANTAN", value: "KALIMANTAN" },
+          { text: "SULAWESI", value: "SULAWESI" },
+          { text: "PUMA", value: "PUMA" },
+        ],
+        filterSearch: true,
+        filterMultiple: true,
+        onFilter: (value, record) =>
+          record.region_tsel === value,
+      },
+      { title: "Aera", dataIndex: "area", key: "area", search: true, },
       {
         title: "Site ID",
         dataIndex: "site_id",
@@ -579,8 +581,23 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
           break;
       }
       
-      
-      
+      switch (parameter) {
+        case 'packetloss ran to core':
+          formData.append("status_progress_packetloss",payload?.status_progress ?? "");
+          formData.append("tanggal_action_packetloss",payload?.date ?? "");
+          break;
+        case 'latency ran to core':
+          formData.append("status_progress_latency",payload?.status_progress ?? "");
+          formData.append("tanggal_action_latency",payload?.date ?? "");
+          break;
+        case 'jitter ran to core':
+          formData.append("status_progress_jitter",payload?.status_progress ?? "");
+          formData.append("tanggal_action_jitter",payload?.date ?? "");
+          break;
+          
+        default:
+          break;
+      }
 
       formData.append("detail_rca", payload?.detail_rca);
       // formData.append(

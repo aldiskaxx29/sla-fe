@@ -7,6 +7,9 @@ import {
   Select,
   Checkbox,
   CheckboxProps,
+  DatePicker,
+  Row,
+  Col
 } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import TextArea from "antd/es/input/TextArea";
@@ -14,6 +17,8 @@ import { useCallback, useEffect, useState } from "react";
 import { useSite } from "../hooks/site.hooks";
 import { useLazyDownload_evidanceQuery } from "../rtk/site.rtk";
 import { toast } from "react-toastify";
+import dayjs from 'dayjs';
+import type { Dayjs } from 'dayjs';
 
 type DataModal = { parameter: string; id: string };
 
@@ -460,6 +465,42 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week, year }
               </Select>
             </Form.Item>
           )}
+
+          {!dataModal?.parameter?.includes("mttrq") ? (
+            <Row gutter={16}>
+            <Col xs={24} md={12}>
+              <Form.Item
+                label="Status Progress"
+                name="status_progress"
+              >
+                <Select placeholder="Pilih Status Progres">
+                  <Option value="OGP">OGP</Option>
+                  <Option value="OPEN">OPEN</Option>
+                  <Option value="CLOSED">CLOSED</Option>
+                </Select>
+              </Form.Item>
+            </Col>
+          
+            <Col xs={24} md={12}>
+              <Form.Item
+                label="Tanggal"
+                name="date"
+                getValueProps={(value) => ({
+                  value: value ? dayjs(value) : undefined,
+                })}
+                normalize={(value) =>
+                  value?.isValid() ? value.format("YYYY-MM-DD") : null
+                }
+              >
+                <DatePicker
+                  style={{ width: "100%" }}
+                  format="YYYY-MM-DD"
+                  placeholder="Pilih Tanggal"
+                />
+              </Form.Item>
+            </Col>
+          </Row>
+          ) : ''}
 
           {
             dataModal?.parameter != "mttrq critical" &&

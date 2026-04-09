@@ -20,6 +20,8 @@ const MSAmenu = ({
   level,
   setLevel,
   handletreg,
+  handlefilter,
+  filter,
   treg,
 }) => {
   const dataWithIndex = (dataSource) => {
@@ -41,32 +43,31 @@ const MSAmenu = ({
       value: "all",
     },
     {
-      label: "TREG 1",
+      label: "Area 1",
       value: "treg1",
     },
     {
-      label: "TREG 2",
+      label: "Area 2",
       value: "treg2",
     },
     {
-      label: "TREG 3",
+      label: "Area 3",
       value: "treg3",
     },
     {
-      label: "TREG 4",
+      label: "Area 4",
       value: "treg4",
+    }
+  ];
+
+  const filterBy = [
+    {
+      label: "By Total Ne",
+      value: "by total ne",
     },
     {
-      label: "TREG 5",
-      value: "treg5",
-    },
-    {
-      label: "TREG 6",
-      value: "treg6",
-    },
-    {
-      label: "TREG 7",
-      value: "treg7",
+      label: "By Achievement",
+      value: "by ach",
     },
   ];
 
@@ -142,11 +143,18 @@ const MSAmenu = ({
           </div>
           <div className="flex gap-6">
             <AppDropdown
-              title="Filter Treg"
+              title="Filter Area"
               placeholder="All"
               options={filterOptions}
               onChange={(value) => handletreg(value)}
               value={treg}
+            />
+            <AppDropdown
+              title="Filter By"
+              placeholder="All"
+              options={filterBy}
+              onChange={(value) => handlefilter(value)}
+              value={filter}
             />
             {/* <Button
               onClick={handleDownloadMsa}
