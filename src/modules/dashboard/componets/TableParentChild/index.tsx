@@ -1,4 +1,4 @@
-import { Image, Spin, Table } from "antd";
+import { Image, Spin, Table, Modal } from "antd";
 import Column from "antd/es/table/Column";
 import ColumnGroup from "antd/es/table/ColumnGroup";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -13,6 +13,20 @@ interface TableParentChildProps {
   treg: string;
 }
 
+interface WeeklyDetailData {
+  week: string;
+  kpi: string;
+  region: string;
+  year: number;
+}
+
+interface RealisasiResponse {
+  data?: {
+    before?: Record<string, unknown>[];
+    after?: Record<string, unknown>[];
+  };
+}
+
 let identIndex = 1;
 
 const TableParentChild: React.FC<TableParentChildProps> = ({
@@ -22,15 +36,27 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
 }) => {
   const [loading, setLoading] = useState(false);
   const [detailParameter, setDetailParameter] = useState("");
-  const [dataSource, setDataSource] = useState([]);
-  const [injectedData, setInjectedData] = useState({});
-  const [injectedChildData, setInjectedChildData] = useState({});
-  const { getWitel, getCNP, getModalDetail } = useDashboard();
+  const [dataSource, setDataSource] = useState<Record<string, unknown>[]>([]);
+  const [injectedData, setInjectedData] = useState<Record<string, unknown>>({});
+  const [injectedChildData, setInjectedChildData] = useState<Record<string, unknown>>({});
+  const { getWitel, getCNP, getDetailsiteNotclear, getWeeklyMonth } = useDashboard();
   const { menuId } = useParams();
   const [expandedRowKey, setExpandedRowKeys] = useState<number[] | string[]>(
     []
   );
-  const [filter, setFilter] = useState("by total ne");
+  const [filter] = useState("by total ne");
+
+  // Modal states
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalLoading, setModalLoading] = useState(false);
+  const [modalData, setModalData] = useState<Record<string, unknown>[] | null>(null);
+  const [weeklyDetail, setWeeklyDetail] = useState<WeeklyDetailData | null>(null);
+
+  // Modal Realisasi states
+  const [realisasiModalVisible, setRealisasiModalVisible] = useState(false);
+  const [realisasiModalLoading, setRealisasiModalLoading] = useState(false);
+  const [realisasiModalData, setRealisasiModalData] = useState<RealisasiResponse | null>(null);
+  const [realisasiDetail, setRealisasiDetail] = useState<{ month: string; kpi: string; monthNum: number } | null>(null);
 
   useEffect(() => {
     if (!data) return;
@@ -86,6 +112,57 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
 
     return mappingData2;
   }, [dataSource, injectedData, injectedChildData]);
+
+  // Function to generate realisasi columns based on month
+  const generateRealisasiColumns = (monthNum: number) => {
+    const weekCount = monthNum === 2 ? 4 : 5; // Month 2 has 4 weeks, month 3 has 5 weeks
+    const columnsArray: Array<{
+      title: string;
+      dataIndex?: string;
+      key: string;
+      render: (text: unknown) => React.ReactNode;
+      width?: number;
+    }> = [
+      {
+        title: "No.",
+        key: "no",
+        render: (_, __, index) => index + 1,
+        width: 50,
+      },
+      {
+        title: "Reg",
+        dataIndex: "region_tsel",
+        key: "region_tsel",
+        render: (text) => text ?? "-",
+      },
+      {
+        title: "Target",
+        dataIndex: "target",
+        key: "target",
+        render: (text) => text ?? "-",
+      },
+    ];
+
+    // Add week columns dynamically
+    for (let i = 1; i <= weekCount; i++) {
+      columnsArray.push({
+        title: `W${i}`,
+        dataIndex: `ach_${monthNum}_${i}`,
+        key: `ach_${monthNum}_${i}`,
+        render: (text) => text ?? "-",
+      });
+    }
+
+    // Add month column
+    columnsArray.push({
+      title: monthNum === 2 ? "Feb" : "Mar",
+      dataIndex: `ach_fm_${monthNum}`,
+      key: `ach_fm_${monthNum}`,
+      render: (text) => text ?? "-",
+    });
+
+    return columnsArray;
+  };
 
   const columns = useMemo(() => {
     if (!data) return [];
@@ -267,6 +344,19 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
               // className: "!bg-blue-pacific !p-3",
             }),
             compare: true,
+            render: (text: unknown, record: unknown) => {
+              if (!text) return text;
+              return (
+                <span
+                  className="!text-blue-600 p-1 bg-blue-50 rounded-sm cursor-pointer font-semibold hover:bg-blue-100"
+                  onClick={() => fetchRealisasiMonthly("before_rekon", monthNum, record as Record<string, unknown>)}
+                  role="button"
+                  tabIndex={0}
+                >
+                  {text as React.ReactNode}
+                </span>
+              );
+            },
           },
           {
             title: "REALISASI AFTER",
@@ -282,6 +372,19 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
               // className: "!bg-blue-pacific !p-3",
             }),
             compare: true,
+            render: (text: unknown, record: unknown) => {
+              if (!text) return text;
+              return (
+                <span
+                  className="!text-blue-600 p-1 bg-blue-50 rounded-sm cursor-pointer font-semibold hover:bg-blue-100"
+                  onClick={() => fetchRealisasiMonthly("after_rekon", monthNum, record as Record<string, unknown>)}
+                  role="button"
+                  tabIndex={0}
+                >
+                  {text as React.ReactNode}
+                </span>
+              );
+            },
           },
           {
             title: "ACHIEVEMENT",
@@ -380,6 +483,110 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
 
     return [...baseColumns, ...lastMonth, ...groupedColumns, ...rekonScore];
   }, [data]);
+
+  const fetchWeeklyDetail = useCallback(
+    async (weekKey: string, record: Record<string, unknown>) => {
+      setModalLoading(true);
+      try {
+        const weekNum = weekKey.split("_")[2]; // Ekstrak nomor minggu dari "ach_1_3" -> "3"
+        const monthNum = weekKey.split("_")[1]; // Ekstrak nomor bulan dari "ach_1_3" -> "1"
+        
+        const weekParam = `week_${monthNum}_${weekNum}`;
+        
+        let kpiParam = "";
+        let regionParam = "";
+        
+        const isParent = record.main_parent;
+        
+        if (isParent) {
+          kpiParam = (record.parameter?.toString() || "").toLowerCase();
+          regionParam = "";
+        } else {
+          console.log(record);
+          
+          kpiParam = (record.mini_parameter?.toString() || "").toLowerCase();
+          regionParam = (record.parameter?.toString() || "").toLowerCase();
+        }
+        
+        const yearParam = new Date().getFullYear();
+
+        const response = await getDetailsiteNotclear({
+          query: {
+            week: weekParam,
+            year: yearParam,
+            kpi: kpiParam,
+            region: regionParam,
+            type: menuId,
+          },
+        }).unwrap();
+
+        const responseData =
+          response && typeof response === "object" && "data" in response
+            ? (response as { data?: Record<string, unknown>[] }).data
+            : response;
+
+        setModalData(Array.isArray(responseData) ? responseData : null);
+        setWeeklyDetail({
+          week: weekParam,
+          kpi: kpiParam,
+          region: regionParam,
+          year: yearParam,
+        });
+        setModalVisible(true);
+        return true;
+      } catch (error) {
+        console.log("Error fetching weekly detail:", error);
+        return false;
+      } finally {
+        setModalLoading(false);
+      }
+    },
+    [getDetailsiteNotclear, menuId]
+  );
+
+  const fetchRealisasiMonthly = useCallback(
+    async (monthKey: string, monthNum: number, record: Record<string, unknown>) => {
+      setRealisasiModalLoading(true);
+      try {
+        let kpiParam = "";
+        
+        const isParent = record.main_parent;
+        
+        if (isParent) {
+          kpiParam = (record.parameter?.toString() || "").toLowerCase();
+        } else {
+          kpiParam = (record.mini_parameter?.toString() || "").toLowerCase();
+        }
+        
+        const yearParam = new Date().getFullYear();
+        const monthParam = `${monthKey}_${monthNum}`;
+
+        const response = await getWeeklyMonth({
+          query: {
+            month: monthParam,
+            year: yearParam,
+            kpi: kpiParam,
+            type: menuId,
+          },
+        }).unwrap();
+
+        setRealisasiModalData(response as RealisasiResponse);
+        setRealisasiDetail({
+          month: monthKey,
+          kpi: kpiParam,
+          monthNum: monthNum,
+        });
+        setRealisasiModalVisible(true);
+        return true;
+      } catch (error) {
+        console.log("Error fetching realisasi monthly:", error);
+        return false;
+      } finally {
+        setRealisasiModalLoading(false);
+      }
+    },
+    [getWeeklyMonth, menuId]
+  );
 
   const fetchWitelData = useCallback(
     async (record) => {
@@ -482,8 +689,9 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
 
   return (
     <div>
-      {loadingMainData ||
-        (loading && <Spin fullscreen tip="Sedang Memuat Data..." />)}
+      {(loadingMainData || loading || realisasiModalLoading) && (
+        <Spin fullscreen tip="Sedang Memuat Data..." />
+      )}
 
       <Table
         size="small"
@@ -500,21 +708,21 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
           expandIcon: () => <div></div>,
         }}
       >
-        {columns.map((column) =>
-          column.children ? (
+      {columns.map((col: any) =>
+        col.children ? (
             <ColumnGroup
-              key={column.key ?? column.title}
-              title={column.title}
-              onHeaderCell={column.onHeaderCell}
+              key={col.key ?? col.title}
+              title={col.title}
+              onHeaderCell={col.onHeaderCell}
             >
-              {column.children.map((child) => (
+              {col.children.map((child: any) => (
                 <Column
                   key={child.dataIndex}
                   title={child.title}
                   dataIndex={child.dataIndex}
                   width="fit-content"
                   onHeaderCell={child.onHeaderCell}
-                  onCell={(record, index) => {
+                  onCell={(record) => {
                     const isLastTwo =
                       record.parameter.toLowerCase().includes("service") ||
                       record.parameter.toLowerCase().includes("weighted");
@@ -523,8 +731,8 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                       .toLowerCase()
                       .includes("real");
                     const baseOnCell =
-                      typeof column.onCell === "function"
-                        ? column.onCell()
+                      typeof col.onCell === "function"
+                        ? col.onCell()
                         : {};
                     if (isLastTwo && child.dataIndex.includes("score"))
                       return {
@@ -609,6 +817,75 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                       child.compare &&
                       !isLastTwo
                     ) {
+                      // Check if this is a realisasi column
+                      const isRealisasiColumn = /^realisasi_fm_(before|after)_\d+$/.test(child.dataIndex as string);
+                      
+                      if (isRealisasiColumn && text) {
+                        const monthNum = (child.dataIndex as string).match(/\d+$/)?.[0];
+                        const isBeforeColumn = (child.dataIndex as string).includes("before");
+                        const monthKey = isBeforeColumn ? "before_rekon" : "after_rekon";
+                        
+                        // Check if packetloss parameter
+                        if (
+                          record.parameter
+                            ?.toLowerCase()
+                            .includes("packetloss 1-5% ran to core") ||
+                          record.parameter
+                            ?.toLowerCase()
+                            .includes("packetloss >5% ran to core") ||
+                          record.mini_parameter
+                            ?.toLowerCase()
+                            .includes("packetloss 1-5% ran to core") ||
+                          record.mini_parameter
+                            ?.toLowerCase()
+                            .includes("packetloss >5% ran to core") ||
+                          record.mini_parameter
+                            ?.toLowerCase()
+                            .includes("packetloss ran to core")
+                        ) {
+                          return (
+                            <span
+                              className={`${
+                                !isBelowTarget
+                                  ? "!text-red-500 p-1 bg-red-50 rounded-sm"
+                                  : "!text-green-500 p-1 bg-green-50 rounded-sm"
+                              } cursor-pointer`}
+                              onClick={() => {
+                                if (monthNum) {
+                                  fetchRealisasiMonthly(monthKey, parseInt(monthNum), record);
+                                }
+                              }}
+                              role="button"
+                              tabIndex={0}
+                            >
+                              {record.satuan === "%" ? text + "%" : text}
+                            </span>
+                          );
+                        }
+                        
+                        return (
+                          <span
+                            className={`${
+                              isBelowTarget
+                                ? "!text-red-500 p-1 bg-red-50 rounded-sm"
+                                : "!text-green-500 p-1 bg-green-50 rounded-sm"
+                            } cursor-pointer`}
+                            onClick={() => {
+                              if (monthNum) {
+                                fetchRealisasiMonthly(monthKey, parseInt(monthNum), record);
+                              }
+                            }}
+                            role="button"
+                            tabIndex={0}
+                          >
+                            {record.satuan === "%" ? text + "%" : text}
+                          </span>
+                        );
+                      }
+
+                      // Check if this is a weekly column (ach_1_1, ach_1_2, etc.)
+                      const isWeeklyColumn = /^ach_\d+_\d+$/.test(child.dataIndex);
+
                       if (
                         record.parameter
                           ?.toLowerCase()
@@ -632,7 +909,14 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                               !isBelowTarget
                                 ? "!text-red-500 p-1 bg-red-50 rounded-sm"
                                 : "!text-green-500 p-1 bg-green-50 rounded-sm"
-                            } curcor-pointer`}
+                            } ${isWeeklyColumn ? "cursor-pointer" : ""}`}
+                            onClick={() => {
+                              if (isWeeklyColumn && text) {
+                                fetchWeeklyDetail(child.dataIndex, record);
+                              }
+                            }}
+                            role={isWeeklyColumn ? "button" : undefined}
+                            tabIndex={isWeeklyColumn ? 0 : undefined}
                           >
                             {record.satuan === "%"
                               ? text + "%"
@@ -646,7 +930,14 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                             isBelowTarget
                               ? "!text-red-500 p-1 bg-red-50 rounded-sm"
                               : "!text-green-500 p-1 bg-green-50 rounded-sm"
-                          } cursor-pointer `}
+                          } ${isWeeklyColumn ? "cursor-pointer" : ""}`}
+                          onClick={() => {
+                            if (isWeeklyColumn && text) {
+                              fetchWeeklyDetail(child.dataIndex, record);
+                            }
+                          }}
+                          role={isWeeklyColumn ? "button" : undefined}
+                          tabIndex={isWeeklyColumn ? 0 : undefined}
                         >
                           {record.satuan === "%"
                             ? text ?? "" + "%"
@@ -674,12 +965,12 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
             </ColumnGroup>
           ) : (
             <Column
-              key={column.dataIndex}
-              title={column.title}
-              dataIndex={column.dataIndex}
-              width={column.width}
-              onHeaderCell={column.onHeaderCell}
-              onCell={(record, index) => {
+              key={col.dataIndex}
+              title={col.title}
+              dataIndex={col.dataIndex}
+              width={col.width}
+              onHeaderCell={col.onHeaderCell}
+              onCell={(record) => {
                 const isLastTwo =
                   record.parameter.toLowerCase().includes("service") ||
                   record.parameter.toLowerCase().includes("weighted");
@@ -704,11 +995,11 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                   },
                 };
               }}
-              align={column.align}
-              fixed={column.fixed}
-              render={(text, record, index) => {
+              align={col.align}
+              fixed={col.fixed}
+              render={(text, record) => {
                 const isBelowTarget = Number(text) < Number(record.target);
-                if (column.dataIndex == "parameter") {
+                if (col.dataIndex == "parameter") {
                   return (
                     <div
                       className="cursor-pointer text-primary-500"
@@ -788,6 +1079,180 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
           )
         )}
       </Table>
+
+      {/* Modal untuk detail weekly */}
+      <Modal
+        title={`Detail Week ${weeklyDetail?.week} - ${weeklyDetail?.kpi}`}
+        open={modalVisible}
+        onCancel={() => setModalVisible(false)}
+        width={1000}
+        footer={null}
+        loading={modalLoading}
+      >
+        {modalLoading ? (
+          <div className="flex justify-center items-center py-8">
+            <Spin tip="Mengambil data..." />
+          </div>
+        ) : modalData ? (
+          <div className="max-h-[650px] overflow-y-auto">
+            {Array.isArray(modalData) ? (
+              <Table
+                dataSource={modalData}
+                size="small"
+                pagination={{ pageSize: 100 }}
+                bordered
+                scroll={{ x: "max-content" }}
+                columns={[
+                  {
+                    title: "No.",
+                    key: "no",
+                    render: (_, __, index) => index + 1,
+                    width: 50,
+                  },
+                  {
+                    title: "Week",
+                    dataIndex: "week",
+                    key: "week",
+                    render: (text) => text ?? "-",
+                  },
+                  {
+                    title: "Region",
+                    dataIndex: "region_tsel",
+                    key: "region_tsel",
+                    render: (text) => text ?? "-",
+                  },
+                  {
+                    title: "Area",
+                    dataIndex: "area",
+                    key: "area",
+                    render: (text) => text ?? "-",
+                  },
+                  {
+                    title: "Site ID",
+                    dataIndex: "site_id",
+                    key: "site_id",
+                    render: (text) => text ?? "-",
+                  },
+                  {
+                    title: "PL Status",
+                    dataIndex: "packetloss_status",
+                    key: "packetloss_status",
+                    render: (text) => text ?? "-",
+                  },
+                  {
+                    title: "DIST PL",
+                    dataIndex: "distribution_pl",
+                    key: "distribution_pl",
+                    render: (text) => text ?? "-",
+                  },
+                  {
+                    title: "Value",
+                    dataIndex: "value",
+                    key: "value",
+                    render: (text) =>
+                      text !== null && text !== undefined ? text : "-",
+                  },
+                  {
+                    title: "Group RCA",
+                    dataIndex: "grouping_rca",
+                    key: "grouping_rca",
+                    render: (text) => text ?? "-",
+                  },
+                  {
+                    title: "Detail RCA",
+                    dataIndex: "detail_rca",
+                    key: "detail_rca",
+                    render: (text) => text ?? "-",
+                  },
+                  {
+                    title: "Update Progres",
+                    dataIndex: "update_progress_packetloss",
+                    key: "update_progress_packetloss",
+                    render: (text) => text ?? "-",
+                  },
+                  {
+                    title: "Last Update",
+                    dataIndex: "last_update_packetloss_cnq",
+                    key: "last_update_packetloss_cnq",
+                    render: (text) => text ?? "-",
+                  },
+                  {
+                    title: "User Update",
+                    dataIndex: "user_update_packetloss_cnq",
+                    key: "user_update_packetloss_cnq",
+                    render: (text) => text ?? "-",
+                  },
+                ]}
+                rowKey={(_, index) => index as number}
+              />
+            ) : (
+              <div className="p-4">
+                <p>{JSON.stringify(modalData, null, 2)}</p>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="text-center py-4">Tidak ada data</div>
+        )}
+      </Modal>
+
+      {/* Modal untuk Realisasi Monthly */}
+      <Modal
+        title={`Achievement Prediction - ${realisasiDetail?.kpi?.toUpperCase()}`}
+        open={realisasiModalVisible}
+        onCancel={() => setRealisasiModalVisible(false)}
+        width={1200}
+        footer={null}
+        loading={realisasiModalLoading}
+      >
+        {realisasiModalLoading ? (
+          <div className="flex justify-center items-center py-8">
+            <Spin tip="Mengambil data..." />
+          </div>
+        ) : realisasiModalData && typeof realisasiModalData === "object" && realisasiModalData.data ? (
+          <div className="max-h-[700px] overflow-y-auto">
+            <div className="grid grid-cols-2 gap-6">
+              {/* Realisasi Before */}
+              <div>
+                <h3 className="text-lg font-bold mb-4 text-center">Realisasi Before</h3>
+                {realisasiModalData.data?.before && Array.isArray(realisasiModalData.data.before) ? (
+                  <Table
+                    dataSource={realisasiModalData.data.before}
+                    size="small"
+                    pagination={{ pageSize: 50, hideOnSinglePage: true }}
+                    bordered
+                    scroll={{ x: "max-content" }}
+                    columns={generateRealisasiColumns(realisasiDetail?.monthNum || 2)}
+                    rowKey={(_, index) => index as number}
+                  />
+                ) : (
+                  <div className="text-center py-4 text-gray-500">Tidak ada data</div>
+                )}
+              </div>
+
+              {/* Realisasi After */}
+              <div>
+                <h3 className="text-lg font-bold mb-4 text-center">Realisasi After</h3>
+                {realisasiModalData.data?.after && Array.isArray(realisasiModalData.data.after) ? (
+                  <Table
+                    dataSource={realisasiModalData.data.after}
+                    size="small"
+                    pagination={{ pageSize: 50, hideOnSinglePage: true }}
+                    bordered
+                    scroll={{ x: "max-content" }}
+                    columns={generateRealisasiColumns(realisasiDetail?.monthNum || 2)}
+                    rowKey={(_, index) => index as number}
+                  />
+                ) : (
+                  <div className="text-center py-4 text-gray-500">Tidak ada data</div>
+                )}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="text-center py-4">Tidak ada data</div>
+        )}
+      </Modal>
     </div>
   );
 };
