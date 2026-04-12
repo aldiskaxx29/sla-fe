@@ -63,6 +63,33 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
     setDataSource(data);
   }, [data]);
 
+  const formatText = (text) => {
+    return text?.replace(/_/g, " ") // Mengganti underscore dengan spasi
+      .toLowerCase() // Mengubah semua huruf menjadi kecil terlebih dahulu
+      .replace(/\b\w/g, (char) => char.toUpperCase()); // Kapitalisasi setiap kata
+  };
+
+  const formatWeekMonth = (text) => {
+    // Validasi agar tidak undefined atau null
+    if (!text || typeof text !== "string") {
+      return "";
+    }
+  
+    const match = text.match(/week_(\d+)_(\d+)/i);
+    if (!match) {
+      return text.replace(/_/g, " ");
+    }
+  
+    const monthNumber = parseInt(match[1], 10);
+    const weekNumber = parseInt(match[2], 10);
+  
+    const monthName = new Intl.DateTimeFormat("id-ID", {
+      month: "long",
+    }).format(new Date(2024, monthNumber - 1, 1));
+  
+    return `${monthName.charAt(0).toUpperCase() + monthName.slice(1)} Week ${weekNumber}`;
+  };
+
   const dataMapping = useMemo(() => {
     const mappingData2 = dataSource.map((data, indexParent) => {
       if (
@@ -1082,7 +1109,7 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
 
       {/* Modal untuk detail weekly */}
       <Modal
-        title={`Detail Week ${weeklyDetail?.week} - ${weeklyDetail?.kpi}`}
+        title={`Detail ${formatWeekMonth(weeklyDetail?.week)} ${formatText(weeklyDetail?.kpi)}`}
         open={modalVisible}
         onCancel={() => setModalVisible(false)}
         width={1000}

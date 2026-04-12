@@ -198,7 +198,7 @@ const MSAmenu = ({
             >
               Nation Wide
             </button>
-            <button
+            {/* <button
               className={
                 level === "area"
                   ? "text-brand-secondary border rounded-full px-3 h-8 border-brand-secondary"
@@ -217,7 +217,7 @@ const MSAmenu = ({
               onClick={() => setLevel("region")}
             >
               Regional
-            </button>
+            </button> */}
           </div>
         </div>
         <div className=" flex gap-4 w-full overflow-auto">
