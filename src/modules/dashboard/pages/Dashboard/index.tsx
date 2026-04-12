@@ -210,6 +210,7 @@ function Dashboard() {
 
       {menu.key === "msa" && dataSC && dataHistoryData ? (
         <MSAmenu
+          handlefilter={handlefilter}
           treg={treg}
           handletreg={handletreg}
           dataHistoryData={dataHistoryData}
@@ -218,6 +219,7 @@ function Dashboard() {
           isSuccessHistoryData={isSuccessHistoryData}
           trendData={trendData}
           level={level}
+          filter={filter}
           setLevel={setLevel}
         />
       ) : (
