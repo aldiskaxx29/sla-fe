@@ -714,6 +714,154 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
     [dataMapping, expandedRowKey, fetchWitelData]
   );
 
+  const columnPop = useMemo(() => {
+    const isMttrq =
+      weeklyDetail?.kpi?.toLowerCase().includes("mttrq");
+  
+    // Kolom khusus untuk KPI MTTRQ
+    if (isMttrq) {
+      return [
+        {
+          title: "No.",
+          key: "no",
+          render: (_: any, __: any, index: number) => index + 1,
+          width: 60,
+        },
+        {
+          title: "Year",
+          dataIndex: "year",
+          key: "year",
+          render: (text: string) => text ?? "-",
+        },
+        {
+          title: "Month",
+          dataIndex: "month",
+          key: "month",
+          render: (text: string) => text ?? "-",
+        },
+        {
+          title: "No Ticket",
+          dataIndex: "ticket_id",
+          key: "ticket_id",
+          render: (text: string) => text ?? "-",
+        },
+        {
+          title: "Site Id",
+          dataIndex: "site_id",
+          key: "site_id",
+          render: (text: string) => text ?? "-",
+        },
+        {
+          title: "Region Tsel",
+          dataIndex: "region_tsel",
+          key: "region_tsel",
+          render: (text: string) => text ?? "-",
+        },
+        {
+          title: "Witel",
+          dataIndex: "witel",
+          key: "witel",
+          render: (text: string) => text ?? "-",
+        },
+        {
+          title: "Treshold",
+          dataIndex: "treshold",
+          key: "treshold",
+          render: (text: string) => text ?? "-",
+        },
+        {
+          title: "TTR Awal",
+          dataIndex: "ttr_customer_jam",
+          key: "ttr_customer_jam",
+          render: (text: string) => text ?? "-",
+        },
+      ];
+    }
+  
+    // Kolom default
+    return [
+      {
+        title: "No.",
+        key: "no",
+        render: (_: any, __: any, index: number) => index + 1,
+        width: 50,
+      },
+      {
+        title: "Week",
+        dataIndex: "week",
+        key: "week",
+        render: (text: string) => text ?? "-",
+      },
+      {
+        title: "Region",
+        dataIndex: "region_tsel",
+        key: "region_tsel",
+        render: (text: string) => text ?? "-",
+      },
+      {
+        title: "Area",
+        dataIndex: "area",
+        key: "area",
+        render: (text: string) => text ?? "-",
+      },
+      {
+        title: "Site ID",
+        dataIndex: "site_id",
+        key: "site_id",
+        render: (text: string) => text ?? "-",
+      },
+      {
+        title: "PL Status",
+        dataIndex: "packetloss_status",
+        key: "packetloss_status",
+        render: (text: string) => text ?? "-",
+      },
+      {
+        title: "DIST PL",
+        dataIndex: "distribution_pl",
+        key: "distribution_pl",
+        render: (text: string) => text ?? "-",
+      },
+      {
+        title: "Value",
+        dataIndex: "value",
+        key: "value",
+        render: (text: number) =>
+          text !== null && text !== undefined ? text : "-",
+      },
+      {
+        title: "Group RCA",
+        dataIndex: "grouping_rca",
+        key: "grouping_rca",
+        render: (text: string) => text ?? "-",
+      },
+      {
+        title: "Detail RCA",
+        dataIndex: "detail_rca",
+        key: "detail_rca",
+        render: (text: string) => text ?? "-",
+      },
+      {
+        title: "Update Progres",
+        dataIndex: "update_progress_packetloss",
+        key: "update_progress_packetloss",
+        render: (text: string) => text ?? "-",
+      },
+      {
+        title: "Last Update",
+        dataIndex: "last_update_packetloss_cnq",
+        key: "last_update_packetloss_cnq",
+        render: (text: string) => text ?? "-",
+      },
+      {
+        title: "User Update",
+        dataIndex: "user_update_packetloss_cnq",
+        key: "user_update_packetloss_cnq",
+        render: (text: string) => text ?? "-",
+      },
+    ];
+  }, [weeklyDetail?.kpi]);
+
   return (
     <div>
       {(loadingMainData || loading || realisasiModalLoading) && (
@@ -1129,87 +1277,7 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                 pagination={{ pageSize: 100 }}
                 bordered
                 scroll={{ x: "max-content" }}
-                columns={[
-                  {
-                    title: "No.",
-                    key: "no",
-                    render: (_, __, index) => index + 1,
-                    width: 50,
-                  },
-                  {
-                    title: "Week",
-                    dataIndex: "week",
-                    key: "week",
-                    render: (text) => text ?? "-",
-                  },
-                  {
-                    title: "Region",
-                    dataIndex: "region_tsel",
-                    key: "region_tsel",
-                    render: (text) => text ?? "-",
-                  },
-                  {
-                    title: "Area",
-                    dataIndex: "area",
-                    key: "area",
-                    render: (text) => text ?? "-",
-                  },
-                  {
-                    title: "Site ID",
-                    dataIndex: "site_id",
-                    key: "site_id",
-                    render: (text) => text ?? "-",
-                  },
-                  {
-                    title: "PL Status",
-                    dataIndex: "packetloss_status",
-                    key: "packetloss_status",
-                    render: (text) => text ?? "-",
-                  },
-                  {
-                    title: "DIST PL",
-                    dataIndex: "distribution_pl",
-                    key: "distribution_pl",
-                    render: (text) => text ?? "-",
-                  },
-                  {
-                    title: "Value",
-                    dataIndex: "value",
-                    key: "value",
-                    render: (text) =>
-                      text !== null && text !== undefined ? text : "-",
-                  },
-                  {
-                    title: "Group RCA",
-                    dataIndex: "grouping_rca",
-                    key: "grouping_rca",
-                    render: (text) => text ?? "-",
-                  },
-                  {
-                    title: "Detail RCA",
-                    dataIndex: "detail_rca",
-                    key: "detail_rca",
-                    render: (text) => text ?? "-",
-                  },
-                  {
-                    title: "Update Progres",
-                    dataIndex: "update_progress_packetloss",
-                    key: "update_progress_packetloss",
-                    render: (text) => text ?? "-",
-                  },
-                  {
-                    title: "Last Update",
-                    dataIndex: "last_update_packetloss_cnq",
-                    key: "last_update_packetloss_cnq",
-                    render: (text) => text ?? "-",
-                  },
-                  {
-                    title: "User Update",
-                    dataIndex: "user_update_packetloss_cnq",
-                    key: "user_update_packetloss_cnq",
-                    render: (text) => text ?? "-",
-                  },
-                ]}
+                columns={columnPop}
                 rowKey={(_, index) => index as number}
               />
             ) : (
