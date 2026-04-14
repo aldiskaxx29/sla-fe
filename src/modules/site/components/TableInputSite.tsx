@@ -273,11 +273,24 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
       },
       ...(dynamicKey === "packetloss"
         ? [
+            // {
+            //   title: "DIST PL",
+            //   key: "distribution_pl",
+            //   dataIndex: "distribution_pl",
+            //   search: true,
+            // },
             {
               title: "DIST PL",
-              key: "distribution_pl",
               dataIndex: "distribution_pl",
-              search: true,
+              key: "distribution_pl",
+              filters: [
+                { text: "1-5%", value: "1-5%" },
+                { text: ">5%", value: ">5%" }
+              ],
+              filterSearch: true,
+              filterMultiple: true,
+              onFilter: (value, record) =>
+                record.distribution_pl === value,
             },
           ]
         : []),
@@ -316,12 +329,45 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
       //     },
       //   ],
       // },
+      // {
+      //   title: "Group RCA",
+      //   dataIndex: "RCA",
+      //   key: "RCA",
+      //   align: "center",
+      //   search: true,
+      // },
       {
         title: "Group RCA",
         dataIndex: "RCA",
         key: "RCA",
-        align: "center",
-        search: true,
+        filters: [
+          { text: "Technical Unknown", value: "Technical Unknown" },
+          { text: "Technical TSEL", value: "Technical TSEL" },
+          { text: "Cap End Site Need Order", value: "Cap End Site Need Order" },
+          { text: "Temperature TSEL", value: "Temperature TSEL" },
+          { text: "Cap End Site Order", value: "Cap End Site Order" },
+          { text: "Technical TIF", value: "Technical TIF" },
+          { text: "Routing TSEL", value: "Routing TSEL" },
+          { text: "Routing TIF", value: "Routing TIF" },
+          { text: "Cap Intermediate / Hub", value: "Cap Intermediate / Hub" },
+          { text: "QE Redaman", value: "QE Redaman" },
+          { text: "Power TSEL", value: "Power TSEL" },
+          { text: "Hardware / Software Capability", value: "Hardware / Software Capability" },
+          { text: "Gamas SKKL", value: "Gamas SKKL" },
+          { text: "Gamas Repetitive", value: "Gamas Repetitive" },
+          { text: "Gamas FO Darat / SKSO", value: "Gamas FO Darat / SKSO" },
+          { text: "Cap OLT", value: "Cap OLT" },
+          { text: "Warranty Redeploy", value: "Warranty Redeploy" },
+          { text: "Obstacle", value: "Obstacle" },
+          { text: "ISR Segel Balmon", value: "ISR Segel Balmon" },
+          { text: "ISR Interference Internal", value: "ISR Interference Internal" },
+          { text: "ISR Interference External", value: "ISR Interference External" },
+          { text: "Cap 3rd Party", value: "Cap 3rd Party" }
+        ],
+        filterSearch: true,
+        filterMultiple: true,
+        onFilter: (value, record) =>
+          record.RCA === value,
       },
       {
         title: "Detail RCA",
