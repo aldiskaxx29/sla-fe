@@ -141,13 +141,34 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
   }, [dataSource, injectedData, injectedChildData]);
 
   // Function to generate realisasi columns based on month
-  const generateRealisasiColumns = (monthNum: number) => {
+  const generateRealisasiColumns = (monthNum: number, kpi?: string) => {
     const weekCount = monthNum === 2 ? 4 : 5; // Month 2 has 4 weeks, month 3 has 5 weeks
+    const isPacketloss =
+      kpi?.toLowerCase().includes("packetloss") &&
+      kpi?.toLowerCase().includes("ran to core");
+
+    const renderAchievement = (text: unknown, record: Record<string, unknown>): React.ReactNode => {
+      if (text === null || text === undefined || text === "") return "-";
+      const value = Number(text);
+      const target = Number(record.target);
+      if (Number.isNaN(value) || Number.isNaN(target)) return text as React.ReactNode;
+
+      const isAboveTarget = value > target;
+      // Packetloss: merah jika di atas target. Lainnya: hijau jika di atas target.
+      const isGood = isPacketloss ? !isAboveTarget : isAboveTarget;
+
+      return (
+        <span className={isGood ? "text-green-500 font-semibold" : "text-red-500 font-semibold"}>
+          {text as React.ReactNode}
+        </span>
+      );
+    };
+
     const columnsArray: Array<{
       title: string;
       dataIndex?: string;
       key: string;
-      render: (text: unknown) => React.ReactNode;
+      render: (text: unknown, record?: Record<string, unknown>) => React.ReactNode;
       width?: number;
     }> = [
       {
@@ -160,13 +181,13 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
         title: "Reg",
         dataIndex: "region_tsel",
         key: "region_tsel",
-        render: (text) => text ?? "-",
+        render: (text) => (text ?? "-") as React.ReactNode,
       },
       {
         title: "Target",
         dataIndex: "target",
         key: "target",
-        render: (text) => text ?? "-",
+        render: (text) => (text ?? "-") as React.ReactNode,
       },
     ];
 
@@ -176,7 +197,7 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
         title: `W${i}`,
         dataIndex: `ach_${monthNum}_${i}`,
         key: `ach_${monthNum}_${i}`,
-        render: (text) => text ?? "-",
+        render: renderAchievement,
       });
     }
 
@@ -185,7 +206,7 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
       title: monthNum === 2 ? "Feb" : "Mar",
       dataIndex: `ach_fm_${monthNum}`,
       key: `ach_fm_${monthNum}`,
-      render: (text) => text ?? "-",
+      render: renderAchievement,
     });
 
     return columnsArray;
@@ -722,16 +743,10 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
     if (isMttrq) {
       return [
         {
-          title: "No.",
+          title: "No",
           key: "no",
           render: (_: any, __: any, index: number) => index + 1,
           width: 60,
-        },
-        {
-          title: "Year",
-          dataIndex: "year",
-          key: "year",
-          render: (text: string) => text ?? "-",
         },
         {
           title: "Month",
@@ -752,9 +767,9 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
           render: (text: string) => text ?? "-",
         },
         {
-          title: "Region Tsel",
-          dataIndex: "region_tsel",
-          key: "region_tsel",
+          title: "Final Severity",
+          dataIndex: "final_severity",
+          key: "final_severity",
           render: (text: string) => text ?? "-",
         },
         {
@@ -773,6 +788,24 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
           title: "TTR Awal",
           dataIndex: "ttr_customer_jam",
           key: "ttr_customer_jam",
+          render: (text: string) => text ?? "-",
+        },
+        {
+          title: "TTR Selisih",
+          dataIndex: "ttr_selisih",
+          key: "ttr_selisih",
+          render: (text: string) => text ?? "-",
+        },
+        {
+          title: "TTR Final",
+          dataIndex: "ttr_final",
+          key: "ttr_final",
+          render: (text: string) => text ?? "-",
+        },
+        {
+          title: "Ket Recon",
+          dataIndex: "ket_recon",
+          key: "ket_recon",
           render: (text: string) => text ?? "-",
         },
       ];
@@ -1274,7 +1307,7 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
               <Table
                 dataSource={modalData}
                 size="small"
-                pagination={{ pageSize: 100 }}
+                pagination={{ pageSize: 10 }}
                 bordered
                 scroll={{ x: "max-content" }}
                 columns={columnPop}
@@ -1317,7 +1350,7 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                     pagination={{ pageSize: 50, hideOnSinglePage: true }}
                     bordered
                     scroll={{ x: "max-content" }}
-                    columns={generateRealisasiColumns(realisasiDetail?.monthNum || 2)}
+                    columns={generateRealisasiColumns(realisasiDetail?.monthNum || 2, realisasiDetail?.kpi)}
                     rowKey={(_, index) => index as number}
                   />
                 ) : (
@@ -1335,7 +1368,7 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                     pagination={{ pageSize: 50, hideOnSinglePage: true }}
                     bordered
                     scroll={{ x: "max-content" }}
-                    columns={generateRealisasiColumns(realisasiDetail?.monthNum || 2)}
+                    columns={generateRealisasiColumns(realisasiDetail?.monthNum || 2, realisasiDetail?.kpi)}
                     rowKey={(_, index) => index as number}
                   />
                 ) : (
