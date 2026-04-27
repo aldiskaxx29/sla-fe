@@ -251,22 +251,41 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week, year }
           kpi: form.getFieldValue("kpi")[0],
         },
       }).unwrap();
-
-      const blobUrl = URL.createObjectURL(result as Blob);
-
+  
+      // pastikan result berupa Blob
+      const blob = result as Blob;
+  
+      // ambil extension dari mime type
+      const mimeType = blob.type; 
+      let extension = "file";
+  
+      if (mimeType.includes("jpeg")) extension = "jpg";
+      else if (mimeType.includes("png")) extension = "png";
+      // else if (mimeType.includes("gif")) extension = "gif";
+      // else if (mimeType.includes("webp")) extension = "webp";
+      // else if (mimeType.includes("pdf")) extension = "pdf";
+      // else if (mimeType.includes("excel") || mimeType.includes("spreadsheet")) extension = "xlsx";
+      // else if (mimeType.includes("csv")) extension = "csv";
+      // else if (mimeType.includes("zip")) extension = "zip";
+  
+      // nama file dinamis
+      const fileName = `evidence.${extension}`;
+  
+      const blobUrl = URL.createObjectURL(blob);
+  
       const tempLink = document.createElement("a");
-
       tempLink.href = blobUrl;
-
-      tempLink.setAttribute("download", "evidance.xlsx");
-
+      tempLink.setAttribute("download", fileName);
+  
       document.body.appendChild(tempLink);
       tempLink.click();
-
+  
       document.body.removeChild(tempLink);
       URL.revokeObjectURL(blobUrl);
+  
     } catch (error) {
-      toast.error("Failed to download the file:", error);
+      console.error(error);
+      toast.error("Failed to download file");
     }
   };
 
@@ -462,6 +481,7 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week, year }
                 <Option value="⁠Waiting DWS">⁠Waiting DWS</Option>
                 <Option value="Force Major">Force Major</Option>
                 <Option value="3rd Party">⁠3rd Party</Option>
+                <Option value="Reenginering">Reenginering</Option>
               </Select>
             </Form.Item>
           )}

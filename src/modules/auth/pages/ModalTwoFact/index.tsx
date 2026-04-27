@@ -104,13 +104,13 @@ const ModalTwoFact = ({ open, parameter, onCancel }) => {
           </Button>
 
           {/* 🔴 RESET TOKEN */}
-          <Button
+          {/* <Button
             danger
             className="w-full mt-3"
             onClick={handleResetToken}
           >
             Reset Token Authenticator
-          </Button>
+          </Button> */}
         </Form>
       </div>
     </Modal>

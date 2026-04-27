@@ -24,12 +24,12 @@ const LoginPage = () => {
     e.preventDefault();
     const form = e.currentTarget;
     const formData = new FormData(form);
-
+  
     const values: IAuthLoginRequest = {
       email: (formData.get("email") as string)?.trim(),
       password: (formData.get("password") as string) ?? "",
     };
-
+  
     if (!values.email || !values.password) {
       toast.dismiss();
       toast.warning("Please input your email and password!", {
@@ -37,22 +37,31 @@ const LoginPage = () => {
       });
       return;
     }
-
+  
     try {
       const resp = await login(values).unwrap();
-
-      if (!resp.status) throw resp;
-      setQrData(resp);
-
-      toast.dismiss();
-      setIsOpenTwoFact(true);
+      // Validasi login berhasil
+      if (resp?.status === true) {
+        toast.dismiss();
+        toast.success("Login berhasil. Silakan verifikasi 2FA.", {
+          position: "top-right",
+        });
+  
+        // Simpan data QR jika ada
+        setQrData(resp.data ?? resp);
+        setIsOpenTwoFact(true);
+      } else {
+        throw new Error(resp?.message || "Email atau password salah.");
+      }
     } catch (err: any) {
       const msg =
-        err?.data?.message ??
-        err?.message ??
-        (typeof err === "string" ? err : "Login failed. Please try again.");
+        err?.data?.message ||
+        err?.message ||
+        "Login failed. Please try again.";
+  
       toast.dismiss();
       toast.error(msg, { position: "top-right" });
+      setIsOpenTwoFact(false); // Pastikan modal tidak terbuka
     }
   };
 
