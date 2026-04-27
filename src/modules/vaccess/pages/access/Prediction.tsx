@@ -4,7 +4,15 @@ import { FileExcelFilled } from "@ant-design/icons";
 import DailyTracking from "./DailyTracking";
 import * as XLSX from "xlsx";
 import PopupDownload from "./PopupDownload";
-
+let HEADER = {headers:{Rtoken:''}}
+try {
+    let data = JSON.parse(localStorage.getItem('user_data')??"{}")
+    HEADER = {headers:{
+        Rtoken:btoa(data.level_user)
+    }}
+} catch (error) {
+    // console.log(error)
+}
 
 function getStartEnd(date = new Date(),max_date=new Date()) {
     if([5,6,0,1].includes(date.getDay())){
@@ -157,11 +165,13 @@ const Prediction = ()=>{
         JABOTABEK_OUTER : {total_site:0,t_pl5:0,t_pl15:2,t_lat:25,t_jit:25,r_pl5:0,r_pl15:0,r_lat:0,r_jit:0},
     })
 
-    async function RAW(start,end){
-        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vaccess.php?cmd=raw-access&start=${start}&end=${end}`)
-        let {data} = await res.json()
-        setRAWDATA(data)
-    }
+    // async function RAW(start,end){
+    //     let user = localStorage.getItem("")
+    //     let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vaccess.php?cmd=raw-access&start=${start}&end=${end}`)
+    //     let {data} = await res.json()
+    //     setRAWDATA(data)
+    // }
+
     function getRange7Hari(tanggal){
 
         const end = new Date(tanggal);
@@ -182,12 +192,12 @@ const Prediction = ()=>{
             end_date: format(end)
         }
     }
-    async function RAWLAST(start){
-        let {start_date,end_date} = getRange7Hari(start)
-        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vaccess.php?cmd=raw-access&start=${start_date}&end=${end_date}`)
-        let {data} = await res.json()
-        setRAWDATALAST(data)
-    }
+    // async function RAWLAST(start){
+    //     let {start_date,end_date} = getRange7Hari(start)
+    //     let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vaccess.php?cmd=raw-access&start=${start_date}&end=${end_date}`,HEADER)
+    //     let {data} = await res.json()
+    //     setRAWDATALAST(data)
+    // }
 
     function exportRAW() {
         if (!RAWDATA || RAWDATA.length === 0) {
@@ -212,7 +222,8 @@ const Prediction = ()=>{
         let filename = "RAW THIS WEEK-"+`${start}`+`-${end}`
         XLSX.writeFile(workbook, filename+".xlsx");
     }
-     function exportRAWLAST() {
+
+    function exportRAWLAST() {
         if (!RAWDATALAST || RAWDATALAST.length === 0) {
             return;
             alert('Data Raw Not Ready Yet')
@@ -237,19 +248,19 @@ const Prediction = ()=>{
         XLSX.writeFile(workbook, filename+".xlsx");
     }
     async function SitePL18(start,end){
-        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vaccess.php?cmd=site-pl-18-hours&week=${getWeek(new Date(MAX_DATE))}&start=${start}&end=${end}`)
+        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vaccess.php?cmd=site-pl-18-hours&week=${getWeek(new Date(MAX_DATE))}&start=${start}&end=${end}`,HEADER)
         let {data} = await res.json()
         setPL18(data.length)
         setPL18DATA(data)
     }
     async function SiteJit2Days(){
-        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vaccess.php?cmd=site-jitter-2days`)
+        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vaccess.php?cmd=site-jitter-2days`,HEADER)
         let {data} = await res.json()
         setJIT2(data.length)
         setJIT2DATA(data)
     }
     async function PredictionWeek(start,end){
-        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vaccess.php?cmd=prediction-week&start=${start}&end=${end}`)
+        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vaccess.php?cmd=prediction-week&start=${start}&end=${end}`,HEADER)
         let {data} = await res.json()
         let TBT = RESETTBSITE
         // let TBT = {}
@@ -261,7 +272,7 @@ const Prediction = ()=>{
         setTBSITE({...TBT})
     }
     async function PredictionWeekDetail(start,end){
-        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vaccess.php?cmd=prediction-week-detail&start=${start}&end=${end}`)
+        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vaccess.php?cmd=prediction-week-detail&start=${start}&end=${end}`,HEADER)
         let {data} = await res.json()
         let TBT = RESETTB
         data.forEach((a)=>{
@@ -349,7 +360,7 @@ const Prediction = ()=>{
     }  
 
     async function currentUpdateState(){
-        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vaccess.php?cmd=max-date`)
+        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vaccess.php?cmd=max-date`,HEADER)
         let {data} = await res.json()
         setMAXDATE(data.max_date)
     }

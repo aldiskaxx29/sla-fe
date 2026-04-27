@@ -348,9 +348,9 @@ const ResumeRCA = ()=>{
                   </div>
                   
                 }
-                {
+                {/* {
                   !PARAMETER.includes('MTTR') && <div onClick={()=>setPOPUPLOAD(true)} className="cursor-pointer text-white flex gap-2 items-center py-1 px-3 rounded-sm bg-sky-700"><UploadOutlined></UploadOutlined>Upload</div>
-                }
+                } */}
             </div>
             <div></div>
             {(PARAMETER!='MTTRq Major' && PARAMETER!='MTTRq Minor' && PARAMETER!='MTTRq Critical') ? <Traffic mode={PARAMETER} week={WEEK} setLOADING={setLOADING}/> : <MTTR parameter={PARAMETER} week={WEEK} weekstart={WEEKStart} weekend={WEEKEnd} setLOADING={setLOADING}/>}

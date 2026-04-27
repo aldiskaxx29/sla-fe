@@ -18,6 +18,16 @@ ChartJS.register(
 );
 
 import { Bar } from "react-chartjs-2";
+let HEADER = {headers:{Rtoken:''}}
+try {
+    let data = JSON.parse(localStorage.getItem('user_data')??"{}")
+    HEADER = {headers:{
+        Rtoken:btoa(data.level_user)
+    }}
+} catch (error) {
+    // console.log(error)
+}
+
 
 const StackedBarChart = ({POP,MODE,DATE,CLEAR,SPIKE,CONSC}) => {
 let dataset = [
@@ -154,7 +164,7 @@ const DailyTracking=({start,end})=>{
         setPOP(true);setTITLEPOP("SITE DAILY TRACKING PACKET LOSS - CLEAR")
     }
     async function DailyTracking(){
-            let res = await fetch('https://qosmo.telkom.co.id/baseapi/vaccess.php?cmd=daily-tracking-'+DAILYMODE.toLowerCase()+'&region='+DRegion+`&start=${start}&end=${end}`)
+            let res = await fetch('https://qosmo.telkom.co.id/baseapi/vaccess.php?cmd=daily-tracking-'+DAILYMODE.toLowerCase()+'&region='+DRegion+`&start=${start}&end=${end}`,HEADER)
             let {data} = await res.json()
             setDailyTracking({...data})
             let clear = []
@@ -193,6 +203,14 @@ const DailyTracking=({start,end})=>{
             setDSPIKE([...spike])
             setDCONSC([...consc])
         }
+    // useEffect(()=>{
+    //      if(localStorage.getItem("user_data")){
+    //         let data = JSON.parse(localStorage.getItem('user_data')??"")
+    //         HEADER = {headers:{
+    //             Rtoken:data.level_user
+    //         }}
+    //     }
+    // },[])
     useEffect(()=>{
         DailyTracking()
     },[DAILYMODE,DRegion])
