@@ -7,8 +7,17 @@ import * as XLSX from "xlsx";
 
 const PopupDownload = ({close}) =>{
     const [RAW,setRAW] = useState([])
+    let HEADER = {headers:{Rtoken:''}}
+try {
+    let data = JSON.parse(localStorage.getItem('user_data')??"{}")
+    HEADER = {headers:{
+        Rtoken:btoa(data.level_user)
+    }}
+} catch (error) {
+    // console.log(error)
+}
     async function RawList(){
-        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vaccess.php?cmd=raw-list`)
+        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vaccess.php?cmd=raw-list`,HEADER)
         let {data} = await res.json()
         setRAW(data)
     }
