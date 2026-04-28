@@ -4,6 +4,15 @@ import {
 } from "@ant-design/icons";
 import React, { useEffect, useState } from "react";
 import Popup from "./Popup";
+let HEADER = {headers:{Rtoken:''}}
+try {
+    let data = JSON.parse(localStorage.getItem('user_data')??"{}")
+    HEADER = {headers:{
+        Rtoken:btoa(data.level_user)
+    }}
+} catch (error) {
+    // console.log(error)
+}
 const ActionPlanProgress = React.memo(({mode,week,DATATABLE,LABELS})=>{
     const [POPUP,setPOPUP] = useState(false)
     const [POPDATA,setPOPDATA] = useState([])
@@ -62,7 +71,7 @@ const ActionPlanProgress = React.memo(({mode,week,DATATABLE,LABELS})=>{
     }
 
     async function Init(){
-        let res = await fetch('https://qosmo.telkom.co.id/baseapi/vrecon.php?cmd=action-plan&traffic='+mode.split('_')[0].toLowerCase()+`&week=${week.split('-')[0]}&year=${week.split('-')[1]}&dist=${mode.split('_')[1]}`)
+        let res = await fetch('https://qosmo.telkom.co.id/baseapi/vrecon.php?cmd=action-plan&traffic='+mode.split('_')[0].toLowerCase()+`&week=${week.split('-')[0]}&year=${week.split('-')[1]}&dist=${mode.split('_')[1]}`,HEADER)
         let {data} = await res.json()
         try {
             let d = {}
