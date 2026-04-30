@@ -4,6 +4,7 @@ import { FileExcelFilled } from "@ant-design/icons";
 import DailyTracking from "./DailyTracking";
 import * as XLSX from "xlsx";
 import PopupDownload from "./PopupDownload";
+
 let HEADER = {headers:{Rtoken:''}}
 try {
     let data = JSON.parse(localStorage.getItem('user_data')??"{}")
@@ -15,7 +16,7 @@ try {
 }
 
 function getStartEnd(date = new Date(),max_date=new Date()) {
-    if([5,6,0,1].includes(date.getDay())){
+    if([5,6,0].includes(date.getDay())){
         date.setDate(date.getDate()-4)
     }
   const current = new Date(date);
@@ -165,13 +166,6 @@ const Prediction = ()=>{
         JABOTABEK_OUTER : {total_site:0,t_pl5:0,t_pl15:1,t_lat:25,t_jit:25,r_pl5:0,r_pl15:0,r_lat:0,r_jit:0},
     })
 
-    // async function RAW(start,end){
-    //     let user = localStorage.getItem("")
-    //     let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vaccess.php?cmd=raw-access&start=${start}&end=${end}`)
-    //     let {data} = await res.json()
-    //     setRAWDATA(data)
-    // }
-
     function getRange7Hari(tanggal){
 
         const end = new Date(tanggal);
@@ -192,12 +186,6 @@ const Prediction = ()=>{
             end_date: format(end)
         }
     }
-    // async function RAWLAST(start){
-    //     let {start_date,end_date} = getRange7Hari(start)
-    //     let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vaccess.php?cmd=raw-access&start=${start_date}&end=${end_date}`,HEADER)
-    //     let {data} = await res.json()
-    //     setRAWDATALAST(data)
-    // }
 
     function exportRAW() {
         if (!RAWDATA || RAWDATA.length === 0) {
@@ -247,6 +235,7 @@ const Prediction = ()=>{
         let filename = "RAW LAST WEEK-"+`${start_date}`+`-${end_date}`
         XLSX.writeFile(workbook, filename+".xlsx");
     }
+
     async function SitePL18(start,end){
         let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vaccess.php?cmd=site-pl-18-hours&week=${getWeek(new Date(MAX_DATE))}&start=${start}&end=${end}`,HEADER)
         let {data} = await res.json()
@@ -266,27 +255,29 @@ const Prediction = ()=>{
         // let TBT = {}
         Object.keys(data).forEach(a=>{
             TBT[a.replace(' ','_')].total_site=Number(data[a].total_site)
-            // TBT[a.replace(' ','_')].target_lat = (((100-Number(TBSITE[a.replace(' ','_')].treshold_lat))/100)*Number(TBSITE[a.replace(' ','_')].total_site))
-            // TBT[a.replace(' ','_')].target_jit = (((100-Number(TBSITE[a.replace(' ','_')].treshold_jit))/100)*Number(TBSITE[a.replace(' ','_')].total_site))
         })
         setTBSITE({...TBT})
     }
+
     async function PredictionWeekDetail(start,end){
         let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vaccess.php?cmd=prediction-week-detail&start=${start}&end=${end}`,HEADER)
         let {data} = await res.json()
         let TBT = RESETTB
+        let dmax = data.map(a=>Number(a.lat));
+        let MAX = Math.max(...dmax);
+        // console.log(MAX,dmax);
         data.forEach((a)=>{
             try {
-                if(Number(a.pl5)>=4 && TBT[a.region.replace(" ","_")]){
-                TBT[a.region.replace(" ","_")].r_pl5+=1
+                if(Number(a.pl5)>=MAX && TBT[a.region.replace(" ","_")]){
+                    TBT[a.region.replace(" ","_")].r_pl5+=1
                 }
-                if(Number(a.pl15)>=4 && TBT[a.region.replace(" ","_")]){
+                if(Number(a.pl15)>=MAX && TBT[a.region.replace(" ","_")]){
                     TBT[a.region.replace(" ","_")].r_pl15+=1
                 }
-                if(Number(a.lat)>=4 && TBT[a.region.replace(" ","_")]){
+                if(Number(a.lat)>=MAX && TBT[a.region.replace(" ","_")]){
                     TBT[a.region.replace(" ","_")].r_lat+=1
                 }
-                if(Number(a.jit)>=4 && TBT[a.region.replace(" ","_")]){
+                if(Number(a.jit)>=MAX && TBT[a.region.replace(" ","_")]){
                     TBT[a.region.replace(" ","_")].r_jit+=1
                 }
             } catch (error) {
@@ -304,8 +295,6 @@ const Prediction = ()=>{
         let filename = "PREDIKSI W"+getWeek(new Date(MAX_DATE))+"_"+Date.now()
         XLSX.writeFile(wb, filename+".xlsx");
     }
-
-    
 
     function PopTable(region,mode){
         setPOPMODE(mode)

@@ -27,6 +27,16 @@ import React, { useEffect, useState } from "react";
 import MTTR from "./Mttr";
 import Popup from "./Popup";
 import PopupUpload from "./PopupUpload";
+
+let HEADER = {headers:{Rtoken:''}}
+try {
+    let data = JSON.parse(localStorage.getItem('user_data')??"{}")
+    HEADER = {headers:{
+        Rtoken:btoa(data.level_user)
+    }}
+} catch (error) {
+    // console.log(error)
+}
 function getFriday(date) {
   const d = new Date(date);
   const day = d.getDay(); // 0=Min ... 5=Jum
@@ -233,11 +243,11 @@ const ResumeRCA = ()=>{
     async function setWeekFilter(){
       let D = {}
       if(!PARAMETER.includes('MTTR')){
-        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vrca.php?cmd=last-week-twamp`)
+        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vrca.php?cmd=last-week-twamp`,HEADER)
         let {data} = await res.json()
         D=data
       }else{
-         let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vrca.php?cmd=last-week-ticket`)
+         let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vrca.php?cmd=last-week-ticket`,HEADER)
           let {data} = await res.json()
           D=data
       }

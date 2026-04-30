@@ -20,6 +20,16 @@ ChartJS.register(
   Tooltip,
   Legend
 );
+let HEADER = {headers:{Rtoken:''}}
+try {
+    let data = JSON.parse(localStorage.getItem('user_data')??"{}")
+    HEADER = {headers:{
+        Rtoken:btoa(data.level_user)
+    }}
+} catch (error) {
+    // console.log(error)
+}
+console.log(HEADER)
 const StackedBarChart = ({labels,chartdata,PopChart}) => {
   const data = {
     labels: labels,
@@ -186,7 +196,7 @@ const TRAFFIC = React.memo(({ShowPopup,mode,week,setLOADING})=>{
 
     
     async function Nasional(){
-        let res = await fetch('https://qosmo.telkom.co.id/baseapi/vrca.php?cmd=rca-'+mode.split('_')[0].toLowerCase()+`&week=${week.split('-')[0]}&year=${week.split('-')[1]}&dist=${mode.split('_')[1]}`)
+        let res = await fetch('https://qosmo.telkom.co.id/baseapi/vrca.php?cmd=rca-'+mode.split('_')[0].toLowerCase()+`&week=${week.split('-')[0]}&year=${week.split('-')[1]}&dist=${mode.split('_')[1]}`,HEADER)
         let {data} = await res.json()
         try {
             setNasional(data.length)
@@ -197,7 +207,7 @@ const TRAFFIC = React.memo(({ShowPopup,mode,week,setLOADING})=>{
     }
     async function Table(){
         setLOADING(true)
-        let res = await fetch('https://qosmo.telkom.co.id/baseapi/vrecon.php?cmd=table-recon&traffic='+mode.split('_')[0].toLowerCase()+`&week=${week.split('-')[0]}&year=${week.split('-')[1]}&dist=${mode.split('_')[1]}`)
+        let res = await fetch('https://qosmo.telkom.co.id/baseapi/vrecon.php?cmd=table-recon&traffic='+mode.split('_')[0].toLowerCase()+`&week=${week.split('-')[0]}&year=${week.split('-')[1]}&dist=${mode.split('_')[1]}`,HEADER)
         let {data} = await res.json()
         try {
             let d = {progress:{},sites:{}}
@@ -252,7 +262,7 @@ const TRAFFIC = React.memo(({ShowPopup,mode,week,setLOADING})=>{
         : num.toFixed(2);
     }
     async function ChartData(){
-        let res = await fetch('https://qosmo.telkom.co.id/baseapi/vrecon.php?cmd=chart-recon&traffic='+mode.split('_')[0].toLowerCase()+`&week=${week.split('-')[0]}&year=${week.split('-')[1]}&dist=${mode.split('_')[1]}`)
+        let res = await fetch('https://qosmo.telkom.co.id/baseapi/vrecon.php?cmd=chart-recon&traffic='+mode.split('_')[0].toLowerCase()+`&week=${week.split('-')[0]}&year=${week.split('-')[1]}&dist=${mode.split('_')[1]}`,HEADER)
         let {data} = await res.json()
         let chart = {OGP:[],close:[]}
         let group = []

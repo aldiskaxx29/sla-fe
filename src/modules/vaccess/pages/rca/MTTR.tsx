@@ -21,6 +21,15 @@ ChartJS.register(
   Tooltip,
   Legend
 );
+let HEADER = {headers:{Rtoken:''}}
+try {
+    let data = JSON.parse(localStorage.getItem('user_data')??"{}")
+    HEADER = {headers:{
+        Rtoken:btoa(data.level_user)
+    }}
+} catch (error) {
+    // console.log(error)
+}
 const StackedBarChart = ({datachart}) => {
   const data = {
     labels: ["SPMS", "ISR", "TRANSPORT","QE", "COMCASE","CERAGON","LATE RESPON","WARRANTY","ISSUE DWS","ISSUE TSEL","WAITING CRA/CRQ"],
@@ -99,7 +108,7 @@ const StackedBarChart = ({datachart}) => {
 const TOPOLDEST =({sitegroup,week})=>{
     const [TOP,setTOP] = useState([])
     async function TopOldest(){
-        let res = await fetch('https://qosmo.telkom.co.id/baseapi/vrca.php?cmd=top-oldest&sitegroup='+sitegroup)
+        let res = await fetch('https://qosmo.telkom.co.id/baseapi/vrca.php?cmd=top-oldest&sitegroup='+sitegroup,HEADER)
         let {data} = await res.json();
         setTOP(data)
     }
@@ -154,7 +163,7 @@ const RCACHART = React.memo(({sitegroup,week,weekstart,weekend})=>{
     const [DATA,setData] = useState({SPMS:0,ISR:0,TRANSPORT:0,QE:0,COMCASE:0,CERAGON:0,"LATE RESPONSE":0,"ISSUE DWS":0,"ISSUE TSEL":0,WARRANTY:0,"WAITING CRA/CRQ":0})
     const [DATACHART,setDataChart] = useState([])
     async function ChartData(){
-        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vrca.php?cmd=chart-rca-not-clear&weekstart=${weekstart}&weekend=${weekend}&week=${week.split('-')[0]}&year=${week.split('-')[1]}&sitegroup=${sitegroup}`)
+        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vrca.php?cmd=chart-rca-not-clear&weekstart=${weekstart}&weekend=${weekend}&week=${week.split('-')[0]}&year=${week.split('-')[1]}&sitegroup=${sitegroup}`,HEADER)
         let {data} = await res.json() || []
         try {
             
@@ -186,7 +195,7 @@ const RESUME = React.memo(({week,weekstart,weekend,sitegroup,setLOADING})=>{
     const [OPEN,setOPEN] = useState([])
     async function ChartData(){
         setLOADING(true)
-        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vrca.php?cmd=resume&weekstart=${weekstart}&weekend=${weekend}&week=${week.split('-')[0]}&year=${week.split('-')[1]}&sitegroup=${sitegroup}`)
+        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vrca.php?cmd=resume&weekstart=${weekstart}&weekend=${weekend}&week=${week.split('-')[0]}&year=${week.split('-')[1]}&sitegroup=${sitegroup}`,HEADER)
         try {    
             let {data} = await res.json() || []
             if(data){
@@ -259,7 +268,7 @@ const TABLERCANOTCLEAR = React.memo(({sitegroup,week,weekstart,weekend})=>{
     const [POPDATA,setPOPDATA] = useState({})
     const [DETAIL,setDETAIL]=useState(RESETDETAIL)
     async function TableData(){
-        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vrca.php?cmd=detail-rca-not-clear&weekstart=${weekstart}&weekend=${weekend}&week=${week.split('-')[0]}&year=${week.split('-')[1]}&sitegroup=${sitegroup}`)
+        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vrca.php?cmd=detail-rca-not-clear&weekstart=${weekstart}&weekend=${weekend}&week=${week.split('-')[0]}&year=${week.split('-')[1]}&sitegroup=${sitegroup}`,HEADER)
         try {
         let {data} = await res.json() || []
         let d = RESETTB
@@ -281,7 +290,7 @@ const TABLERCANOTCLEAR = React.memo(({sitegroup,week,weekstart,weekend})=>{
     }
 
     async function PopTable(region,rca){
-        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vrca.php?cmd=pop-not-clear&region=${region}&rca=${rca}&week=${week.split('-')[0]}&year=${week.split('-')[1]}&sitegroup=${sitegroup}`)
+        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vrca.php?cmd=pop-not-clear&region=${region}&rca=${rca}&week=${week.split('-')[0]}&year=${week.split('-')[1]}&sitegroup=${sitegroup}`,HEADER)
         let {data} = await res.json()
         setPOPDATA(data)
         
