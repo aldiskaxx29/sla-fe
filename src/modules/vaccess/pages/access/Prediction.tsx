@@ -106,18 +106,18 @@ const Prediction = ()=>{
     const [POP,setPOP] = useState(false)
     const [TITLEPOP,setTITLEPOP] = useState("")
     const RESETTB = {
-        SUMBAGUT : {total_site:0,t_pl5:13,t_pl15:42,t_lat:25,t_jit:25,r_pl5:0,r_pl15:0,r_lat:0,r_jit:0},
-        SUMBAGSEL : {total_site:0,t_pl5:13,t_pl15:57,t_lat:25,t_jit:25,r_pl5:0,r_pl15:0,r_lat:0,r_jit:0},
-        JABOTABEK_INNER : {total_site:0,t_pl5:0,t_pl15:3,t_lat:25,t_jit:25,r_pl5:0,r_pl15:0,r_lat:0,r_jit:0},
-        JAWA_BARAT : {total_site:0,t_pl5:0,t_pl15:2,t_lat:25,t_jit:25,r_pl5:0,r_pl15:0,r_lat:0,r_jit:0},
-        JAWA_TENGAH : {total_site:0,t_pl5:0,t_pl15:2,t_lat:25,t_jit:25,r_pl5:0,r_pl15:0,r_lat:0,r_jit:0},
+        SUMBAGUT : {total_site:0,t_pl5:11,t_pl15:38,t_lat:25,t_jit:25,r_pl5:0,r_pl15:0,r_lat:0,r_jit:0},
+        SUMBAGSEL : {total_site:0,t_pl5:11,t_pl15:53,t_lat:25,t_jit:25,r_pl5:0,r_pl15:0,r_lat:0,r_jit:0},
+        JABOTABEK_INNER : {total_site:0,t_pl5:0,t_pl15:2,t_lat:25,t_jit:25,r_pl5:0,r_pl15:0,r_lat:0,r_jit:0},
+        JAWA_BARAT : {total_site:0,t_pl5:0,t_pl15:1,t_lat:25,t_jit:25,r_pl5:0,r_pl15:0,r_lat:0,r_jit:0},
+        JAWA_TENGAH : {total_site:0,t_pl5:0,t_pl15:1,t_lat:25,t_jit:25,r_pl5:0,r_pl15:0,r_lat:0,r_jit:0},
         JAWA_TIMUR : {total_site:0,t_pl5:0,t_pl15:2,t_lat:25,t_jit:25,r_pl5:0,r_pl15:0,r_lat:0,r_jit:0},
-        BALINUSRA : {total_site:0,t_pl5:12,t_pl15:21,t_lat:25,t_jit:25,r_pl5:0,r_pl15:0,r_lat:0,r_jit:0},
-        KALIMANTAN : {total_site:0,t_pl5:13,t_pl15:57,t_lat:25,t_jit:25,r_pl5:0,r_pl15:0,r_lat:0,r_jit:0},
-        SULAWESI : {total_site:0,t_pl5:13,t_pl15:28,t_lat:25,t_jit:25,r_pl5:0,r_pl15:0,r_lat:0,r_jit:0},
-        SUMBAGTENG : {total_site:0,t_pl5:13,t_pl15:39,t_lat:25,t_jit:25,r_pl5:0,r_pl15:0,r_lat:0,r_jit:0},
-        PUMA : {total_site:0,t_pl5:12,t_pl15:22,t_lat:25,t_jit:25,r_pl5:0,r_pl15:0,r_lat:0,r_jit:0},
-        JABOTABEK_OUTER : {total_site:0,t_pl5:0,t_pl15:2,t_lat:25,t_jit:25,r_pl5:0,r_pl15:0,r_lat:0,r_jit:0},
+        BALINUSRA : {total_site:0,t_pl5:11,t_pl15:19,t_lat:25,t_jit:25,r_pl5:0,r_pl15:0,r_lat:0,r_jit:0},
+        KALIMANTAN : {total_site:0,t_pl5:11,t_pl15:52,t_lat:25,t_jit:25,r_pl5:0,r_pl15:0,r_lat:0,r_jit:0},
+        SULAWESI : {total_site:0,t_pl5:12,t_pl15:25,t_lat:25,t_jit:25,r_pl5:0,r_pl15:0,r_lat:0,r_jit:0},
+        SUMBAGTENG : {total_site:0,t_pl5:11,t_pl15:35,t_lat:25,t_jit:25,r_pl5:0,r_pl15:0,r_lat:0,r_jit:0},
+        PUMA : {total_site:0,t_pl5:11,t_pl15:20,t_lat:25,t_jit:25,r_pl5:0,r_pl15:0,r_lat:0,r_jit:0},
+        JABOTABEK_OUTER : {total_site:0,t_pl5:0,t_pl15:1,t_lat:25,t_jit:25,r_pl5:0,r_pl15:0,r_lat:0,r_jit:0},
     }
     
     const RESETTBSITE = {
@@ -151,18 +151,18 @@ const Prediction = ()=>{
     })
 
     const [TB,setTB] = useState({
-        SUMBAGUT : {total_site:0,t_pl5:13,t_pl15:42,t_lat:25,t_jit:25,r_pl5:0,r_pl15:0,r_lat:0,r_jit:0},
-        SUMBAGSEL : {total_site:0,t_pl5:13,t_pl15:57,t_lat:25,t_jit:25,r_pl5:0,r_pl15:0,r_lat:0,r_jit:0},
-        JABOTABEK_INNER : {total_site:0,t_pl5:0,t_pl15:3,t_lat:25,t_jit:25,r_pl5:0,r_pl15:0,r_lat:0,r_jit:0},
-        JAWA_BARAT : {total_site:0,t_pl5:0,t_pl15:2,t_lat:25,t_jit:25,r_pl5:0,r_pl15:0,r_lat:0,r_jit:0},
-        JAWA_TENGAH : {total_site:0,t_pl5:0,t_pl15:2,t_lat:25,t_jit:25,r_pl5:0,r_pl15:0,r_lat:0,r_jit:0},
+        SUMBAGUT : {total_site:0,t_pl5:11,t_pl15:38,t_lat:25,t_jit:25,r_pl5:0,r_pl15:0,r_lat:0,r_jit:0},
+        SUMBAGSEL : {total_site:0,t_pl5:11,t_pl15:53,t_lat:25,t_jit:25,r_pl5:0,r_pl15:0,r_lat:0,r_jit:0},
+        JABOTABEK_INNER : {total_site:0,t_pl5:0,t_pl15:2,t_lat:25,t_jit:25,r_pl5:0,r_pl15:0,r_lat:0,r_jit:0},
+        JAWA_BARAT : {total_site:0,t_pl5:0,t_pl15:1,t_lat:25,t_jit:25,r_pl5:0,r_pl15:0,r_lat:0,r_jit:0},
+        JAWA_TENGAH : {total_site:0,t_pl5:0,t_pl15:1,t_lat:25,t_jit:25,r_pl5:0,r_pl15:0,r_lat:0,r_jit:0},
         JAWA_TIMUR : {total_site:0,t_pl5:0,t_pl15:2,t_lat:25,t_jit:25,r_pl5:0,r_pl15:0,r_lat:0,r_jit:0},
-        BALINUSRA : {total_site:0,t_pl5:12,t_pl15:21,t_lat:25,t_jit:25,r_pl5:0,r_pl15:0,r_lat:0,r_jit:0},
-        KALIMANTAN : {total_site:0,t_pl5:13,t_pl15:57,t_lat:25,t_jit:25,r_pl5:0,r_pl15:0,r_lat:0,r_jit:0},
-        SULAWESI : {total_site:0,t_pl5:13,t_pl15:28,t_lat:25,t_jit:25,r_pl5:0,r_pl15:0,r_lat:0,r_jit:0},
-        SUMBAGTENG : {total_site:0,t_pl5:13,t_pl15:39,t_lat:25,t_jit:25,r_pl5:0,r_pl15:0,r_lat:0,r_jit:0},
-        PUMA : {total_site:0,t_pl5:12,t_pl15:22,t_lat:25,t_jit:25,r_pl5:0,r_pl15:0,r_lat:0,r_jit:0},
-        JABOTABEK_OUTER : {total_site:0,t_pl5:0,t_pl15:2,t_lat:25,t_jit:25,r_pl5:0,r_pl15:0,r_lat:0,r_jit:0},
+        BALINUSRA : {total_site:0,t_pl5:11,t_pl15:19,t_lat:25,t_jit:25,r_pl5:0,r_pl15:0,r_lat:0,r_jit:0},
+        KALIMANTAN : {total_site:0,t_pl5:11,t_pl15:52,t_lat:25,t_jit:25,r_pl5:0,r_pl15:0,r_lat:0,r_jit:0},
+        SULAWESI : {total_site:0,t_pl5:12,t_pl15:25,t_lat:25,t_jit:25,r_pl5:0,r_pl15:0,r_lat:0,r_jit:0},
+        SUMBAGTENG : {total_site:0,t_pl5:11,t_pl15:35,t_lat:25,t_jit:25,r_pl5:0,r_pl15:0,r_lat:0,r_jit:0},
+        PUMA : {total_site:0,t_pl5:11,t_pl15:20,t_lat:25,t_jit:25,r_pl5:0,r_pl15:0,r_lat:0,r_jit:0},
+        JABOTABEK_OUTER : {total_site:0,t_pl5:0,t_pl15:1,t_lat:25,t_jit:25,r_pl5:0,r_pl15:0,r_lat:0,r_jit:0},
     })
 
     // async function RAW(start,end){

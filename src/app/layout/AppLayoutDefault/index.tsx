@@ -66,6 +66,7 @@ const AppLayoutDefault = () => {
     // { label: "Reconsiliation", value: "input-site" },
     { label: "Report Reconsilation", value: "report-site" },
     { label: "Resume RCA", value: "resume-rca" },
+    { label: "Week-to-Date Achievement", value: "access-prediction" },
     // { label: "Report Support Needed", value: "report-support-needed" },
   ];
 
@@ -268,7 +269,7 @@ const AppLayoutDefault = () => {
                 >
                   SLA
                   {open2 && (
-                    <div className="absolute left-0 top-full -mt-2 w-[200px] bg-[#576278] border rounded shadow opacity-100">
+                    <div className="z-100 absolute left-0 top-full -mt-2 w-[300px] bg-[#576278] border rounded shadow opacity-100">
                       {slaOpt.map((option) => (
                         <p
                           key={option.value}

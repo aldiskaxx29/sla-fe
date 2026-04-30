@@ -932,8 +932,8 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                   onHeaderCell={child.onHeaderCell}
                   onCell={(record) => {
                     const isLastTwo =
-                      record.parameter.toLowerCase().includes("service") ||
-                      record.parameter.toLowerCase().includes("weighted");
+                      record.parameter?.toLowerCase()?.includes("service") ||
+                      record.parameter?.toLowerCase()?.includes("weighted");
                     const isRealColumn = child?.dataIndex
                       ?.toString()
                       .toLowerCase()
@@ -985,8 +985,8 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                   fixed={child.fixed}
                   render={(text, record) => {
                     const isLastTwo =
-                      record.parameter.toLowerCase().includes("service") ||
-                      record.parameter.toLowerCase().includes("weighted");
+                      record.parameter?.toLowerCase()?.includes("service") ||
+                      record.parameter?.toLowerCase()?.includes("weighted");
                     // const isBelowTarget = Number(text) <= Number(record.target);
                     const value = Number(text);
                     const target = Number(record.target);
@@ -1180,8 +1180,8 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
               onHeaderCell={col.onHeaderCell}
               onCell={(record) => {
                 const isLastTwo =
-                  record.parameter.toLowerCase().includes("service") ||
-                  record.parameter.toLowerCase().includes("weighted");
+                  record.parameter?.toLowerCase()?.includes("service") ||
+                  record.parameter?.toLowerCase()?.includes("weighted");
                 if (isLastTwo)
                   return {
                     className: "!bg-blue-pacific !p-3",
@@ -1249,7 +1249,7 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                   );
                 }
                 if (
-                  record.parameter.toLowerCase().includes("service") &&
+                  record.parameter?.toLowerCase()?.includes("service") &&
                   text
                 ) {
                   return (
@@ -1265,7 +1265,7 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                   );
                 }
                 if (
-                  record.parameter.toLowerCase().includes("weighted") &&
+                  record.parameter?.toLowerCase()?.includes("weighted") &&
                   text
                 ) {
                   return (
