@@ -1,5 +1,12 @@
 import { emptySplitApi } from "@/app/redux/app.rtx";
-import { IAuthLoginRequest, IAuthLoginResponse } from "../types/auth.interface";
+import {
+  IAuthLoginRequest,
+  IAuthLoginResponse,
+  IAuthVerifyOtpEmailRequest,
+  IAuthLogin2faRequest,
+  IAuthResendOtpEmailRequest,
+  IAuthResetTokenRequest,
+} from "../types/auth.interface";
 
 const setAuthData = (response: IAuthLoginResponse) => {
   if (response.status && response.token) {
@@ -38,6 +45,7 @@ export const getCurrentUser = () => {
 
 export const authApi = emptySplitApi.injectEndpoints({
   endpoints: (builder) => ({
+    /** Step 1: Login dengan NIK & Password */
     login: builder.mutation<IAuthLoginResponse, IAuthLoginRequest>({
       query: ({ email, password }) => {
         const formData = new FormData();
@@ -49,9 +57,6 @@ export const authApi = emptySplitApi.injectEndpoints({
           body: formData,
         };
       },
-      transformResponse: (response: IAuthLoginResponse) => {
-        return response;
-      },
       transformErrorResponse: (
         response:
           | import("@reduxjs/toolkit/query").FetchBaseQueryError
@@ -60,21 +65,56 @@ export const authApi = emptySplitApi.injectEndpoints({
         status: "status" in response ? response.status : undefined,
         message:
           (response as { data?: { message?: string } })?.data?.message ||
-          "Login failed",
+          "Login gagal. Periksa kembali NIK dan password Anda.",
       }),
     }),
 
-    login_2fa: builder.mutation<IAuthLoginResponse, IAuthLoginRequest>({
-      query: (body) => {
-        return {
-          method: "POST",
-          url: "login/2fa",
-          body,
-        };
-      },
-      transformResponse: (response: IAuthLoginResponse) => {
-        console.log(response, "RESP 2FA");
+    /** Step 2a: Verifikasi OTP yang dikirim ke email (first login / setup 2FA) */
+    verifyOtpEmail: builder.mutation<IAuthLoginResponse, IAuthVerifyOtpEmailRequest>({
+      query: (body) => ({
+        method: "POST",
+        url: "login/verify-otp-email",
+        body,
+      }),
+      transformErrorResponse: (
+        response:
+          | import("@reduxjs/toolkit/query").FetchBaseQueryError
+          | { data?: { message?: string } }
+      ) => ({
+        status: "status" in response ? response.status : undefined,
+        message:
+          (response as { data?: { message?: string } })?.data?.message ||
+          "Kode OTP Email tidak valid.",
+      }),
+    }),
 
+    /** Resend OTP Email */
+    resendOtpEmail: builder.mutation<IAuthLoginResponse, IAuthResendOtpEmailRequest>({
+      query: (body) => ({
+        method: "POST",
+        url: "login/resend-otp-email",
+        body,
+      }),
+      transformErrorResponse: (
+        response:
+          | import("@reduxjs/toolkit/query").FetchBaseQueryError
+          | { data?: { message?: string } }
+      ) => ({
+        status: "status" in response ? response.status : undefined,
+        message:
+          (response as { data?: { message?: string } })?.data?.message ||
+          "Gagal mengirim ulang OTP.",
+      }),
+    }),
+
+    /** Step 2b: Verifikasi kode Authenticator (login/2fa) */
+    login_2fa: builder.mutation<IAuthLoginResponse, IAuthLogin2faRequest>({
+      query: (body) => ({
+        method: "POST",
+        url: "login/2fa",
+        body,
+      }),
+      transformResponse: (response: IAuthLoginResponse) => {
         setAuthData(response);
         return response;
       },
@@ -86,24 +126,17 @@ export const authApi = emptySplitApi.injectEndpoints({
         status: "status" in response ? response.status : undefined,
         message:
           (response as { data?: { message?: string } })?.data?.message ||
-          "Login failed",
+          "Kode Authenticator tidak valid.",
       }),
     }),
 
-    resetToken: builder.mutation<IAuthLoginResponse, IAuthLoginRequest>({
-      query: (body) => {
-        return {
-          method: "POST",
-          url: "reset2fa",
-          body,
-        };
-      },
-      transformResponse: (response: IAuthLoginResponse) => {
-        console.log(response, "RESP Reset Token");
-
-        setAuthData(response);
-        return response;
-      },
+    /** Reset Token 2FA (ketika user tidak punya akses authenticator) */
+    resetToken: builder.mutation<IAuthLoginResponse, IAuthResetTokenRequest>({
+      query: (body) => ({
+        method: "POST",
+        url: "reset2fa",
+        body,
+      }),
       transformErrorResponse: (
         response:
           | import("@reduxjs/toolkit/query").FetchBaseQueryError
@@ -112,7 +145,7 @@ export const authApi = emptySplitApi.injectEndpoints({
         status: "status" in response ? response.status : undefined,
         message:
           (response as { data?: { message?: string } })?.data?.message ||
-          "Login failed",
+          "Gagal mereset token 2FA.",
       }),
     }),
 
@@ -142,5 +175,11 @@ export const authApi = emptySplitApi.injectEndpoints({
   overrideExisting: false,
 });
 
-export const { useLoginMutation, useLogoutMutation, useLogin_2faMutation, useResetTokenMutation } =
-  authApi;
+export const {
+  useLoginMutation,
+  useLogoutMutation,
+  useLogin_2faMutation,
+  useResetTokenMutation,
+  useVerifyOtpEmailMutation,
+  useResendOtpEmailMutation,
+} = authApi;

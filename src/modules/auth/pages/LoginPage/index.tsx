@@ -15,8 +15,11 @@ import ModalTwoFact from "../ModalTwoFact";
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const [qrData, setQrData] = useState<string | null>(null);
   const [isOpenTwoFact, setIsOpenTwoFact] = useState(false);
+  const [loginData, setLoginData] = useState<{
+    user_id: number;
+    otp_expires_in?: number;
+  } | null>(null);
 
   const [login, { isLoading }] = useLoginMutation();
 
@@ -24,31 +27,34 @@ const LoginPage = () => {
     e.preventDefault();
     const form = e.currentTarget;
     const formData = new FormData(form);
-  
+
     const values: IAuthLoginRequest = {
       email: (formData.get("email") as string)?.trim(),
       password: (formData.get("password") as string) ?? "",
     };
-  
+
     if (!values.email || !values.password) {
       toast.dismiss();
-      toast.warning("Please input your email and password!", {
+      toast.warning("Silahkan masukan NIK dan Password Anda!", {
         position: "top-right",
       });
       return;
     }
-  
+
     try {
       const resp = await login(values).unwrap();
-      // Validasi login berhasil
-      if (resp?.status === true) {
+
+      if (resp?.status === true && resp?.requires_otp_email) {
         toast.dismiss();
-        toast.success("Login berhasil. Silakan verifikasi 2FA.", {
+        toast.info(resp.message || "Silahkan periksa email Anda untuk menerima kode OTP.", {
           position: "top-right",
+          autoClose: 5000,
         });
-  
-        // Simpan data QR jika ada
-        setQrData(resp.data ?? resp);
+
+        setLoginData({
+          user_id: resp.user_id!,
+          otp_expires_in: resp.otp_expires_in,
+        });
         setIsOpenTwoFact(true);
       } else {
         throw new Error(resp?.message || "Email atau password salah.");
@@ -57,11 +63,11 @@ const LoginPage = () => {
       const msg =
         err?.data?.message ||
         err?.message ||
-        "Login failed. Please try again.";
-  
+        "Login gagal. Periksa kembali NIK dan password Anda.";
+
       toast.dismiss();
       toast.error(msg, { position: "top-right" });
-      setIsOpenTwoFact(false); // Pastikan modal tidak terbuka
+      setIsOpenTwoFact(false);
     }
   };
 
@@ -147,13 +153,14 @@ const LoginPage = () => {
             disabled={isLoading}
             className="w-full h-12 border-0 rounded-lg font-medium text-base shadow-md mt-4 text-white bg-gradient-to-br from-[#3E99E7] to-[#4666E3] hover:from-[#4666E3] hover:to-[#3E99E7] transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isLoading ? "Logging in..." : "Masuk"}
+            {isLoading ? "Memproses..." : "Masuk"}
           </button>
         </div>
       </form>
+
       <ModalTwoFact
         open={isOpenTwoFact}
-        parameter={qrData}
+        loginData={loginData}
         onCancel={() => setIsOpenTwoFact(false)}
       />
     </>
