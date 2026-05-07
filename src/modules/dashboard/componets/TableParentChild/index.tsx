@@ -142,7 +142,8 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
 
   // Function to generate realisasi columns based on month
   const generateRealisasiColumns = (monthNum: number, kpi?: string) => {
-    const weekCount = monthNum === 2 ? 4 : 5; // Month 2 has 4 weeks, month 3 has 5 weeks
+    console.log('monthNum', monthNum)
+    const weekCount = [3, 6, 8, 11].includes(monthNum) ? 5 : 4;
     const isPacketloss =
       kpi?.toLowerCase().includes("packetloss") &&
       kpi?.toLowerCase().includes("ran to core");
@@ -202,8 +203,14 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
     }
 
     // Add month column
+    const monthNames = [
+      "", // biar index mulai dari 1
+      "Jan", "Feb", "Mar", "Apr", "Mei", "Jun",
+      "Jul", "Agu", "Sep", "Okt", "Nov", "Des"
+    ];
+    
     columnsArray.push({
-      title: monthNum === 2 ? "Feb" : "Mar",
+      title: monthNames[monthNum],
       dataIndex: `ach_fm_${monthNum}`,
       key: `ach_fm_${monthNum}`,
       render: renderAchievement,
@@ -895,6 +902,12 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
     ];
   }, [weeklyDetail?.kpi]);
 
+  const monthNameing = [
+    "", // biar index mulai dari 1
+    "Jan", "Feb", "Mar", "Apr", "Mei", "Jun",
+    "Jul", "Agu", "Sep", "Okt", "Nov", "Des"
+  ];
+
   return (
     <div>
       {(loadingMainData || loading || realisasiModalLoading) && (
@@ -1326,7 +1339,7 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
 
       {/* Modal untuk Realisasi Monthly */}
       <Modal
-        title={`Achievement Prediction - ${realisasiDetail?.kpi?.toUpperCase()}`}
+        title={`Achievement - ${realisasiDetail?.kpi?.toUpperCase()}`}
         open={realisasiModalVisible}
         onCancel={() => setRealisasiModalVisible(false)}
         width={1200}
