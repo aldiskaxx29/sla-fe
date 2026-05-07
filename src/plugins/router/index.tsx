@@ -54,7 +54,7 @@ const useRouter = () => {
     },
     {
       path: "",
-      element: <AuthRouteGuard  requireAuth={true}/>,
+      element: <AuthRouteGuard  requireAuth={false}/>,
       children: [
         {
           path: "",

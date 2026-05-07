@@ -35,18 +35,22 @@ function getStartEnd(date = new Date(),max_date=new Date()) {
   const end = new Date(start);
   end.setDate(start.getDate() + 6);
     let currentText = ""
+    let currentDate = ""
     let now = new Date()
     if(end<now){
         currentText = formatID(end)
+        currentDate = formatYMD(end)
     }else{
         currentText = formatID(date)
+        currentDate = formatYMD(date)
     }
   return {
     start: formatYMD(start),
     end: formatYMD(end),
     startText: formatID(start),
     endText: formatID(end),
-    currentText: currentText
+    currentText: currentText,
+    currentDate:currentDate
   };
 }
 
@@ -85,6 +89,7 @@ function getWeek(date = new Date()) {
     (date - firstFriday) / (1000 * 60 * 60 * 24)
   );
 
+//   console.log(diffDays,date)
   return Math.floor(diffDays / 7) + 1;
 }
 
@@ -376,7 +381,7 @@ const Prediction = ()=>{
             {POPDOWNLOAD && <PopupDownload RAWDATA={RAWDATA} RAWDATALAST={RAWDATALAST} LAST={exportRAWLAST} NOW={exportRAW} close={setPOPDOWNLOAD}></PopupDownload>}
             <div className="grid grid-cols-7 mb-1">
                 <div className="col-span-6 flex justify-between items-center">
-                    <div className="text-md font-bold text-red-700 flex gap-2">PREDIKSI <div>W{getWeek(new Date(getStartEnd(new  Date(MAX_DATE)).currentText))} ({getStartEnd(new Date(MAX_DATE)).startText} - {getStartEnd(new Date(MAX_DATE),new Date(MAX_DATE)).currentText})</div></div>
+                    <div className="text-md font-bold text-red-700 flex gap-2">PREDIKSI <div>W{getWeek(new Date(getStartEnd(new  Date(MAX_DATE)).currentDate))} ({getStartEnd(new Date(MAX_DATE)).startText} - {getStartEnd(new Date(MAX_DATE),new Date(MAX_DATE)).currentText})</div></div>
                     <div onClick={()=>setPOPDOWNLOAD(true)} className="cursor-pointer flex items-center gap-1" style={{fontSize:'0.8em',color:RAWDATA.length ? 'black' :'gray'}}>
                         Export As Excel
                         <FileExcelFilled style={{color:'green',fontSize:'1.7em'}}></FileExcelFilled>
