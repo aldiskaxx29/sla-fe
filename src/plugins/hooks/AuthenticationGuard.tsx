@@ -23,10 +23,10 @@ export const AuthRouteGuard: React.FC<GuardProps> = ({
       />
     );
   }
-  if (!requireAuth && authed) {
-    return (
-      <Navigate to={redirectTo || "/executive"} state={{ from: location }} replace />
-    );
-  }
+  // if (!requireAuth && authed) {
+  //   return (
+  //     <Navigate to={redirectTo || "/executive"} state={{ from: location }} replace />
+  //   );
+  // }
   return <Outlet {...props} />;
 };
