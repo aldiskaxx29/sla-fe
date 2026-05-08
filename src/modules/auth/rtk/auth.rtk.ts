@@ -6,6 +6,7 @@ import {
   IAuthLogin2faRequest,
   IAuthResendOtpEmailRequest,
   IAuthResetTokenRequest,
+  IAuthResetTokenResponse,
 } from "../types/auth.interface";
 
 const setAuthData = (response: IAuthLoginResponse) => {
@@ -131,7 +132,7 @@ export const authApi = emptySplitApi.injectEndpoints({
     }),
 
     /** Reset Token 2FA (ketika user tidak punya akses authenticator) */
-    resetToken: builder.mutation<IAuthLoginResponse, IAuthResetTokenRequest>({
+    resetToken: builder.mutation<IAuthResetTokenResponse, IAuthResetTokenRequest>({
       query: (body) => ({
         method: "POST",
         url: "reset2fa",

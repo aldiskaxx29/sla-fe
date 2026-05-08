@@ -2,6 +2,7 @@ import { Button, Form, Image, Input, Modal } from "antd";
 import {
   useLogin_2faMutation,
   useResendOtpEmailMutation,
+  useResetTokenMutation,
   useVerifyOtpEmailMutation,
 } from "../../rtk/auth.rtk";
 import { useCallback, useEffect, useState } from "react";
@@ -10,8 +11,9 @@ import { authSetAuthenticatedUser } from "../../redux/auth.slice";
 import { useDispatch } from "react-redux";
 
 interface LoginData {
-  user_id: number;
+  user_id: string | number;
   otp_expires_in?: number;
+  requires_2fa?: boolean; // true = returning user, mulai dari step AUTHENTICATOR
 }
 
 interface ModalTwoFactProps {
@@ -36,6 +38,7 @@ const ModalTwoFact = ({ open, loginData, onCancel }: ModalTwoFactProps) => {
   const [login_2fa, { isLoading: isLoading2fa }] = useLogin_2faMutation();
   const [verifyOtpEmail, { isLoading: isLoadingVerify }] = useVerifyOtpEmailMutation();
   const [resendOtpEmail, { isLoading: isLoadingResend }] = useResendOtpEmailMutation();
+  const [resetToken, { isLoading: isLoadingReset }] = useResetTokenMutation();
 
   const [step, setStep] = useState<StepType>("EMAIL_OTP");
   const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
@@ -44,12 +47,19 @@ const ModalTwoFact = ({ open, loginData, onCancel }: ModalTwoFactProps) => {
   // Reset state saat modal dibuka
   useEffect(() => {
     if (open) {
-      setStep("EMAIL_OTP");
+      if (loginData?.requires_2fa) {
+        // Returning user: sudah punya 2FA, langsung ke step AUTHENTICATOR
+        setStep("AUTHENTICATOR");
+        setEncryptedUserId(String(loginData.user_id));
+      } else {
+        // First login: mulai dari verifikasi OTP email
+        setStep("EMAIL_OTP");
+        setEncryptedUserId(null);
+      }
       setQrCodeUrl(null);
-      setEncryptedUserId(null);
       form.resetFields();
     }
-  }, [open, form]);
+  }, [open, loginData, form]);
 
   const handleSubmit = useCallback(async () => {
     const code = form.getFieldValue("code");
@@ -63,7 +73,8 @@ const ModalTwoFact = ({ open, loginData, onCancel }: ModalTwoFactProps) => {
     try {
       if (step === "EMAIL_OTP") {
         // Step 1: Verifikasi OTP email → POST /login/verify-otp-email
-        const resp = await verifyOtpEmail({ user_id: userId!, code }).unwrap();
+        // Body: { user_id, otp }
+        const resp = await verifyOtpEmail({ user_id: userId!, otp: code }).unwrap();
 
         if (resp?.status && resp?.requires_2fa_setup) {
           // First login: perlu scan QR untuk setup authenticator
@@ -108,13 +119,17 @@ const ModalTwoFact = ({ open, loginData, onCancel }: ModalTwoFactProps) => {
           window.location.reload();
         }
       } else if (step === "EMAIL_RESET") {
-        // Reset 2FA: verifikasi OTP email dulu
-        const resp = await verifyOtpEmail({ user_id: userId!, code }).unwrap();
+        // Verify OTP yang dikirim ke email setelah reset → POST /login/verify-otp-email
+        const verifyResp = await verifyOtpEmail({
+          user_id: encryptedUserId || userId!,
+          otp: code,
+        }).unwrap();
 
-        if (resp?.status && resp?.requires_2fa_setup) {
-          toast.success("OTP valid. Silakan scan QR Code baru Anda.");
-          setQrCodeUrl(resp.qr_code_url || null);
-          setEncryptedUserId((resp as any).user_id || null);
+        if (verifyResp?.status) {
+          toast.success("OTP valid. Silakan scan QR Code baru untuk login.");
+          setQrCodeUrl(verifyResp.qr_code_url || null);
+          const newUserId = String((verifyResp as any).user_id || encryptedUserId || userId);
+          setEncryptedUserId(newUserId);
           setStep("SCAN_QR");
           form.resetFields(["code"]);
         }
@@ -141,9 +156,27 @@ const ModalTwoFact = ({ open, loginData, onCancel }: ModalTwoFactProps) => {
     }
   };
 
-  const handleResetAuthenticator = () => {
-    setStep("EMAIL_RESET");
-    form.resetFields(["code"]);
+  // Klik "Reset Token Authenticator":
+  // Hit /reset2fa { user_id } → BE reset token sekaligus kirim OTP ke email
+  // Response berisi user_id baru yg harus dipakai untuk verify-otp-email
+  const handleResetAuthenticator = async () => {
+    const userId = encryptedUserId || loginData?.user_id;
+    if (!userId) return;
+    try {
+      const resp = await resetToken({ user_id: userId }).unwrap();
+
+      // Gunakan user_id dari response reset2fa untuk verify-otp-email berikutnya
+      if (resp?.user_id) {
+        setEncryptedUserId(String(resp.user_id));
+      }
+
+      toast.success(resp?.message || "Token direset. OTP telah dikirim ke email Anda.");
+      setStep("EMAIL_RESET");
+      form.resetFields(["code"]);
+    } catch (error: any) {
+      const msg = error?.data?.message || error?.message || "Gagal mereset token. Coba lagi.";
+      toast.error(msg);
+    }
   };
 
   const getTitle = () => {
@@ -172,7 +205,7 @@ const ModalTwoFact = ({ open, loginData, onCancel }: ModalTwoFactProps) => {
     }
   };
 
-  const isLoading = isLoading2fa || isLoadingVerify;
+  const isLoading = isLoading2fa || isLoadingVerify || isLoadingReset;
   const isEmailStep = step === "EMAIL_OTP" || step === "EMAIL_RESET";
 
   return (

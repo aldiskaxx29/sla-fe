@@ -17,8 +17,9 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isOpenTwoFact, setIsOpenTwoFact] = useState(false);
   const [loginData, setLoginData] = useState<{
-    user_id: number;
+    user_id: string | number;
     otp_expires_in?: number;
+    requires_2fa?: boolean;
   } | null>(null);
 
   const [login, { isLoading }] = useLoginMutation();
@@ -45,15 +46,27 @@ const LoginPage = () => {
       const resp = await login(values).unwrap();
 
       if (resp?.status === true && resp?.requires_otp_email) {
+        // First login: perlu verifikasi OTP email dulu
         toast.dismiss();
         toast.info(resp.message || "Silahkan periksa email Anda untuk menerima kode OTP.", {
           position: "top-right",
           autoClose: 5000,
         });
-
         setLoginData({
           user_id: resp.user_id!,
           otp_expires_in: resp.otp_expires_in,
+        });
+        setIsOpenTwoFact(true);
+      } else if (resp?.status === true && resp?.requires_2fa) {
+        // Returning user: sudah setup 2FA, langsung ke step AUTHENTICATOR
+        toast.dismiss();
+        toast.info("Masukkan kode dari aplikasi Authenticator Anda.", {
+          position: "top-right",
+          autoClose: 4000,
+        });
+        setLoginData({
+          user_id: resp.user_id!,
+          requires_2fa: true,
         });
         setIsOpenTwoFact(true);
       } else {

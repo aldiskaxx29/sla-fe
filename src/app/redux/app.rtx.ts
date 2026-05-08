@@ -81,7 +81,10 @@ const baseQueryWithReauth: BaseQueryFn<
       return {
         data: {
           status: true,
-          message: "Reset 2FA berhasil (MOCK)",
+          requires_otp_email: true,
+          message: "Silahkan periksa email Anda untuk menerima kode OTP reset 2FA. (MOCK)",
+          user_id: 2158,
+          otp_expires_in: 600,
         }
       };
     }
