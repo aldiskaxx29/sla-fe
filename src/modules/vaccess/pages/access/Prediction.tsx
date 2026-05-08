@@ -303,6 +303,8 @@ const Prediction = ()=>{
 
     function PopTable(region,mode){
         setPOPMODE(mode)
+        let dmax = PDETAIL.map(a=>Number(a.lat));
+        let MAX = Math.max(...dmax);
         if(region=='nationwide'){
             setPOPDATA(PDETAIL.filter(a=>a[mode]>=4).map(a=>{
             let c=a
@@ -313,7 +315,8 @@ const Prediction = ()=>{
             }
             return c}))
         }else{
-            setPOPDATA(PDETAIL.filter(a=>a.region==region && a[mode]>=4).map(a=>{
+            
+            setPOPDATA(PDETAIL.filter(a=>a.region==region && a[mode]>=MAX).map(a=>{
             let c=a
             c.pop_value = a['av_'+(mode=='lat' ||mode=='jit' ? mode :'pl')]
 
@@ -368,8 +371,6 @@ const Prediction = ()=>{
         if(MAX_DATE){
             let {start,end}= getStartEnd(new Date(MAX_DATE))
             SitePL18(start,end)
-            // RAW(start,end)
-            // RAWLAST(start)
             PredictionWeekDetail(start,end)
         }
     },[MAX_DATE])
