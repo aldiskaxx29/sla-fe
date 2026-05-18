@@ -306,7 +306,8 @@ const Prediction = ()=>{
         let dmax = PDETAIL.map(a=>Number(a.lat));
         let MAX = Math.max(...dmax);
         if(region=='nationwide'){
-            setPOPDATA(PDETAIL.filter(a=>a[mode]>=4).map(a=>{
+            // console.log(PDETAIL.filter(a=>a[mode]>=MAX && [...Object.keys(TBSITE).map(a=>a.replace("_"," "))].includes(a.region)))
+            setPOPDATA(PDETAIL.filter(a=>a[mode]>=MAX && [...Object.keys(TBSITE).map(a=>a.replace("_"," "))].includes(a.region)).map(a=>{
             let c=a
             c.pop_value = a['av_'+(mode=='lat' ||mode=='jit' ? mode :'pl')]
 
@@ -315,7 +316,6 @@ const Prediction = ()=>{
             }
             return c}))
         }else{
-            
             setPOPDATA(PDETAIL.filter(a=>a.region==region && a[mode]>=MAX).map(a=>{
             let c=a
             c.pop_value = a['av_'+(mode=='lat' ||mode=='jit' ? mode :'pl')]

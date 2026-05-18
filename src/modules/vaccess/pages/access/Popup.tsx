@@ -39,7 +39,7 @@ const Popup = ({title,close,data,mode}) =>{
                 </div>
                 </div>
                 <div className="h-full py-2">
-                <div className="overflow-y-auto scrollbar-thin mb-2" style={{minHeight:'fit-content',maxHeight:'60vh'}}>
+                <div className="overflow-y-auto scrollbar-thin mb-2" style={{minHeight:'fit-content',maxHeight:'450px'}}>
                     <table className="w-250 border" id="excel">
                         <thead>
                             <tr>
