@@ -1,6 +1,7 @@
 import { useCreateUserMutation } from "@/modules/user/rtk/user.rtk";
 import { Button, Form, Image, Input } from "antd";
 import { useEffect } from "react";
+import { toast } from "react-toastify";
 
 const ProfilePage = () => {
   const [form] = Form.useForm();
@@ -17,7 +18,8 @@ const ProfilePage = () => {
       // ✅ Merge old data so id_telegram (or others) aren’t lost
       const updatedData = { ...oldData, id, ...values };
       localStorage.setItem("user_data", JSON.stringify(updatedData));
-
+      toast.dismiss();
+      toast.success("Data berhasil di edit", { position: "top-right" });
       // window.location.reload();
     } catch (error) {
       console.log("Validate Failed:", error);
@@ -52,9 +54,9 @@ const ProfilePage = () => {
           <Form.Item name="email" label="Email">
             <Input placeholder="Masukkan Email" className="h-12" />
           </Form.Item>
-          <Form.Item name="level_user" label="Level User">
+          {/* <Form.Item name="level_user" label="Level User">
             <Input placeholder="Masukkan Level User" className="h-12" />
-          </Form.Item>
+          </Form.Item> */}
           <Form.Item name="treg" label="Region">
             <Input placeholder="Masukkan Region" className="h-12" />
           </Form.Item>
