@@ -39,6 +39,7 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
   const [dataSource, setDataSource] = useState<Record<string, unknown>[]>([]);
   const [injectedData, setInjectedData] = useState<Record<string, unknown>>({});
   const [injectedChildData, setInjectedChildData] = useState<Record<string, unknown>>({});
+  const [injectedGrandChildData, setInjectedGrandChildData] = useState<Record<string, unknown>>({});
   const { getWitel, getCNP, getDetailsiteNotclear, getWeeklyMonth } = useDashboard();
   const { menuId } = useParams();
   const [expandedRowKey, setExpandedRowKeys] = useState<number[] | string[]>(
@@ -104,17 +105,35 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
               injectedChildData.identIndex === childData.identIndex &&
               Array.isArray(injectedChildData.children)
             ) {
-              childrenMapped = injectedChildData.children.map((grandChild) => ({
-                ...grandChild,
-                index,
-                indexParent,
-              }));
+              childrenMapped = injectedChildData.children.map((grandChild, gcIndex) => {
+                let grandChildrenMapped = [];
+                if (
+                  injectedGrandChildData.identIndex === grandChild.identIndex &&
+                  Array.isArray(injectedGrandChildData.children)
+                ) {
+                  grandChildrenMapped = injectedGrandChildData.children.map((ggChild) => ({
+                    ...ggChild,
+                    index: gcIndex,
+                    indexParent: index,
+                    mainIndexParent: indexParent,
+                  }));
+                }
+
+                return {
+                  ...grandChild,
+                  index: gcIndex,
+                  indexParent: index,
+                  mainIndexParent: indexParent,
+                  children: grandChildrenMapped,
+                };
+              });
             }
 
             return {
               ...childData,
               index,
               indexParent,
+              mainIndexParent: indexParent,
               children: childrenMapped,
             };
           }
@@ -138,7 +157,7 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
     });
 
     return mappingData2;
-  }, [dataSource, injectedData, injectedChildData]);
+  }, [dataSource, injectedData, injectedChildData, injectedGrandChildData]);
 
   // Function to generate realisasi columns based on month
   const generateRealisasiColumns = (monthNum: number, kpi?: string) => {
@@ -249,6 +268,7 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
     };
 
     // Static columns (always shown)
+    // TODO
     const baseColumns = [
       {
         title: "NO",
@@ -659,10 +679,23 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
               treg,
             },
           }).unwrap();
-        } else {
+        } else if (record.parent) {
           res = await getWitel({
             query: {
               parameter: detailParameter
+                ?.replace(/%20/g, " ")
+                .toLocaleLowerCase(),
+              region: record.parameter,
+              level: "witel",
+              filter,
+              type: menuId,
+              treg,
+            },
+          }).unwrap();
+        } else {
+          res = await getWitel({
+            query: {
+              parameter: (record.mini_parameter || detailParameter)
                 ?.replace(/%20/g, " ")
                 .toLocaleLowerCase(),
               region: record.parameter,
@@ -687,7 +720,7 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
           }));
           const injectData = { ...findData, children: newData };
           setInjectedData(injectData);
-        } else {
+        } else if (record.parent) {
           const findData = dataMapping[record.indexParent];
           const newData = res.data?.map((data) => ({
             ...data,
@@ -700,6 +733,21 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
             children: newData,
           };
           setInjectedChildData(injectData);
+        } else {
+          const findData = dataMapping[record.mainIndexParent];
+          const childData = findData?.children[record.indexParent];
+          const grandChildDataInject = childData?.children[record.index];
+          const newData = res.data?.map((data) => ({
+            ...data,
+            mini_parameter: findData.parameter,
+            identIndex: data.identIndex || identIndex++,
+            is_level_4: true,
+          }));
+          const injectData = {
+            ...grandChildDataInject,
+            children: newData,
+          };
+          setInjectedGrandChildData(injectData);
         }
         return true;
       } catch (error) {
@@ -716,7 +764,11 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
     async (record) => {
       if (record.parameter.toLowerCase().includes("core"))
         setDetailParameter(record.parameter);
-      if (record.parent || record.main_parent) {
+        
+      const isMttrq = record.mini_parameter?.toLowerCase().includes("mttrq") || record.parameter?.toLowerCase().includes("mttrq");
+      const isLevel3Mttrq = !record.main_parent && !record.parent && !record.is_level_4 && isMttrq;
+
+      if (record.parent || record.main_parent || isLevel3Mttrq) {
         const key = record.identIndex;
         setExpandedRowKeys((prevKeys) => {
           const isExpanded = prevKeys.includes(key);
@@ -1221,6 +1273,8 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
               render={(text, record) => {
                 const isBelowTarget = Number(text) < Number(record.target);
                 if (col.dataIndex == "parameter") {
+                  const isMttrq = record.mini_parameter?.toLowerCase().includes("mttrq") || record.parameter?.toLowerCase().includes("mttrq");
+                  const isLevel3Mttrq = !record.main_parent && !record.parent && !record.is_level_4 && isMttrq;
                   return (
                     <div
                       className="cursor-pointer text-primary-500"
@@ -1234,12 +1288,14 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                             ? "ml-0"
                             : record.parent
                             ? "ml-2 !text-[13px]"
+                            : record.is_level_4
+                            ? "ml-8 !text-xs"
                             : "ml-4 !text-xs"
                         }`}
                       >
                         <Image
                           className={`${
-                            record.main_parent || record.parent
+                            record.main_parent || record.parent || isLevel3Mttrq
                               ? "block"
                               : "hidden"
                           } `}
