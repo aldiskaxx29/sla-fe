@@ -57,7 +57,7 @@ const MSAmenu = ({
     {
       label: "Area 4",
       value: "treg4",
-    }
+    },
   ];
 
   const filterBy = [
@@ -72,6 +72,33 @@ const MSAmenu = ({
   ];
 
   const { getComply, dataComply } = useDashboard();
+
+  const getTrendChartData = (trendKey: string) => {
+    const trendItem = trendData?.[trendKey];
+    const candidates = [trendItem?.data, trendItem].filter(Boolean);
+
+    for (const candidate of candidates) {
+      if (!candidate || typeof candidate !== "object") continue;
+
+      const week = Array.isArray(candidate.week) ? candidate.week : [];
+      const data = Array.isArray(candidate.data) ? candidate.data : [];
+
+      if (week.length && data.length) {
+        return { week, data };
+      }
+
+      const nested = candidate.data;
+      if (nested && typeof nested === "object") {
+        const nestedWeek = Array.isArray(nested.week) ? nested.week : [];
+        const nestedData = Array.isArray(nested.data) ? nested.data : [];
+        if (nestedWeek.length && nestedData.length) {
+          return { week: nestedWeek, data: nestedData };
+        }
+      }
+    }
+
+    return null;
+  };
 
   const fetchComply = async () => {
     try {
@@ -141,13 +168,14 @@ const MSAmenu = ({
               </div>
             </div> */}
           </div>
-          <div className="flex gap-6">
+          <div className="flex flex-wrap items-end gap-3 lg:gap-4">
             <AppDropdown
               title="Filter Area"
               placeholder="All"
               options={filterOptions}
               onChange={(value) => handletreg(value)}
               value={treg}
+              className="min-w-[250px] lg:min-w-[260px]"
             />
             <AppDropdown
               title="Filter By"
@@ -155,6 +183,7 @@ const MSAmenu = ({
               options={filterBy}
               onChange={(value) => handlefilter(value)}
               value={filter}
+              className="min-w-[250px] lg:min-w-[260px]"
             />
             {/* <Button
               onClick={handleDownloadMsa}
@@ -167,7 +196,7 @@ const MSAmenu = ({
             </Button> */}
             <Button
               onClick={() => {}}
-              className="!h-11 !px-3 py-2.5 !border-0 !rounded-full !bg-[#EDFFFD]"
+              className="!h-11 !px-3 py-2.5 !border-0 !rounded-full !bg-[#EDFFFD] shrink-0"
             >
               <p className="text-brand-secondary font-medium">Export as XLS</p>
               <Image src={xlxsIcon} alt="icon" width={16} preview={false} />
@@ -222,98 +251,86 @@ const MSAmenu = ({
         </div>
         <div className=" flex gap-4 w-full overflow-auto">
           <div className="w-full">
-            {trendData["packetloss ran to core"] && (
+            {getTrendChartData("packetloss ran to core") && (
               <ChartMSA
                 description="Lower Better"
                 title="PACKETLOSS RAN-TO-CORE"
                 key="PACKETLOSS RAN-TO-CORE"
-                data={{
-                  week: trendData["packetloss ran to core"].data.week,
-                  data: trendData["packetloss ran to core"].data.data,
-                }}
+                data={getTrendChartData("packetloss ran to core")!}
               />
             )}
-            {trendData["packetloss core to internet"] && (
+            {getTrendChartData("packetloss core to internet") && (
               <ChartMSA
                 description="Higher Better"
                 title="PACKETLOSS CORE-TO-INTERNET"
                 key="PACKETLOSS CORE-TO-INTERNET"
-                data={{
-                  week: trendData["packetloss core to internet"].data.week,
-                  data: trendData["packetloss core to internet"].data.data,
-                }}
+                data={getTrendChartData("packetloss core to internet")!}
               />
             )}
           </div>
+          {!getTrendChartData("packetloss ran to core") &&
+            !getTrendChartData("packetloss core to internet") &&
+            !getTrendChartData("latency ran to core") &&
+            !getTrendChartData("latency core to internet") &&
+            !getTrendChartData("jitter ran to core") &&
+            !getTrendChartData("jitter core to internet") &&
+            !getTrendChartData("mttrq ran to core major") &&
+            !getTrendChartData("mttrq ran to core minor") && (
+              <div className="w-full py-12 text-center text-gray-500">
+                Trend achievement belum tersedia atau format respons API tidak sesuai.
+              </div>
+            )}
           <div className="w-full">
-            {trendData["latency ran to core"] && (
+            {getTrendChartData("latency ran to core") && (
               <ChartMSA
                 description="Higher Better"
                 title="LATENCY RAN-TO-CORE"
                 key="LATENCY RAN-TO-CORE"
-                data={{
-                  week: trendData["latency ran to core"].data.week,
-                  data: trendData["latency ran to core"].data.data,
-                }}
+                data={getTrendChartData("latency ran to core")!}
               />
             )}
-            {trendData["latency core to internet"] && (
+            {getTrendChartData("latency core to internet") && (
               <ChartMSA
                 description="Higher Better"
                 title="LATENCY CORE-TO-INTERNET"
                 key="LATENCY CORE-TO-INTERNET"
-                data={{
-                  week: trendData["latency core to internet"].data.week,
-                  data: trendData["latency core to internet"].data.data,
-                }}
+                data={getTrendChartData("latency core to internet")!}
               />
             )}
           </div>
           <div className="w-full">
-            {trendData["jitter ran to core"] && (
+            {getTrendChartData("jitter ran to core") && (
               <ChartMSA
                 description="Higher Better"
                 title="JITTER RAN-TO-CORE"
                 key="JITTER RAN-TO-CORE"
-                data={{
-                  week: trendData["jitter ran to core"].data.week,
-                  data: trendData["jitter ran to core"].data.data,
-                }}
+                data={getTrendChartData("jitter ran to core")!}
               />
             )}
-            {trendData["jitter core to internet"] && (
+            {getTrendChartData("jitter core to internet") && (
               <ChartMSA
                 description="Higher Better"
                 title="JITTER CORE-TO-INTERNET"
                 key="JITTER CORE-TO-INTERNET"
-                data={{
-                  week: trendData["jitter core to internet"].data.week,
-                  data: trendData["jitter core to internet"].data.data,
-                }}
+                data={getTrendChartData("jitter core to internet")!}
               />
             )}
           </div>
           <div className="w-full">
-            {trendData["mttrq ran to core major"] && (
+            {getTrendChartData("mttrq ran to core major") && (
               <ChartMSA
                 description="Higher Better"
                 title="MTTRQ MAJOR"
                 key="MTTRQ MAJOR"
-                data={{
-                  week: trendData["mttrq ran to core major"].data.week,
-                  data: trendData["mttrq ran to core major"].data.data,
-                }}
+                data={getTrendChartData("mttrq ran to core major")!}
               />
             )}
-            {trendData["mttrq ran to core minor"] && (
+            {getTrendChartData("mttrq ran to core minor") && (
               <ChartMSA
                 description="Higher Better"
                 title="MTTRQ MINOR"
                 key="MTTRQ MINOR"
-                data={{
-                  week: trendData["mttrq ran to core minor"].data.week,
-                  data: trendData["mttrq ran to core minor"].data.data,
-                }}
+                data={getTrendChartData("mttrq ran to core minor")!}
               />
             )}
           </div>

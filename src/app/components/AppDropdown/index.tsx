@@ -20,17 +20,15 @@ const AppDropdown = <
   ...selectProps
 }: AppDropdownProps<ValueType>) => {
   return (
-    <div className="flex items-center">
-      <div className="border border-[#DBDADE] rounded-l-full pl-4 py-2.5 text-xs w-[90px]">
+    <div className={`flex items-center ${className || ""}`}>
+      <div className="border border-[#DBDADE] rounded-l-full pl-4 py-2.5 text-xs w-[90px] shrink-0">
         {title}
       </div>
       <div
-        className={`border border-[#DBDADE] rounded-r-full pr-4 py-0.5 text-xs w-[100px] ${
-          className || ""
-        }`}
+        className="border border-[#DBDADE] rounded-r-full pr-4 py-0.5 text-xs flex-1 min-w-[140px]"
       >
         <Select<ValueType, DefaultOptionType>
-          style={{ width: 150, overflow: "hidden" }}
+          style={{ width: "100%", overflow: "hidden" }}
           variant="borderless"
           {...selectProps}
         />

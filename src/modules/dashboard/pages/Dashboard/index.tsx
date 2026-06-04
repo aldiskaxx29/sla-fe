@@ -41,7 +41,7 @@ function Dashboard() {
 
   //// State
   const [filter, setFilter] = useState("");
-  const [treg, setTreg] = useState("");
+  const [treg, setTreg] = useState("all");
   const [menu, setMenu] = useState({
     label: "Monday Monitoring",
     key: "Monday",
@@ -49,6 +49,8 @@ function Dashboard() {
   const [historyType, setHistoryType] = useState("pl 5% ran to core");
   const [type, setType] = useState("msa");
   const [trendData, setTrendData] = useState<Record<string, any>>({});
+
+  const effectiveTreg = treg === "all" ? "" : treg;
 
   const handlefilter = (e) => {
     setFilter(e);
@@ -82,11 +84,11 @@ function Dashboard() {
       query: {
         type: menuId,
         filter,
-        treg,
+        treg: effectiveTreg,
       },
     }).unwrap();
     setLoading(false);
-  }, [filter, getSC, menuId, treg]);
+  }, [effectiveTreg, filter, getSC, menuId]);
 
   /**
    * @description Fetch customer list
@@ -101,7 +103,7 @@ function Dashboard() {
           type: menuId,
           kpi: historyType,
           filter: filter,
-          treg: treg,
+          treg: effectiveTreg,
         },
       }).unwrap();
     } catch (err) {
@@ -110,7 +112,7 @@ function Dashboard() {
       setLoading(false);
     }
     setLoading(false);
-  }, [menuId, historyType, filter, treg]);
+  }, [effectiveTreg, menuId, historyType, filter]);
 
   /**
    * @description Fetch customer list
@@ -137,7 +139,7 @@ function Dashboard() {
             type: menuId,
             level,
             parameter: param,
-            treg,
+            treg: effectiveTreg,
           },
         }).unwrap(); // Ensure we're waiting for the correct response
 
@@ -154,7 +156,7 @@ function Dashboard() {
     } finally {
       setLoading(false);
     }
-  }, [menuId, level, treg]);
+  }, [effectiveTreg, menuId, level]);
 
   // Handle menu selection
   const handleHistoryCNOP = (data: string) => {

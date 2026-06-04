@@ -140,7 +140,7 @@ const DetailIssue: React.FC<DetailIssueProps> = ({
           );
         }
         if (isNationwide) {
-          return <span className="!font-bold">{text}</span>;
+          return <span className="!font-bold">{"text"}</span>;
         }
         return text ?? "-";
       },
