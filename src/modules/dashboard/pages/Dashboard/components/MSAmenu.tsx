@@ -272,8 +272,8 @@ const MSAmenu = ({
                 title="PACKETLOSS CORE-TO-INTERNET"
                 key="PACKETLOSS CORE-TO-INTERNET"
                 data={{
-                  week: trendData["packetloss core to internet"].data.week,
-                  data: trendData["packetloss core to internet"].data.data,
+                  week: trendData["packetloss core to internet"]?.data?.week,
+                  data: trendData["packetloss core to internet"]?.data?.data,
                 }}
               />
             )}
@@ -285,8 +285,8 @@ const MSAmenu = ({
                 title="LATENCY RAN-TO-CORE"
                 key="LATENCY RAN-TO-CORE"
                 data={{
-                  week: trendData["latency ran to core"].data.week,
-                  data: trendData["latency ran to core"].data.data,
+                  week: trendData["latency ran to core"]?.data?.week,
+                  data: trendData["latency ran to core"]?.data?.data,
                 }}
               />
             )}
@@ -296,8 +296,8 @@ const MSAmenu = ({
                 title="LATENCY CORE-TO-INTERNET"
                 key="LATENCY CORE-TO-INTERNET"
                 data={{
-                  week: trendData["latency core to internet"].data.week,
-                  data: trendData["latency core to internet"].data.data,
+                  week: trendData["latency core to internet"]?.data?.week,
+                  data: trendData["latency core to internet"]?.data?.data,
                 }}
               />
             )}
@@ -309,8 +309,8 @@ const MSAmenu = ({
                 title="JITTER RAN-TO-CORE"
                 key="JITTER RAN-TO-CORE"
                 data={{
-                  week: trendData["jitter ran to core"].data.week,
-                  data: trendData["jitter ran to core"].data.data,
+                  week: trendData["jitter ran to core"]?.data?.week,
+                  data: trendData["jitter ran to core"]?.data?.data,
                 }}
               />
             )}
@@ -320,8 +320,8 @@ const MSAmenu = ({
                 title="JITTER CORE-TO-INTERNET"
                 key="JITTER CORE-TO-INTERNET"
                 data={{
-                  week: trendData["jitter core to internet"].data.week,
-                  data: trendData["jitter core to internet"].data.data,
+                  week: trendData["jitter core to internet"]?.data?.week,
+                  data: trendData["jitter core to internet"]?.data?.data,
                 }}
               />
             )}
@@ -333,8 +333,8 @@ const MSAmenu = ({
                 title="MTTRQ MAJOR"
                 key="MTTRQ MAJOR"
                 data={{
-                  week: trendData["mttrq ran to core major"].data.week,
-                  data: trendData["mttrq ran to core major"].data.data,
+                  week: trendData["mttrq ran to core major"]?.data?.week,
+                  data: trendData["mttrq ran to core major"]?.data?.data,
                 }}
               />
             )}
@@ -344,8 +344,8 @@ const MSAmenu = ({
                 title="MTTRQ MINOR"
                 key="MTTRQ MINOR"
                 data={{
-                  week: trendData["mttrq ran to core minor"].data.week,
-                  data: trendData["mttrq ran to core minor"].data.data,
+                  week: trendData["mttrq ran to core minor"]?.data?.week,
+                  data: trendData["mttrq ran to core minor"]?.data?.data,
                 }}
               />
             )}
