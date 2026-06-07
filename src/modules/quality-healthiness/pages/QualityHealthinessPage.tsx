@@ -222,7 +222,7 @@ function CoreNetworkTable() {
             <tr key={i}>
               {row.label !== "" ? (
                 <td className="py-1">
-                  <div className="inline-block px-2 py-0.5 rounded-full bg-[#6c8fa5] text-white text-[9px] font-bold shadow-sm text-[10px]">
+                  <div className="inline-block px-2 py-0.5 rounded-full bg-[#6c8fa5] text-white  font-bold shadow-sm text-[10px]">
                     {row.label}
                   </div>
                 </td>
@@ -613,65 +613,66 @@ const QualityHealthinessMenu = () => {
                 region: geojsonRegion,
               }}
             />
-            
           </div>
 
           {/* RIGHT SIDE SUMMARY */}
           <div className="z-10 absolute mt-[270px] pl-2">
-          <div className="flex-1 text-wrap flex flex-col justify-center space-y-6">
-            {/* A. Category */}
-            <div className="">
-              <h2 className="font-bold text-sm">A. Category:</h2>
-              <ol className="list-decimal list-inside space-y-1 font-medium text-[9px]">
-                <li>
-                  <span className="font-bold">EXCELLENT:</span> Healthiness =
-                  95-100% Nation Wide ✅ | Region ✅
-                </li>
-                <li>
-                  <span className="font-bold">HEALTHY:</span> Healthiness =
-                  90-95% Nation Wide ✅ | Region ✅/❌
-                </li>
-                <li>
-                  <span className="font-bold">MAINTAIN:</span> Healthiness =
-                  80-90% Nation Wide ✅/❌ | Region ✅/❌
-                </li>
-                <li>
-                  <span className="font-bold">NOT HEALTHY:</span> Healthiness
-                  &lt; 80% Nation Wide ❌ | Region ❌
-                </li>
-              </ol>
-            </div>
+            <div className="flex-1 text-wrap flex flex-col justify-center space-y-6">
+              {/* A. Category */}
+              <div className="">
+                <h2 className="font-bold text-sm">A. Category:</h2>
+                <ol className="list-decimal list-inside space-y-1 font-medium text-[9px]">
+                  <li>
+                    <span className="font-bold">EXCELLENT:</span> Healthiness =
+                    95-100% Nation Wide ✅ | Region ✅
+                  </li>
+                  <li>
+                    <span className="font-bold">HEALTHY:</span> Healthiness =
+                    90-95% Nation Wide ✅ | Region ✅/❌
+                  </li>
+                  <li>
+                    <span className="font-bold">MAINTAIN:</span> Healthiness =
+                    80-90% Nation Wide ✅/❌ | Region ✅/❌
+                  </li>
+                  <li>
+                    <span className="font-bold">NOT HEALTHY:</span> Healthiness
+                    &lt; 80% Nation Wide ❌ | Region ❌
+                  </li>
+                </ol>
+              </div>
 
-            {/* B. Quality Healthiness */}
-            <div>
-              <h2 className="font-bold text-sm">B. Quality Healthiness:</h2>
-              <p className="text-[9px]">
-                Pencapaian <span className="font-semibold">Packet loss</span>,{" "}
-                <span className="font-semibold">latency</span> dan{" "}
-                <span className="font-semibold">Jitter</span> pada segment{" "}
-                <span className="font-bold">Access Network</span> dan{" "}
-                <span className="font-bold">Core Network</span>
-              </p>
-            </div>
+              {/* B. Quality Healthiness */}
+              <div>
+                <h2 className="font-bold text-sm">B. Quality Healthiness:</h2>
+                <p className="text-[9px]">
+                  Pencapaian <span className="font-semibold">Packet loss</span>,{" "}
+                  <span className="font-semibold">latency</span> dan{" "}
+                  <span className="font-semibold">Jitter</span> pada segment{" "}
+                  <span className="font-bold">Access Network</span> dan{" "}
+                  <span className="font-bold">Core Network</span>
+                </p>
+              </div>
 
-            {/* C. Per Segment */}
-            <div>
-              <h2 className="font-bold text-sm">C. Per Segment Healthiness:</h2>
-              <ol className="list-decimal list-inside space-y-1 text-[9px]">
-                <li>
-                  <span className="font-bold">Access Network:</span> AVG of{" "}
-                  <span className="font-bold">SLA CNOP &amp; MSA</span> (Ach PL
-                  &lt; 0.1% + Ach Latency based on distance to TWAMP + Ach
-                  Jitter &lt; 2 ms)
-                </li>
-                <li>
-                  <span className="font-bold">Core Network:</span> Avg of{" "}
-                  <span className="font-bold">SLA CNOP &amp; MSA</span> (Ach RPJ
-                  Agg. Metro-E + Ach RPJ EBR to IGW based on baseline)
-                </li>
-              </ol>
+              {/* C. Per Segment */}
+              <div>
+                <h2 className="font-bold text-sm">
+                  C. Per Segment Healthiness:
+                </h2>
+                <ol className="list-decimal list-inside space-y-1 text-[9px]">
+                  <li>
+                    <span className="font-bold">Access Network:</span> AVG of{" "}
+                    <span className="font-bold">SLA CNOP &amp; MSA</span> (Ach
+                    PL &lt; 0.1% + Ach Latency based on distance to TWAMP + Ach
+                    Jitter &lt; 2 ms)
+                  </li>
+                  <li>
+                    <span className="font-bold">Core Network:</span> Avg of{" "}
+                    <span className="font-bold">SLA CNOP &amp; MSA</span> (Ach
+                    RPJ Agg. Metro-E + Ach RPJ EBR to IGW based on baseline)
+                  </li>
+                </ol>
+              </div>
             </div>
-          </div> 
           </div>
         </div>
       </div>
@@ -765,7 +766,7 @@ const QualityHealthinessMenu = () => {
                   </svg>
 
                   {/* Persentase lebih kecil */}
-                  <div className="absolute text-[10px] font-bold text-black text-[15px]">
+                  <div className="absolute  font-bold text-black text-[15px]">
                     96,40%
                   </div>
                 </div>
@@ -902,7 +903,7 @@ const QualityHealthinessMenu = () => {
                   </svg>
 
                   {/* Persentase lebih kecil */}
-                  <div className="absolute text-[10px] font-bold text-black text-[15px]">
+                  <div className="absolute  font-bold text-black text-[15px]">
                     100%
                   </div>
                 </div>

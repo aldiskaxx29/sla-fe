@@ -691,7 +691,22 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
 
   return (
     <div className="mt-8">
-      <Table dataSource={dataSource} bordered className="rounded-xl" pagination={pagination} onChange={(pag) => setPagination(pag)} >
+      <Table
+        dataSource={dataSource}
+        bordered
+        className="rounded-xl"
+        pagination={pagination}
+        rowKey={(record, index) =>
+          String(
+            record.id ??
+              record.site_id ??
+              record.ticket_id ??
+              record.no ??
+              index
+          )
+        }
+        onChange={(pag) => setPagination(pag)}
+      >
         {columns.map((column) =>
           column.children ? (
             <ColumnGroup

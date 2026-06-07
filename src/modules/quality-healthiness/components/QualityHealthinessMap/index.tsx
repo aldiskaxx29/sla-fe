@@ -131,7 +131,7 @@ const index: React.FC<MapMapProps> = ({ filter, data, geojson }) => {
   useEffect(() => {
     if (!isMapLoaded || !mapWrapper.current || !mapRef.current) return;
     const resizer = new ResizeObserver(
-      debounce(() => mapRef.current!.resize(), 100)
+      debounce(() => mapRef.current!.resize(), 100),
     );
     resizer.observe(mapWrapper.current);
     return () => resizer.disconnect();
@@ -143,7 +143,7 @@ const index: React.FC<MapMapProps> = ({ filter, data, geojson }) => {
     const regionData = geojson.region.features.find(
       (f) =>
         f.properties?.region.toLowerCase() ===
-        (filter.location ?? "").toLowerCase()
+        (filter.location ?? "").toLowerCase(),
     );
 
     if (regionData) {
@@ -152,7 +152,7 @@ const index: React.FC<MapMapProps> = ({ filter, data, geojson }) => {
         [bboxData[0], bboxData[1], bboxData[2], bboxData[3]],
         {
           padding: 24,
-        }
+        },
       );
     } else {
       mapRef.current?.flyTo({
@@ -309,7 +309,7 @@ const index: React.FC<MapMapProps> = ({ filter, data, geojson }) => {
                 source: newSource,
                 id: hoverFeatureId,
               } as mapboxgl.FeatureIdentifier,
-              { hover: false }
+              { hover: false },
             );
           }
           hoverFeatureId = id as string | number;
@@ -318,7 +318,7 @@ const index: React.FC<MapMapProps> = ({ filter, data, geojson }) => {
               source: newSource,
               id: hoverFeatureId,
             } as mapboxgl.FeatureIdentifier,
-            { hover: true }
+            { hover: true },
           );
         }
 
@@ -382,7 +382,7 @@ const index: React.FC<MapMapProps> = ({ filter, data, geojson }) => {
               source: newSource,
               id: hoverFeatureId,
             } as mapboxgl.FeatureIdentifier,
-            { hover: false }
+            { hover: false },
           );
         }
         hoverFeatureId = null;
