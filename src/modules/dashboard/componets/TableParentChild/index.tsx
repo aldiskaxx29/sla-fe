@@ -1,7 +1,7 @@
-import { Image, Spin, Table, Modal } from "antd";
+import { Image, Skeleton, Spin, Table, Modal } from "antd";
 import Column from "antd/es/table/Column";
 import ColumnGroup from "antd/es/table/ColumnGroup";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDashboard } from "../../hooks/dashboard.hooks";
 import { useParams } from "react-router-dom";
 
@@ -57,6 +57,15 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
   const [realisasiModalLoading, setRealisasiModalLoading] = useState(false);
   const [realisasiModalData, setRealisasiModalData] = useState<RealisasiResponse | null>(null);
   const [realisasiDetail, setRealisasiDetail] = useState<{ month: string; kpi: string; monthNum: number } | null>(null);
+  const lastColumnsRef = useRef<any[]>([]);
+  const skeletonRows = useMemo(
+    () =>
+      Array.from({ length: 8 }, (_, index) => ({
+        __skeleton: true,
+        identIndex: `skeleton-${index}`,
+      })),
+    []
+  );
 
   useEffect(() => {
     if (!data) return;
@@ -89,6 +98,30 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
   
     return `${monthName.charAt(0).toUpperCase() + monthName.slice(1)} Week ${weekNumber}`;
   };
+
+  const skeletonSampleRecord = useMemo(() => {
+    if (!loadingMainData) return null;
+
+    const sample: Record<string, unknown> = {
+      parameter: "__skeleton__",
+      target: "__skeleton__",
+      satuan: "__skeleton__",
+      weight: "__skeleton__",
+    };
+
+    for (let month = 1; month <= 12; month += 1) {
+      sample[`ach_fm_${month}`] = "__skeleton__";
+      sample[`score_fm_${month}`] = "__skeleton__";
+      sample[`realisasi_fm_before_${month}`] = "__skeleton__";
+      sample[`realisasi_fm_after_${month}`] = "__skeleton__";
+
+      for (let week = 1; week <= 5; week += 1) {
+        sample[`ach_${month}_${week}`] = "__skeleton__";
+      }
+    }
+
+    return sample;
+  }, [loadingMainData]);
 
   const dataMapping = useMemo(() => {
     const mappingData2 = dataSource.map((data, indexParent) => {
@@ -139,6 +172,14 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
 
     return mappingData2;
   }, [dataSource, injectedData, injectedChildData]);
+
+  const hasMeaningfulValue = (value: unknown) =>
+    !(
+      value === null ||
+      value === undefined ||
+      value === "" ||
+      value === "-"
+    );
 
   // Function to generate realisasi columns based on month
   const generateRealisasiColumns = (monthNum: number, kpi?: string) => {
@@ -223,7 +264,14 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
     if (!data) return [];
     // Extract keys dynamically
     // Extract keys dynamically
-    const sampleRecord = data[0];
+    const sampleRecord =
+      data.find((item) => item && Object.keys(item).length > 0) ??
+      skeletonSampleRecord ??
+      null;
+
+    if (!sampleRecord) {
+      return lastColumnsRef.current;
+    }
 
     const weeklyKeys = Object.keys(sampleRecord).filter((key) =>
       /^ach_\d+_\d+$/.test(key)
@@ -231,6 +279,24 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
     const monthlyKeys = Object.keys(sampleRecord).filter((key) =>
       /^ach_fm_\d+$/.test(key)
     );
+
+    const activeMonthlyKeys = monthlyKeys.filter((monthKey) => {
+      const monthNum = parseInt(monthKey.replace("ach_fm_", ""));
+      const relatedWeekKeys = weeklyKeys.filter((weekKey) =>
+        weekKey.startsWith(`ach_${monthNum}_`)
+      );
+      const relevantKeys = [
+        `ach_fm_${monthNum}`,
+        `score_fm_${monthNum}`,
+        `realisasi_fm_before_${monthNum}`,
+        `realisasi_fm_after_${monthNum}`,
+        ...relatedWeekKeys,
+      ];
+
+      return data.some((row) =>
+        relevantKeys.some((key) => hasMeaningfulValue(row?.[key]))
+      );
+    });
 
     // Map months
     const monthMapping = {
@@ -349,7 +415,10 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
     ];
 
     // Group weekly data under each month
-    const groupedColumns = monthlyKeys.map((monthKey) => {
+    const displayMonthlyKeys =
+      activeMonthlyKeys.length > 0 ? activeMonthlyKeys : monthlyKeys;
+
+    const groupedColumns = displayMonthlyKeys.map((monthKey) => {
       const monthNum = parseInt(monthKey.replace("ach_fm_", ""));
       const relatedWeeks = weeklyKeys.filter((weekKey) =>
         weekKey.startsWith(`ach_${monthNum}_`)
@@ -536,8 +605,10 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
     ];
     groupedColumns.shift();
 
-    return [...baseColumns, ...lastMonth, ...groupedColumns, ...rekonScore];
-  }, [data]);
+    const computedColumns = [...baseColumns, ...lastMonth, ...groupedColumns, ...rekonScore];
+    lastColumnsRef.current = computedColumns;
+    return computedColumns;
+  }, [data, skeletonSampleRecord]);
 
   const fetchWeeklyDetail = useCallback(
     async (weekKey: string, record: Record<string, unknown>) => {
@@ -907,20 +978,38 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
     "Jan", "Feb", "Mar", "Apr", "Mei", "Jun",
     "Jul", "Agu", "Sep", "Okt", "Nov", "Des"
   ];
+  const tableData = loadingMainData ? skeletonRows : dataMapping;
+  const isSkeletonRow = (record: Record<string, unknown>) =>
+    Boolean((record as { __skeleton?: boolean }).__skeleton);
+  const renderSkeletonCell = () => (
+    <div className="flex items-center w-full py-1.5">
+      <Skeleton.Input
+        active
+        size="small"
+        className="w-full"
+        style={{ width: "100%", height: 16 }}
+      />
+    </div>
+  );
 
   return (
     <div>
-      {(loadingMainData || loading || realisasiModalLoading) && (
+      {(loading || realisasiModalLoading) && (
         <Spin fullscreen tip="Sedang Memuat Data..." />
       )}
 
       <Table
         size="small"
-        dataSource={dataMapping}
+        dataSource={tableData}
         bordered
         pagination={{ pageSize: 1000000, hideOnSinglePage: true }}
         className="rounded-xl "
         rowKey={(record) => record.identIndex}
+        onRow={(record) =>
+          isSkeletonRow(record)
+            ? { style: { height: 48 } }
+            : {}
+        }
         scroll={{ x: "max-content" }}
         expandable={{
           expandedRowKeys: expandedRowKey,
@@ -930,7 +1019,7 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
         }}
       >
       {columns.map((col: any) =>
-        col.children ? (
+          col.children ? (
             <ColumnGroup
               key={col.key ?? col.title}
               title={col.title}
@@ -944,6 +1033,9 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                   width="fit-content"
                   onHeaderCell={child.onHeaderCell}
                   onCell={(record) => {
+                    if (isSkeletonRow(record)) {
+                      return {};
+                    }
                     const isLastTwo =
                       record.parameter?.toLowerCase()?.includes("service") ||
                       record.parameter?.toLowerCase()?.includes("weighted");
@@ -997,6 +1089,10 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                   align={child.align}
                   fixed={child.fixed}
                   render={(text, record) => {
+                    if (isSkeletonRow(record)) {
+                      return renderSkeletonCell();
+                    }
+
                     const isLastTwo =
                       record.parameter?.toLowerCase()?.includes("service") ||
                       record.parameter?.toLowerCase()?.includes("weighted");
@@ -1192,6 +1288,9 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
               width={col.width}
               onHeaderCell={col.onHeaderCell}
               onCell={(record) => {
+                if (isSkeletonRow(record)) {
+                  return {};
+                }
                 const isLastTwo =
                   record.parameter?.toLowerCase()?.includes("service") ||
                   record.parameter?.toLowerCase()?.includes("weighted");
@@ -1219,6 +1318,10 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
               align={col.align}
               fixed={col.fixed}
               render={(text, record) => {
+                if (isSkeletonRow(record)) {
+                  return renderSkeletonCell();
+                }
+
                 const isBelowTarget = Number(text) < Number(record.target);
                 if (col.dataIndex == "parameter") {
                   return (

@@ -1,5 +1,5 @@
 // Antd
-import { Button, Checkbox, Input, InputRef, Space, Table } from "antd";
+import { Button, Checkbox, Input, InputRef, Skeleton, Space, Table } from "antd";
 import ModalInput from "./ModalInput";
 import { useMemo, useRef, useState } from "react";
 import { EditOutlined, SearchOutlined } from "@ant-design/icons";
@@ -12,6 +12,7 @@ const { Column, ColumnGroup } = Table;
 
 interface TableHistoryProps {
   dataSource: Record<string, unknown>[];
+  isLoading?: boolean;
   parameter: string;
   week;
   month;
@@ -23,6 +24,7 @@ interface TableHistoryProps {
 
 const TableInputSite: React.FC<TableHistoryProps> = ({
   dataSource,
+  isLoading = false,
   parameter,
   week,
   month,
@@ -168,6 +170,14 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
 
   const [open, setOpen] = useState(false);
   const [dataModal, setDataModal] = useState({});
+  const skeletonRows = useMemo(
+    () =>
+      Array.from({ length: 17 }, (_, index) => ({
+        __skeleton: true,
+        id: `skeleton-${index}`,
+      })),
+    []
+  );
   const dynamicKey = useMemo(() => {
     if (parameter.includes("packetloss")) return "packetloss";
     if (parameter.includes("jitter")) return "jitter";
@@ -703,10 +713,14 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
     setOpen(true);
   };
 
+  const tableData = isLoading ? skeletonRows : dataSource;
+  const isSkeletonRow = (record: Record<string, unknown>) =>
+    Boolean((record as { __skeleton?: boolean }).__skeleton);
+
   return (
     <div className="mt-8 min-w-max">
       <Table
-        dataSource={dataSource}
+        dataSource={tableData}
         bordered
         className="rounded-xl"
         scroll={{ x: "max-content" }}
@@ -765,6 +779,28 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
               onFilter={column.onFilter}
               {...(column.search ? getColumnSearchProps(column.dataIndex) : {})}
               render={(text, record, index) => {
+                if (isSkeletonRow(record)) {
+                  if (column.key === "no") {
+                    return <Skeleton.Input active size="small" style={{ width: 40 }} />;
+                  }
+
+                  if (column.dataIndex?.startsWith("button") || column.dataIndex === "action") {
+                    return (
+                      <div className="flex justify-center">
+                        <Skeleton.Avatar active size="small" shape="square" />
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <Skeleton.Input
+                      active
+                      size="small"
+                      style={{ width: column.width || "100%" }}
+                    />
+                  );
+                }
+
                 if (column.key === "no") {
                   return (pagination.current - 1) * pagination.pageSize + index + 1;
                 }

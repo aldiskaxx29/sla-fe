@@ -1,6 +1,6 @@
 import AppDropdown from "@/app/components/AppDropdown";
 import xlxsIcon from "@/assets/file-spreadsheet.svg";
-import { Button, Image, Spin, Upload } from "antd";
+import { Button, Image, Upload } from "antd";
 import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { TableInputSite } from "../components/TableInputSite";
@@ -27,6 +27,12 @@ const SitePage = () => {
     current: 1,
     pageSize: 10,
   });
+  const mttrqParameters = [
+    "mttrq critical",
+    "mttrq major",
+    "mttrq minor",
+  ];
+  const isMttrqParameter = mttrqParameters.includes(parameter);
 
   const fetchSite = useCallback(async () => {
     setLoading(true);
@@ -38,8 +44,8 @@ const SitePage = () => {
           parameter,
           year,
           month,
-          ...(!["mttrq critical","mttrq major", "mttrq minor"].includes(parameter) && { week }),
-          ...(["mttrq critical","mttrq major", "mttrq minor"].includes(parameter) && { month }),
+          ...(!isMttrqParameter && { week }),
+          ...(isMttrqParameter && { month }),
         },
       }).unwrap();
     } catch (error) {
@@ -47,12 +53,12 @@ const SitePage = () => {
     } finally {
       setLoading(false);
     }
-  }, [exclude, parameter, month, week, year, prev]);
+  }, [exclude, parameter, month, week, year, prev, isMttrqParameter, getSite]);
 
   useEffect(() => {
     if (!week || !month || !year) return;
     fetchSite();
-  }, [exclude, parameter, year, week, month, trigger, prev]);
+  }, [exclude, parameter, year, week, month, trigger, prev, fetchSite]);
 
   const optPrev = [
     // { label: "All", value: "all" },
@@ -114,10 +120,17 @@ const SitePage = () => {
       }));
   }, [month]);
 
+  const selectedWeeks = useMemo(
+    () => filterWeeks.find((item) => item.month === month)?.value ?? [],
+    [month]
+  );
+
   useEffect(() => {
-    // setWeek(filterWeeks.find((item) => item.month === month)?.value[0] ?? "1");
-    setWeek("13");
-  }, [month]);
+    if (!selectedWeeks.length) return;
+    setWeek((currentWeek) =>
+      selectedWeeks.includes(currentWeek) ? currentWeek : selectedWeeks[0]
+    );
+  }, [selectedWeeks]);
 
   const [downloadTemplate] = useLazyDownload_templateQuery();
 
@@ -130,8 +143,8 @@ const SitePage = () => {
           year,
           month,
           week,
-          ...(!["mttrq critical","mttrq major", "mttrq minor"].includes(parameter) && { week }),
-          ...(["mttrq critical","mttrq major", "mttrq minor"].includes(parameter) && { month }),
+          ...(!isMttrqParameter && { week }),
+          ...(isMttrqParameter && { month }),
         },
       }).unwrap();
 
@@ -170,8 +183,8 @@ const SitePage = () => {
           exclude,
           parameter,
           month,
-          ...(!["mttrq critical","mttrq major", "mttrq minor"].includes(parameter) && { week }),
-          ...(["mttrq critical","mttrq major", "mttrq minor"].includes(parameter) && { month }),
+          ...(!isMttrqParameter && { week }),
+          ...(isMttrqParameter && { month }),
         },
         body: formData,
       }).unwrap();
@@ -189,7 +202,6 @@ const SitePage = () => {
 
   return (
     <div className="bg-white border border-[#DBDBDB] rounded-xl p-4 m-6 overflow-x-hidden">
-      {loading && <Spin fullscreen tip="Sedang Memuat Data..." />}
       <div className="flex justify-between mb-6 gap-4 overflow-x-auto">
         {/* <div className="bg-[#EDEDED] max-w-[210px] rounded-[54px] px-4 py-1 h-10 flex justify-center items-center mr-2">
           <p className="font-semibold text-[#0E2133] text-base">REKONSILIASI</p>
@@ -231,7 +243,7 @@ const SitePage = () => {
             value={month}
             onChange={(value) => setMonth(value)}
           />
-          {!["mttrq critical","mttrq major", "mttrq minor"].includes(parameter) && (
+          {!isMttrqParameter && (
             <AppDropdown
               title="Week"
               placeholder="All"
@@ -265,19 +277,18 @@ const SitePage = () => {
         </div>
       </div>
       <div className="w-full overflow-x-auto">
-        {dataSite && (
-          <TableInputSite
-            dataSource={dataSite.data}
-            parameter={parameter}
-            week={week}
-            month={month}
-            year={year}
-            setTrigger={setTrigger}
-            pagination={pagination}
-            onChange={(pag) => setPagination(pag)}
-            setPagination={setPagination}
-          />
-        )}
+        <TableInputSite
+          dataSource={dataSite?.data ?? []}
+          isLoading={loading || !dataSite?.data}
+          parameter={parameter}
+          week={week}
+          month={month}
+          year={year}
+          setTrigger={setTrigger}
+          pagination={pagination}
+          onChange={(pag) => setPagination(pag)}
+          setPagination={setPagination}
+        />
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import { Button, Image, Skeleton } from "antd";
+import { Button, Image } from "antd";
 import { Component, useEffect } from "react";
 
 import warningIcon from "@/assets/warning.svg";
@@ -42,6 +42,7 @@ const MSAmenu = ({
   isLoadingSC,
   dataHistoryData,
   isSuccessHistoryData,
+  isLoadingHistoryData,
   trendData,
   level,
   setLevel,
@@ -50,28 +51,6 @@ const MSAmenu = ({
   filter,
   treg,
 }) => {
-  const showTableSkeleton = isLoadingSC || !dataSC || !dataHistoryData;
-
-  const TableSkeleton = () => (
-    <div className="rounded-xl border border-[#DBDBDB] bg-white px-4 py-5">
-      <Skeleton active title={false} paragraph={{ rows: 1, width: ["35%"] }} />
-      <div className="mt-4 space-y-3">
-        {Array.from({ length: 7 }, (_, rowIndex) => (
-          <div key={rowIndex} className="grid gap-3 grid-cols-12">
-            {Array.from({ length: 12 }, (_, colIndex) => (
-              <Skeleton.Input
-                key={colIndex}
-                active
-                size="small"
-                className="!w-full !h-8"
-              />
-            ))}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-
   const dataWithIndex = (dataSource) => {
     return dataSource?.map((item, index) => {
       return {
@@ -316,17 +295,13 @@ const MSAmenu = ({
           </div>
         </div>
         <div className="w-auto overflow-x-auto ">
-          {showTableSkeleton ? (
-            <TableSkeleton />
-          ) : (
-            <TableFallbackBoundary key={`${treg}-${filter}-${msaRows.length}`}>
-              <TableParentChild
-                treg={treg}
-                data={dataWithIndex(msaRows)}
-                loadingMainData={false}
-              ></TableParentChild>
-            </TableFallbackBoundary>
-          )}
+          <TableFallbackBoundary key={`${treg}-${filter}-${msaRows.length}`}>
+            <TableParentChild
+              treg={treg}
+              data={dataWithIndex(msaRows)}
+              loadingMainData={isLoadingSC || !dataSC || msaRows.length === 0}
+            ></TableParentChild>
+          </TableFallbackBoundary>
         </div>
         <div className="flex justify-between border-b-[1px] mt-4 border-gray-200 font-medium mb-5">
           <div className="bg-[#EDEDED] py-2 px-4 rounded-full mb-3">
@@ -456,11 +431,16 @@ const MSAmenu = ({
             <p className="text-base font-semibold">MONTHLY DATA SLA</p>
           </div>
           <div className="w-auto overflow-x-auto">
-            {showTableSkeleton ? (
-              <TableSkeleton />
-            ) : (
-              <TableHistory dataSource={dataHistoryData?.data} treg={treg} />
-            )}
+            <TableHistory
+              dataSource={dataHistoryData?.data ?? []}
+              treg={treg}
+              loadingMainData={
+                isLoadingHistoryData ||
+                !dataHistoryData ||
+                (Array.isArray(dataHistoryData?.data) &&
+                  dataHistoryData.data.length === 0)
+              }
+            />
           </div>
         </div>
       </div>

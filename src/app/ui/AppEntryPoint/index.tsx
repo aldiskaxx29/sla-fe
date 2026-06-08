@@ -34,16 +34,7 @@ const AppEntryPoint = () => {
         },
       }}
     >
-      <Suspense
-        fallback={
-          <div className="grid justify-items-center items-center h-screen bg-white">
-            {/* <img src={LoadingAnimation} width={"100px"} height={"100px"} /> */}
-            Loading
-          </div>
-        }
-      >
-        {routes}
-      </Suspense>
+      <Suspense>{routes}</Suspense>
     </AntdConfigProvider>
   );
 };

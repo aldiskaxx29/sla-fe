@@ -418,54 +418,46 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week, year }
             )}
           {!dataModal?.parameter?.includes("mttrq") ? (
             <div>
-
-              <Form form={form} layout="vertical">
-
-                {/* FORM 1 */}
-                <Form.Item
-                  label="RCA Rekonsiliasi"
-                  name="group2"
-                  rules={[{ required: true, message: "Pilih RCA Rekonsiliasi" }]}
+              {/* FORM 1 */}
+              <Form.Item
+                label="RCA Rekonsiliasi"
+                name="group2"
+                rules={[{ required: true, message: "Pilih RCA Rekonsiliasi" }]}
+              >
+                <Select
+                  placeholder="Pilih RCA Rekonsiliasi"
+                  onChange={handleGroup2Change}
                 >
-                  <Select
-                    placeholder="Pilih RCA Rekonsiliasi"
-                    onChange={handleGroup2Change}
-                  >
-                    {group2Options.map((g2) => (
-                      <Option key={g2} value={g2}>
-                        {g2}
-                      </Option>
-                    ))}
-                  </Select>
-                </Form.Item>
+                  {group2Options.map((g2) => (
+                    <Option key={g2} value={g2}>
+                      {g2}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
 
-                {/* FORM 2 */}
-                <Form.Item
-                  label="Grouping RCA"
-                  name="group1"
+              {/* FORM 2 */}
+              <Form.Item label="Grouping RCA" name="group1">
+                <Input disabled />
+              </Form.Item>
+
+              {/* FORM 3 */}
+              <Form.Item
+                label="Update Progress"
+                name="group22"
+                rules={[{ required: true, message: "Pilih Update Progress" }]}
+              >
+                <Select
+                  placeholder="Pilih Update Progress"
+                  disabled={!selectedGroup1}
                 >
-                  <Input disabled />
-                </Form.Item>
-
-                {/* FORM 3 */}
-                <Form.Item
-                  label="Update Progress"
-                  name="group22"
-                  rules={[{ required: true, message: "Pilih Update Progress" }]}
-                >
-                  <Select
-                    placeholder="Pilih Update Progress"
-                    disabled={!selectedGroup1}
-                  >
-                    {group22Options.map((g22) => (
-                      <Option key={g22} value={g22}>
-                        {g22}
-                      </Option>
-                    ))}
-                  </Select>
-                </Form.Item>
-
-              </Form>
+                  {group22Options.map((g22) => (
+                    <Option key={g22} value={g22}>
+                      {g22}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
             </div>
           ) : (
             <Form.Item
