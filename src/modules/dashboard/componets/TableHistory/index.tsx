@@ -1,5 +1,5 @@
 // Antd
-import { Image, Spin, Table } from "antd";
+import { Image, Skeleton, Spin, Table } from "antd";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDashboard } from "../../hooks/dashboard.hooks";
 
@@ -10,6 +10,7 @@ import arrowDropdown from "@/assets/arrow_dropdown.svg";
 interface TableHistoryProps {
   dataSource: Record<string, unknown>[];
   treg: string;
+  loadingMainData?: boolean;
 }
 
 let identIndex = 1;
@@ -17,6 +18,7 @@ let identIndex = 1;
 const TableHistory: React.FC<TableHistoryProps> = ({
   dataSource: data,
   treg,
+  loadingMainData = false,
 }) => {
   const [dataSource, setDataSource] = useState(data);
   const [loading, setLoading] = useState(false);
@@ -35,6 +37,14 @@ const TableHistory: React.FC<TableHistoryProps> = ({
       })) || []
     );
   }, [dataSource]);
+  const skeletonRows = useMemo(
+    () =>
+      Array.from({ length: 8 }, (_, index) => ({
+        __skeleton: true,
+        key: `skeleton-${index}`,
+      })),
+    []
+  );
 
   const dataMapping = useMemo(() => {
     const mappingData2 = dataSource.map((data, indexParent) => {
@@ -86,6 +96,9 @@ const TableHistory: React.FC<TableHistoryProps> = ({
 
     return mappingData2;
   }, [dataSource, injectedData, injectedChildData]);
+  const tableData = loadingMainData ? skeletonRows : dataMapping;
+  const isSkeletonRow = (record: Record<string, unknown>) =>
+    Boolean((record as { __skeleton?: boolean }).__skeleton);
 
   const fetchWitelData = useCallback(
     async (record) => {
@@ -305,7 +318,7 @@ const TableHistory: React.FC<TableHistoryProps> = ({
       {loading && <Spin fullscreen tip="Sedang Memuat Data..." />}
 
       <Table
-        dataSource={dataMapping}
+        dataSource={tableData}
         bordered
         pagination={{ pageSize: 1000000, hideOnSinglePage: true }}
         className="rounded-xl "
@@ -429,6 +442,9 @@ const TableHistory: React.FC<TableHistoryProps> = ({
               fixed={column.fixed}
               align={column.align}
               onCell={(record, index) => {
+                if (isSkeletonRow(record)) {
+                  return {};
+                }
                 const isLastTwo =
                   record.parameter?.toLowerCase().includes("service") ||
                   record.parameter?.toLowerCase().includes("weighted");
@@ -437,6 +453,16 @@ const TableHistory: React.FC<TableHistoryProps> = ({
                 };
               }}
               render={(text, record, index) => {
+                if (isSkeletonRow(record)) {
+                  return (
+                    <Skeleton.Input
+                      active
+                      size="small"
+                      style={{ width: "100%" }}
+                    />
+                  );
+                }
+
                 const isLastTwo =
                   record.parameter?.toLowerCase().includes("service") ||
                   record.parameter?.toLowerCase().includes("weighted");

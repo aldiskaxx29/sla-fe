@@ -66,6 +66,7 @@ function Dashboard() {
     isSuccessHistoryData,
     dataSC,
     isLoadingSC,
+    isLoadingHistoryData,
     dataHistoryData,
   } = useDashboard();
   const { menuId } = useParams();
@@ -200,7 +201,7 @@ function Dashboard() {
         <Spin fullscreen tip="Sedang Memuat Data..." />
       )}
 
-      {isMsaRoute && dataSC && dataHistoryData ? (
+      {isMsaRoute && (
         <MSAmenu
           handlefilter={handlefilter}
           treg={treg}
@@ -208,6 +209,7 @@ function Dashboard() {
           dataHistoryData={dataHistoryData}
           dataSC={dataSC}
           isLoadingSC={isLoadingSC}
+          isLoadingHistoryData={isLoadingHistoryData}
           isSuccessHistoryData={isSuccessHistoryData}
           trendData={trendData}
           level={level}
@@ -217,22 +219,6 @@ function Dashboard() {
           historyType={historyType}
           parameterHistory={historyType}
         />
-        ) : (
-          isMsaRoute && (
-            <div className="flex flex-col gap-4 h-[70vh] w-full justify-center items-center">
-              <Skeleton.Input active size="large" block />
-              <Skeleton.Input active size="large" block />
-            <Skeleton.Input active size="large" block />
-            <Skeleton.Input active size="large" block />
-            <Skeleton.Input active size="large" block />
-            <Skeleton.Input active size="large" block />
-            <Skeleton.Input active size="large" block />
-            <Skeleton.Input active size="large" block />
-            <Skeleton.Input active size="large" block />
-            <Skeleton.Input active size="large" block />
-            <Skeleton.Input active size="large" block />
-          </div>
-        )
       )}
 
       {menu.key === "cnop" && dataSC ? (
