@@ -320,9 +320,28 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week, year }
   };
 
   return (
-    <Modal open={open} onCancel={onCancel} footer={null} centered>
-      <div>
-        <p className="text-xl font-bold text-center w-full my-6">
+    <Modal
+      open={open}
+      onCancel={onCancel}
+      footer={null}
+      centered
+      width={760}
+      destroyOnClose
+      className="site-input-modal"
+      styles={{
+        body: {
+          maxHeight: "72vh",
+          overflowY: "auto",
+          paddingTop: 8,
+          paddingBottom: 8,
+        },
+        content: {
+          borderRadius: 20,
+        },
+      }}
+    >
+      <div className="px-2 pb-1">
+        <p className="text-lg font-semibold text-center w-full my-3 text-[#0E2133]">
           Upsdate Site Exlcude
         </p>
         <Form form={form} layout="vertical">
@@ -345,7 +364,7 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week, year }
             <Input placeholder="Masukkan Ticket ID" />
           </Form.Item>
 
-          <div className="flex gap-6">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <Form.Item
               label="Site ID"
               name="site_id"
@@ -356,15 +375,22 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week, year }
             {dataModal?.parameter != "mttrq critical" &&
               dataModal?.parameter != "mttrq major" &&
               dataModal?.parameter != "mttrq minor" && (
-                <Form.Item name="site_exclude" label="Exclude?">
-                  <Checkbox
-                    // onChange={() => setExclude(!exclude)} checked={exclude}
-                    onChange={onChangeEx}
-                    checked={exclude}
-                  >
-                    {labelEx}
-                  </Checkbox>
-                </Form.Item>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:col-span-1">
+                  <Form.Item name="site_exclude" label="Exclude?">
+                    <Checkbox
+                      // onChange={() => setExclude(!exclude)} checked={exclude}
+                      onChange={onChangeEx}
+                      checked={exclude}
+                    >
+                      {labelEx}
+                    </Checkbox>
+                  </Form.Item>
+                  <Form.Item name="site_sos" label="Site SOS" className="md:mt-0">
+                    <Checkbox onChange={onChangeSos} checked={checked}>
+                      {labelSos}
+                    </Checkbox>
+                  </Form.Item>
+                </div>
               )}
           </div>
 
@@ -388,15 +414,6 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week, year }
                 rules={[{ required: true, message: "Masukkan Ticket Id" }]}
               >
                 <Input type="text" placeholder="Masukkan Ticket Id" readOnly />
-              </Form.Item>
-            )}
-          {dataModal?.parameter != "mttrq critical" &&
-            dataModal?.parameter != "mttrq major" &&
-            dataModal?.parameter != "mttrq minor" && (
-              <Form.Item name="site_sos" label="Site SOS">
-                <Checkbox onChange={onChangeSos} checked={checked}>
-                  {labelSos}
-                </Checkbox>
               </Form.Item>
             )}
           {!dataModal?.parameter?.includes("mttrq") ? (
@@ -588,13 +605,12 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week, year }
             )}
           </Form.Item>
 
-          <div style={{ textAlign: "right" }}>
+          <div className="sticky bottom-0 z-10 -mx-2 mt-6 flex justify-end gap-2 border-t border-[#E5E7EB] bg-white px-2 pt-4 pb-2">
             <Button
               onClick={() => {
                 setPreview("");
                 onCancel();
               }}
-              style={{ marginRight: 8 }}
             >
               Cancel
             </Button>

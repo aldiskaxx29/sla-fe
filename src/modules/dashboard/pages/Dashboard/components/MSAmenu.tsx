@@ -1,4 +1,5 @@
-import { Button, Image } from "antd";
+import { Button, Image, Skeleton } from "antd";
+import { Component, useEffect } from "react";
 
 import warningIcon from "@/assets/warning.svg";
 import checkIcon from "@/assets/check.svg";
@@ -7,9 +8,34 @@ import ChartMSA from "@/modules/dashboard/componets/ChartMSA";
 import { TableHistory } from "@/modules/dashboard/componets/TableHistory";
 import { TableParentChild } from "@/modules/dashboard/componets/TableParentChild";
 import AppDropdown from "@/app/components/AppDropdown";
-import { useEffect } from "react";
 import { useDashboard } from "@/modules/dashboard/hooks/dashboard.hooks";
 import { toast } from "react-toastify";
+
+class TableFallbackBoundary extends Component<
+  { children: React.ReactNode },
+  { hasError: boolean }
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="rounded-xl border border-dashed border-amber-300 bg-amber-50 px-4 py-5 text-sm text-amber-900">
+          Data tabel MSA gagal dirender. Silakan ubah filter atau muat ulang halaman.
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
 
 const MSAmenu = ({
   dataSC,
@@ -24,6 +50,28 @@ const MSAmenu = ({
   filter,
   treg,
 }) => {
+  const showTableSkeleton = isLoadingSC || !dataSC || !dataHistoryData;
+
+  const TableSkeleton = () => (
+    <div className="rounded-xl border border-[#DBDBDB] bg-white px-4 py-5">
+      <Skeleton active title={false} paragraph={{ rows: 1, width: ["35%"] }} />
+      <div className="mt-4 space-y-3">
+        {Array.from({ length: 7 }, (_, rowIndex) => (
+          <div key={rowIndex} className="grid gap-3 grid-cols-12">
+            {Array.from({ length: 12 }, (_, colIndex) => (
+              <Skeleton.Input
+                key={colIndex}
+                active
+                size="small"
+                className="!w-full !h-8"
+              />
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
   const dataWithIndex = (dataSource) => {
     return dataSource?.map((item, index) => {
       return {
@@ -73,6 +121,68 @@ const MSAmenu = ({
 
   const { getComply, dataComply } = useDashboard();
 
+  const normalizeMsaRows = (rows: Record<string, unknown>[]) => {
+    const dashIfEmpty = (value: unknown) =>
+      value === "" || value === null || value === undefined ? "-" : value;
+
+    const pickFirstValue = (row: Record<string, unknown>, keys: string[]) => {
+      for (const key of keys) {
+        const value = row[key];
+        if (value !== undefined && value !== null && value !== "") {
+          return value;
+        }
+      }
+      return "-";
+    };
+
+    return rows.map((row) => {
+      const normalized: Record<string, unknown> = {
+        ...row,
+      };
+
+      normalized.ach_fm_1 = dashIfEmpty(
+        pickFirstValue(row, ["ach_fm_prev", "ach_fm_prev_2"])
+      );
+      normalized.ach_fm_2 = dashIfEmpty(
+        pickFirstValue(row, ["ach_fm_curr", "ach_fm_prev_1"])
+      );
+
+      normalized.realisasi_fm_before_1 = dashIfEmpty(
+        pickFirstValue(row, ["realisasi_fm_before_prev", "realisasi_fm_before_prev_2"])
+      );
+      normalized.realisasi_fm_after_1 = dashIfEmpty(
+        pickFirstValue(row, ["realisasi_fm_after_prev", "realisasi_fm_after_prev_2"])
+      );
+      normalized.realisasi_fm_1 = dashIfEmpty(
+        pickFirstValue(row, ["realisasi_fm_prev", "realisasi_fm_prev_2"])
+      );
+      normalized.score_fm_1 = dashIfEmpty(
+        pickFirstValue(row, ["score_fm_prev", "score_fm_prev_2"])
+      );
+
+      normalized.realisasi_fm_before_2 = dashIfEmpty(
+        pickFirstValue(row, ["realisasi_fm_before_curr", "realisasi_fm_before_prev_1"])
+      );
+      normalized.realisasi_fm_after_2 = dashIfEmpty(
+        pickFirstValue(row, ["realisasi_fm_after_curr", "realisasi_fm_after_prev_1"])
+      );
+      normalized.realisasi_fm_2 = dashIfEmpty(
+        pickFirstValue(row, ["realisasi_fm_curr", "realisasi_fm_prev_1"])
+      );
+      normalized.score_fm_2 = dashIfEmpty(
+        pickFirstValue(row, ["score_fm_curr", "score_fm_prev_1"])
+      );
+
+      for (let week = 1; week <= 4; week += 1) {
+        const sourceKey = `ach_w${week}`;
+        normalized[`ach_1_${week}`] = dashIfEmpty(row[sourceKey]);
+        normalized[`ach_2_${week}`] = dashIfEmpty(row[sourceKey]);
+      }
+
+      return normalized;
+    });
+  };
+
   const getTrendChartData = (trendKey: string) => {
     const trendItem = trendData?.[trendKey];
     const candidates = [trendItem?.data, trendItem].filter(Boolean);
@@ -121,6 +231,8 @@ const MSAmenu = ({
   useEffect(() => {
     fetchComply();
   }, []);
+
+  const msaRows = Array.isArray(dataSC?.data) ? normalizeMsaRows(dataSC.data) : [];
 
   return (
     <div>
@@ -203,15 +315,19 @@ const MSAmenu = ({
             </Button>
           </div>
         </div>
-        {!isLoadingSC && (
-          <div className="w-auto overflow-x-auto ">
-            <TableParentChild
-              treg={treg}
-              data={dataWithIndex(dataSC?.data)}
-              loadingMainData={isLoadingSC}
-            ></TableParentChild>
-          </div>
-        )}
+        <div className="w-auto overflow-x-auto ">
+          {showTableSkeleton ? (
+            <TableSkeleton />
+          ) : (
+            <TableFallbackBoundary key={`${treg}-${filter}-${msaRows.length}`}>
+              <TableParentChild
+                treg={treg}
+                data={dataWithIndex(msaRows)}
+                loadingMainData={false}
+              ></TableParentChild>
+            </TableFallbackBoundary>
+          )}
+        </div>
         <div className="flex justify-between border-b-[1px] mt-4 border-gray-200 font-medium mb-5">
           <div className="bg-[#EDEDED] py-2 px-4 rounded-full mb-3">
             <p className="text-base font-semibold">TREND ACHIEVEMENT</p>
@@ -335,16 +451,18 @@ const MSAmenu = ({
             )}
           </div>
         </div>
-        {isSuccessHistoryData && dataHistoryData && (
-          <div className="mt-6">
-            <div className="bg-[#EDEDED] py-2 px-4 rounded-full mb-3 w-fit">
-              <p className="text-base font-semibold">MONTHLY DATA SLA</p>
-            </div>
-            <div className="w-auto overflow-x-auto">
-              <TableHistory dataSource={dataHistoryData?.data} treg={treg} />
-            </div>
+        <div className="mt-6">
+          <div className="bg-[#EDEDED] py-2 px-4 rounded-full mb-3 w-fit">
+            <p className="text-base font-semibold">MONTHLY DATA SLA</p>
           </div>
-        )}
+          <div className="w-auto overflow-x-auto">
+            {showTableSkeleton ? (
+              <TableSkeleton />
+            ) : (
+              <TableHistory dataSource={dataHistoryData?.data} treg={treg} />
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

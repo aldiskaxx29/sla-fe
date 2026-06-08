@@ -134,16 +134,15 @@ const AppLayoutDefault = () => {
           <Header className="!bg-white flex justify-between items-center sticky !px-6 z-20">
             <div className="flex items-center gap-4">
               <Image src={qosmo} alt="icon" width={128} preview={false} />
-              <div className=" rounded-[54px] px-3 py-2 h-12 flex justify-center items-center">
+              {/* <div className=" rounded-[54px] px-3 py-2 h-12 flex justify-center items-center">
                 <p className="font-semibold text-[#0E2133] text-2xl">
                   {titleNavigation}
                 </p>
-              </div>
+              </div> */}
             </div>
             <div className="flex gap-4">
               {level == 5 && (
                 <div className="text-sm flex justify-between items-center bg-[#576278] rounded-[54px] px-3 py-2">
-  
                   <Button
                     className={`${
                       location.pathname.includes("one")
@@ -188,7 +187,7 @@ const AppLayoutDefault = () => {
                       Executive Summary
                     </p>
                   </Button>
-  
+
                   <Button
                     className={`${
                       location.pathname.includes("one")
@@ -213,227 +212,229 @@ const AppLayoutDefault = () => {
               )}
               {(level == 1 || level == 2 || level == 3 || level == 4) && (
                 <div className="text-sm flex justify-between items-center bg-[#576278] rounded-[54px] px-3 py-2">
-                <Button
-                  className={`${
-                    location.pathname.includes("executive")
-                      ? "!bg-[#A6AEC1]"
-                      : "!bg-[#576278]"
-                  } !border-0 !rounded-4xl !shadow-none`}
-                  onClick={() => {
-                    handleMenuSelect("executive");
-                  }}
-                >
-                  <p
-                    className={
+                  <Button
+                    className={`${
                       location.pathname.includes("executive")
-                        ? "text-white "
-                        : "text-[#C6C6C6] "
-                    }
-                  >
-                    Executive Summary
-                  </p>
-                </Button>
-
-                <Button
-                  className={`${
-                    location.pathname.includes("monday")
-                      ? "!bg-[#A6AEC1]"
-                      : "!bg-[#576278]"
-                  } !border-0 !rounded-4xl !shadow-none`}
-                  onClick={() => {
-                    handleMenuSelect("monday");
-                  }}
-                >
-                  <p
-                    className={
-                      location.pathname.includes("monday")
-                        ? "text-white "
-                        : "text-[#C6C6C6] "
-                    }
-                  >
-                    Monday Monitoring
-                  </p>
-                </Button>
-
-                <div
-                  ref={containerRef}
-                  onMouseEnter={() => setOpen2(true)}
-                  onMouseLeave={() => setOpen2(false)}
-                  className={`relative inline-block px-4 py-2 rounded-full cursor-pointer ${
-                    ["/msa", "/cnop", "/report-site","/report-support-needed"].includes(
-                      location.pathname
-                    )
-                      ? "!bg-[#A6AEC1] text-white"
-                      : "!bg-[#576278] text-[#C6C6C6]"
-                  }`}
-                >
-                  SLA
-                  {open2 && (
-                    <div className="z-100 absolute left-0 top-full -mt-2 w-[300px] bg-[#576278] border rounded shadow opacity-100">
-                      {slaOpt.map((option) => (
-                        <p
-                          key={option.value}
-                          className={`px-4 py-2 hover:bg-gray-500 cursor-pointer ${
-                            location.pathname?.includes(option.value)
-                              ? "!bg-[#A6AEC1] text-white"
-                              : "!bg-[#576278] text-[#C6C6C6]"
-                          }`}
-                          onClick={() => {
-                            handleMenuSelect(option.value);
-                            setOpen2(false);
-                          }}
-                        >
-                          {option.label}
-                        </p>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                
-                <div
-                  ref={containerRef}
-                  onMouseEnter={() => setOpen1(true)}
-                  onMouseLeave={() => setOpen1(false)}
-                  className={`relative inline-block px-4 py-2 rounded-full cursor-pointer ${
-                    location.pathname?.includes("network")
-                      ? "!bg-[#A6AEC1] text-white"
-                      : "!bg-[#576278] text-[#C6C6C6]"
-                  }`}
-                >
-                  Network Performance
-                  {open1 && (
-                    <div className="absolute left-0 top-full -mt-2 w-full bg-[#576278] border rounded shadow z-10">
-                      {networkOpt.map((option) => (
-                        <p
-                          key={option.value}
-                          className={`px-4 py-2 hover:bg-gray-500 cursor-pointer ${
-                            location.pathname?.includes(option.value)
-                              ? "!bg-[#A6AEC1] text-white"
-                              : "!bg-[#576278] text-[#C6C6C6]"
-                          }`}
-                          onClick={() => {
-                            handleMenuSelect(option.value);
-                            setOpen1(false);
-                          }}
-                        >
-                          {option.label}
-                        </p>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                
-                <Button
-                  className={`${
-                    location.pathname.includes("input-site")
-                      ? "!bg-[#A6AEC1]"
-                      : "!bg-[#576278]"
-                  } !border-0 !rounded-4xl !shadow-none`}
-                  onClick={() => {
-                    handleMenuSelect("input-site");
-                  }}
-                >
-                  <p
-                    className={
-                      location.pathname.includes("input-site")
-                        ? "text-white "
-                        : "text-[#C6C6C6] "
-                    }
-                  >
-                    Reconsiliation
-                  </p>
-                </Button>
-
-                <Button
-                  className={`${
-                    location.pathname.includes("one")
-                      ? "!bg-[#A6AEC1]"
-                      : "!bg-[#576278]"
-                  } !border-0 !rounded-4xl !shadow-none`}
-                  onClick={() => {
-                    handleMenuSelect("one");
-                  }}
-                >
-                  <p
-                    className={
-                      location.pathname.includes("one")
-                        ? "text-white "
-                        : "text-[#C6C6C6] "
-                    }
-                  >
-                    One Visibility
-                  </p>
-                </Button>
-                
-                <Button
-                  className={`${
-                    location.pathname.includes("ticket")
-                      ? "!bg-[#A6AEC1]"
-                      : "!bg-[#576278]"
-                  } !border-0 !rounded-4xl !shadow-none`}
-                >
-                  <p
-                    className={
-                      location.pathname.includes("ticket")
-                        ? "text-white "
-                        : "text-[#C6C6C6] "
-                    }
+                        ? "!bg-[#A6AEC1]"
+                        : "!bg-[#576278]"
+                    } !border-0 !rounded-4xl !shadow-none`}
                     onClick={() => {
-                      handleMenuSelect("ticket");
+                      handleMenuSelect("executive");
                     }}
                   >
-                    Ticket Quality
-                  </p>
-                </Button>
-                
-                <Button
-                  className={`${
-                    location.pathname.includes("elibrary")
-                      ? "!bg-[#A6AEC1]"
-                      : "!bg-[#576278]"
-                  } !border-0 !rounded-4xl !shadow-none`}
-                  onClick={() => {
-                    handleMenuSelect("elibrary");
-                  }}
-                >
-                  <p
-                    className={
-                      location.pathname.includes("elibrary")
-                        ? "text-white "
-                        : "text-[#C6C6C6] "
-                    }
+                    <p
+                      className={
+                        location.pathname.includes("executive")
+                          ? "text-white "
+                          : "text-[#C6C6C6] "
+                      }
+                    >
+                      Executive Summary
+                    </p>
+                  </Button>
+
+                  <Button
+                    className={`${
+                      location.pathname.includes("monday")
+                        ? "!bg-[#A6AEC1]"
+                        : "!bg-[#576278]"
+                    } !border-0 !rounded-4xl !shadow-none`}
+                    onClick={() => {
+                      handleMenuSelect("monday");
+                    }}
                   >
-                    E-Library
-                  </p>
-                </Button>
-                
-                <Button
-                  className={`${
-                    location.pathname.includes("msa")
-                      ? "!bg-[#576278]"
-                      : "!bg-[#576278]"
-                  } !border-0 !rounded-4xl !shadow-none`}
-                  onClick={() => {
-                    handleMenuSelect("msa");
-                  }}
-                >
-                  <p
-                    className={`cursor-pointer ${
-                      location.pathname.includes("dashboard-ta")
-                        ? "text-white"
-                        : "text-[#C6C6C6]"
+                    <p
+                      className={
+                        location.pathname.includes("monday")
+                          ? "text-white "
+                          : "text-[#C6C6C6] "
+                      }
+                    >
+                      Monday Monitoring
+                    </p>
+                  </Button>
+
+                  <div
+                    ref={containerRef}
+                    onMouseEnter={() => setOpen2(true)}
+                    onMouseLeave={() => setOpen2(false)}
+                    className={`relative inline-block px-4 py-2 rounded-full cursor-pointer ${
+                      [
+                        "/msa",
+                        "/cnop",
+                        "/report-site",
+                        "/report-support-needed",
+                      ].includes(location.pathname)
+                        ? "!bg-[#A6AEC1] text-white"
+                        : "!bg-[#576278] text-[#C6C6C6]"
                     }`}
-                    onClick={() =>
-                      window.open("http://10.60.174.188:8008/", "_blank")
-                    }
                   >
-                    Telkom Akses
-                  </p>
-                </Button>
-              </div>
+                    SLA
+                    {open2 && (
+                      <div className="z-100 absolute left-0 top-full -mt-2 w-[300px] bg-[#576278] border rounded shadow opacity-100">
+                        {slaOpt.map((option) => (
+                          <p
+                            key={option.value}
+                            className={`px-4 py-2 hover:bg-gray-500 cursor-pointer ${
+                              location.pathname?.includes(option.value)
+                                ? "!bg-[#A6AEC1] text-white"
+                                : "!bg-[#576278] text-[#C6C6C6]"
+                            }`}
+                            onClick={() => {
+                              handleMenuSelect(option.value);
+                              setOpen2(false);
+                            }}
+                          >
+                            {option.label}
+                          </p>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div
+                    ref={containerRef}
+                    onMouseEnter={() => setOpen1(true)}
+                    onMouseLeave={() => setOpen1(false)}
+                    className={`relative inline-block px-4 py-2 rounded-full cursor-pointer ${
+                      location.pathname?.includes("network")
+                        ? "!bg-[#A6AEC1] text-white"
+                        : "!bg-[#576278] text-[#C6C6C6]"
+                    }`}
+                  >
+                    Network Performance
+                    {open1 && (
+                      <div className="absolute left-0 top-full -mt-2 w-full bg-[#576278] border rounded shadow z-10">
+                        {networkOpt.map((option) => (
+                          <p
+                            key={option.value}
+                            className={`px-4 py-2 hover:bg-gray-500 cursor-pointer ${
+                              location.pathname?.includes(option.value)
+                                ? "!bg-[#A6AEC1] text-white"
+                                : "!bg-[#576278] text-[#C6C6C6]"
+                            }`}
+                            onClick={() => {
+                              handleMenuSelect(option.value);
+                              setOpen1(false);
+                            }}
+                          >
+                            {option.label}
+                          </p>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <Button
+                    className={`${
+                      location.pathname.includes("input-site")
+                        ? "!bg-[#A6AEC1]"
+                        : "!bg-[#576278]"
+                    } !border-0 !rounded-4xl !shadow-none`}
+                    onClick={() => {
+                      handleMenuSelect("input-site");
+                    }}
+                  >
+                    <p
+                      className={
+                        location.pathname.includes("input-site")
+                          ? "text-white "
+                          : "text-[#C6C6C6] "
+                      }
+                    >
+                      Reconsiliation
+                    </p>
+                  </Button>
+
+                  <Button
+                    className={`${
+                      location.pathname.includes("one")
+                        ? "!bg-[#A6AEC1]"
+                        : "!bg-[#576278]"
+                    } !border-0 !rounded-4xl !shadow-none`}
+                    onClick={() => {
+                      handleMenuSelect("one");
+                    }}
+                  >
+                    <p
+                      className={
+                        location.pathname.includes("one")
+                          ? "text-white "
+                          : "text-[#C6C6C6] "
+                      }
+                    >
+                      One Visibility
+                    </p>
+                  </Button>
+
+                  <Button
+                    className={`${
+                      location.pathname.includes("ticket")
+                        ? "!bg-[#A6AEC1]"
+                        : "!bg-[#576278]"
+                    } !border-0 !rounded-4xl !shadow-none`}
+                  >
+                    <p
+                      className={
+                        location.pathname.includes("ticket")
+                          ? "text-white "
+                          : "text-[#C6C6C6] "
+                      }
+                      onClick={() => {
+                        handleMenuSelect("ticket");
+                      }}
+                    >
+                      Ticket Quality
+                    </p>
+                  </Button>
+
+                  <Button
+                    className={`${
+                      location.pathname.includes("elibrary")
+                        ? "!bg-[#A6AEC1]"
+                        : "!bg-[#576278]"
+                    } !border-0 !rounded-4xl !shadow-none`}
+                    onClick={() => {
+                      handleMenuSelect("elibrary");
+                    }}
+                  >
+                    <p
+                      className={
+                        location.pathname.includes("elibrary")
+                          ? "text-white "
+                          : "text-[#C6C6C6] "
+                      }
+                    >
+                      E-Library
+                    </p>
+                  </Button>
+
+                  <Button
+                    className={`${
+                      location.pathname.includes("msa")
+                        ? "!bg-[#576278]"
+                        : "!bg-[#576278]"
+                    } !border-0 !rounded-4xl !shadow-none`}
+                    onClick={() => {
+                      handleMenuSelect("msa");
+                    }}
+                  >
+                    <p
+                      className={`cursor-pointer ${
+                        location.pathname.includes("dashboard-ta")
+                          ? "text-white"
+                          : "text-[#C6C6C6]"
+                      }`}
+                      onClick={() =>
+                        window.open("http://10.60.174.188:8008/", "_blank")
+                      }
+                    >
+                      Telkom Akses
+                    </p>
+                  </Button>
+                </div>
               )}
-  
+
               <div className="flex rounded-[54px] border border-[#DBDADE] gap-4 px-3 py-1 h-12 items-center justify-center">
                 <Image
                   src={notification}
@@ -441,7 +442,7 @@ const AppLayoutDefault = () => {
                   width={30}
                   preview={false}
                 />
-  
+
                 {/* Profile Dropdown */}
                 <div ref={profileRef} className="relative flex">
                   <Image
@@ -452,7 +453,7 @@ const AppLayoutDefault = () => {
                     preview={false}
                     onClick={() => setProfileOpen(!profileOpen)}
                   />
-  
+
                   {/* Dropdown Menu */}
                   {profileOpen && (
                     <div className="absolute right-0 top-full bg-white border border-gray-200 rounded-lg shadow-lg z-50">

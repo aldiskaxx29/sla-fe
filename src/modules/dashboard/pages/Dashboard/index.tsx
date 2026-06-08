@@ -72,22 +72,22 @@ function Dashboard() {
 
   //// Methods
 
-  /**
-   * @description Fetch customer list
-   *
-   * @return {Promise<void>} Promise<void>
-   */
+  const isDashboardMenu = menuId === "msa" || menuId === "cnop";
+  const isMsaRoute = menuId === "msa";
+
   const fetchDashboard = useCallback(async (): Promise<void> => {
     setLoading(true);
-
-    await getSC({
-      query: {
-        type: menuId,
-        filter,
-        treg: effectiveTreg,
-      },
-    }).unwrap();
-    setLoading(false);
+    try {
+      await getSC({
+        query: {
+          type: menuId,
+          filter,
+          treg: effectiveTreg,
+        },
+      }).unwrap();
+    } finally {
+      setLoading(false);
+    }
   }, [effectiveTreg, filter, getSC, menuId]);
 
   /**
@@ -111,7 +111,6 @@ function Dashboard() {
     } finally {
       setLoading(false);
     }
-    setLoading(false);
   }, [effectiveTreg, menuId, historyType, filter]);
 
   /**
@@ -174,33 +173,20 @@ function Dashboard() {
     }
   }, [menuId]);
 
-  // Fetch data based on menu selection
   useEffect(() => {
-    if (!menu) return;
-    const fetchData = async () => {
-      await fetchDashboard();
-      await fetchTrend();
-      await fetchHistory();
-    };
-
-    if (menuId === "msa") {
-      setTimeout(() => {
-        fetchData();
-      }, 500);
-    } else if (menuId === "cnop") {
-      setTimeout(() => {
-        fetchData();
-      }, 500);
-    }
-  }, [menu, filter, type, isLoadingSC, dataSC, menuId, treg]);
+    if (!isDashboardMenu) return;
+    fetchDashboard();
+  }, [fetchDashboard, isDashboardMenu]);
 
   useEffect(() => {
+    if (!isDashboardMenu) return;
     fetchHistory();
-  }, [historyType]);
+  }, [fetchHistory, historyType, isDashboardMenu]);
 
   useEffect(() => {
+    if (!isDashboardMenu) return;
     fetchTrend();
-  }, [level]);
+  }, [fetchTrend, isDashboardMenu, level]);
 
   useEffect(() => {
     setFilter("by ach");
@@ -208,9 +194,11 @@ function Dashboard() {
 
   return (
     <div className="text-nowrap bg-white">
-      {loading && <Spin fullscreen tip="Sedang Memuat Data..." />}
+      {loading && !isMsaRoute && (
+        <Spin fullscreen tip="Sedang Memuat Data..." />
+      )}
 
-      {menu.key === "msa" && dataSC && dataHistoryData ? (
+      {isMsaRoute && dataSC && dataHistoryData ? (
         <MSAmenu
           handlefilter={handlefilter}
           treg={treg}
@@ -224,11 +212,11 @@ function Dashboard() {
           filter={filter}
           setLevel={setLevel}
         />
-      ) : (
-        menu.key === "msa" && (
-          <div className="flex flex-col gap-4 h-[70vh] w-full justify-center items-center">
-            <Skeleton.Input active size="large" block />
-            <Skeleton.Input active size="large" block />
+        ) : (
+          isMsaRoute && (
+            <div className="flex flex-col gap-4 h-[70vh] w-full justify-center items-center">
+              <Skeleton.Input active size="large" block />
+              <Skeleton.Input active size="large" block />
             <Skeleton.Input active size="large" block />
             <Skeleton.Input active size="large" block />
             <Skeleton.Input active size="large" block />
