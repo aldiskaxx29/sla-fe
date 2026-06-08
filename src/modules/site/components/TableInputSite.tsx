@@ -35,6 +35,14 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
   const [searchedColumn, setSearchedColumn] = useState("");
   const searchInput = useRef<InputRef>(null);
 
+  const formatTableValue = (value: unknown): string | number => {
+    if (value === null || value === undefined || value === "") {
+      return "-";
+    }
+
+    return typeof value === "number" ? value : String(value);
+  };
+
   const handleSearch = (
     selectedKeys: string[],
     confirm: FilterDropdownProps["confirm"],
@@ -144,15 +152,17 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
       },
     },
     render: (text) =>
-      searchedColumn === dataIndex ? (
+      formatTableValue(text) === "-" ? (
+        "-"
+      ) : searchedColumn === dataIndex ? (
         <Highlighter
           highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
           searchWords={[searchText]}
           autoEscape
-          textToHighlight={text ? text.toString() : ""}
+          textToHighlight={String(formatTableValue(text))}
         />
       ) : (
-        text
+        formatTableValue(text)
       ),
   });
 
@@ -375,6 +385,8 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
         key: "detail_rca",
         align: "center",
         search: true,
+        width: 220,
+        ellipsis: true,
       },
       // {
       //   title: `Update Progres Cnq`,
@@ -504,6 +516,8 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
         dataIndex: "detail_rca",
         key: "detail_rca",
         align: "center",
+        width: 220,
+        ellipsis: true,
       },
       // {
       //   title: "INPUT EVIDENCE",
@@ -690,11 +704,12 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
   };
 
   return (
-    <div className="mt-8">
+    <div className="mt-8 min-w-max">
       <Table
         dataSource={dataSource}
         bordered
         className="rounded-xl"
+        scroll={{ x: "max-content" }}
         pagination={pagination}
         rowKey={(record, index) =>
           String(
@@ -818,7 +833,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
                     </span>
                   );
                 }
-                return text;
+                return formatTableValue(text);
               }}
             />
           )

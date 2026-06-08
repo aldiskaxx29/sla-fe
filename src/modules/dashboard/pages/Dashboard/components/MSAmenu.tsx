@@ -1,4 +1,5 @@
-import { Button, Image, Select } from "antd";
+import { Button, Image, Skeleton } from "antd";
+import { Component, useEffect } from "react";
 
 import warningIcon from "@/assets/warning.svg";
 import checkIcon from "@/assets/check.svg";
@@ -6,12 +7,36 @@ import xlxsIcon from "@/assets/file-spreadsheet.svg";
 import ChartMSA from "@/modules/dashboard/componets/ChartMSA";
 import { TableHistory } from "@/modules/dashboard/componets/TableHistory";
 import { TableParentChild } from "@/modules/dashboard/componets/TableParentChild";
-import { TableHistoryCNOP } from "@/modules/dashboard/componets/TableHistoryCNOP";
-import { snakeToPascal_Utils } from "@/app/utils/wording.utils";
 import AppDropdown from "@/app/components/AppDropdown";
-import { useEffect, useState, useMemo } from "react";
 import { useDashboard } from "@/modules/dashboard/hooks/dashboard.hooks";
 import { toast } from "react-toastify";
+
+class TableFallbackBoundary extends Component<
+  { children: React.ReactNode },
+  { hasError: boolean }
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="rounded-xl border border-dashed border-amber-300 bg-amber-50 px-4 py-5 text-sm text-amber-900">
+          Data tabel MSA gagal dirender. Silakan ubah filter atau muat ulang
+          halaman.
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
 
 const MSAmenu = ({
   dataSC,
@@ -25,10 +50,29 @@ const MSAmenu = ({
   handlefilter,
   filter,
   treg,
-  handleHistoryCNOP,
-  historyType,
-  parameterHistory,
 }) => {
+  const showTableSkeleton = isLoadingSC || !dataSC || !dataHistoryData;
+
+  const TableSkeleton = () => (
+    <div className="rounded-xl border border-[#DBDBDB] bg-white px-4 py-5">
+      <Skeleton active title={false} paragraph={{ rows: 1, width: ["35%"] }} />
+      <div className="mt-4 space-y-3">
+        {Array.from({ length: 7 }, (_, rowIndex) => (
+          <div key={rowIndex} className="grid gap-3 grid-cols-12">
+            {Array.from({ length: 12 }, (_, colIndex) => (
+              <Skeleton.Input
+                key={colIndex}
+                active
+                size="small"
+                className="!w-full !h-8"
+              />
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
   const dataWithIndex = (dataSource) => {
     return dataSource?.map((item, index) => {
       return {
@@ -77,20 +121,80 @@ const MSAmenu = ({
   ];
 
   const { getComply, dataComply } = useDashboard();
-  const [plRanToCoreOption, setPlRanToCoreOption] = useState("packetloss ran to core");
-  const [historyPeriod, setHistoryPeriod] = useState("monthly");
 
-  const HistoryOptions = [
-    "pl 5% ran to core",
-    "pl 1-5% ran to core",
-    "latency ran to core",
-    "jitter ran to core",
-    "mttrq ran to core major",
-    "mttrq ran to core minor",
-    "pl core to internet",
-    "latency core to internet",
-    "jitter core to internet",
-  ];
+  const normalizeMsaRows = (rows: Record<string, unknown>[]) => {
+    const dashIfEmpty = (value: unknown) =>
+      value === "" || value === null || value === undefined ? "-" : value;
+
+    const pickFirstValue = (row: Record<string, unknown>, keys: string[]) => {
+      for (const key of keys) {
+        const value = row[key];
+        if (value !== undefined && value !== null && value !== "") {
+          return value;
+        }
+      }
+      return "-";
+    };
+
+    return rows.map((row) => {
+      const normalized: Record<string, unknown> = {
+        ...row,
+      };
+
+      normalized.ach_fm_1 = dashIfEmpty(
+        pickFirstValue(row, ["ach_fm_prev", "ach_fm_prev_2"]),
+      );
+      normalized.ach_fm_2 = dashIfEmpty(
+        pickFirstValue(row, ["ach_fm_curr", "ach_fm_prev_1"]),
+      );
+
+      normalized.realisasi_fm_before_1 = dashIfEmpty(
+        pickFirstValue(row, [
+          "realisasi_fm_before_prev",
+          "realisasi_fm_before_prev_2",
+        ]),
+      );
+      normalized.realisasi_fm_after_1 = dashIfEmpty(
+        pickFirstValue(row, [
+          "realisasi_fm_after_prev",
+          "realisasi_fm_after_prev_2",
+        ]),
+      );
+      normalized.realisasi_fm_1 = dashIfEmpty(
+        pickFirstValue(row, ["realisasi_fm_prev", "realisasi_fm_prev_2"]),
+      );
+      normalized.score_fm_1 = dashIfEmpty(
+        pickFirstValue(row, ["score_fm_prev", "score_fm_prev_2"]),
+      );
+
+      normalized.realisasi_fm_before_2 = dashIfEmpty(
+        pickFirstValue(row, [
+          "realisasi_fm_before_curr",
+          "realisasi_fm_before_prev_1",
+        ]),
+      );
+      normalized.realisasi_fm_after_2 = dashIfEmpty(
+        pickFirstValue(row, [
+          "realisasi_fm_after_curr",
+          "realisasi_fm_after_prev_1",
+        ]),
+      );
+      normalized.realisasi_fm_2 = dashIfEmpty(
+        pickFirstValue(row, ["realisasi_fm_curr", "realisasi_fm_prev_1"]),
+      );
+      normalized.score_fm_2 = dashIfEmpty(
+        pickFirstValue(row, ["score_fm_curr", "score_fm_prev_1"]),
+      );
+
+      for (let week = 1; week <= 4; week += 1) {
+        const sourceKey = `ach_w${week}`;
+        normalized[`ach_1_${week}`] = dashIfEmpty(row[sourceKey]);
+        normalized[`ach_2_${week}`] = dashIfEmpty(row[sourceKey]);
+      }
+
+      return normalized;
+    });
+  };
 
   const getTrendChartData = (trendKey: string) => {
     const trendItem = trendData?.[trendKey];
@@ -141,6 +245,10 @@ const MSAmenu = ({
     fetchComply();
   }, []);
 
+  const msaRows = Array.isArray(dataSC?.data)
+    ? normalizeMsaRows(dataSC.data)
+    : [];
+
   return (
     <div>
       <div className="bg-white border border-[#DBDBDB] rounded-xl p-4 mx-6 ">
@@ -187,14 +295,13 @@ const MSAmenu = ({
               </div>
             </div> */}
           </div>
-          <div className="flex flex-wrap items-end gap-3 lg:gap-4">
+          <div className="flex gap-6">
             <AppDropdown
               title="Filter Area"
               placeholder="All"
               options={filterOptions}
               onChange={(value) => handletreg(value)}
               value={treg}
-              className="min-w-[250px] lg:min-w-[260px]"
             />
             <AppDropdown
               title="Filter By"
@@ -202,7 +309,6 @@ const MSAmenu = ({
               options={filterBy}
               onChange={(value) => handlefilter(value)}
               value={filter}
-              className="min-w-[250px] lg:min-w-[260px]"
             />
             {/* <Button
               onClick={handleDownloadMsa}
@@ -215,22 +321,26 @@ const MSAmenu = ({
             </Button> */}
             <Button
               onClick={() => {}}
-              className="!h-11 !px-3 py-2.5 !border-0 !rounded-full !bg-[#EDFFFD] shrink-0"
+              className="!h-11 !px-3 py-2.5 !border-0 !rounded-full !bg-[#EDFFFD]"
             >
               <p className="text-brand-secondary font-medium">Export as XLS</p>
               <Image src={xlxsIcon} alt="icon" width={16} preview={false} />
             </Button>
           </div>
         </div>
-        {!isLoadingSC && (
-          <div className="w-auto overflow-x-auto ">
-            <TableParentChild
-              treg={treg}
-              data={dataWithIndex(dataSC?.data)}
-              loadingMainData={isLoadingSC}
-            ></TableParentChild>
-          </div>
-        )}
+        <div className="w-auto overflow-x-auto ">
+          {showTableSkeleton ? (
+            <TableSkeleton />
+          ) : (
+            <TableFallbackBoundary key={`${treg}-${filter}-${msaRows.length}`}>
+              <TableParentChild
+                treg={treg}
+                data={dataWithIndex(msaRows)}
+                loadingMainData={false}
+              ></TableParentChild>
+            </TableFallbackBoundary>
+          )}
+        </div>
         <div className="flex justify-between border-b-[1px] mt-4 border-gray-200 font-medium mb-5">
           <div className="bg-[#EDEDED] py-2 px-4 rounded-full mb-3">
             <p className="text-base font-semibold">TREND ACHIEVEMENT</p>
@@ -270,170 +380,90 @@ const MSAmenu = ({
         </div>
         <div className=" flex gap-4 w-full overflow-auto">
           <div className="w-full">
-            {getTrendChartData("packetloss ran to core") && (
+            {trendData["packetloss ran to core"] && (
               <ChartMSA
                 description="Lower Better"
                 title="PACKETLOSS RAN-TO-CORE"
                 key="PACKETLOSS RAN-TO-CORE"
-                data={{
-                  week: trendData[plRanToCoreOption]?.data?.week || [],
-                  data: trendData[plRanToCoreOption]?.data?.data || [],
-                }}
-                extra={
-                  <Select
-                    value={plRanToCoreOption}
-                    onChange={(val) => setPlRanToCoreOption(val)}
-                    size="small"
-                    className="[&_.ant-select-selector]:!rounded-full"
-                    style={{ width: 90 }}
-                    options={[
-                      { value: "packetloss ran to core", label: "Default" },
-                      { value: "packetloss 1-5% ran to core", label: "1-5%" },
-                      { value: "packetloss >5% ran to core", label: ">5%" },
-                    ]}
-                  />
-                }
+                data={getTrendChartData("packetloss ran to core")!}
               />
             )}
-            {getTrendChartData("packetloss core to internet") && (
+            {trendData["packetloss core to internet"] && (
               <ChartMSA
                 description="Higher Better"
                 title="PACKETLOSS CORE-TO-INTERNET"
                 key="PACKETLOSS CORE-TO-INTERNET"
-                data={{
-                  week: trendData["packetloss core to internet"]?.data?.week,
-                  data: trendData["packetloss core to internet"]?.data?.data,
-                }}
+                data={getTrendChartData("packetloss core to internet")!}
               />
             )}
           </div>
-          {!getTrendChartData("packetloss ran to core") &&
-            !getTrendChartData("packetloss core to internet") &&
-            !getTrendChartData("latency ran to core") &&
-            !getTrendChartData("latency core to internet") &&
-            !getTrendChartData("jitter ran to core") &&
-            !getTrendChartData("jitter core to internet") &&
-            !getTrendChartData("mttrq ran to core major") &&
-            !getTrendChartData("mttrq ran to core minor") && (
-              <div className="w-full py-12 text-center text-gray-500">
-                Trend achievement belum tersedia atau format respons API tidak sesuai.
-              </div>
-            )}
           <div className="w-full">
-            {getTrendChartData("latency ran to core") && (
+            {trendData["latency ran to core"] && (
               <ChartMSA
                 description="Higher Better"
                 title="LATENCY RAN-TO-CORE"
                 key="LATENCY RAN-TO-CORE"
-                data={{
-                  week: trendData["latency ran to core"]?.data?.week,
-                  data: trendData["latency ran to core"]?.data?.data,
-                }}
+                data={getTrendChartData("latency ran to core")!}
               />
             )}
-            {getTrendChartData("latency core to internet") && (
+            {trendData["latency core to internet"] && (
               <ChartMSA
                 description="Higher Better"
                 title="LATENCY CORE-TO-INTERNET"
                 key="LATENCY CORE-TO-INTERNET"
-                data={{
-                  week: trendData["latency core to internet"]?.data?.week,
-                  data: trendData["latency core to internet"]?.data?.data,
-                }}
+                data={getTrendChartData("latency core to internet")!}
               />
             )}
           </div>
           <div className="w-full">
-            {getTrendChartData("jitter ran to core") && (
+            {trendData["jitter ran to core"] && (
               <ChartMSA
                 description="Higher Better"
                 title="JITTER RAN-TO-CORE"
                 key="JITTER RAN-TO-CORE"
-                data={{
-                  week: trendData["jitter ran to core"]?.data?.week,
-                  data: trendData["jitter ran to core"]?.data?.data,
-                }}
+                data={getTrendChartData("jitter ran to core")!}
               />
             )}
-            {getTrendChartData("jitter core to internet") && (
+            {trendData["jitter core to internet"] && (
               <ChartMSA
                 description="Higher Better"
                 title="JITTER CORE-TO-INTERNET"
                 key="JITTER CORE-TO-INTERNET"
-                data={{
-                  week: trendData["jitter core to internet"]?.data?.week,
-                  data: trendData["jitter core to internet"]?.data?.data,
-                }}
+                data={getTrendChartData("jitter core to internet")!}
               />
             )}
           </div>
           <div className="w-full">
-            {getTrendChartData("mttrq ran to core major") && (
+            {trendData["mttrq ran to core major"] && (
               <ChartMSA
                 description="Higher Better"
                 title="MTTRQ MAJOR"
                 key="MTTRQ MAJOR"
-                data={{
-                  week: trendData["mttrq ran to core major"]?.data?.week,
-                  data: trendData["mttrq ran to core major"]?.data?.data,
-                }}
+                data={getTrendChartData("mttrq ran to core major")!}
               />
             )}
-            {getTrendChartData("mttrq ran to core minor") && (
+            {trendData["mttrq ran to core minor"] && (
               <ChartMSA
                 description="Higher Better"
                 title="MTTRQ MINOR"
                 key="MTTRQ MINOR"
-                data={{
-                  week: trendData["mttrq ran to core minor"]?.data?.week,
-                  data: trendData["mttrq ran to core minor"]?.data?.data,
-                }}
+                data={getTrendChartData("mttrq ran to core minor")!}
               />
             )}
           </div>
         </div>
-        {isSuccessHistoryData && dataHistoryData && (
-          <div className="mt-6">
-            <div className="flex gap-4 items-center mb-3">
-              <div className="bg-[#EDEDED] py-2 px-4 rounded-full w-fit">
-                <p className="text-base font-semibold">DATA SLA</p>
-              </div>
-              <Select
-                value={historyPeriod}
-                onChange={(val) => setHistoryPeriod(val)}
-                className="[&_.ant-select-selector]:!rounded-full"
-                options={[
-                  { value: "monthly", label: "Monthly" },
-                  { value: "weekly", label: "Weekly" },
-                ]}
-                style={{ width: 120 }}
-              />
-              {historyPeriod === "weekly" && (
-                <Select
-                  value={historyType}
-                  onChange={(val) => handleHistoryCNOP(val)}
-                  className="[&_.ant-select-selector]:!rounded-full"
-                  options={HistoryOptions.map((opt) => ({
-                    value: opt,
-                    label: snakeToPascal_Utils(opt).replace("Pl", "PL"),
-                  }))}
-                  style={{ width: 250 }}
-                />
-              )}
-            </div>
-            <div className="w-auto overflow-x-auto">
-              {historyPeriod === "monthly" ? (
-                <TableHistory dataSource={dataHistoryData?.data} treg={treg} />
-              ) : (
-                <TableHistoryCNOP
-                  filter={filter}
-                  dataSource={dataHistoryData?.data}
-                  parameter={parameterHistory}
-                />
-              )}
-            </div>
+        <div className="mt-6">
+          <div className="bg-[#EDEDED] py-2 px-4 rounded-full mb-3 w-fit">
+            <p className="text-base font-semibold">MONTHLY DATA SLA</p>
           </div>
-        )}
+          <div className="w-auto overflow-x-auto">
+            {showTableSkeleton ? (
+              <TableSkeleton />
+            ) : (
+              <TableHistory dataSource={dataHistoryData?.data} treg={treg} />
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
