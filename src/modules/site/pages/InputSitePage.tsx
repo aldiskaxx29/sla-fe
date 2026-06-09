@@ -27,11 +27,7 @@ const SitePage = () => {
     current: 1,
     pageSize: 10,
   });
-  const mttrqParameters = [
-    "mttrq critical",
-    "mttrq major",
-    "mttrq minor",
-  ];
+  const mttrqParameters = ["mttrq critical", "mttrq major", "mttrq minor"];
   const isMttrqParameter = mttrqParameters.includes(parameter);
 
   const fetchSite = useCallback(async () => {
@@ -122,13 +118,13 @@ const SitePage = () => {
 
   const selectedWeeks = useMemo(
     () => filterWeeks.find((item) => item.month === month)?.value ?? [],
-    [month]
+    [month],
   );
 
   useEffect(() => {
     if (!selectedWeeks.length) return;
     setWeek((currentWeek) =>
-      selectedWeeks.includes(currentWeek) ? currentWeek : selectedWeeks[0]
+      selectedWeeks.includes(currentWeek) ? currentWeek : selectedWeeks[0],
     );
   }, [selectedWeeks]);
 
@@ -202,6 +198,7 @@ const SitePage = () => {
 
   return (
     <div className="bg-white border border-[#DBDBDB] rounded-xl p-4 m-6 overflow-x-hidden">
+      {loading && <Spin fullscreen tip="Sedang Memuat Data..." />}
       <div className="flex justify-between mb-6 gap-4 overflow-x-auto">
         {/* <div className="bg-[#EDEDED] max-w-[210px] rounded-[54px] px-4 py-1 h-10 flex justify-center items-center mr-2">
           <p className="font-semibold text-[#0E2133] text-base">REKONSILIASI</p>
@@ -229,7 +226,6 @@ const SitePage = () => {
             onChange={(value) => setParameter(value)}
           />
           <AppDropdown
-            
             title="Tahun"
             placeholder="All"
             options={optYear}
@@ -277,18 +273,19 @@ const SitePage = () => {
         </div>
       </div>
       <div className="w-full overflow-x-auto">
-        <TableInputSite
-          dataSource={dataSite?.data ?? []}
-          isLoading={loading || !dataSite?.data}
-          parameter={parameter}
-          week={week}
-          month={month}
-          year={year}
-          setTrigger={setTrigger}
-          pagination={pagination}
-          onChange={(pag) => setPagination(pag)}
-          setPagination={setPagination}
-        />
+        {dataSite && (
+          <TableInputSite
+            dataSource={dataSite.data}
+            parameter={parameter}
+            week={week}
+            month={month}
+            year={year}
+            setTrigger={setTrigger}
+            pagination={pagination}
+            onChange={(pag) => setPagination(pag)}
+            setPagination={setPagination}
+          />
+        )}
       </div>
     </div>
   );

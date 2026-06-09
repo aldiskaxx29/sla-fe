@@ -76,6 +76,9 @@ function Dashboard() {
   const isDashboardMenu = menuId === "msa" || menuId === "cnop";
   const isMsaRoute = menuId === "msa";
 
+  const isDashboardMenu = menuId === "msa" || menuId === "cnop";
+  const isMsaRoute = menuId === "msa";
+
   const fetchDashboard = useCallback(async (): Promise<void> => {
     setLoading(true);
     try {
@@ -201,7 +204,7 @@ function Dashboard() {
         <Spin fullscreen tip="Sedang Memuat Data..." />
       )}
 
-      {isMsaRoute && (
+      {isMsaRoute && dataSC && dataHistoryData ? (
         <MSAmenu
           handlefilter={handlefilter}
           treg={treg}
@@ -215,10 +218,23 @@ function Dashboard() {
           level={level}
           filter={filter}
           setLevel={setLevel}
-          handleHistoryCNOP={handleHistoryCNOP}
-          historyType={historyType}
-          parameterHistory={historyType}
         />
+      ) : (
+        isMsaRoute && (
+          <div className="flex flex-col gap-4 h-[70vh] w-full justify-center items-center">
+            <Skeleton.Input active size="large" block />
+            <Skeleton.Input active size="large" block />
+            <Skeleton.Input active size="large" block />
+            <Skeleton.Input active size="large" block />
+            <Skeleton.Input active size="large" block />
+            <Skeleton.Input active size="large" block />
+            <Skeleton.Input active size="large" block />
+            <Skeleton.Input active size="large" block />
+            <Skeleton.Input active size="large" block />
+            <Skeleton.Input active size="large" block />
+            <Skeleton.Input active size="large" block />
+          </div>
+        )
       )}
 
       {menu.key === "cnop" && dataSC ? (

@@ -1,4 +1,4 @@
-import { Button, Image } from "antd";
+import { Button, Image, Skeleton } from "antd";
 import { Component, useEffect } from "react";
 
 import warningIcon from "@/assets/warning.svg";
@@ -28,8 +28,7 @@ class TableFallbackBoundary extends Component<
     if (this.state.hasError) {
       return (
         <div className="rounded-xl border border-dashed border-amber-300 bg-amber-50 px-4 py-5 text-sm text-amber-900">
-          Data tabel MSA gagal dirender. Silakan ubah filter atau muat ulang
-          halaman.
+          Data tabel MSA gagal dirender. Silakan ubah filter atau muat ulang halaman.
         </div>
       );
     }
@@ -52,6 +51,28 @@ const MSAmenu = ({
   filter,
   treg,
 }) => {
+  const showTableSkeleton = isLoadingSC || !dataSC || !dataHistoryData;
+
+  const TableSkeleton = () => (
+    <div className="rounded-xl border border-[#DBDBDB] bg-white px-4 py-5">
+      <Skeleton active title={false} paragraph={{ rows: 1, width: ["35%"] }} />
+      <div className="mt-4 space-y-3">
+        {Array.from({ length: 7 }, (_, rowIndex) => (
+          <div key={rowIndex} className="grid gap-3 grid-cols-12">
+            {Array.from({ length: 12 }, (_, colIndex) => (
+              <Skeleton.Input
+                key={colIndex}
+                active
+                size="small"
+                className="!w-full !h-8"
+              />
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
   const dataWithIndex = (dataSource) => {
     return dataSource?.map((item, index) => {
       return {
@@ -121,48 +142,36 @@ const MSAmenu = ({
       };
 
       normalized.ach_fm_1 = dashIfEmpty(
-        pickFirstValue(row, ["ach_fm_prev", "ach_fm_prev_2"]),
+        pickFirstValue(row, ["ach_fm_prev", "ach_fm_prev_2"])
       );
       normalized.ach_fm_2 = dashIfEmpty(
-        pickFirstValue(row, ["ach_fm_curr", "ach_fm_prev_1"]),
+        pickFirstValue(row, ["ach_fm_curr", "ach_fm_prev_1"])
       );
 
       normalized.realisasi_fm_before_1 = dashIfEmpty(
-        pickFirstValue(row, [
-          "realisasi_fm_before_prev",
-          "realisasi_fm_before_prev_2",
-        ]),
+        pickFirstValue(row, ["realisasi_fm_before_prev", "realisasi_fm_before_prev_2"])
       );
       normalized.realisasi_fm_after_1 = dashIfEmpty(
-        pickFirstValue(row, [
-          "realisasi_fm_after_prev",
-          "realisasi_fm_after_prev_2",
-        ]),
+        pickFirstValue(row, ["realisasi_fm_after_prev", "realisasi_fm_after_prev_2"])
       );
       normalized.realisasi_fm_1 = dashIfEmpty(
-        pickFirstValue(row, ["realisasi_fm_prev", "realisasi_fm_prev_2"]),
+        pickFirstValue(row, ["realisasi_fm_prev", "realisasi_fm_prev_2"])
       );
       normalized.score_fm_1 = dashIfEmpty(
-        pickFirstValue(row, ["score_fm_prev", "score_fm_prev_2"]),
+        pickFirstValue(row, ["score_fm_prev", "score_fm_prev_2"])
       );
 
       normalized.realisasi_fm_before_2 = dashIfEmpty(
-        pickFirstValue(row, [
-          "realisasi_fm_before_curr",
-          "realisasi_fm_before_prev_1",
-        ]),
+        pickFirstValue(row, ["realisasi_fm_before_curr", "realisasi_fm_before_prev_1"])
       );
       normalized.realisasi_fm_after_2 = dashIfEmpty(
-        pickFirstValue(row, [
-          "realisasi_fm_after_curr",
-          "realisasi_fm_after_prev_1",
-        ]),
+        pickFirstValue(row, ["realisasi_fm_after_curr", "realisasi_fm_after_prev_1"])
       );
       normalized.realisasi_fm_2 = dashIfEmpty(
-        pickFirstValue(row, ["realisasi_fm_curr", "realisasi_fm_prev_1"]),
+        pickFirstValue(row, ["realisasi_fm_curr", "realisasi_fm_prev_1"])
       );
       normalized.score_fm_2 = dashIfEmpty(
-        pickFirstValue(row, ["score_fm_curr", "score_fm_prev_1"]),
+        pickFirstValue(row, ["score_fm_curr", "score_fm_prev_1"])
       );
 
       for (let week = 1; week <= 4; week += 1) {
@@ -224,9 +233,7 @@ const MSAmenu = ({
     fetchComply();
   }, []);
 
-  const msaRows = Array.isArray(dataSC?.data)
-    ? normalizeMsaRows(dataSC.data)
-    : [];
+  const msaRows = Array.isArray(dataSC?.data) ? normalizeMsaRows(dataSC.data) : [];
 
   return (
     <div>
@@ -308,13 +315,17 @@ const MSAmenu = ({
           </div>
         </div>
         <div className="w-auto overflow-x-auto ">
-          <TableFallbackBoundary key={`${treg}-${filter}-${msaRows.length}`}>
-            <TableParentChild
-              treg={treg}
-              data={dataWithIndex(msaRows)}
-              loadingMainData={isLoadingSC || !dataSC || msaRows.length === 0}
-            ></TableParentChild>
-          </TableFallbackBoundary>
+          {showTableSkeleton ? (
+            <TableSkeleton />
+          ) : (
+            <TableFallbackBoundary key={`${treg}-${filter}-${msaRows.length}`}>
+              <TableParentChild
+                treg={treg}
+                data={dataWithIndex(msaRows)}
+                loadingMainData={false}
+              ></TableParentChild>
+            </TableFallbackBoundary>
+          )}
         </div>
         <div className="flex justify-between border-b-[1px] mt-4 border-gray-200 font-medium mb-5">
           <div className="bg-[#EDEDED] py-2 px-4 rounded-full mb-3">
@@ -432,17 +443,13 @@ const MSAmenu = ({
             <p className="text-base font-semibold">MONTHLY DATA SLA</p>
           </div>
           <div className="w-auto overflow-x-auto">
-            <TableHistory
-              dataSource={dataHistoryData?.data ?? []}
-              treg={treg}
-              loadingMainData={
-                isLoadingHistoryData ||
-                !dataHistoryData ||
-                (Array.isArray(dataHistoryData?.data) &&
-                  dataHistoryData.data.length === 0)
-              }
-            />
+            {showTableSkeleton ? (
+              <TableSkeleton />
+            ) : (
+              <TableHistory dataSource={dataHistoryData?.data} treg={treg} />
+            )}
           </div>
+        </div>
         </div>
       </div>
     </div>
