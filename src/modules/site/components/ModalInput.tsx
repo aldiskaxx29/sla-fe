@@ -326,7 +326,8 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week, year }
       footer={null}
       centered
       width={760}
-      destroyOnClose
+      destroyOnHidden
+      forceRender
       className="site-input-modal"
       styles={{
         body: {
@@ -584,18 +585,19 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week, year }
                   />
                 </div>
               ) : (
-                <p className="ant-upload-drag-icon">
+                <div className="ant-upload-drag-icon">
                   <UploadOutlined />
-                  <p>Upload File</p>
-                </p>
+                  <span>Upload File</span>
+                </div>
               )}
             </Upload.Dragger>
-            {preview && (
-              <Button className="mt-3" onClick={handleIconDownload}>
-                Download Evidance
-              </Button>
-            )}
           </Form.Item>
+
+          {preview && (
+            <Button className="mt-3" onClick={handleIconDownload}>
+              Download Evidance
+            </Button>
+          )}
 
           <div className="sticky bottom-0 z-10 -mx-2 mt-6 flex justify-end gap-2 border-t border-[#E5E7EB] bg-white px-2 pt-4 pb-2">
             <Button

@@ -725,29 +725,34 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
         className="rounded-xl"
         scroll={{ x: "max-content" }}
         pagination={pagination}
-        rowKey={(record, index) =>
+        rowKey={(record) =>
           String(
             record.id ??
               record.site_id ??
               record.ticket_id ??
               record.no ??
-              index
+              record.month ??
+              record.week ??
+              record.RCA ??
+              record.detail_rca ??
+              record.action ??
+              record.button_req
           )
         }
         onChange={(pag) => setPagination(pag)}
       >
-        {columns.map((column) =>
+        {columns.map((column, columnIndex) =>
           column.children ? (
             <ColumnGroup
-              key={column.key ?? column.title}
+              key={column.key ?? column.dataIndex ?? column.title ?? columnIndex}
               title={column.title}
               onHeaderCell={() => ({
                 className: "!bg-blue-pacific",
               })}
             >
-              {column.children.map((child) => (
+              {column.children.map((child, childIndex) => (
                 <Column
-                  key={child.dataIndex}
+                  key={child.key ?? child.dataIndex ?? child.title ?? childIndex}
                   title={child.title}
                   dataIndex={child.dataIndex}
                   width="fit-content"
@@ -764,7 +769,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
             </ColumnGroup>
           ) : (
             <Column
-              key={column.dataIndex}
+              key={column.key ?? column.dataIndex ?? column.title ?? columnIndex}
               title={column.title}
               dataIndex={column.dataIndex}
               width={column.width}

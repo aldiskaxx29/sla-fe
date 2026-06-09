@@ -35,18 +35,20 @@ const NetworkPage = () => {
             className="w-full min-h-[100vh]"
           />
         ))}
-      {menuId === "core-perf" &&
+      {menuId === "core-perf" && (
         <iframe
           src="https://qosmo.telkom.co.id/executive/?page=core"
           title="Core Perf Dashboard"
           className="w-full min-h-[100vh]"
-        />}
-      {menuId === "cdn-perf" &&
+        />
+      )}
+      {menuId === "cdn-perf" && (
         <iframe
           src="https://qosmo.telkom.co.id/executive/?page=cdn"
           title="CDN Perf Dashboard"
           className="w-full min-h-[100vh]"
-        />}
+        />
+      )}
       {menuId === "quality-healthiness" && <QualityHealthinessPage />}
     </>
   );

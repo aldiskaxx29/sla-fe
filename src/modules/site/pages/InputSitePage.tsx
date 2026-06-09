@@ -27,12 +27,36 @@ const SitePage = () => {
     current: 1,
     pageSize: 10,
   });
-  const mttrqParameters = [
-    "mttrq critical",
-    "mttrq major",
-    "mttrq minor",
-  ];
+  const mttrqParameters = ["mttrq critical", "mttrq major", "mttrq minor"];
   const isMttrqParameter = mttrqParameters.includes(parameter);
+
+  const filterWeeks = [
+    { month: "1", value: ["all", "1", "2", "3", "4"] },
+    { month: "2", value: ["all", "5", "6", "7", "8"] },
+    { month: "3", value: ["all", "9", "10", "11", "12", "13"] },
+    { month: "4", value: ["all", "14", "15", "16", "17"] },
+    { month: "5", value: ["all", "18", "19", "20", "21"] },
+    { month: "6", value: ["all", "22", "23", "24", "25", "26"] },
+    { month: "7", value: ["all", "27", "28", "29", "30"] },
+    { month: "8", value: ["all", "31", "32", "33", "34"] },
+    { month: "9", value: ["all", "35", "36", "37", "38", "39"] },
+    { month: "10", value: ["all", "40", "41", "42", "43"] },
+    { month: "11", value: ["all", "44", "45", "46", "47"] },
+    { month: "12", value: ["all", "48", "49", "50", "51", "52"] },
+  ];
+
+  const selectedWeeks = useMemo(
+    () => filterWeeks.find((item) => item.month === month)?.value ?? [],
+    [month],
+  );
+
+  const normalizedWeek = useMemo(() => {
+    if (!selectedWeeks.length) return "";
+    return selectedWeeks.includes(week) ? week : selectedWeeks[0];
+  }, [selectedWeeks, week]);
+
+  const effectiveWeek = isMttrqParameter ? "" : normalizedWeek;
+  const effectiveMonth = month;
 
   const fetchSite = useCallback(async () => {
     setLoading(true);
@@ -43,9 +67,8 @@ const SitePage = () => {
           exclude,
           parameter,
           year,
-          month,
-          ...(!isMttrqParameter && { week }),
-          ...(isMttrqParameter && { month }),
+          month: effectiveMonth,
+          ...(!isMttrqParameter && { week: effectiveWeek }),
         },
       }).unwrap();
     } catch (error) {
@@ -53,12 +76,32 @@ const SitePage = () => {
     } finally {
       setLoading(false);
     }
-  }, [exclude, parameter, month, week, year, prev, isMttrqParameter, getSite]);
+  }, [
+    exclude,
+    parameter,
+    effectiveMonth,
+    effectiveWeek,
+    year,
+    prev,
+    isMttrqParameter,
+    getSite,
+  ]);
 
   useEffect(() => {
-    if (!week || !month || !year) return;
+    if (!month || !year) return;
+    if (!isMttrqParameter && !effectiveWeek) return;
     fetchSite();
-  }, [exclude, parameter, year, week, month, trigger, prev, fetchSite]);
+  }, [
+    exclude,
+    parameter,
+    year,
+    month,
+    trigger,
+    prev,
+    isMttrqParameter,
+    effectiveWeek,
+    fetchSite,
+  ]);
 
   const optPrev = [
     // { label: "All", value: "all" },
@@ -91,21 +134,6 @@ const SitePage = () => {
     { label: "2030", value: "2030" },
   ];
 
-  const filterWeeks = [
-    { month: "1", value: ["all", "1", "2", "3", "4"] },
-    { month: "2", value: ["all", "5", "6", "7", "8"] },
-    { month: "3", value: ["all", "9", "10", "11", "12", "13"] },
-    { month: "4", value: ["all", "14", "15", "16", "17"] },
-    { month: "5", value: ["all", "18", "19", "20", "21"] },
-    { month: "6", value: ["all", "22", "23", "24", "25", "26"] },
-    { month: "7", value: ["all", "27", "28", "29", "30"] },
-    { month: "8", value: ["all", "31", "32", "33", "34"] },
-    { month: "9", value: ["all", "35", "36", "37", "38", "39"] },
-    { month: "10", value: ["all", "40", "41", "42", "43"] },
-    { month: "11", value: ["all", "44", "45", "46", "47"] },
-    { month: "12", value: ["all", "48", "49", "50", "51", "52"] },
-  ];
-
   const optMonths = Array.from({ length: 12 }, (_, i) => ({
     label: dayjs().month(i).format("MMMM"),
     value: String(i + 1),
@@ -120,17 +148,10 @@ const SitePage = () => {
       }));
   }, [month]);
 
-  const selectedWeeks = useMemo(
-    () => filterWeeks.find((item) => item.month === month)?.value ?? [],
-    [month]
-  );
-
   useEffect(() => {
-    if (!selectedWeeks.length) return;
-    setWeek((currentWeek) =>
-      selectedWeeks.includes(currentWeek) ? currentWeek : selectedWeeks[0]
-    );
-  }, [selectedWeeks]);
+    if (!normalizedWeek || normalizedWeek === week) return;
+    setWeek(normalizedWeek);
+  }, [normalizedWeek, week]);
 
   const [downloadTemplate] = useLazyDownload_templateQuery();
 
@@ -141,10 +162,8 @@ const SitePage = () => {
           exclude,
           parameter,
           year,
-          month,
-          week,
-          ...(!isMttrqParameter && { week }),
-          ...(isMttrqParameter && { month }),
+          month: effectiveMonth,
+          ...(!isMttrqParameter && { week: effectiveWeek }),
         },
       }).unwrap();
 
@@ -168,7 +187,14 @@ const SitePage = () => {
     } catch (error) {
       console.error("Failed to download the file:", error);
     }
-  }, [exclude, month, parameter, week]);
+  }, [
+    exclude,
+    effectiveMonth,
+    effectiveWeek,
+    parameter,
+    isMttrqParameter,
+    downloadTemplate,
+  ]);
   const [uploadTemplate, { isLoading }] = useUpload_templateMutation();
 
   const handleUpload = async (options) => {
@@ -229,7 +255,6 @@ const SitePage = () => {
             onChange={(value) => setParameter(value)}
           />
           <AppDropdown
-            
             title="Tahun"
             placeholder="All"
             options={optYear}
@@ -281,8 +306,8 @@ const SitePage = () => {
           dataSource={dataSite?.data ?? []}
           isLoading={loading || !dataSite?.data}
           parameter={parameter}
-          week={week}
-          month={month}
+          week={effectiveWeek}
+          month={effectiveMonth}
           year={year}
           setTrigger={setTrigger}
           pagination={pagination}

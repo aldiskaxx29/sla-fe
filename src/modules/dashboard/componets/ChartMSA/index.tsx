@@ -33,9 +33,10 @@ interface ChartMSAProps {
     week: string[];
     data: { name: string; data: (number | string)[] }[];
   };
+  extra?: React.ReactNode;
 }
 
-const ChartMSA: React.FC<ChartMSAProps> = ({ title, description, data }) => {
+const ChartMSA: React.FC<ChartMSAProps> = ({ title, description, data, extra }) => {
   const monthMapping: Record<number, string> = {
     1: "Jan",
     2: "Feb",
@@ -155,14 +156,17 @@ const ChartMSA: React.FC<ChartMSAProps> = ({ title, description, data }) => {
 
   return (
     <div className="w-full p-2">
-      <div className="flex justify-between my-2">
-        <p className="font-bold text-sm">{title}</p>
+      <div className="flex justify-between my-2 items-center">
+        <div className="flex items-center gap-2">
+          <p className="font-bold text-sm">{title}</p>
+          {extra && <div>{extra}</div>}
+        </div>
         <div className="flex gap-2 items-center">
-          {description.includes("Lower") ? (
+          {/* {description.includes("Lower") ? (
             <Image className="" src={ArrowDown} alt="logo" width={24} />
           ) : (
             <Image src={ArrowUp} alt="logo" width={24} />
-          )}
+          )} */}
           <div
             className={`${
               description.includes("Lower") ? "bg-[#FFE7BA]" : "bg-[#BAE7FF]"

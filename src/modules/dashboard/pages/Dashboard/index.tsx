@@ -123,6 +123,8 @@ function Dashboard() {
   const fetchTrend = useCallback(async (): Promise<void> => {
     const trendParameters = [
       "packetloss ran to core",
+      "packetloss 1-5% ran to core",
+      "packetloss >5% ran to core",
       "latency ran to core",
       "jitter ran to core",
       "packetloss core to internet",

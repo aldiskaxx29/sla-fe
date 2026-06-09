@@ -297,14 +297,13 @@ const MSAmenu = ({
               </div>
             </div> */}
           </div>
-          <div className="flex flex-wrap items-end gap-3 lg:gap-4">
+          <div className="flex gap-6">
             <AppDropdown
               title="Filter Area"
               placeholder="All"
               options={filterOptions}
               onChange={(value) => handletreg(value)}
               value={treg}
-              className="min-w-[250px] lg:min-w-[260px]"
             />
             <AppDropdown
               title="Filter By"
@@ -312,7 +311,6 @@ const MSAmenu = ({
               options={filterBy}
               onChange={(value) => handlefilter(value)}
               value={filter}
-              className="min-w-[250px] lg:min-w-[260px]"
             />
             {/* <Button
               onClick={handleDownloadMsa}
@@ -325,7 +323,7 @@ const MSAmenu = ({
             </Button> */}
             <Button
               onClick={() => {}}
-              className="!h-11 !px-3 py-2.5 !border-0 !rounded-full !bg-[#EDFFFD] shrink-0"
+              className="!h-11 !px-3 py-2.5 !border-0 !rounded-full !bg-[#EDFFFD]"
             >
               <p className="text-brand-secondary font-medium">Export as XLS</p>
               <Image src={xlxsIcon} alt="icon" width={16} preview={false} />
