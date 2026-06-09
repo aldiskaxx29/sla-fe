@@ -1,5 +1,5 @@
 // Antd
-import { Checkbox, Image, Spin, Table } from "antd";
+import { Checkbox, Image, Skeleton, Table } from "antd";
 import ModalInput from "./ModalInput";
 import { useMemo, useState } from "react";
 import { EditOutlined } from "@ant-design/icons";
@@ -14,6 +14,7 @@ interface TableHistoryProps {
   week: string;
   month: string;
   year: string;
+  isLoadingData?: boolean;
 }
 
 const TableReportSite: React.FC<TableHistoryProps> = ({
@@ -22,6 +23,7 @@ const TableReportSite: React.FC<TableHistoryProps> = ({
   month,
   week,
   year,
+  isLoadingData = false,
 }) => {
   const [open, setOpen] = useState(false);
   const [openClear, setOpenClear] = useState(false);
@@ -29,6 +31,14 @@ const TableReportSite: React.FC<TableHistoryProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [currentStatusSite, setCurrentStatusSite] = useState(""); // State untuk menyimpan status_site
   const { getClearData } = useSite();
+  const skeletonRows = useMemo(
+    () =>
+      Array.from({ length: 10 }, (_, index) => ({
+        __skeleton: true,
+        key: `skeleton-${index}`,
+      })),
+    []
+  );
 
   const columns1 = [
     {
@@ -195,6 +205,15 @@ const TableReportSite: React.FC<TableHistoryProps> = ({
     [dataSource]
   );
 
+  const tableData = isLoadingData ? skeletonRows : dataWithIndex;
+  const isSkeletonRow = (record: Record<string, unknown>) =>
+    Boolean((record as { __skeleton?: boolean }).__skeleton);
+  const renderSkeletonCell = () => (
+    <div className="flex items-center w-full py-1.5">
+      <Skeleton.Input active size="small" style={{ width: "100%", height: 16 }} />
+    </div>
+  );
+
   const handleSave = () => {
     console.log("Pajangan");
   };
@@ -202,6 +221,8 @@ const TableReportSite: React.FC<TableHistoryProps> = ({
   const openModalClear = async (record, statusSite) => {
     try {
       setIsLoading(true);
+      setOpenClear(true);
+      setDataModal([]);
       const response = await getClearData({
         query: {
           region: record.region_tsel,
@@ -214,9 +235,9 @@ const TableReportSite: React.FC<TableHistoryProps> = ({
       }).unwrap();
 
       setDataModal(response?.data);
-      setOpenClear(true);
     } catch (error) {
       console.error("Error", error);
+      setOpenClear(false);
     } finally {
       setIsLoading(false);
     }
@@ -230,12 +251,17 @@ const TableReportSite: React.FC<TableHistoryProps> = ({
 
   return (
     <div className="mt-8">
-      {isLoading && <Spin fullscreen tip="Sedang Memuat Data..." />}
       <Table
-        dataSource={dataWithIndex}
+        dataSource={tableData}
         bordered
         className="rounded-xl "
         pagination={{ pageSize: 1000000, hideOnSinglePage: true }}
+        rowKey={(record, index) =>
+          (record as Record<string, unknown>)?.key || `row-${index}`
+        }
+        onRow={(record) =>
+          isSkeletonRow(record) ? { style: { height: 48 } } : {}
+        }
       >
         {columns.map((column) =>
           column.children ? (
@@ -254,6 +280,9 @@ const TableReportSite: React.FC<TableHistoryProps> = ({
                   onHeaderCell={child.onHeaderCell}
                   fixed={child.fixed}
                   render={(text, record) => {
+                    if (isSkeletonRow(record)) {
+                      return renderSkeletonCell();
+                    }
                     const isLast = record?.region_tsel
                       ?.toLowerCase()
                       .includes("nation");
@@ -289,6 +318,9 @@ const TableReportSite: React.FC<TableHistoryProps> = ({
               fixed={column.fixed}
               align={column.align}
               render={(text, record) => {
+                if (isSkeletonRow(record)) {
+                  return renderSkeletonCell();
+                }
                 const isLast = record?.region_tsel
                   ?.toLowerCase()
                   .includes("nation");
@@ -335,6 +367,7 @@ const TableReportSite: React.FC<TableHistoryProps> = ({
         open={openClear}
         data={dataModal}
         parameter={parameter}
+        isLoading={isLoading}
         onCancel={() => {
           setOpenClear(false);
         }}

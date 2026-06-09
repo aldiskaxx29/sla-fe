@@ -11,6 +11,7 @@ import {
 
 const SitePage = () => {
   const [loading, setLoading] = useState(false);
+  const [exportLoading, setExportLoading] = useState(false);
   const [week, setWeek] = useState("1");
   // month is 1-based to match dropdown values (1..12)
   const [month, setMonth] = useState(String(new Date().getMonth() + 1));
@@ -22,6 +23,7 @@ const SitePage = () => {
 
   const handleDownload = useCallback(async () => {
     try {
+      setExportLoading(true);
       const result = await downloadRecon({
         query: {
           parameter,
@@ -52,6 +54,8 @@ const SitePage = () => {
       URL.revokeObjectURL(blobUrl);
     } catch (error) {
       console.error("Failed to download the file:", error);
+    } finally {
+      setExportLoading(false);
     }
   }, [year,month, parameter, week]);
   /**
@@ -160,8 +164,6 @@ const SitePage = () => {
 
   return (
     <div className="bg-white border border-[#DBDBDB] rounded-xl p-4 mx-6 ">
-      {loading && <Spin fullscreen tip="Sedang Memuat Data..." />}
-
       <div className="flex justify-between mb-6">
         <div className="bg-[#EDEDED] rounded-[54px] px-4 py-2 h-12 flex justify-center items-center">
           <span className="font-semibold text-[#0E2133] text-base w-full">
@@ -219,6 +221,7 @@ const SitePage = () => {
             onClick={() => {
               handleDownload();
             }}
+            loading={exportLoading}
             className="!h-11 !px-3 py-2.5 !border-0 !rounded-full !bg-[#EDFFFD]"
           >
             <p className="text-brand-secondary font-medium">Export Recon</p>
@@ -242,15 +245,16 @@ const SitePage = () => {
               year={year}
             />
           </div>
-        ) : dataReportSite && "data" in dataReportSite ? (
+        ) : (
           <TableReportSite
-            dataSource={dataReportSite.data as Record<string, unknown>[]}
+            dataSource={(dataReportSite?.data as Record<string, unknown>[]) ?? []}
             parameter={parameter}
             week={week}
             month={month}
             year={year}
+            isLoadingData={loading || isLoadingSite || !dataReportSite}
           />
-        ) : null}
+        )}
       </div>
     </div>
   );

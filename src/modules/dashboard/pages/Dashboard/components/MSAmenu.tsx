@@ -1,4 +1,4 @@
-import { Button, Image } from "antd";
+import { Button, Image, Skeleton } from "antd";
 import { Component, useEffect } from "react";
 
 import warningIcon from "@/assets/warning.svg";
@@ -43,6 +43,8 @@ const MSAmenu = ({
   dataHistoryData,
   isSuccessHistoryData,
   isLoadingHistoryData,
+  isTrendLoading,
+  isTrendReady,
   trendData,
   level,
   setLevel,
@@ -104,6 +106,12 @@ const MSAmenu = ({
     const dashIfEmpty = (value: unknown) =>
       value === "" || value === null || value === undefined ? "-" : value;
 
+    const hasExplicitMonthlyKeys = (row: Record<string, unknown>) =>
+      Object.keys(row).some((key) => {
+        const match = key.match(/^ach_fm_(\d+)$/);
+        return Boolean(match && Number(match[1]) > 2);
+      });
+
     const pickFirstValue = (row: Record<string, unknown>, keys: string[]) => {
       for (const key of keys) {
         const value = row[key];
@@ -119,38 +127,40 @@ const MSAmenu = ({
         ...row,
       };
 
-      normalized.ach_fm_1 = dashIfEmpty(
-        pickFirstValue(row, ["ach_fm_prev", "ach_fm_prev_2"])
-      );
-      normalized.ach_fm_2 = dashIfEmpty(
-        pickFirstValue(row, ["ach_fm_curr", "ach_fm_prev_1"])
-      );
+      if (!hasExplicitMonthlyKeys(row)) {
+        normalized.ach_fm_1 = dashIfEmpty(
+          pickFirstValue(row, ["ach_fm_prev", "ach_fm_prev_2"])
+        );
+        normalized.ach_fm_2 = dashIfEmpty(
+          pickFirstValue(row, ["ach_fm_curr", "ach_fm_prev_1"])
+        );
 
-      normalized.realisasi_fm_before_1 = dashIfEmpty(
-        pickFirstValue(row, ["realisasi_fm_before_prev", "realisasi_fm_before_prev_2"])
-      );
-      normalized.realisasi_fm_after_1 = dashIfEmpty(
-        pickFirstValue(row, ["realisasi_fm_after_prev", "realisasi_fm_after_prev_2"])
-      );
-      normalized.realisasi_fm_1 = dashIfEmpty(
-        pickFirstValue(row, ["realisasi_fm_prev", "realisasi_fm_prev_2"])
-      );
-      normalized.score_fm_1 = dashIfEmpty(
-        pickFirstValue(row, ["score_fm_prev", "score_fm_prev_2"])
-      );
+        normalized.realisasi_fm_before_1 = dashIfEmpty(
+          pickFirstValue(row, ["realisasi_fm_before_prev", "realisasi_fm_before_prev_2"])
+        );
+        normalized.realisasi_fm_after_1 = dashIfEmpty(
+          pickFirstValue(row, ["realisasi_fm_after_prev", "realisasi_fm_after_prev_2"])
+        );
+        normalized.realisasi_fm_1 = dashIfEmpty(
+          pickFirstValue(row, ["realisasi_fm_prev", "realisasi_fm_prev_2"])
+        );
+        normalized.score_fm_1 = dashIfEmpty(
+          pickFirstValue(row, ["score_fm_prev", "score_fm_prev_2"])
+        );
 
-      normalized.realisasi_fm_before_2 = dashIfEmpty(
-        pickFirstValue(row, ["realisasi_fm_before_curr", "realisasi_fm_before_prev_1"])
-      );
-      normalized.realisasi_fm_after_2 = dashIfEmpty(
-        pickFirstValue(row, ["realisasi_fm_after_curr", "realisasi_fm_after_prev_1"])
-      );
-      normalized.realisasi_fm_2 = dashIfEmpty(
-        pickFirstValue(row, ["realisasi_fm_curr", "realisasi_fm_prev_1"])
-      );
-      normalized.score_fm_2 = dashIfEmpty(
-        pickFirstValue(row, ["score_fm_curr", "score_fm_prev_1"])
-      );
+        normalized.realisasi_fm_before_2 = dashIfEmpty(
+          pickFirstValue(row, ["realisasi_fm_before_curr", "realisasi_fm_before_prev_1"])
+        );
+        normalized.realisasi_fm_after_2 = dashIfEmpty(
+          pickFirstValue(row, ["realisasi_fm_after_curr", "realisasi_fm_after_prev_1"])
+        );
+        normalized.realisasi_fm_2 = dashIfEmpty(
+          pickFirstValue(row, ["realisasi_fm_curr", "realisasi_fm_prev_1"])
+        );
+        normalized.score_fm_2 = dashIfEmpty(
+          pickFirstValue(row, ["score_fm_curr", "score_fm_prev_1"])
+        );
+      }
 
       for (let week = 1; week <= 4; week += 1) {
         const sourceKey = `ach_w${week}`;
@@ -188,6 +198,19 @@ const MSAmenu = ({
 
     return null;
   };
+
+  const trendChartEntries = [
+    getTrendChartData("packetloss ran to core"),
+    getTrendChartData("packetloss core to internet"),
+    getTrendChartData("latency ran to core"),
+    getTrendChartData("latency core to internet"),
+    getTrendChartData("jitter ran to core"),
+    getTrendChartData("jitter core to internet"),
+    getTrendChartData("mttrq ran to core major"),
+    getTrendChartData("mttrq ran to core minor"),
+  ];
+
+  const hasTrendCharts = trendChartEntries.some(Boolean);
 
   const fetchComply = async () => {
     try {
@@ -340,90 +363,101 @@ const MSAmenu = ({
             </button> */}
           </div>
         </div>
-        <div className=" flex gap-4 w-full overflow-auto">
-          <div className="w-full">
-            {getTrendChartData("packetloss ran to core") && (
-              <ChartMSA
-                description="Lower Better"
-                title="PACKETLOSS RAN-TO-CORE"
-                key="PACKETLOSS RAN-TO-CORE"
-                data={getTrendChartData("packetloss ran to core")!}
-              />
-            )}
-            {getTrendChartData("packetloss core to internet") && (
-              <ChartMSA
-                description="Higher Better"
-                title="PACKETLOSS CORE-TO-INTERNET"
-                key="PACKETLOSS CORE-TO-INTERNET"
-                data={getTrendChartData("packetloss core to internet")!}
-              />
-            )}
-          </div>
-          {!getTrendChartData("packetloss ran to core") &&
-            !getTrendChartData("packetloss core to internet") &&
-            !getTrendChartData("latency ran to core") &&
-            !getTrendChartData("latency core to internet") &&
-            !getTrendChartData("jitter ran to core") &&
-            !getTrendChartData("jitter core to internet") &&
-            !getTrendChartData("mttrq ran to core major") &&
-            !getTrendChartData("mttrq ran to core minor") && (
+        <div className="relative min-h-[560px] mb-4">
+          {(isTrendLoading || !isTrendReady) && (
+            <div className="absolute inset-0 z-10 grid w-full grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-4">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <div
+                  key={`trend-skeleton-${index}`}
+                  className="rounded-2xl border border-[#DBDBDB] bg-white p-4"
+                >
+                  <Skeleton active paragraph={{ rows: 8 }} title={{ width: "55%" }} />
+                </div>
+              ))}
+            </div>
+          )}
+          <div
+            className={`flex gap-4 w-full overflow-auto transition-opacity duration-150 ${
+              isTrendLoading || !isTrendReady ? "opacity-0 pointer-events-none" : "opacity-100"
+            }`}
+          >
+            <div className="w-full">
+              {getTrendChartData("packetloss ran to core") && (
+                <ChartMSA
+                  description="Lower Better"
+                  title="PACKETLOSS RAN-TO-CORE"
+                  key="PACKETLOSS RAN-TO-CORE"
+                  data={getTrendChartData("packetloss ran to core")!}
+                />
+              )}
+              {getTrendChartData("packetloss core to internet") && (
+                <ChartMSA
+                  description="Higher Better"
+                  title="PACKETLOSS CORE-TO-INTERNET"
+                  key="PACKETLOSS CORE-TO-INTERNET"
+                  data={getTrendChartData("packetloss core to internet")!}
+                />
+              )}
+            </div>
+            {!hasTrendCharts && isTrendReady && (
               <div className="w-full py-12 text-center text-gray-500">
                 Trend achievement belum tersedia atau format respons API tidak sesuai.
               </div>
             )}
-          <div className="w-full">
-            {getTrendChartData("latency ran to core") && (
-              <ChartMSA
-                description="Higher Better"
-                title="LATENCY RAN-TO-CORE"
-                key="LATENCY RAN-TO-CORE"
-                data={getTrendChartData("latency ran to core")!}
-              />
-            )}
-            {getTrendChartData("latency core to internet") && (
-              <ChartMSA
-                description="Higher Better"
-                title="LATENCY CORE-TO-INTERNET"
-                key="LATENCY CORE-TO-INTERNET"
-                data={getTrendChartData("latency core to internet")!}
-              />
-            )}
-          </div>
-          <div className="w-full">
-            {getTrendChartData("jitter ran to core") && (
-              <ChartMSA
-                description="Higher Better"
-                title="JITTER RAN-TO-CORE"
-                key="JITTER RAN-TO-CORE"
-                data={getTrendChartData("jitter ran to core")!}
-              />
-            )}
-            {getTrendChartData("jitter core to internet") && (
-              <ChartMSA
-                description="Higher Better"
-                title="JITTER CORE-TO-INTERNET"
-                key="JITTER CORE-TO-INTERNET"
-                data={getTrendChartData("jitter core to internet")!}
-              />
-            )}
-          </div>
-          <div className="w-full">
-            {getTrendChartData("mttrq ran to core major") && (
-              <ChartMSA
-                description="Higher Better"
-                title="MTTRQ MAJOR"
-                key="MTTRQ MAJOR"
-                data={getTrendChartData("mttrq ran to core major")!}
-              />
-            )}
-            {getTrendChartData("mttrq ran to core minor") && (
-              <ChartMSA
-                description="Higher Better"
-                title="MTTRQ MINOR"
-                key="MTTRQ MINOR"
-                data={getTrendChartData("mttrq ran to core minor")!}
-              />
-            )}
+            <div className="w-full">
+              {getTrendChartData("latency ran to core") && (
+                <ChartMSA
+                  description="Higher Better"
+                  title="LATENCY RAN-TO-CORE"
+                  key="LATENCY RAN-TO-CORE"
+                  data={getTrendChartData("latency ran to core")!}
+                />
+              )}
+              {getTrendChartData("latency core to internet") && (
+                <ChartMSA
+                  description="Higher Better"
+                  title="LATENCY CORE-TO-INTERNET"
+                  key="LATENCY CORE-TO-INTERNET"
+                  data={getTrendChartData("latency core to internet")!}
+                />
+              )}
+            </div>
+            <div className="w-full">
+              {getTrendChartData("jitter ran to core") && (
+                <ChartMSA
+                  description="Higher Better"
+                  title="JITTER RAN-TO-CORE"
+                  key="JITTER RAN-TO-CORE"
+                  data={getTrendChartData("jitter ran to core")!}
+                />
+              )}
+              {getTrendChartData("jitter core to internet") && (
+                <ChartMSA
+                  description="Higher Better"
+                  title="JITTER CORE-TO-INTERNET"
+                  key="JITTER CORE-TO-INTERNET"
+                  data={getTrendChartData("jitter core to internet")!}
+                />
+              )}
+            </div>
+            <div className="w-full">
+              {getTrendChartData("mttrq ran to core major") && (
+                <ChartMSA
+                  description="Higher Better"
+                  title="MTTRQ MAJOR"
+                  key="MTTRQ MAJOR"
+                  data={getTrendChartData("mttrq ran to core major")!}
+                />
+              )}
+              {getTrendChartData("mttrq ran to core minor") && (
+                <ChartMSA
+                  description="Higher Better"
+                  title="MTTRQ MINOR"
+                  key="MTTRQ MINOR"
+                  data={getTrendChartData("mttrq ran to core minor")!}
+                />
+              )}
+            </div>
           </div>
         </div>
         <div className="mt-6">

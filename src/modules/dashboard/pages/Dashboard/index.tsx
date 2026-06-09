@@ -49,6 +49,7 @@ function Dashboard() {
   const [historyType, setHistoryType] = useState("pl 5% ran to core");
   const [type, setType] = useState("msa");
   const [trendData, setTrendData] = useState<Record<string, any>>({});
+  const [trendReady, setTrendReady] = useState(false);
 
   const effectiveTreg = treg === "all" ? "" : treg;
 
@@ -132,6 +133,7 @@ function Dashboard() {
     ];
 
     try {
+      setTrendReady(false);
       setLoading(true);
       const trendPromises = trendParameters.map(async (param) => {
         const response = await getTrend({
@@ -151,8 +153,10 @@ function Dashboard() {
       // Merge all results into a single object
       const trendsMap = Object.assign({}, ...results);
       setTrendData(trendsMap);
+      setTrendReady(true);
     } catch (error) {
       console.error("Error fetching trends:", error);
+      setTrendReady(true);
     } finally {
       setLoading(false);
     }
@@ -208,6 +212,8 @@ function Dashboard() {
           dataSC={dataSC}
           isLoadingSC={isLoadingSC}
           isLoadingHistoryData={isLoadingHistoryData}
+          isTrendLoading={loading}
+          isTrendReady={trendReady}
           isSuccessHistoryData={isSuccessHistoryData}
           trendData={trendData}
           level={level}

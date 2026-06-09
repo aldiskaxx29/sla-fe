@@ -1,4 +1,4 @@
-import { Image, Skeleton, Spin, Table, Modal } from "antd";
+import { Image, Skeleton, Table, Modal } from "antd";
 import Column from "antd/es/table/Column";
 import ColumnGroup from "antd/es/table/ColumnGroup";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -35,6 +35,7 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
   treg,
 }) => {
   const [loading, setLoading] = useState(false);
+  const [loadingRowKey, setLoadingRowKey] = useState<number | string | null>(null);
   const [detailParameter, setDetailParameter] = useState("");
   const [dataSource, setDataSource] = useState<Record<string, unknown>[]>([]);
   const [injectedData, setInjectedData] = useState<Record<string, unknown>>({});
@@ -180,6 +181,45 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
       value === "" ||
       value === "-"
     );
+
+  const resolveMonthYearFromRecord = (record: Record<string, unknown>) => {
+    const currentYear = new Date().getFullYear();
+
+    const rawYear = record.year;
+    const parsedYear =
+      typeof rawYear === "number" ? rawYear : Number(rawYear);
+    const year = Number.isFinite(parsedYear) && parsedYear > 0 ? parsedYear : currentYear;
+
+    const rawMonth = record.month ?? record.monthNum;
+    const parsedMonth =
+      typeof rawMonth === "number" ? rawMonth : Number(rawMonth);
+    if (Number.isFinite(parsedMonth) && parsedMonth >= 1 && parsedMonth <= 12) {
+      return { month: parsedMonth, year };
+    }
+
+    const monthCandidates = Array.from({ length: 12 }, (_, index) => index + 1).filter(
+      (month) => {
+        const relevantKeys = [
+          `ach_fm_${month}`,
+          `score_fm_${month}`,
+          `realisasi_fm_before_${month}`,
+          `realisasi_fm_after_${month}`,
+          `ach_${month}_1`,
+          `ach_${month}_2`,
+          `ach_${month}_3`,
+          `ach_${month}_4`,
+          `ach_${month}_5`,
+        ];
+
+        return relevantKeys.some((key) => hasMeaningfulValue(record[key]));
+      }
+    );
+
+    return {
+      month: monthCandidates.at(-1) ?? new Date().getMonth() + 1,
+      year,
+    };
+  };
 
   // Function to generate realisasi columns based on month
   const generateRealisasiColumns = (monthNum: number, kpi?: string) => {
@@ -636,6 +676,15 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
         
         const yearParam = new Date().getFullYear();
 
+        setWeeklyDetail({
+          week: weekParam,
+          kpi: kpiParam,
+          region: regionParam,
+          year: yearParam,
+        });
+        setModalData(null);
+        setModalVisible(true);
+
         const response = await getDetailsiteNotclear({
           query: {
             week: weekParam,
@@ -652,13 +701,6 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
             : response;
 
         setModalData(Array.isArray(responseData) ? responseData : null);
-        setWeeklyDetail({
-          week: weekParam,
-          kpi: kpiParam,
-          region: regionParam,
-          year: yearParam,
-        });
-        setModalVisible(true);
         return true;
       } catch (error) {
         console.log("Error fetching weekly detail:", error);
@@ -687,6 +729,14 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
         const yearParam = new Date().getFullYear();
         const monthParam = `${monthKey}_${monthNum}`;
 
+        setRealisasiDetail({
+          month: monthKey,
+          kpi: kpiParam,
+          monthNum: monthNum,
+        });
+        setRealisasiModalData(null);
+        setRealisasiModalVisible(true);
+
         const response = await getWeeklyMonth({
           query: {
             month: monthParam,
@@ -697,12 +747,6 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
         }).unwrap();
 
         setRealisasiModalData(response as RealisasiResponse);
-        setRealisasiDetail({
-          month: monthKey,
-          kpi: kpiParam,
-          monthNum: monthNum,
-        });
-        setRealisasiModalVisible(true);
         return true;
       } catch (error) {
         console.log("Error fetching realisasi monthly:", error);
@@ -716,10 +760,12 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
 
   const fetchWitelData = useCallback(
     async (record) => {
+      setLoadingRowKey(record.identIndex);
       setLoading(true);
       try {
         let res;
         const mini_parameter = record.parameter.toLocaleLowerCase();
+        const { month, year } = resolveMonthYearFromRecord(record);
         if (record.main_parent) {
           res = await getCNP({
             query: {
@@ -741,6 +787,8 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
               filter,
               type: menuId,
               treg,
+              month,
+              year,
             },
           }).unwrap();
         }
@@ -777,6 +825,7 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
         console.log(error);
         return false;
       } finally {
+        setLoadingRowKey(null);
         setLoading(false);
       }
     },
@@ -980,7 +1029,10 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
   ];
   const tableData = loadingMainData ? skeletonRows : dataMapping;
   const isSkeletonRow = (record: Record<string, unknown>) =>
-    Boolean((record as { __skeleton?: boolean }).__skeleton);
+    Boolean(
+      (record as { __skeleton?: boolean }).__skeleton ||
+        loadingRowKey === record.identIndex
+    );
   const renderSkeletonCell = () => (
     <div className="flex items-center w-full py-1.5">
       <Skeleton.Input
@@ -994,10 +1046,6 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
 
   return (
     <div>
-      {(loading || realisasiModalLoading) && (
-        <Spin fullscreen tip="Sedang Memuat Data..." />
-      )}
-
       <Table
         size="small"
         dataSource={tableData}
@@ -1324,6 +1372,7 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
 
                 const isBelowTarget = Number(text) < Number(record.target);
                 if (col.dataIndex == "parameter") {
+                  const isExpanded = expandedRowKey.includes(record.identIndex);
                   return (
                     <div
                       className="cursor-pointer text-primary-500"
@@ -1345,7 +1394,9 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                             record.main_parent || record.parent
                               ? "block"
                               : "hidden"
-                          } `}
+                          } transform transition-transform duration-150 ${
+                            isExpanded ? "rotate-90" : "rotate-0"
+                          }`}
                           width={10}
                           src={arrowDropdown}
                           preview={false}
@@ -1411,11 +1462,21 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
         onCancel={() => setModalVisible(false)}
         width={1000}
         footer={null}
-        loading={modalLoading}
       >
         {modalLoading ? (
-          <div className="flex justify-center items-center py-8">
-            <Spin tip="Mengambil data..." />
+          <div className="max-h-[650px] overflow-y-auto">
+            <Table
+              dataSource={skeletonRows}
+              size="small"
+              pagination={{ pageSize: 10, hideOnSinglePage: true }}
+              bordered
+              scroll={{ x: "max-content" }}
+              columns={columnPop.map((column: any) => ({
+                ...column,
+                render: () => renderSkeletonCell(),
+              }))}
+              rowKey={(_, index) => index as number}
+            />
           </div>
         ) : modalData ? (
           <div className="max-h-[650px] overflow-y-auto">
@@ -1447,11 +1508,41 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
         onCancel={() => setRealisasiModalVisible(false)}
         width={1200}
         footer={null}
-        loading={realisasiModalLoading}
       >
         {realisasiModalLoading ? (
-          <div className="flex justify-center items-center py-8">
-            <Spin tip="Mengambil data..." />
+          <div className="max-h-[700px] overflow-y-auto">
+            <div className="grid grid-cols-2 gap-6">
+              <div>
+                <h3 className="text-lg font-bold mb-4 text-center">Realisasi Before</h3>
+                <Table
+                  dataSource={skeletonRows}
+                  size="small"
+                  pagination={{ pageSize: 50, hideOnSinglePage: true }}
+                  bordered
+                  scroll={{ x: "max-content" }}
+                  columns={generateRealisasiColumns(realisasiDetail?.monthNum || 2, realisasiDetail?.kpi).map((column: any) => ({
+                    ...column,
+                    render: () => renderSkeletonCell(),
+                  }))}
+                  rowKey={(_, index) => index as number}
+                />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold mb-4 text-center">Realisasi After</h3>
+                <Table
+                  dataSource={skeletonRows}
+                  size="small"
+                  pagination={{ pageSize: 50, hideOnSinglePage: true }}
+                  bordered
+                  scroll={{ x: "max-content" }}
+                  columns={generateRealisasiColumns(realisasiDetail?.monthNum || 2, realisasiDetail?.kpi).map((column: any) => ({
+                    ...column,
+                    render: () => renderSkeletonCell(),
+                  }))}
+                  rowKey={(_, index) => index as number}
+                />
+              </div>
+            </div>
           </div>
         ) : realisasiModalData && typeof realisasiModalData === "object" && realisasiModalData.data ? (
           <div className="max-h-[700px] overflow-y-auto">
