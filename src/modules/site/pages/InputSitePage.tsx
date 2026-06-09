@@ -1,7 +1,6 @@
 import AppDropdown from "@/app/components/AppDropdown";
 import xlxsIcon from "@/assets/file-spreadsheet.svg";
 import { Button, Image, Upload } from "antd";
-import { Button, Image, Upload } from "antd";
 import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { TableInputSite } from "../components/TableInputSite";

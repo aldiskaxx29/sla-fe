@@ -3,23 +3,10 @@ import { useParams } from "react-router-dom";
 
 const QualityHealthinessPage = lazy(
   () => import("@/modules/quality-healthiness/pages/QualityHealthinessPage"),
-  () => import("@/modules/quality-healthiness/pages/QualityHealthinessPage"),
 );
 
 const NetworkPage = () => {
   const { menuId } = useParams();
-  const isLocalDev =
-    typeof window !== "undefined" &&
-    ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname);
-
-  const renderLocalFallback = (title: string, description: string) => (
-    <div className="mx-6 mt-6 rounded-xl border border-[#DBDBDB] bg-white p-6 min-h-[calc(100vh-120px)] flex items-center justify-center">
-      <div className="max-w-xl text-center">
-        <p className="text-2xl font-semibold text-[#0E2133]">{title}</p>
-        <p className="mt-3 text-sm text-[#4B465C]">{description}</p>
-      </div>
-    </div>
-  );
   const isLocalDev =
     typeof window !== "undefined" &&
     ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname);

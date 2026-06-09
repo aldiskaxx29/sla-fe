@@ -68,15 +68,11 @@ function Dashboard() {
     dataSC,
     isLoadingSC,
     isLoadingHistoryData,
-    isLoadingHistoryData,
     dataHistoryData,
   } = useDashboard();
   const { menuId } = useParams();
 
   //// Methods
-
-  const isDashboardMenu = menuId === "msa" || menuId === "cnop";
-  const isMsaRoute = menuId === "msa";
 
   const isDashboardMenu = menuId === "msa" || menuId === "cnop";
   const isMsaRoute = menuId === "msa";
