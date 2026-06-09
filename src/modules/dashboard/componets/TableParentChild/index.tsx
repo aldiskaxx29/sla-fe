@@ -263,8 +263,8 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
     console.log("monthNum", monthNum);
     const weekCount = [3, 6, 8, 11].includes(monthNum) ? 5 : 4;
     const isPacketloss =
-      kpi?.toLowerCase().includes("packetloss") &&
-      kpi?.toLowerCase().includes("ran to core");
+      kpi?.toLowerCase()?.includes("packetloss") &&
+      kpi?.toLowerCase()?.includes("ran to core");
 
     const renderAchievement = (
       text: unknown,
@@ -934,12 +934,12 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
 
   const handleExpandCollaps = useCallback(
     async (record) => {
-      if (record.parameter.toLowerCase().includes("core"))
+      if (record.parameter?.toLowerCase()?.includes("core"))
         setDetailParameter(record.parameter);
 
       const isMttrq =
-        record.mini_parameter?.toLowerCase().includes("mttrq") ||
-        record.parameter?.toLowerCase().includes("mttrq");
+        record.mini_parameter?.toLowerCase()?.includes("mttrq") ||
+        record.parameter?.toLowerCase()?.includes("mttrq");
       const isLevel3Mttrq =
         !record.main_parent && !record.parent && !record.is_level_4 && isMttrq;
 
@@ -970,7 +970,7 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
   );
 
   const columnPop = useMemo(() => {
-    const isMttrq = weeklyDetail?.kpi?.toLowerCase().includes("mttrq");
+    const isMttrq = weeklyDetail?.kpi?.toLowerCase()?.includes("mttrq") ?? false;
 
     // Kolom khusus untuk KPI MTTRQ
     if (isMttrq) {
@@ -1207,7 +1207,10 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                       .includes("real");
                     const baseOnCell =
                       typeof col.onCell === "function" ? col.onCell() : {};
-                    if (isLastTwo && child.dataIndex.includes("score"))
+                    if (
+                      isLastTwo &&
+                      child.dataIndex?.toString().includes("score")
+                    )
                       return {
                         ...baseOnCell,
                         style: {
@@ -1265,11 +1268,13 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                     }
 
                     const isJitter =
-                      record.mini_parameter
-                        ?.toLowerCase()
-                        .includes("latency") ||
-                      record.mini_parameter?.toLowerCase().includes("jitter") ||
-                      record.mini_parameter?.toLowerCase().includes("mttr");
+                      record.mini_parameter?.toLowerCase()?.includes(
+                        "latency",
+                      ) ||
+                      record.mini_parameter?.toLowerCase()?.includes(
+                        "jitter",
+                      ) ||
+                      record.mini_parameter?.toLowerCase()?.includes("mttr");
 
                     const isBelowTarget = isJitter
                       ? value < target // 👉 JITTER
