@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 
 const QualityHealthinessPage = lazy(
   () => import("@/modules/quality-healthiness/pages/QualityHealthinessPage"),
+  () => import("@/modules/quality-healthiness/pages/QualityHealthinessPage"),
 );
 
 const NetworkPage = () => {
@@ -42,37 +43,25 @@ const NetworkPage = () => {
           )
         ) : (
           <iframe
-            src="/executive/?page=access"
+            src="https://qosmo.telkom.co.id/executive/?page=access"
             title="Monday Monitoring Dashboard"
             className="w-full min-h-[100vh]"
           />
         ))}
-      {menuId === "core-perf" &&
-        (isLocalDev ? (
-          renderLocalFallback(
-            "Core Perf",
-            "Dashboard Core Perf tidak tersedia sebagai iframe lokal di environment ini, jadi halaman menampilkan shell aplikasi saja tanpa blank screen.",
-          )
-        ) : (
-          <iframe
-            src="/executive/?page=core"
-            title="One Visibility Dashboard"
-            className="w-full min-h-[100vh]"
-          />
-        ))}
-      {menuId === "cdn-perf" &&
-        (isLocalDev ? (
-          renderLocalFallback(
-            "CDN Perf",
-            "Dashboard CDN Perf tidak tersedia sebagai iframe lokal di environment ini, jadi halaman menampilkan shell aplikasi saja tanpa blank screen.",
-          )
-        ) : (
-          <iframe
-            src="/executive/?page=cdn"
-            title="One Visibility Dashboard"
-            className="w-full min-h-[100vh]"
-          />
-        ))}
+      {menuId === "core-perf" && (
+        <iframe
+          src="https://qosmo.telkom.co.id/executive/?page=core"
+          title="Core Perf Dashboard"
+          className="w-full min-h-[100vh]"
+        />
+      )}
+      {menuId === "cdn-perf" && (
+        <iframe
+          src="https://qosmo.telkom.co.id/executive/?page=cdn"
+          title="CDN Perf Dashboard"
+          className="w-full min-h-[100vh]"
+        />
+      )}
       {menuId === "quality-healthiness" && <QualityHealthinessPage />}
     </>
   );

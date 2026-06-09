@@ -200,6 +200,14 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
       value === "-"
     );
 
+  const hasMeaningfulValue = (value: unknown) =>
+    !(
+      value === null ||
+      value === undefined ||
+      value === "" ||
+      value === "-"
+    );
+
   // Function to generate realisasi columns based on month
   const generateRealisasiColumns = (monthNum: number, kpi?: string) => {
     console.log('monthNum', monthNum)
