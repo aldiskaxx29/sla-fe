@@ -1,4 +1,4 @@
-import { Image, Skeleton, Spin, Table, Modal } from "antd";
+import { Image, Skeleton, Table, Modal } from "antd";
 import Column from "antd/es/table/Column";
 import ColumnGroup from "antd/es/table/ColumnGroup";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -35,29 +35,46 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
   treg,
 }) => {
   const [loading, setLoading] = useState(false);
+  const [loadingRowKey, setLoadingRowKey] = useState<number | string | null>(
+    null,
+  );
   const [detailParameter, setDetailParameter] = useState("");
   const [dataSource, setDataSource] = useState<Record<string, unknown>[]>([]);
   const [injectedData, setInjectedData] = useState<Record<string, unknown>>({});
-  const [injectedChildData, setInjectedChildData] = useState<Record<string, unknown>>({});
-  const [injectedGrandChildData, setInjectedGrandChildData] = useState<Record<string, unknown>>({});
-  const { getWitel, getCNP, getDetailsiteNotclear, getWeeklyMonth } = useDashboard();
+  const [injectedChildData, setInjectedChildData] = useState<
+    Record<string, unknown>
+  >({});
+  const [injectedGrandChildData, setInjectedGrandChildData] = useState<
+    Record<string, unknown>
+  >({});
+  const { getWitel, getCNP, getDetailsiteNotclear, getWeeklyMonth } =
+    useDashboard();
   const { menuId } = useParams();
   const [expandedRowKey, setExpandedRowKeys] = useState<number[] | string[]>(
-    []
+    [],
   );
   const [filter] = useState("by total ne");
 
   // Modal states
   const [modalVisible, setModalVisible] = useState(false);
   const [modalLoading, setModalLoading] = useState(false);
-  const [modalData, setModalData] = useState<Record<string, unknown>[] | null>(null);
-  const [weeklyDetail, setWeeklyDetail] = useState<WeeklyDetailData | null>(null);
+  const [modalData, setModalData] = useState<Record<string, unknown>[] | null>(
+    null,
+  );
+  const [weeklyDetail, setWeeklyDetail] = useState<WeeklyDetailData | null>(
+    null,
+  );
 
   // Modal Realisasi states
   const [realisasiModalVisible, setRealisasiModalVisible] = useState(false);
   const [realisasiModalLoading, setRealisasiModalLoading] = useState(false);
-  const [realisasiModalData, setRealisasiModalData] = useState<RealisasiResponse | null>(null);
-  const [realisasiDetail, setRealisasiDetail] = useState<{ month: string; kpi: string; monthNum: number } | null>(null);
+  const [realisasiModalData, setRealisasiModalData] =
+    useState<RealisasiResponse | null>(null);
+  const [realisasiDetail, setRealisasiDetail] = useState<{
+    month: string;
+    kpi: string;
+    monthNum: number;
+  } | null>(null);
   const lastColumnsRef = useRef<any[]>([]);
   const skeletonRows = useMemo(
     () =>
@@ -65,7 +82,7 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
         __skeleton: true,
         identIndex: `skeleton-${index}`,
       })),
-    []
+    [],
   );
 
   useEffect(() => {
@@ -74,7 +91,8 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
   }, [data]);
 
   const formatText = (text) => {
-    return text?.replace(/_/g, " ") // Mengganti underscore dengan spasi
+    return text
+      ?.replace(/_/g, " ") // Mengganti underscore dengan spasi
       .toLowerCase() // Mengubah semua huruf menjadi kecil terlebih dahulu
       .replace(/\b\w/g, (char) => char.toUpperCase()); // Kapitalisasi setiap kata
   };
@@ -84,19 +102,19 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
     if (!text || typeof text !== "string") {
       return "";
     }
-  
+
     const match = text.match(/week_(\d+)_(\d+)/i);
     if (!match) {
       return text.replace(/_/g, " ");
     }
-  
+
     const monthNumber = parseInt(match[1], 10);
     const weekNumber = parseInt(match[2], 10);
-  
+
     const monthName = new Intl.DateTimeFormat("id-ID", {
       month: "long",
     }).format(new Date(2024, monthNumber - 1, 1));
-  
+
     return `${monthName.charAt(0).toUpperCase() + monthName.slice(1)} Week ${weekNumber}`;
   };
 
@@ -138,28 +156,33 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
               injectedChildData.identIndex === childData.identIndex &&
               Array.isArray(injectedChildData.children)
             ) {
-              childrenMapped = injectedChildData.children.map((grandChild, gcIndex) => {
-                let grandChildrenMapped = [];
-                if (
-                  injectedGrandChildData.identIndex === grandChild.identIndex &&
-                  Array.isArray(injectedGrandChildData.children)
-                ) {
-                  grandChildrenMapped = injectedGrandChildData.children.map((ggChild) => ({
-                    ...ggChild,
+              childrenMapped = injectedChildData.children.map(
+                (grandChild, gcIndex) => {
+                  let grandChildrenMapped = [];
+                  if (
+                    injectedGrandChildData.identIndex ===
+                      grandChild.identIndex &&
+                    Array.isArray(injectedGrandChildData.children)
+                  ) {
+                    grandChildrenMapped = injectedGrandChildData.children.map(
+                      (ggChild) => ({
+                        ...ggChild,
+                        index: gcIndex,
+                        indexParent: index,
+                        mainIndexParent: indexParent,
+                      }),
+                    );
+                  }
+
+                  return {
+                    ...grandChild,
                     index: gcIndex,
                     indexParent: index,
                     mainIndexParent: indexParent,
-                  }));
-                }
-
-                return {
-                  ...grandChild,
-                  index: gcIndex,
-                  indexParent: index,
-                  mainIndexParent: indexParent,
-                  children: grandChildrenMapped,
-                };
-              });
+                    children: grandChildrenMapped,
+                  };
+                },
+              );
             }
 
             return {
@@ -169,7 +192,7 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
               mainIndexParent: indexParent,
               children: childrenMapped,
             };
-          }
+          },
         );
 
         return {
@@ -190,44 +213,81 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
     });
 
     return mappingData2;
-  }, [dataSource, injectedData, injectedChildData, injectedGrandChildData]);
+  }, [dataSource, injectedData, injectedChildData]);
 
   const hasMeaningfulValue = (value: unknown) =>
-    !(
-      value === null ||
-      value === undefined ||
-      value === "" ||
-      value === "-"
-    );
+    !(value === null || value === undefined || value === "" || value === "-");
 
-  const hasMeaningfulValue = (value: unknown) =>
-    !(
-      value === null ||
-      value === undefined ||
-      value === "" ||
-      value === "-"
-    );
+  const resolveMonthYearFromRecord = (record: Record<string, unknown>) => {
+    const currentYear = new Date().getFullYear();
+
+    const rawYear = record.year;
+    const parsedYear = typeof rawYear === "number" ? rawYear : Number(rawYear);
+    const year =
+      Number.isFinite(parsedYear) && parsedYear > 0 ? parsedYear : currentYear;
+
+    const rawMonth = record.month ?? record.monthNum;
+    const parsedMonth =
+      typeof rawMonth === "number" ? rawMonth : Number(rawMonth);
+    if (Number.isFinite(parsedMonth) && parsedMonth >= 1 && parsedMonth <= 12) {
+      return { month: parsedMonth, year };
+    }
+
+    const monthCandidates = Array.from(
+      { length: 12 },
+      (_, index) => index + 1,
+    ).filter((month) => {
+      const relevantKeys = [
+        `ach_fm_${month}`,
+        `score_fm_${month}`,
+        `realisasi_fm_before_${month}`,
+        `realisasi_fm_after_${month}`,
+        `ach_${month}_1`,
+        `ach_${month}_2`,
+        `ach_${month}_3`,
+        `ach_${month}_4`,
+        `ach_${month}_5`,
+      ];
+
+      return relevantKeys.some((key) => hasMeaningfulValue(record[key]));
+    });
+
+    return {
+      month: monthCandidates.at(-1) ?? new Date().getMonth() + 1,
+      year,
+    };
+  };
 
   // Function to generate realisasi columns based on month
   const generateRealisasiColumns = (monthNum: number, kpi?: string) => {
-    console.log('monthNum', monthNum)
+    console.log("monthNum", monthNum);
     const weekCount = [3, 6, 8, 11].includes(monthNum) ? 5 : 4;
     const isPacketloss =
       kpi?.toLowerCase().includes("packetloss") &&
       kpi?.toLowerCase().includes("ran to core");
 
-    const renderAchievement = (text: unknown, record: Record<string, unknown>): React.ReactNode => {
+    const renderAchievement = (
+      text: unknown,
+      record: Record<string, unknown>,
+    ): React.ReactNode => {
       if (text === null || text === undefined || text === "") return "-";
       const value = Number(text);
       const target = Number(record.target);
-      if (Number.isNaN(value) || Number.isNaN(target)) return text as React.ReactNode;
+      if (Number.isNaN(value) || Number.isNaN(target))
+        return text as React.ReactNode;
 
       const isAboveTarget = value > target;
       // Packetloss: merah jika di atas target. Lainnya: hijau jika di atas target.
       const isGood = isPacketloss ? !isAboveTarget : isAboveTarget;
 
       return (
-        <span className={isGood ? "text-green-500 font-semibold" : "text-red-500 font-semibold"}>
+        <span
+          className={
+            isGood
+              ? "text-green-500 font-semibold"
+              : "text-red-500 font-semibold"
+          }
+        >
           {text as React.ReactNode}
         </span>
       );
@@ -237,7 +297,10 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
       title: string;
       dataIndex?: string;
       key: string;
-      render: (text: unknown, record?: Record<string, unknown>) => React.ReactNode;
+      render: (
+        text: unknown,
+        record?: Record<string, unknown>,
+      ) => React.ReactNode;
       width?: number;
     }> = [
       {
@@ -273,10 +336,20 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
     // Add month column
     const monthNames = [
       "", // biar index mulai dari 1
-      "Jan", "Feb", "Mar", "Apr", "Mei", "Jun",
-      "Jul", "Agu", "Sep", "Okt", "Nov", "Des"
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "Mei",
+      "Jun",
+      "Jul",
+      "Agu",
+      "Sep",
+      "Okt",
+      "Nov",
+      "Des",
     ];
-    
+
     columnsArray.push({
       title: monthNames[monthNum],
       dataIndex: `ach_fm_${monthNum}`,
@@ -301,16 +374,16 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
     }
 
     const weeklyKeys = Object.keys(sampleRecord).filter((key) =>
-      /^ach_\d+_\d+$/.test(key)
+      /^ach_\d+_\d+$/.test(key),
     );
     const monthlyKeys = Object.keys(sampleRecord).filter((key) =>
-      /^ach_fm_\d+$/.test(key)
+      /^ach_fm_\d+$/.test(key),
     );
 
     const activeMonthlyKeys = monthlyKeys.filter((monthKey) => {
       const monthNum = parseInt(monthKey.replace("ach_fm_", ""));
       const relatedWeekKeys = weeklyKeys.filter((weekKey) =>
-        weekKey.startsWith(`ach_${monthNum}_`)
+        weekKey.startsWith(`ach_${monthNum}_`),
       );
       const relevantKeys = [
         `ach_fm_${monthNum}`,
@@ -321,7 +394,7 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
       ];
 
       return data.some((row) =>
-        relevantKeys.some((key) => hasMeaningfulValue(row?.[key]))
+        relevantKeys.some((key) => hasMeaningfulValue(row?.[key])),
       );
     });
 
@@ -374,7 +447,10 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
           className: "!bg-blue-pacific !p-3",
         }),
         render: (text, record) => {
-          if (record.parameter === "PACKETLOSS 1-5% RAN TO CORE" || record.parameter === "PACKETLOSS >5% RAN TO CORE") {
+          if (
+            record.parameter === "PACKETLOSS 1-5% RAN TO CORE" ||
+            record.parameter === "PACKETLOSS >5% RAN TO CORE"
+          ) {
             // Hilangkan .00
             return parseFloat(text).toFixed(2).endsWith(".00")
               ? parseInt(text)
@@ -449,7 +525,7 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
     const groupedColumns = displayMonthlyKeys.map((monthKey) => {
       const monthNum = parseInt(monthKey.replace("ach_fm_", ""));
       const relatedWeeks = weeklyKeys.filter((weekKey) =>
-        weekKey.startsWith(`ach_${monthNum}_`)
+        weekKey.startsWith(`ach_${monthNum}_`),
       );
 
       return {
@@ -501,7 +577,13 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
               return (
                 <span
                   className="!text-blue-600 p-1 bg-blue-50 rounded-sm cursor-pointer font-semibold hover:bg-blue-100"
-                  onClick={() => fetchRealisasiMonthly("before_rekon", monthNum, record as Record<string, unknown>)}
+                  onClick={() =>
+                    fetchRealisasiMonthly(
+                      "before_rekon",
+                      monthNum,
+                      record as Record<string, unknown>,
+                    )
+                  }
                   role="button"
                   tabIndex={0}
                 >
@@ -529,7 +611,13 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
               return (
                 <span
                   className="!text-blue-600 p-1 bg-blue-50 rounded-sm cursor-pointer font-semibold hover:bg-blue-100"
-                  onClick={() => fetchRealisasiMonthly("after_rekon", monthNum, record as Record<string, unknown>)}
+                  onClick={() =>
+                    fetchRealisasiMonthly(
+                      "after_rekon",
+                      monthNum,
+                      record as Record<string, unknown>,
+                    )
+                  }
                   role="button"
                   tabIndex={0}
                 >
@@ -633,7 +721,12 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
     ];
     groupedColumns.shift();
 
-    const computedColumns = [...baseColumns, ...lastMonth, ...groupedColumns, ...rekonScore];
+    const computedColumns = [
+      ...baseColumns,
+      ...lastMonth,
+      ...groupedColumns,
+      ...rekonScore,
+    ];
     lastColumnsRef.current = computedColumns;
     return computedColumns;
   }, [data, skeletonSampleRecord]);
@@ -644,25 +737,34 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
       try {
         const weekNum = weekKey.split("_")[2]; // Ekstrak nomor minggu dari "ach_1_3" -> "3"
         const monthNum = weekKey.split("_")[1]; // Ekstrak nomor bulan dari "ach_1_3" -> "1"
-        
+
         const weekParam = `week_${monthNum}_${weekNum}`;
-        
+
         let kpiParam = "";
         let regionParam = "";
-        
+
         const isParent = record.main_parent;
-        
+
         if (isParent) {
           kpiParam = (record.parameter?.toString() || "").toLowerCase();
           regionParam = "";
         } else {
           console.log(record);
-          
+
           kpiParam = (record.mini_parameter?.toString() || "").toLowerCase();
           regionParam = (record.parameter?.toString() || "").toLowerCase();
         }
-        
+
         const yearParam = new Date().getFullYear();
+
+        setWeeklyDetail({
+          week: weekParam,
+          kpi: kpiParam,
+          region: regionParam,
+          year: yearParam,
+        });
+        setModalData(null);
+        setModalVisible(true);
 
         const response = await getDetailsiteNotclear({
           query: {
@@ -680,13 +782,6 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
             : response;
 
         setModalData(Array.isArray(responseData) ? responseData : null);
-        setWeeklyDetail({
-          week: weekParam,
-          kpi: kpiParam,
-          region: regionParam,
-          year: yearParam,
-        });
-        setModalVisible(true);
         return true;
       } catch (error) {
         console.log("Error fetching weekly detail:", error);
@@ -695,25 +790,37 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
         setModalLoading(false);
       }
     },
-    [getDetailsiteNotclear, menuId]
+    [getDetailsiteNotclear, menuId],
   );
 
   const fetchRealisasiMonthly = useCallback(
-    async (monthKey: string, monthNum: number, record: Record<string, unknown>) => {
+    async (
+      monthKey: string,
+      monthNum: number,
+      record: Record<string, unknown>,
+    ) => {
       setRealisasiModalLoading(true);
       try {
         let kpiParam = "";
-        
+
         const isParent = record.main_parent;
-        
+
         if (isParent) {
           kpiParam = (record.parameter?.toString() || "").toLowerCase();
         } else {
           kpiParam = (record.mini_parameter?.toString() || "").toLowerCase();
         }
-        
+
         const yearParam = new Date().getFullYear();
         const monthParam = `${monthKey}_${monthNum}`;
+
+        setRealisasiDetail({
+          month: monthKey,
+          kpi: kpiParam,
+          monthNum: monthNum,
+        });
+        setRealisasiModalData(null);
+        setRealisasiModalVisible(true);
 
         const response = await getWeeklyMonth({
           query: {
@@ -725,12 +832,6 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
         }).unwrap();
 
         setRealisasiModalData(response as RealisasiResponse);
-        setRealisasiDetail({
-          month: monthKey,
-          kpi: kpiParam,
-          monthNum: monthNum,
-        });
-        setRealisasiModalVisible(true);
         return true;
       } catch (error) {
         console.log("Error fetching realisasi monthly:", error);
@@ -739,15 +840,17 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
         setRealisasiModalLoading(false);
       }
     },
-    [getWeeklyMonth, menuId]
+    [getWeeklyMonth, menuId],
   );
 
   const fetchWitelData = useCallback(
     async (record) => {
+      setLoadingRowKey(record.identIndex);
       setLoading(true);
       try {
         let res;
         const mini_parameter = record.parameter.toLocaleLowerCase();
+        const { month, year } = resolveMonthYearFromRecord(record);
         if (record.main_parent) {
           res = await getCNP({
             query: {
@@ -769,19 +872,8 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
               filter,
               type: menuId,
               treg,
-            },
-          }).unwrap();
-        } else {
-          res = await getWitel({
-            query: {
-              parameter: (record.mini_parameter || detailParameter)
-                ?.replace(/%20/g, " ")
-                .toLocaleLowerCase(),
-              region: record.parameter,
-              level: "witel",
-              filter,
-              type: menuId,
-              treg,
+              month,
+              year,
             },
           }).unwrap();
         }
@@ -790,7 +882,7 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
           const findData = dataMapping.find(
             (data) =>
               data.coreIndex == record.coreIndex &&
-              data.parameter == record.parameter
+              data.parameter == record.parameter,
           );
           const newData = res.data?.map((data) => ({
             ...data,
@@ -833,19 +925,23 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
         console.log(error);
         return false;
       } finally {
+        setLoadingRowKey(null);
         setLoading(false);
       }
     },
-    [dataMapping, detailParameter, filter, getCNP, getWitel, menuId, treg]
+    [dataMapping, detailParameter, filter, getCNP, getWitel, menuId, treg],
   );
 
   const handleExpandCollaps = useCallback(
     async (record) => {
       if (record.parameter.toLowerCase().includes("core"))
         setDetailParameter(record.parameter);
-        
-      const isMttrq = record.mini_parameter?.toLowerCase().includes("mttrq") || record.parameter?.toLowerCase().includes("mttrq");
-      const isLevel3Mttrq = !record.main_parent && !record.parent && !record.is_level_4 && isMttrq;
+
+      const isMttrq =
+        record.mini_parameter?.toLowerCase().includes("mttrq") ||
+        record.parameter?.toLowerCase().includes("mttrq");
+      const isLevel3Mttrq =
+        !record.main_parent && !record.parent && !record.is_level_4 && isMttrq;
 
       if (record.parent || record.main_parent || isLevel3Mttrq) {
         const key = record.identIndex;
@@ -870,13 +966,12 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
         }
       }
     },
-    [dataMapping, expandedRowKey, fetchWitelData]
+    [dataMapping, expandedRowKey, fetchWitelData],
   );
 
   const columnPop = useMemo(() => {
-    const isMttrq =
-      weeklyDetail?.kpi?.toLowerCase().includes("mttrq");
-  
+    const isMttrq = weeklyDetail?.kpi?.toLowerCase().includes("mttrq");
+
     // Kolom khusus untuk KPI MTTRQ
     if (isMttrq) {
       return [
@@ -948,7 +1043,7 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
         },
       ];
     }
-  
+
     // Kolom default
     return [
       {
@@ -1035,12 +1130,25 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
 
   const monthNameing = [
     "", // biar index mulai dari 1
-    "Jan", "Feb", "Mar", "Apr", "Mei", "Jun",
-    "Jul", "Agu", "Sep", "Okt", "Nov", "Des"
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "Mei",
+    "Jun",
+    "Jul",
+    "Agu",
+    "Sep",
+    "Okt",
+    "Nov",
+    "Des",
   ];
   const tableData = loadingMainData ? skeletonRows : dataMapping;
   const isSkeletonRow = (record: Record<string, unknown>) =>
-    Boolean((record as { __skeleton?: boolean }).__skeleton);
+    Boolean(
+      (record as { __skeleton?: boolean }).__skeleton ||
+      loadingRowKey === record.identIndex,
+    );
   const renderSkeletonCell = () => (
     <div className="flex items-center w-full py-1.5">
       <Skeleton.Input
@@ -1054,10 +1162,6 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
 
   return (
     <div>
-      {(loading || realisasiModalLoading) && (
-        <Spin fullscreen tip="Sedang Memuat Data..." />
-      )}
-
       <Table
         size="small"
         dataSource={tableData}
@@ -1066,9 +1170,7 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
         className="rounded-xl "
         rowKey={(record) => record.identIndex}
         onRow={(record) =>
-          isSkeletonRow(record)
-            ? { style: { height: 48 } }
-            : {}
+          isSkeletonRow(record) ? { style: { height: 48 } } : {}
         }
         scroll={{ x: "max-content" }}
         expandable={{
@@ -1078,7 +1180,7 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
           expandIcon: () => <div></div>,
         }}
       >
-      {columns.map((col: any) =>
+        {columns.map((col: any) =>
           col.children ? (
             <ColumnGroup
               key={col.key ?? col.title}
@@ -1104,9 +1206,7 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                       .toLowerCase()
                       .includes("real");
                     const baseOnCell =
-                      typeof col.onCell === "function"
-                        ? col.onCell()
-                        : {};
+                      typeof col.onCell === "function" ? col.onCell() : {};
                     if (isLastTwo && child.dataIndex.includes("score"))
                       return {
                         ...baseOnCell,
@@ -1114,8 +1214,8 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                           fontSize: record.main_parent
                             ? ""
                             : record.parent
-                            ? "12px"
-                            : "11px",
+                              ? "12px"
+                              : "11px",
                         },
                       };
                     else if (isLastTwo) {
@@ -1131,8 +1231,8 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                           fontSize: record.main_parent
                             ? ""
                             : record.parent
-                            ? "12px"
-                            : "11px",
+                              ? "12px"
+                              : "11px",
                         },
                       };
                     }
@@ -1141,8 +1241,8 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                         fontSize: record.main_parent
                           ? ""
                           : record.parent
-                          ? "12px"
-                          : "11px",
+                            ? "12px"
+                            : "11px",
                       },
                     };
                   }}
@@ -1164,24 +1264,21 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                       return <span>{text}</span>;
                     }
 
-                    const isJitter = record.mini_parameter
-                      ?.toLowerCase()
-                      .includes('latency') || 
+                    const isJitter =
                       record.mini_parameter
-                      ?.toLowerCase()
-                      .includes('jitter') ||
-                      record.mini_parameter
-                      ?.toLowerCase()
-                      .includes('mttr');
+                        ?.toLowerCase()
+                        .includes("latency") ||
+                      record.mini_parameter?.toLowerCase().includes("jitter") ||
+                      record.mini_parameter?.toLowerCase().includes("mttr");
 
                     const isBelowTarget = isJitter
-                      ? value < target        // 👉 JITTER
-                      : value <= target;    
+                      ? value < target // 👉 JITTER
+                      : value <= target;
 
                     if (!text) return text;
                     // if (!record.target && !isLastTwo) {
                     if (
-                      (record.target === '' ||
+                      (record.target === "" ||
                         record.target === null ||
                         record.target === undefined) &&
                       !isLastTwo
@@ -1195,13 +1292,22 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                       !isLastTwo
                     ) {
                       // Check if this is a realisasi column
-                      const isRealisasiColumn = /^realisasi_fm_(before|after)_\d+$/.test(child.dataIndex as string);
-                      
+                      const isRealisasiColumn =
+                        /^realisasi_fm_(before|after)_\d+$/.test(
+                          child.dataIndex as string,
+                        );
+
                       if (isRealisasiColumn && text) {
-                        const monthNum = (child.dataIndex as string).match(/\d+$/)?.[0];
-                        const isBeforeColumn = (child.dataIndex as string).includes("before");
-                        const monthKey = isBeforeColumn ? "before_rekon" : "after_rekon";
-                        
+                        const monthNum = (child.dataIndex as string).match(
+                          /\d+$/,
+                        )?.[0];
+                        const isBeforeColumn = (
+                          child.dataIndex as string
+                        ).includes("before");
+                        const monthKey = isBeforeColumn
+                          ? "before_rekon"
+                          : "after_rekon";
+
                         // Check if packetloss parameter
                         if (
                           record.parameter
@@ -1229,7 +1335,11 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                               } cursor-pointer`}
                               onClick={() => {
                                 if (monthNum) {
-                                  fetchRealisasiMonthly(monthKey, parseInt(monthNum), record);
+                                  fetchRealisasiMonthly(
+                                    monthKey,
+                                    parseInt(monthNum),
+                                    record,
+                                  );
                                 }
                               }}
                               role="button"
@@ -1239,7 +1349,7 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                             </span>
                           );
                         }
-                        
+
                         return (
                           <span
                             className={`${
@@ -1249,7 +1359,11 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                             } cursor-pointer`}
                             onClick={() => {
                               if (monthNum) {
-                                fetchRealisasiMonthly(monthKey, parseInt(monthNum), record);
+                                fetchRealisasiMonthly(
+                                  monthKey,
+                                  parseInt(monthNum),
+                                  record,
+                                );
                               }
                             }}
                             role="button"
@@ -1261,7 +1375,9 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                       }
 
                       // Check if this is a weekly column (ach_1_1, ach_1_2, etc.)
-                      const isWeeklyColumn = /^ach_\d+_\d+$/.test(child.dataIndex);
+                      const isWeeklyColumn = /^ach_\d+_\d+$/.test(
+                        child.dataIndex,
+                      );
 
                       if (
                         record.parameter
@@ -1317,8 +1433,8 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                           tabIndex={isWeeklyColumn ? 0 : undefined}
                         >
                           {record.satuan === "%"
-                            ? text ?? "" + "%"
-                            : text ?? ""}
+                            ? (text ?? "" + "%")
+                            : (text ?? "")}
                         </span>
                       );
                     }
@@ -1361,8 +1477,8 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                       fontSize: record.main_parent
                         ? ""
                         : record.parent
-                        ? "12px"
-                        : "11px",
+                          ? "12px"
+                          : "11px",
                     },
                   };
                 return {
@@ -1370,8 +1486,8 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                     fontSize: record.main_parent
                       ? ""
                       : record.parent
-                      ? "12px"
-                      : "11px",
+                        ? "12px"
+                        : "11px",
                   },
                 };
               }}
@@ -1384,8 +1500,7 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
 
                 const isBelowTarget = Number(text) < Number(record.target);
                 if (col.dataIndex == "parameter") {
-                  const isMttrq = record.mini_parameter?.toLowerCase().includes("mttrq") || record.parameter?.toLowerCase().includes("mttrq");
-                  const isLevel3Mttrq = !record.main_parent && !record.parent && !record.is_level_4 && isMttrq;
+                  const isExpanded = expandedRowKey.includes(record.identIndex);
                   return (
                     <div
                       className="cursor-pointer text-primary-500"
@@ -1398,10 +1513,10 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                           record.main_parent
                             ? "ml-0"
                             : record.parent
-                            ? "ml-2 !text-[13px]"
-                            : record.is_level_4
-                            ? "ml-8 !text-xs"
-                            : "ml-4 !text-xs"
+                              ? "ml-2 !text-[13px]"
+                              : record.is_level_4
+                                ? "ml-8 !text-xs"
+                                : "ml-4 !text-xs"
                         }`}
                       >
                         <Image
@@ -1409,7 +1524,9 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                             record.main_parent || record.parent || isLevel3Mttrq
                               ? "block"
                               : "hidden"
-                          } `}
+                          } transform transition-transform duration-150 ${
+                            isExpanded ? "rotate-90" : "rotate-0"
+                          }`}
                           width={10}
                           src={arrowDropdown}
                           preview={false}
@@ -1464,7 +1581,7 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                 return text;
               }}
             />
-          )
+          ),
         )}
       </Table>
 
@@ -1475,11 +1592,21 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
         onCancel={() => setModalVisible(false)}
         width={1000}
         footer={null}
-        loading={modalLoading}
       >
         {modalLoading ? (
-          <div className="flex justify-center items-center py-8">
-            <Spin tip="Mengambil data..." />
+          <div className="max-h-[650px] overflow-y-auto">
+            <Table
+              dataSource={skeletonRows}
+              size="small"
+              pagination={{ pageSize: 10, hideOnSinglePage: true }}
+              bordered
+              scroll={{ x: "max-content" }}
+              columns={columnPop.map((column: any) => ({
+                ...column,
+                render: () => renderSkeletonCell(),
+              }))}
+              rowKey={(_, index) => index as number}
+            />
           </div>
         ) : modalData ? (
           <div className="max-h-[650px] overflow-y-auto">
@@ -1511,48 +1638,106 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
         onCancel={() => setRealisasiModalVisible(false)}
         width={1200}
         footer={null}
-        loading={realisasiModalLoading}
       >
         {realisasiModalLoading ? (
-          <div className="flex justify-center items-center py-8">
-            <Spin tip="Mengambil data..." />
+          <div className="max-h-[700px] overflow-y-auto">
+            <div className="grid grid-cols-2 gap-6">
+              <div>
+                <h3 className="text-lg font-bold mb-4 text-center">
+                  Realisasi Before
+                </h3>
+                <Table
+                  dataSource={skeletonRows}
+                  size="small"
+                  pagination={{ pageSize: 50, hideOnSinglePage: true }}
+                  bordered
+                  scroll={{ x: "max-content" }}
+                  columns={generateRealisasiColumns(
+                    realisasiDetail?.monthNum || 2,
+                    realisasiDetail?.kpi,
+                  ).map((column: any) => ({
+                    ...column,
+                    render: () => renderSkeletonCell(),
+                  }))}
+                  rowKey={(_, index) => index as number}
+                />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold mb-4 text-center">
+                  Realisasi After
+                </h3>
+                <Table
+                  dataSource={skeletonRows}
+                  size="small"
+                  pagination={{ pageSize: 50, hideOnSinglePage: true }}
+                  bordered
+                  scroll={{ x: "max-content" }}
+                  columns={generateRealisasiColumns(
+                    realisasiDetail?.monthNum || 2,
+                    realisasiDetail?.kpi,
+                  ).map((column: any) => ({
+                    ...column,
+                    render: () => renderSkeletonCell(),
+                  }))}
+                  rowKey={(_, index) => index as number}
+                />
+              </div>
+            </div>
           </div>
-        ) : realisasiModalData && typeof realisasiModalData === "object" && realisasiModalData.data ? (
+        ) : realisasiModalData &&
+          typeof realisasiModalData === "object" &&
+          realisasiModalData.data ? (
           <div className="max-h-[700px] overflow-y-auto">
             <div className="grid grid-cols-2 gap-6">
               {/* Realisasi Before */}
               <div>
-                <h3 className="text-lg font-bold mb-4 text-center">Realisasi Before</h3>
-                {realisasiModalData.data?.before && Array.isArray(realisasiModalData.data.before) ? (
+                <h3 className="text-lg font-bold mb-4 text-center">
+                  Realisasi Before
+                </h3>
+                {realisasiModalData.data?.before &&
+                Array.isArray(realisasiModalData.data.before) ? (
                   <Table
                     dataSource={realisasiModalData.data.before}
                     size="small"
                     pagination={{ pageSize: 50, hideOnSinglePage: true }}
                     bordered
                     scroll={{ x: "max-content" }}
-                    columns={generateRealisasiColumns(realisasiDetail?.monthNum || 2, realisasiDetail?.kpi)}
+                    columns={generateRealisasiColumns(
+                      realisasiDetail?.monthNum || 2,
+                      realisasiDetail?.kpi,
+                    )}
                     rowKey={(_, index) => index as number}
                   />
                 ) : (
-                  <div className="text-center py-4 text-gray-500">Tidak ada data</div>
+                  <div className="text-center py-4 text-gray-500">
+                    Tidak ada data
+                  </div>
                 )}
               </div>
 
               {/* Realisasi After */}
               <div>
-                <h3 className="text-lg font-bold mb-4 text-center">Realisasi After</h3>
-                {realisasiModalData.data?.after && Array.isArray(realisasiModalData.data.after) ? (
+                <h3 className="text-lg font-bold mb-4 text-center">
+                  Realisasi After
+                </h3>
+                {realisasiModalData.data?.after &&
+                Array.isArray(realisasiModalData.data.after) ? (
                   <Table
                     dataSource={realisasiModalData.data.after}
                     size="small"
                     pagination={{ pageSize: 50, hideOnSinglePage: true }}
                     bordered
                     scroll={{ x: "max-content" }}
-                    columns={generateRealisasiColumns(realisasiDetail?.monthNum || 2, realisasiDetail?.kpi)}
+                    columns={generateRealisasiColumns(
+                      realisasiDetail?.monthNum || 2,
+                      realisasiDetail?.kpi,
+                    )}
                     rowKey={(_, index) => index as number}
                   />
                 ) : (
-                  <div className="text-center py-4 text-gray-500">Tidak ada data</div>
+                  <div className="text-center py-4 text-gray-500">
+                    Tidak ada data
+                  </div>
                 )}
               </div>
             </div>

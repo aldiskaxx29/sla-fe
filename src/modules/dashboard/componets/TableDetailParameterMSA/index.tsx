@@ -26,6 +26,23 @@ const TableDetailParameterMSA: React.FC<TableDetailParameterMSAProps> = ({
     []
   );
 
+  const resolveMonthYearFromRecord = (record: Record<string, unknown>) => {
+    const currentYear = new Date().getFullYear();
+    const rawYear = record.year;
+    const parsedYear =
+      typeof rawYear === "number" ? rawYear : Number(rawYear);
+    const year = Number.isFinite(parsedYear) && parsedYear > 0 ? parsedYear : currentYear;
+
+    const rawMonth = record.month ?? record.monthNum;
+    const parsedMonth =
+      typeof rawMonth === "number" ? rawMonth : Number(rawMonth);
+    const month = Number.isFinite(parsedMonth) && parsedMonth >= 1 && parsedMonth <= 12
+      ? parsedMonth
+      : new Date().getMonth() + 1;
+
+    return { month, year };
+  };
+
   const columns = useMemo(() => {
     if (!data) return [];
     // Extract keys dynamically
@@ -221,12 +238,15 @@ const TableDetailParameterMSA: React.FC<TableDetailParameterMSAProps> = ({
 
   const fetchWitelData = async (record) => {
     try {
+      const { month, year } = resolveMonthYearFromRecord(record);
       const res = await getWitel({
         query: {
           parameter: detailParameter?.replace(/%20/g, " "),
           region: record.parameter,
           level: "witel",
           type: "msa",
+          month,
+          year,
         },
       }).unwrap();
       const findData = dataMapping?.find(
