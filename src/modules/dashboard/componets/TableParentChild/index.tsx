@@ -1506,6 +1506,14 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                 const isBelowTarget = Number(text) < Number(record.target);
                 if (col.dataIndex == "parameter") {
                   const isExpanded = expandedRowKey.includes(record.identIndex);
+                  const isLevel3MttrqRow =
+                    !record.main_parent &&
+                    !record.parent &&
+                    !record.is_level_4 &&
+                    Boolean(
+                      record.mini_parameter?.toLowerCase()?.includes("mttrq") ||
+                        record.parameter?.toLowerCase()?.includes("mttrq"),
+                    );
                   return (
                     <div
                       className="cursor-pointer text-primary-500"
@@ -1526,7 +1534,9 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                       >
                         <Image
                           className={`${
-                            record.main_parent || record.parent || isLevel3Mttrq
+                            record.main_parent ||
+                            record.parent ||
+                            isLevel3MttrqRow
                               ? "block"
                               : "hidden"
                           } transform transition-transform duration-150 ${
