@@ -28,7 +28,8 @@ class TableFallbackBoundary extends Component<
     if (this.state.hasError) {
       return (
         <div className="rounded-xl border border-dashed border-amber-300 bg-amber-50 px-4 py-5 text-sm text-amber-900">
-          Data tabel MSA gagal dirender. Silakan ubah filter atau muat ulang halaman.
+          Data tabel MSA gagal dirender. Silakan ubah filter atau muat ulang
+          halaman.
         </div>
       );
     }
@@ -129,36 +130,48 @@ const MSAmenu = ({
 
       if (!hasExplicitMonthlyKeys(row)) {
         normalized.ach_fm_1 = dashIfEmpty(
-          pickFirstValue(row, ["ach_fm_prev", "ach_fm_prev_2"])
+          pickFirstValue(row, ["ach_fm_prev", "ach_fm_prev_2"]),
         );
         normalized.ach_fm_2 = dashIfEmpty(
-          pickFirstValue(row, ["ach_fm_curr", "ach_fm_prev_1"])
+          pickFirstValue(row, ["ach_fm_curr", "ach_fm_prev_1"]),
         );
 
         normalized.realisasi_fm_before_1 = dashIfEmpty(
-          pickFirstValue(row, ["realisasi_fm_before_prev", "realisasi_fm_before_prev_2"])
+          pickFirstValue(row, [
+            "realisasi_fm_before_prev",
+            "realisasi_fm_before_prev_2",
+          ]),
         );
         normalized.realisasi_fm_after_1 = dashIfEmpty(
-          pickFirstValue(row, ["realisasi_fm_after_prev", "realisasi_fm_after_prev_2"])
+          pickFirstValue(row, [
+            "realisasi_fm_after_prev",
+            "realisasi_fm_after_prev_2",
+          ]),
         );
         normalized.realisasi_fm_1 = dashIfEmpty(
-          pickFirstValue(row, ["realisasi_fm_prev", "realisasi_fm_prev_2"])
+          pickFirstValue(row, ["realisasi_fm_prev", "realisasi_fm_prev_2"]),
         );
         normalized.score_fm_1 = dashIfEmpty(
-          pickFirstValue(row, ["score_fm_prev", "score_fm_prev_2"])
+          pickFirstValue(row, ["score_fm_prev", "score_fm_prev_2"]),
         );
 
         normalized.realisasi_fm_before_2 = dashIfEmpty(
-          pickFirstValue(row, ["realisasi_fm_before_curr", "realisasi_fm_before_prev_1"])
+          pickFirstValue(row, [
+            "realisasi_fm_before_curr",
+            "realisasi_fm_before_prev_1",
+          ]),
         );
         normalized.realisasi_fm_after_2 = dashIfEmpty(
-          pickFirstValue(row, ["realisasi_fm_after_curr", "realisasi_fm_after_prev_1"])
+          pickFirstValue(row, [
+            "realisasi_fm_after_curr",
+            "realisasi_fm_after_prev_1",
+          ]),
         );
         normalized.realisasi_fm_2 = dashIfEmpty(
-          pickFirstValue(row, ["realisasi_fm_curr", "realisasi_fm_prev_1"])
+          pickFirstValue(row, ["realisasi_fm_curr", "realisasi_fm_prev_1"]),
         );
         normalized.score_fm_2 = dashIfEmpty(
-          pickFirstValue(row, ["score_fm_curr", "score_fm_prev_1"])
+          pickFirstValue(row, ["score_fm_curr", "score_fm_prev_1"]),
         );
       }
 
@@ -234,7 +247,9 @@ const MSAmenu = ({
     fetchComply();
   }, []);
 
-  const msaRows = Array.isArray(dataSC?.data) ? normalizeMsaRows(dataSC.data) : [];
+  const msaRows = Array.isArray(dataSC?.data)
+    ? normalizeMsaRows(dataSC.data)
+    : [];
 
   return (
     <div>
@@ -371,14 +386,20 @@ const MSAmenu = ({
                   key={`trend-skeleton-${index}`}
                   className="rounded-2xl border border-[#DBDBDB] bg-white p-4"
                 >
-                  <Skeleton active paragraph={{ rows: 8 }} title={{ width: "55%" }} />
+                  <Skeleton
+                    active
+                    paragraph={{ rows: 8 }}
+                    title={{ width: "55%" }}
+                  />
                 </div>
               ))}
             </div>
           )}
           <div
             className={`flex gap-4 w-full overflow-auto transition-opacity duration-150 ${
-              isTrendLoading || !isTrendReady ? "opacity-0 pointer-events-none" : "opacity-100"
+              isTrendLoading || !isTrendReady
+                ? "opacity-0 pointer-events-none"
+                : "opacity-100"
             }`}
           >
             <div className="w-full">
@@ -401,7 +422,8 @@ const MSAmenu = ({
             </div>
             {!hasTrendCharts && isTrendReady && (
               <div className="w-full py-12 text-center text-gray-500">
-                Trend achievement belum tersedia atau format respons API tidak sesuai.
+                Trend achievement belum tersedia atau format respons API tidak
+                sesuai.
               </div>
             )}
             <div className="w-full">
