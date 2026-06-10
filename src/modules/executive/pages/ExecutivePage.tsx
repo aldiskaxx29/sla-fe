@@ -1,7 +1,9 @@
+import { qosmoUrl } from "@/modules/vaccess/utils/qosmoApi";
+
 const ExecutivePage = () => {
   return (
     <iframe
-      src="https://qosmo.telkom.co.id/executive/?page=executive"
+      src={qosmoUrl("/executive/?page=executive")}
       title="Executive Dashboard"
       className="w-full min-h-[100vh] border-0"
     />

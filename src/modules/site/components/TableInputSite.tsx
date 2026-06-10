@@ -291,6 +291,12 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
         search: true,
       },
       {
+        title: "Status Saat Ini",
+        dataIndex: "status_saat_ini",
+        key: "status_saat_ini",
+        align: "center",
+      },
+      {
         title: `${dynamicTitle} Status`,
         key: `${dynamicKey}_status`,
         dataIndex: `${dynamicKey}_status`,
@@ -486,6 +492,12 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
         key: "site_id",
         align: "center",
         search: true,
+      },
+      {
+        title: "Status Saat Ini",
+        dataIndex: "status_saat_ini",
+        key: "status_saat_ini",
+        align: "center",
       },
       {
         title: "FINAL SEVERITY",

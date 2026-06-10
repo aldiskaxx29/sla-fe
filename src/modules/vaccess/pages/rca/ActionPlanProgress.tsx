@@ -116,24 +116,21 @@ const ActionPlanProgress = React.memo(({mode,week,DATATABLE,LABELS})=>{
     return(
         <div className="relative flex flex-col" style={{height:'90vh'}}>
             {POPUP && <Popup close={()=>setPOPUP(false)} data={POPDATA}></Popup>}
-            {loading && (
-                <div className="absolute inset-0 z-20 bg-white">
-                    <div className="text-md font-bold text-red-700 flex gap-2">ACTION PLAN & PROGRESS</div>
-                    <div className="columns-2 auto-rows-fr gap-3 items-top" style={{gridTemplateRows:'auto',height:'fit-content'}}>
-                        {Array.from({ length: 4 }).map((_, index) => (
-                            <div key={`action-plan-skeleton-${index}`} className="flex flex-col break-inside-avoid mb-2 items-center justify-center w-full">
-                                <div className="w-full rounded-t-lg bg-sky-700 px-4 py-2">
-                                    <Skeleton.Input active size="small" style={{ width: "70%" }} />
-                                </div>
-                                <div className="w-full rounded-b-lg bg-gray-300 px-4 py-3">
-                                    <Skeleton active paragraph={{ rows: 6 }} title={false} />
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            )}
             <div className="text-md font-bold text-red-700 flex gap-2">ACTION PLAN & PROGRESS</div>
+            {loading ? (
+                <div className="columns-2 auto-rows-fr gap-3 items-top" style={{gridTemplateRows:'auto',height:'fit-content', minHeight:'60vh'}}>
+                    {Array.from({ length: 4 }).map((_, index) => (
+                        <div key={`action-plan-skeleton-${index}`} className="flex flex-col break-inside-avoid mb-2 items-center justify-center w-full">
+                            <div className="w-full rounded-t-lg bg-sky-700 px-4 py-2">
+                                <Skeleton.Input active size="small" style={{ width: "70%" }} />
+                            </div>
+                            <div className="w-full rounded-b-lg bg-gray-300 px-4 py-3">
+                                <Skeleton active paragraph={{ rows: 6 }} title={false} />
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            ) : (
             <div className="columns-2 auto-rows-fr gap-3 items-top" style={{gridTemplateRows:'auto',height:'fit-content'}}>
                 {Object.keys(DATA).map((a,i)=>{
                     let num=1
@@ -187,6 +184,7 @@ const ActionPlanProgress = React.memo(({mode,week,DATATABLE,LABELS})=>{
                     </div>
                 )})}
             </div>
+            )}
         </div>
     )
 })
