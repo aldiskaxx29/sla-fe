@@ -12,6 +12,14 @@ export default defineConfig({
     },
   },
   server: {
+    proxy: {
+      "/qosmo": {
+        target: "https://qosmo.telkom.co.id",
+        changeOrigin: true,
+        secure: true,
+        rewrite: (path) => path.replace(/^\/qosmo/, ""),
+      },
+    },
     allowedHosts: [
       '10.60.174.187:8089',
       'bf0b-110-137-192-103.ngrok-free.app',

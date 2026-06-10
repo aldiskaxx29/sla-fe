@@ -1,5 +1,6 @@
 import { Button, Image, Skeleton } from "antd";
-import { Component, useEffect } from "react";
+import { Component, useEffect, useState } from "react";
+import * as XLSX from "xlsx";
 
 import warningIcon from "@/assets/warning.svg";
 import checkIcon from "@/assets/check.svg";
@@ -54,6 +55,8 @@ const MSAmenu = ({
   filter,
   treg,
 }) => {
+  const [exportLoading, setExportLoading] = useState(false);
+
   const dataWithIndex = (dataSource) => {
     return dataSource?.map((item, index) => {
       return {
@@ -233,14 +236,25 @@ const MSAmenu = ({
     }
   };
 
-  const handleDownloadMsa = () => {
-    const fileUrl = "/Summary_Ach_KPI_MSA.pptx";
-    const link = document.createElement("a");
-    link.href = fileUrl; // URL hasil bundle dari Vite / Next.js
-    link.download = "MSA_Report.pptx"; // nama file saat diunduh
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleDownloadMsa = async () => {
+    try {
+      setExportLoading(true);
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+
+      const workbook = XLSX.utils.book_new();
+      const worksheet = XLSX.utils.json_to_sheet(
+        dataWithIndex(msaRows).map((row) => ({
+          ...row,
+        })),
+      );
+
+      XLSX.utils.book_append_sheet(workbook, worksheet, "MSA");
+      XLSX.writeFile(workbook, "MSA_Report.xlsx");
+    } catch (error) {
+      console.error("Failed to export MSA XLS:", error);
+    } finally {
+      setExportLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -322,7 +336,8 @@ const MSAmenu = ({
               <Image src={xlxsIcon} alt="icon" width={16} preview={false} />
             </Button> */}
             <Button
-              onClick={() => {}}
+              onClick={handleDownloadMsa}
+              loading={exportLoading}
               className="!h-11 !px-3 py-2.5 !border-0 !rounded-full !bg-[#EDFFFD]"
             >
               <p className="text-brand-secondary font-medium">Export as XLS</p>

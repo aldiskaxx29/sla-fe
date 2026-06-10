@@ -322,7 +322,7 @@ const TableHistory: React.FC<TableHistoryProps> = ({
         bordered
         pagination={{ pageSize: 1000000, hideOnSinglePage: true }}
         className="rounded-xl "
-        rowKey={(record) => record.identIndex}
+        rowKey={(record) => record.identIndex ?? record.key}
         scroll={{ x: "max-content" }}
         expandable={{
           expandedRowKeys: expandedRowKey,

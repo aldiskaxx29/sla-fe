@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react"
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { Bar } from "react-chartjs-2";
+import { Skeleton } from "antd";
 import ActionPlanProgress from "./ActionPlanProgress"
+import { qosmoUrl } from "@/modules/vaccess/utils/qosmoApi";
 
 import {
   Chart as ChartJS,
@@ -108,7 +110,7 @@ const StackedBarChart = ({datachart}) => {
 const TOPOLDEST =({sitegroup,week})=>{
     const [TOP,setTOP] = useState([])
     async function TopOldest(){
-        let res = await fetch('https://qosmo.telkom.co.id/baseapi/vrca.php?cmd=top-oldest&sitegroup='+sitegroup,HEADER)
+        let res = await fetch(qosmoUrl(`/baseapi/vrca.php?cmd=top-oldest&sitegroup=${sitegroup}`),HEADER)
         let {data} = await res.json();
         setTOP(data)
     }
@@ -163,7 +165,7 @@ const RCACHART = React.memo(({sitegroup,week,weekstart,weekend})=>{
     const [DATA,setData] = useState({SPMS:0,ISR:0,TRANSPORT:0,QE:0,COMCASE:0,CERAGON:0,"LATE RESPONSE":0,"ISSUE DWS":0,"ISSUE TSEL":0,WARRANTY:0,"WAITING CRA/CRQ":0})
     const [DATACHART,setDataChart] = useState([])
     async function ChartData(){
-        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vrca.php?cmd=chart-rca-not-clear&weekstart=${weekstart}&weekend=${weekend}&week=${week.split('-')[0]}&year=${week.split('-')[1]}&sitegroup=${sitegroup}`,HEADER)
+        let res = await fetch(qosmoUrl(`/baseapi/vrca.php?cmd=chart-rca-not-clear&weekstart=${weekstart}&weekend=${weekend}&week=${week.split('-')[0]}&year=${week.split('-')[1]}&sitegroup=${sitegroup}`),HEADER)
         let {data} = await res.json() || []
         try {
             
@@ -193,18 +195,22 @@ const RCACHART = React.memo(({sitegroup,week,weekstart,weekend})=>{
 const RESUME = React.memo(({week,weekstart,weekend,sitegroup,setLOADING})=>{
     const [CLOSED,setCLOSED] = useState([])
     const [OPEN,setOPEN] = useState([])
+    const [loading, setLoading] = useState(true)
     async function ChartData(){
+        setLoading(true)
         setLOADING(true)
-        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vrca.php?cmd=resume&weekstart=${weekstart}&weekend=${weekend}&week=${week.split('-')[0]}&year=${week.split('-')[1]}&sitegroup=${sitegroup}`,HEADER)
+        let res = await fetch(qosmoUrl(`/baseapi/vrca.php?cmd=resume&weekstart=${weekstart}&weekend=${weekend}&week=${week.split('-')[0]}&year=${week.split('-')[1]}&sitegroup=${sitegroup}`),HEADER)
         try {    
             let {data} = await res.json() || []
             if(data){
                 setCLOSED([...data.CLOSED])
                 setOPEN([...data.OPEN])
-                setLOADING(false)
             }
         } catch (error) {
             
+        } finally {
+            setLoading(false)
+            setLOADING(false)
         }
     }
     useEffect(()=>{
@@ -213,7 +219,26 @@ const RESUME = React.memo(({week,weekstart,weekend,sitegroup,setLOADING})=>{
     return(
         <div>
             <div className="text-md font-bold text-red-700 flex gap-2 italic">RESUME</div>
-            <div className="flex flex-col items-center justify-center w-full">  
+            <div className="relative flex flex-col items-center justify-center w-full">
+                {loading && (
+                    <div className="absolute inset-0 z-10 rounded-lg bg-white/90 p-2">
+                        <div className="grid grid-cols-3 gap-2">
+                            <Skeleton.Input active size="small" className="w-full" />
+                            <Skeleton.Input active size="small" className="w-full" />
+                            <Skeleton.Input active size="small" className="w-full" />
+                        </div>
+                        <div className="mt-3 grid grid-cols-3 gap-2">
+                            <Skeleton.Input active className="h-[72px] w-full" />
+                            <Skeleton.Input active className="h-[72px] w-full" />
+                            <Skeleton.Input active className="h-[72px] w-full" />
+                        </div>
+                        <div className="mt-3 grid grid-cols-3 gap-2">
+                            <Skeleton.Input active className="h-5 w-full" />
+                            <Skeleton.Input active className="h-5 w-full" />
+                            <Skeleton.Input active className="h-5 w-full" />
+                        </div>
+                    </div>
+                )}
                 <div className="grid grid-cols-3 font-bold py-2 bg-sky-700 text-white rounded-t-lg text-md w-full text-center">
                     <div>TOTAL TICKET</div>
                     <div>CLEAR</div>
@@ -268,7 +293,7 @@ const TABLERCANOTCLEAR = React.memo(({sitegroup,week,weekstart,weekend})=>{
     const [POPDATA,setPOPDATA] = useState({})
     const [DETAIL,setDETAIL]=useState(RESETDETAIL)
     async function TableData(){
-        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vrca.php?cmd=detail-rca-not-clear&weekstart=${weekstart}&weekend=${weekend}&week=${week.split('-')[0]}&year=${week.split('-')[1]}&sitegroup=${sitegroup}`,HEADER)
+        let res = await fetch(qosmoUrl(`/baseapi/vrca.php?cmd=detail-rca-not-clear&weekstart=${weekstart}&weekend=${weekend}&week=${week.split('-')[0]}&year=${week.split('-')[1]}&sitegroup=${sitegroup}`),HEADER)
         try {
         let {data} = await res.json() || []
         let d = RESETTB
@@ -290,7 +315,7 @@ const TABLERCANOTCLEAR = React.memo(({sitegroup,week,weekstart,weekend})=>{
     }
 
     async function PopTable(region,rca){
-        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vrca.php?cmd=pop-not-clear&region=${region}&rca=${rca}&week=${week.split('-')[0]}&year=${week.split('-')[1]}&sitegroup=${sitegroup}`,HEADER)
+        let res = await fetch(qosmoUrl(`/baseapi/vrca.php?cmd=pop-not-clear&region=${region}&rca=${rca}&week=${week.split('-')[0]}&year=${week.split('-')[1]}&sitegroup=${sitegroup}`),HEADER)
         let {data} = await res.json()
         setPOPDATA(data)
         

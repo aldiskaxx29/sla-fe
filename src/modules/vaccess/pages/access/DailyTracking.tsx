@@ -8,6 +8,8 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+import { qosmoUrl } from "@/modules/vaccess/utils/qosmoApi";
+import { Skeleton } from "antd";
 
 ChartJS.register(
   CategoryScale,
@@ -139,6 +141,7 @@ let dataset = [
 };
 const DailyTracking=({start,end})=>{
     const [DAILYTRACKING,setDailyTracking] = useState({})
+    const [loading, setLoading] = useState(true)
     const [DAILYMODE,setDailyMode] = useState('PL')
     const [DDate,setDDate] = useState([])
     const [DCLEAR,setDCLEAR] = useState([])
@@ -164,13 +167,15 @@ const DailyTracking=({start,end})=>{
         setPOP(true);setTITLEPOP("SITE DAILY TRACKING PACKET LOSS - CLEAR")
     }
     async function DailyTracking(){
-            let res = await fetch('https://qosmo.telkom.co.id/baseapi/vaccess.php?cmd=daily-tracking-'+DAILYMODE.toLowerCase()+'&region='+DRegion+`&start=${start}&end=${end}`,HEADER)
-            let {data} = await res.json()
-            setDailyTracking({...data})
-            let clear = []
-            let spike = []
-            let consc = []
-            let date = []
+            setLoading(true)
+            try {
+                let res = await fetch(qosmoUrl(`/baseapi/vaccess.php?cmd=daily-tracking-${DAILYMODE.toLowerCase()}&region=${DRegion}&start=${start}&end=${end}`),HEADER)
+                let {data} = await res.json()
+                setDailyTracking({...data})
+                let clear = []
+                let spike = []
+                let consc = []
+                let date = []
     
             Object.keys(data).forEach(a=>{
                 let total = Number(data[a][0]||0)+Number(data[a][1]||0)+Number(data[a][2]||0);
@@ -198,10 +203,13 @@ const DailyTracking=({start,end})=>{
                     consc.push(0)
                 }
             })
-            setDDate([...date])
-            setDCLEAR([...clear])
-            setDSPIKE([...spike])
-            setDCONSC([...consc])
+                setDDate([...date])
+                setDCLEAR([...clear])
+                setDSPIKE([...spike])
+                setDCONSC([...consc])
+            } finally {
+                setLoading(false)
+            }
         }
     // useEffect(()=>{
     //      if(localStorage.getItem("user_data")){
@@ -234,7 +242,12 @@ const DailyTracking=({start,end})=>{
                         </select>
                     </div>
                 </div>
-         <div className="px-10" style={{height:'35vh'}}>
+         <div className="relative px-10" style={{height:'35vh'}}>
+            {loading && (
+                <div className="absolute inset-0 z-10 rounded-lg bg-white/95 p-2">
+                    <Skeleton active title={false} paragraph={{ rows: 8 }} />
+                </div>
+            )}
             <StackedBarChart POP={PopDailyTracking} DATE={DDate} MODE={DAILYMODE} CLEAR={DCLEAR} SPIKE={DSPIKE} CONSC={DCONSC}></StackedBarChart>
         </div>
         </div>

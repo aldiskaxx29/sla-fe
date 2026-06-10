@@ -260,7 +260,6 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
 
   // Function to generate realisasi columns based on month
   const generateRealisasiColumns = (monthNum: number, kpi?: string) => {
-    console.log("monthNum", monthNum);
     const weekCount = [3, 6, 8, 11].includes(monthNum) ? 5 : 4;
     const isPacketloss =
       kpi?.toLowerCase()?.includes("packetloss") &&
@@ -970,7 +969,8 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
   );
 
   const columnPop = useMemo(() => {
-    const isMttrq = weeklyDetail?.kpi?.toLowerCase()?.includes("mttrq") ?? false;
+    const isMttrq =
+      weeklyDetail?.kpi?.toLowerCase()?.includes("mttrq") ?? false;
 
     // Kolom khusus untuk KPI MTTRQ
     if (isMttrq) {
@@ -1268,12 +1268,12 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                     }
 
                     const isJitter =
-                      record.mini_parameter?.toLowerCase()?.includes(
-                        "latency",
-                      ) ||
-                      record.mini_parameter?.toLowerCase()?.includes(
-                        "jitter",
-                      ) ||
+                      record.mini_parameter
+                        ?.toLowerCase()
+                        ?.includes("latency") ||
+                      record.mini_parameter
+                        ?.toLowerCase()
+                        ?.includes("jitter") ||
                       record.mini_parameter?.toLowerCase()?.includes("mttr");
 
                     const isBelowTarget = isJitter
@@ -1512,7 +1512,7 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                     !record.is_level_4 &&
                     Boolean(
                       record.mini_parameter?.toLowerCase()?.includes("mttrq") ||
-                        record.parameter?.toLowerCase()?.includes("mttrq"),
+                      record.parameter?.toLowerCase()?.includes("mttrq"),
                     );
                   return (
                     <div

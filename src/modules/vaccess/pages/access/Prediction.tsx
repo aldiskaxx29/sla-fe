@@ -4,6 +4,8 @@ import { FileExcelFilled } from "@ant-design/icons";
 import DailyTracking from "./DailyTracking";
 import * as XLSX from "xlsx";
 import PopupDownload from "./PopupDownload";
+import { qosmoUrl } from "@/modules/vaccess/utils/qosmoApi";
+import { Skeleton } from "antd";
 
 let HEADER = {headers:{Rtoken:''}}
 try {
@@ -94,7 +96,9 @@ function getWeek(date = new Date()) {
 }
 
 const Prediction = ()=>{
-    const [MAX_DATE,setMAXDATE] = useState("")
+    const [MAX_DATE,setMAXDATE] = useState(formatYMD(new Date()))
+    const [topLoading,setTopLoading] = useState(true)
+    const [maxDateReady,setMaxDateReady] = useState(false)
     const [PL18,setPL18] = useState(0)
     const [PL18DATA,setPL18DATA] = useState([])
     const [JIT2,setJIT2] = useState(0)
@@ -242,19 +246,19 @@ const Prediction = ()=>{
     }
 
     async function SitePL18(start,end){
-        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vaccess.php?cmd=site-pl-18-hours&week=${getWeek(new Date(MAX_DATE))}&start=${start}&end=${end}`,HEADER)
+        let res = await fetch(qosmoUrl(`/baseapi/vaccess.php?cmd=site-pl-18-hours&week=${getWeek(new Date(MAX_DATE))}&start=${start}&end=${end}`),HEADER)
         let {data} = await res.json()
         setPL18(data.length)
         setPL18DATA(data)
     }
     async function SiteJit2Days(){
-        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vaccess.php?cmd=site-jitter-2days`,HEADER)
+        let res = await fetch(qosmoUrl(`/baseapi/vaccess.php?cmd=site-jitter-2days`),HEADER)
         let {data} = await res.json()
         setJIT2(data.length)
         setJIT2DATA(data)
     }
     async function PredictionWeek(start,end){
-        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vaccess.php?cmd=prediction-week&start=${start}&end=${end}`,HEADER)
+        let res = await fetch(qosmoUrl(`/baseapi/vaccess.php?cmd=prediction-week&start=${start}&end=${end}`),HEADER)
         let {data} = await res.json()
         let TBT = RESETTBSITE
         // let TBT = {}
@@ -265,7 +269,7 @@ const Prediction = ()=>{
     }
 
     async function PredictionWeekDetail(start,end){
-        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vaccess.php?cmd=prediction-week-detail&start=${start}&end=${end}`,HEADER)
+        let res = await fetch(qosmoUrl(`/baseapi/vaccess.php?cmd=prediction-week-detail&start=${start}&end=${end}`),HEADER)
         let {data} = await res.json()
         let TBT = RESETTB
         let dmax = data.map(a=>Number(a.lat));
@@ -357,40 +361,67 @@ const Prediction = ()=>{
     }  
 
     async function currentUpdateState(){
-        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vaccess.php?cmd=max-date`,HEADER)
-        let {data} = await res.json()
-        setMAXDATE(data.max_date)
+        try {
+            let res = await fetch(qosmoUrl(`/baseapi/vaccess.php?cmd=max-date`),HEADER)
+            let {data} = await res.json()
+            setMAXDATE(data.max_date)
+            setMaxDateReady(true)
+        } catch (error) {
+            setMaxDateReady(true)
+        }
     }
 
     useEffect(()=>{
+        setTopLoading(true)
         currentUpdateState()
         SiteJit2Days()
     },[])
     
     useEffect(()=>{
-        if(MAX_DATE){
-            let {start,end}= getStartEnd(new Date(MAX_DATE))
-            SitePL18(start,end)
-            PredictionWeekDetail(start,end)
+        if(!maxDateReady){
+            return
         }
-    },[MAX_DATE])
 
-    if(MAX_DATE)
+        let cancelled = false
+
+        const loadTopSection = async () => {
+            setTopLoading(true)
+            try {
+                let {start,end}= getStartEnd(new Date(MAX_DATE))
+                await Promise.all([
+                    SitePL18(start,end),
+                    PredictionWeekDetail(start,end)
+                ])
+            } finally {
+                if(!cancelled){
+                    setTopLoading(false)
+                }
+            }
+        }
+
+        loadTopSection()
+
+        return () => {
+            cancelled = true
+        }
+    },[MAX_DATE,maxDateReady])
+
     return (
         <div className="bg-white h-full text-gray-800 p-2" style={{fontFamily:'Poppins'}}>
             {POP && <Popup title={TITLEPOP} close={setPOP} data={POPDATA} mode={POPMODE}></Popup>}
             {POPDOWNLOAD && <PopupDownload RAWDATA={RAWDATA} RAWDATALAST={RAWDATALAST} LAST={exportRAWLAST} NOW={exportRAW} close={setPOPDOWNLOAD}></PopupDownload>}
-            <div className="grid grid-cols-7 mb-1">
-                <div className="col-span-6 flex justify-between items-center">
-                    <div className="text-md font-bold text-red-700 flex gap-2">PREDIKSI <div>W{getWeek(new Date(getStartEnd(new  Date(MAX_DATE)).currentDate))} ({getStartEnd(new Date(MAX_DATE)).startText} - {getStartEnd(new Date(MAX_DATE),new Date(MAX_DATE)).currentText})</div></div>
-                    <div onClick={()=>setPOPDOWNLOAD(true)} className="cursor-pointer flex items-center gap-1" style={{fontSize:'0.8em',color:RAWDATA.length ? 'black' :'gray'}}>
-                        Export As Excel
-                        <FileExcelFilled style={{color:'green',fontSize:'1.7em'}}></FileExcelFilled>
+            <div>
+                <div className="grid grid-cols-7 mb-1">
+                    <div className="col-span-6 flex justify-between items-center">
+                        <div className="text-md font-bold text-red-700 flex gap-2">PREDIKSI <div>W{getWeek(new Date(getStartEnd(new  Date(MAX_DATE)).currentDate))} ({getStartEnd(new Date(MAX_DATE)).startText} - {getStartEnd(new Date(MAX_DATE),new Date(MAX_DATE)).currentText})</div></div>
+                        <div onClick={()=>setPOPDOWNLOAD(true)} className="cursor-pointer flex items-center gap-1" style={{fontSize:'0.8em',color:RAWDATA.length ? 'black' :'gray'}}>
+                            Export As Excel
+                            <FileExcelFilled style={{color:'green',fontSize:'1.7em'}}></FileExcelFilled>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div className="grid grid-cols-7 gap-4" >
-                <div className="col-span-6">
+                <div className="grid grid-cols-7 gap-4" >
+                    <div className="col-span-6">
                     <table id="excel-prediction" className="w-full border border-gray-800 py-2" style={{fontWeight:'300 !important',fontSize:'0.7em',height:'47vh'}}>
                         <thead>
                             <tr>
@@ -413,54 +444,99 @@ const Prediction = ()=>{
                             </tr>
                         </thead>
                         <tbody>
-                            {Object.keys(TBSITE).map((T,i)=>{
-                                return(
-                                <tr key={i}>
-                                <td id={T} style={{fontWeight:'400'}} className={((TB[T].r_pl5>TB[T].t_pl5 || TB[T].r_pl15>TB[T].t_pl15 || TB[T].r_lat>Number(((100-TBSITE[T].treshold_lat)/100*Number(TBSITE[T].total_site)).toFixed(0)) || TB[T].r_jit>Number(((100-TBSITE[T].treshold_jit)/100*Number(TBSITE[T].total_site)).toFixed(0))) ?'bg-red-100' :'bg-white')+` border border-gray-800 text-gray-800 text-left p-[3.5px]`}>{String(i+1).padStart(2,'0')+'-'+T.replace('_',' ')}</td>
-                                <td style={{fontWeight:'400'}} className="bg-white border border-gray-800 text-gray-800 text-center p-[3.5px]">{TBSITE[T].total_site}</td>
-                                <td style={{fontWeight:'400'}} className="bg-white border border-gray-800 text-gray-800 text-center p-[3.5px]">{TB[T].t_pl5}</td>
-                                <td onClick={()=>PopTable(T.replace("_"," "),'pl5')} style={{fontWeight:'400'}} className={(TB[T].r_pl5>TB[T].t_pl5 ?'text-red-600 ' :'text-gray-800 ')+` cursor-pointer bg-white border border-gray-800 text-center p-[3.5px]`}>{TB[T].r_pl5}</td>
-                                <td style={{fontWeight:'400'}} className="bg-white border border-gray-800 text-gray-800 text-center p-[3.5px]">{TB[T].t_pl15}</td>
-                                <td onClick={()=>PopTable(T.replace("_"," "),'pl15')} style={{fontWeight:'400'}} className={(TB[T].r_pl15>TB[T].t_pl15 ?'text-red-600 ' :'text-gray-800 ')+` cursor-pointer bg-white border border-gray-800 text-center p-[3.5px]`}>{TB[T].r_pl15}</td>
-                                <td style={{fontWeight:'400'}} className="bg-white border border-gray-800 text-gray-800 text-center p-[3.5px]">{Number(((100-TBSITE[T].treshold_lat)/100*Number(TBSITE[T].total_site)).toFixed(0))}</td>
-                                <td onClick={()=>PopTable(T.replace("_"," "),'lat')} style={{fontWeight:'400'}} className={(TB[T].r_lat>Number(((100-TBSITE[T].treshold_lat)/100*Number(TBSITE[T].total_site)).toFixed(0)) ?'text-red-600 ' :'text-gray-800 ')+` cursor-pointer bg-white border border-gray-800 text-center p-[3.5px]`}>{TB[T].r_lat}</td>
-                                <td style={{fontWeight:'400'}} className="bg-white border border-gray-800 text-gray-800 text-center p-[3.5px]">{Number(((100-TBSITE[T].treshold_jit)/100*Number(TBSITE[T].total_site)).toFixed(0))}</td>
-                                <td onClick={()=>PopTable(T.replace("_"," "),'jit')} style={{fontWeight:'400'}} className={(TB[T].r_jit>Number(((100-TBSITE[T].treshold_jit)/100*Number(TBSITE[T].total_site)).toFixed(0)) ?'text-red-600 ' :'text-gray-800 ')+` cursor-pointer bg-white border border-gray-800 text-center p-[3.5px]`}>{TB[T].r_jit}</td>
-                                </tr>
-                            )})}
-                            <tr>
-                                <td style={{fontWeight:'700'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-left p-[3.5px]">Nationwide</td>
-                                <td style={{fontWeight:'400'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3.5px]">{Object.keys(TBSITE).map(a=>Number(TBSITE[a].total_site)).reduce((a,b)=>a+b)}</td>
-                                <td style={{fontWeight:'400'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3.5px]">{Object.keys(TB).map(a=>Number(TB[a].t_pl5)).reduce((a,b)=>a+b)}</td>
-                                <td style={{fontWeight:'400'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3.5px] cursor-pointer" onClick={()=>PopTable('nationwide','pl5')}>{Object.keys(TB).map(a=>Number(TB[a].r_pl5)).reduce((a,b)=>a+b)}</td>
-                                <td style={{fontWeight:'400'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3.5px]">{Object.keys(TB).map(a=>Number(TB[a].t_pl15)).reduce((a,b)=>a+b)}</td>
-                                <td style={{fontWeight:'400'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3.5px] cursor-pointer" onClick={()=>PopTable('nationwide','pl15')}>{Object.keys(TB).map(a=>Number(TB[a].r_pl15)).reduce((a,b)=>a+b)}</td>
-                                <td style={{fontWeight:'400'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3.5px]">{Object.keys(TBSITE).map(a=>Number(((100-Number(TBSITE[a].treshold_lat))/100*Number(TBSITE[a].total_site)).toFixed(0))).reduce((a,b)=>a+b)}</td>
-                                <td style={{fontWeight:'400'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3.5px] cursor-pointer" onClick={()=>PopTable('nationwide','lat')}>{Object.keys(TB).map(a=>Number(TB[a].r_lat)).reduce((a,b)=>a+b)}</td>
-                                <td style={{fontWeight:'400'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3.5px]">{Object.keys(TBSITE).map(a=>Number(((100-Number(TBSITE[a].treshold_jit))/100*Number(TBSITE[a].total_site)).toFixed(0))).reduce((a,b)=>a+b)}</td>
-                                <td style={{fontWeight:'400'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3.5px] cursor-pointer" onClick={()=>PopTable('nationwide','jit')}>{Object.keys(TB).map(a=>Number(TB[a].r_jit)).reduce((a,b)=>a+b)}</td>
-                            </tr>
+                            {topLoading ? (
+                                Array.from({ length: 12 }).map((_, i) => (
+                                    <tr key={`prediction-skeleton-${i}`}>
+                                        {Array.from({ length: 10 }).map((__, j) => (
+                                            <td
+                                                key={`prediction-skeleton-${i}-${j}`}
+                                                className="border border-gray-800 bg-white p-[3.5px]"
+                                            >
+                                                <Skeleton.Input
+                                                    active
+                                                    size="small"
+                                                    style={{ width: "100%" }}
+                                                />
+                                            </td>
+                                        ))}
+                                    </tr>
+                                ))
+                            ) : (
+                                <>
+                                    {Object.keys(TBSITE).map((T,i)=>(
+                                        <tr key={i}>
+                                            <td id={T} style={{fontWeight:'400'}} className={((TB[T].r_pl5>TB[T].t_pl5 || TB[T].r_pl15>TB[T].t_pl15 || TB[T].r_lat>Number(((100-TBSITE[T].treshold_lat)/100*Number(TBSITE[T].total_site)).toFixed(0)) || TB[T].r_jit>Number(((100-TBSITE[T].treshold_jit)/100*Number(TBSITE[T].total_site)).toFixed(0))) ?'bg-red-100' :'bg-white')+` border border-gray-800 text-gray-800 text-left p-[3.5px]`}>{String(i+1).padStart(2,'0')+'-'+T.replace('_',' ')}</td>
+                                            <td style={{fontWeight:'400'}} className="bg-white border border-gray-800 text-gray-800 text-center p-[3.5px]">{TBSITE[T].total_site}</td>
+                                            <td style={{fontWeight:'400'}} className="bg-white border border-gray-800 text-gray-800 text-center p-[3.5px]">{TB[T].t_pl5}</td>
+                                            <td onClick={()=>PopTable(T.replace("_"," "),'pl5')} style={{fontWeight:'400'}} className={(TB[T].r_pl5>TB[T].t_pl5 ?'text-red-600 ' :'text-gray-800 ')+` cursor-pointer bg-white border border-gray-800 text-center p-[3.5px]`}>{TB[T].r_pl5}</td>
+                                            <td style={{fontWeight:'400'}} className="bg-white border border-gray-800 text-gray-800 text-center p-[3.5px]">{TB[T].t_pl15}</td>
+                                            <td onClick={()=>PopTable(T.replace("_"," "),'pl15')} style={{fontWeight:'400'}} className={(TB[T].r_pl15>TB[T].t_pl15 ?'text-red-600 ' :'text-gray-800 ')+` cursor-pointer bg-white border border-gray-800 text-center p-[3.5px]`}>{TB[T].r_pl15}</td>
+                                            <td style={{fontWeight:'400'}} className="bg-white border border-gray-800 text-gray-800 text-center p-[3.5px]">{Number(((100-TBSITE[T].treshold_lat)/100*Number(TBSITE[T].total_site)).toFixed(0))}</td>
+                                            <td onClick={()=>PopTable(T.replace("_"," "),'lat')} style={{fontWeight:'400'}} className={(TB[T].r_lat>Number(((100-TBSITE[T].treshold_lat)/100*Number(TBSITE[T].total_site)).toFixed(0)) ?'text-red-600 ' :'text-gray-800 ')+` cursor-pointer bg-white border border-gray-800 text-center p-[3.5px]`}>{TB[T].r_lat}</td>
+                                            <td style={{fontWeight:'400'}} className="bg-white border border-gray-800 text-gray-800 text-center p-[3.5px]">{Number(((100-TBSITE[T].treshold_jit)/100*Number(TBSITE[T].total_site)).toFixed(0))}</td>
+                                            <td onClick={()=>PopTable(T.replace("_"," "),'jit')} style={{fontWeight:'400'}} className={(TB[T].r_jit>Number(((100-TBSITE[T].treshold_jit)/100*Number(TBSITE[T].total_site)).toFixed(0)) ?'text-red-600 ' :'text-gray-800 ')+` cursor-pointer bg-white border border-gray-800 text-center p-[3.5px]`}>{TB[T].r_jit}</td>
+                                        </tr>
+                                    ))}
+                                    <tr>
+                                        <td style={{fontWeight:'700'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-left p-[3.5px]">Nationwide</td>
+                                        <td style={{fontWeight:'400'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3.5px]">{Object.keys(TBSITE).map(a=>Number(TBSITE[a].total_site)).reduce((a,b)=>a+b)}</td>
+                                        <td style={{fontWeight:'400'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3.5px]">{Object.keys(TB).map(a=>Number(TB[a].t_pl5)).reduce((a,b)=>a+b)}</td>
+                                        <td style={{fontWeight:'400'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3.5px] cursor-pointer" onClick={()=>PopTable('nationwide','pl5')}>{Object.keys(TB).map(a=>Number(TB[a].r_pl5)).reduce((a,b)=>a+b)}</td>
+                                        <td style={{fontWeight:'400'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3.5px]">{Object.keys(TB).map(a=>Number(TB[a].t_pl15)).reduce((a,b)=>a+b)}</td>
+                                        <td style={{fontWeight:'400'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3.5px] cursor-pointer" onClick={()=>PopTable('nationwide','pl15')}>{Object.keys(TB).map(a=>Number(TB[a].r_pl15)).reduce((a,b)=>a+b)}</td>
+                                        <td style={{fontWeight:'400'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3.5px]">{Object.keys(TBSITE).map(a=>Number(((100-Number(TBSITE[a].treshold_lat))/100*Number(TBSITE[a].total_site)).toFixed(0))).reduce((a,b)=>a+b)}</td>
+                                        <td style={{fontWeight:'400'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3.5px] cursor-pointer" onClick={()=>PopTable('nationwide','lat')}>{Object.keys(TB).map(a=>Number(TB[a].r_lat)).reduce((a,b)=>a+b)}</td>
+                                        <td style={{fontWeight:'400'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3.5px]">{Object.keys(TBSITE).map(a=>Number(((100-Number(TBSITE[a].treshold_jit))/100*Number(TBSITE[a].total_site)).toFixed(0))).reduce((a,b)=>a+b)}</td>
+                                        <td style={{fontWeight:'400'}} className="bg-yellow-400 border border-gray-800 text-gray-800 text-center p-[3.5px] cursor-pointer" onClick={()=>PopTable('nationwide','jit')}>{Object.keys(TB).map(a=>Number(TB[a].r_jit)).reduce((a,b)=>a+b)}</td>
+                                    </tr>
+                                </>
+                            )}
                         </tbody>
                     </table>
-                </div>
-                <div className="grid grid-rows-2 gap-3">
-                    <div>
-                        <div className="flex flex-col items-center justify-center w-full">
-                            <div className="py-2 bg-sky-700 text-white rounded-t-lg text-lg w-full text-center font-bold">SITE PL 18 HOURS</div>
-                            <div className="rounded-b-lg text-sm bg-to-green-600 flex flex-col items-center bg-linear-to-r from-sky-400 to-sky-200 w-full justify-center py-2">
-                                <div onClick={PopPL18Hours} className="cursor-pointer text-3xl py-2 font-bold text-sky-800">{PL18}</div>
-                                <div>SITE</div>
-                                <div>PACKETLOSS</div>
+                    </div>
+                    <div className="grid grid-rows-2 gap-3">
+                        <div>
+                            <div className="flex flex-col items-center justify-center w-full">
+                                <div className="py-2 bg-sky-700 text-white rounded-t-lg text-lg w-full text-center font-bold">SITE PL 18 HOURS</div>
+                                <div className="rounded-b-lg text-sm bg-to-green-600 flex flex-col items-center bg-linear-to-r from-sky-400 to-sky-200 w-full justify-center py-2">
+                                    {topLoading ? (
+                                        <div className="w-full px-4 py-2">
+                                            <Skeleton.Input active size="large" style={{ width: "100%", height: 42 }} />
+                                            <div className="mt-3 flex flex-col items-center gap-2">
+                                                <Skeleton.Input active size="small" style={{ width: "55%" }} />
+                                                <Skeleton.Input active size="small" style={{ width: "70%" }} />
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <div onClick={PopPL18Hours} className="cursor-pointer text-3xl py-2 font-bold text-sky-800">{PL18}</div>
+                                            <div>SITE</div>
+                                            <div>PACKETLOSS</div>
+                                        </>
+                                    )}
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div>
-                        <div className="flex flex-col items-center justify-center w-full">
-                            <div className="py-2 bg-sky-700 text-white rounded-t-lg text-lg w-full text-center font-bold">SITE JITTER 2 DAYS</div>
-                            <div className="rounded-b-lg text-sm bg-to-green-600 flex flex-col items-center bg-linear-to-r from-sky-400 to-sky-200 w-full justify-center py-2">
-                                <div onClick={PopJITTER} className="cursor-pointer text-3xl py-2 font-bold text-red-600">{JIT2}</div>
-                                <div>SITE</div>
-                                <div>JITTER</div>
+                        <div>
+                            <div className="flex flex-col items-center justify-center w-full">
+                                <div className="py-2 bg-sky-700 text-white rounded-t-lg text-lg w-full text-center font-bold">SITE JITTER 2 DAYS</div>
+                                <div className="rounded-b-lg text-sm bg-to-green-600 flex flex-col items-center bg-linear-to-r from-sky-400 to-sky-200 w-full justify-center py-2">
+                                    {topLoading ? (
+                                        <div className="w-full px-4 py-2">
+                                            <Skeleton.Input active size="large" style={{ width: "100%", height: 42 }} />
+                                            <div className="mt-3 flex flex-col items-center gap-2">
+                                                <Skeleton.Input active size="small" style={{ width: "55%" }} />
+                                                <Skeleton.Input active size="small" style={{ width: "60%" }} />
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <div onClick={PopJITTER} className="cursor-pointer text-3xl py-2 font-bold text-red-600">{JIT2}</div>
+                                            <div>SITE</div>
+                                            <div>JITTER</div>
+                                        </>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </div>

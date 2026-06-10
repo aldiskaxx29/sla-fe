@@ -1,5 +1,13 @@
 // Antd
-import { Button, Checkbox, Input, InputRef, Skeleton, Space, Table } from "antd";
+import {
+  Button,
+  Checkbox,
+  Input,
+  InputRef,
+  Skeleton,
+  Space,
+  Table,
+} from "antd";
 import ModalInput from "./ModalInput";
 import { useMemo, useRef, useState } from "react";
 import { EditOutlined, SearchOutlined } from "@ant-design/icons";
@@ -31,7 +39,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
   year,
   setTrigger,
   pagination,
-  setPagination
+  setPagination,
 }) => {
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -48,7 +56,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
   const handleSearch = (
     selectedKeys: string[],
     confirm: FilterDropdownProps["confirm"],
-    dataIndex
+    dataIndex,
   ) => {
     confirm();
     setSearchText(selectedKeys[0]);
@@ -59,7 +67,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
     clearFilters: () => void,
     selectedKeys,
     confirm,
-    dataIndex
+    dataIndex,
   ) => {
     clearFilters();
     setSearchText("");
@@ -118,7 +126,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
                 clearFilters,
                 selectedKeys as string[],
                 confirm,
-                dataIndex
+                dataIndex,
               )
             }
             size="small"
@@ -176,7 +184,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
         __skeleton: true,
         id: `skeleton-${index}`,
       })),
-    []
+    [],
   );
   const dynamicKey = useMemo(() => {
     if (parameter.includes("packetloss")) return "packetloss";
@@ -189,36 +197,33 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
     if (parameter.includes("latency")) return "Latency";
   }, [parameter]);
   const monthOrWeek = useMemo(() => {
-    console.log(week);
-
     if (week.includes("all")) return "month";
     else return "week";
   }, [week]);
   const titleMonthOrWeek = useMemo(() => {
-    console.log(week);
-
     if (week.includes("all")) return "Month";
     else return "Week";
   }, [week]);
-  
-  const groupingRcaRegional : Record<"packetloss" | "latency" | "jitter", any> = {
-    packetloss: {
-      title: `Update Progres Regional`,
-      key: `grouping_rca_packetloss_regional_2`,
-      dataIndex: `grouping_rca_packetloss_regional_2`,
-    },
-    latency: {
-      title: `Update Progres Regional`,
-      key: `grouping_rca_latency_regional_2`,
-      dataIndex: `grouping_rca_latency_regional_2`,
-    },
-    jitter: {
-      title: `Update Progres Regional`,
-      key: `grouping_rca_jitter_regional_2`,
-      dataIndex: `grouping_rca_jitter_regional_2`,
-    }
-  } as const;
-  const groupingRcaCnq : Record<"packetloss" | "latency" | "jitter", any> = {
+
+  const groupingRcaRegional: Record<"packetloss" | "latency" | "jitter", any> =
+    {
+      packetloss: {
+        title: `Update Progres Regional`,
+        key: `grouping_rca_packetloss_regional_2`,
+        dataIndex: `grouping_rca_packetloss_regional_2`,
+      },
+      latency: {
+        title: `Update Progres Regional`,
+        key: `grouping_rca_latency_regional_2`,
+        dataIndex: `grouping_rca_latency_regional_2`,
+      },
+      jitter: {
+        title: `Update Progres Regional`,
+        key: `grouping_rca_jitter_regional_2`,
+        dataIndex: `grouping_rca_jitter_regional_2`,
+      },
+    } as const;
+  const groupingRcaCnq: Record<"packetloss" | "latency" | "jitter", any> = {
     packetloss: {
       title: `Update Progres`,
       key: `update_progress_packetloss`,
@@ -236,7 +241,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
       key: `update_progress_jitter`,
       dataIndex: `update_progress_jitter`,
       search: true,
-    }
+    },
   } as const;
 
   type DynamicKey = "packetloss" | "latency" | "jitter";
@@ -275,10 +280,9 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
         ],
         filterSearch: true,
         filterMultiple: true,
-        onFilter: (value, record) =>
-          record.region_tsel === value,
+        onFilter: (value, record) => record.region_tsel === value,
       },
-      { title: "Area", dataIndex: "area", key: "area", search: true, },
+      { title: "Area", dataIndex: "area", key: "area", search: true },
       {
         title: "Site ID",
         dataIndex: "site_id",
@@ -305,12 +309,11 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
               key: "distribution_pl",
               filters: [
                 { text: "1-5%", value: "1-5%" },
-                { text: ">5%", value: ">5%" }
+                { text: ">5%", value: ">5%" },
               ],
               filterSearch: true,
               filterMultiple: true,
-              onFilter: (value, record) =>
-                record.distribution_pl === value,
+              onFilter: (value, record) => record.distribution_pl === value,
             },
           ]
         : []),
@@ -372,7 +375,10 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
           { text: "Cap Intermediate / Hub", value: "Cap Intermediate / Hub" },
           { text: "QE Redaman", value: "QE Redaman" },
           { text: "Power TSEL", value: "Power TSEL" },
-          { text: "Hardware / Software Capability", value: "Hardware / Software Capability" },
+          {
+            text: "Hardware / Software Capability",
+            value: "Hardware / Software Capability",
+          },
           { text: "Gamas SKKL", value: "Gamas SKKL" },
           { text: "Gamas Repetitive", value: "Gamas Repetitive" },
           { text: "Gamas FO Darat / SKSO", value: "Gamas FO Darat / SKSO" },
@@ -380,14 +386,19 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
           { text: "Warranty Redeploy", value: "Warranty Redeploy" },
           { text: "Obstacle", value: "Obstacle" },
           { text: "ISR Segel Balmon", value: "ISR Segel Balmon" },
-          { text: "ISR Interference Internal", value: "ISR Interference Internal" },
-          { text: "ISR Interference External", value: "ISR Interference External" },
-          { text: "Cap 3rd Party", value: "Cap 3rd Party" }
+          {
+            text: "ISR Interference Internal",
+            value: "ISR Interference Internal",
+          },
+          {
+            text: "ISR Interference External",
+            value: "ISR Interference External",
+          },
+          { text: "Cap 3rd Party", value: "Cap 3rd Party" },
         ],
         filterSearch: true,
         filterMultiple: true,
-        onFilter: (value, record) =>
-          record.RCA === value,
+        onFilter: (value, record) => record.RCA === value,
       },
       {
         title: "Detail RCA",
@@ -405,8 +416,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
       // },
       ...(groupingRcaCnq[dynamicKey as DynamicKey]
         ? [groupingRcaCnq[dynamicKey as DynamicKey]]
-        : [])
-      ,
+        : []),
       {
         title: `Last Update`,
         key: `last_update_${dynamicKey}_cnq`,
@@ -420,8 +430,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
       },
       ...(groupingRcaRegional[dynamicKey as DynamicKey]
         ? [groupingRcaRegional[dynamicKey as DynamicKey]]
-        : [])
-      ,
+        : []),
       {
         title: `Last Update Regional`,
         key: `last_update_${dynamicKey}_regional`,
@@ -446,7 +455,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
         align: "center",
       },
     ],
-    [dynamicKey, dynamicTitle, monthOrWeek, titleMonthOrWeek]
+    [dynamicKey, dynamicTitle, monthOrWeek, titleMonthOrWeek],
   );
 
   const columns2 = useMemo(
@@ -554,7 +563,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
         align: "center",
       },
     ],
-    []
+    [],
   );
 
   const { saveSite, getSite } = useSite();
@@ -580,18 +589,21 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
       formData.append("month", payload.month);
       formData.append("week", payload.week);
 
-      formData.append("rca_rekonsiliasi", payload?.rca_packetloss ?? payload?.rca_latency ?? payload?.rca_jitter);
+      formData.append(
+        "rca_rekonsiliasi",
+        payload?.rca_packetloss ?? payload?.rca_latency ?? payload?.rca_jitter,
+      );
       // formData.append("update_progress", payload?.update_progress_packetloss ?? payload?.update_progress_latency ?? payload?.update_progress_jitter);
       formData.append("update_progress", payload?.group22);
-      
+
       formData.append("grouping_rca", payload.grouping_rca);
       // formData.append("grouping_rca_regional", payload.grouping_rca_regional);
 
       switch (parameter) {
-        case 'packetloss ran to core':
+        case "packetloss ran to core":
           formData.append(
             "grouping_rca_packetloss_cnq_1",
-            payload?.group1 ?? ""
+            payload?.group1 ?? "",
           );
 
           // formData.append(
@@ -600,7 +612,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
           // );
           formData.append(
             "grouping_rca_packetloss_cnq_2",
-            payload?.group2 ?? ""
+            payload?.group2 ?? "",
           );
           // formData.append(
           //   "grouping_rca_packetloss_regional_2",
@@ -608,61 +620,58 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
           // );
           // formData.append("update_progress_packetloss", payload?.group22);
           break;
-        case 'latency ran to core':
-          formData.append(
-            "grouping_rca_latency_cnq_1",
-            payload?.group1 ?? ""
-          );
+        case "latency ran to core":
+          formData.append("grouping_rca_latency_cnq_1", payload?.group1 ?? "");
           // formData.append(
           //   "grouping_rca_latency_regional_1",
           //   payload?.grouping_rca_latency_regional_1 ?? ""
           // );
-          formData.append(
-            "grouping_rca_latency_cnq_2",
-            payload?.group2 ?? ""
-          );
+          formData.append("grouping_rca_latency_cnq_2", payload?.group2 ?? "");
           // formData.append(
           //   "grouping_rca_latency_regional_2",
           //   payload?.grouping_rca_latency_regional_2 ?? ""
           // );
           // formData.append("update_progress_latency", payload?.group22);
           break;
-        case 'jitter ran to core':
-          formData.append(
-            "grouping_rca_jitter_cnq_1",
-            payload?.group1 ?? ""
-          );
+        case "jitter ran to core":
+          formData.append("grouping_rca_jitter_cnq_1", payload?.group1 ?? "");
           // formData.append(
           //   "grouping_rca_jitter_regional_1",
           //   payload?.grouping_rca_jitter_regional_1 ?? ""
           // );
-          formData.append(
-            "grouping_rca_jitter_cnq_2",
-            payload?.group2 ?? ""
-          );
+          formData.append("grouping_rca_jitter_cnq_2", payload?.group2 ?? "");
           // formData.append(
           //   "grouping_rca_jitter_regional_2",
           //   payload?.grouping_rca_jitter_regional_2 ?? ""
           // );
           // formData.append("update_progress_jitter", payload?.group22);
           break;
-      
+
         default:
           break;
       }
-      
+
       switch (parameter) {
-        case 'packetloss ran to core':
-          formData.append("status_progress_packetloss",payload?.status_progress ?? "");
-          formData.append("tanggal_action_packetloss",payload?.date ?? "");
+        case "packetloss ran to core":
+          formData.append(
+            "status_progress_packetloss",
+            payload?.status_progress ?? "",
+          );
+          formData.append("tanggal_action_packetloss", payload?.date ?? "");
           break;
-        case 'latency ran to core':
-          formData.append("status_progress_latency",payload?.status_progress ?? "");
-          formData.append("tanggal_action_latency",payload?.date ?? "");
+        case "latency ran to core":
+          formData.append(
+            "status_progress_latency",
+            payload?.status_progress ?? "",
+          );
+          formData.append("tanggal_action_latency", payload?.date ?? "");
           break;
-        case 'jitter ran to core':
-          formData.append("status_progress_jitter",payload?.status_progress ?? "");
-          formData.append("tanggal_action_jitter",payload?.date ?? "");
+        case "jitter ran to core":
+          formData.append(
+            "status_progress_jitter",
+            payload?.status_progress ?? "",
+          );
+          formData.append("tanggal_action_jitter", payload?.date ?? "");
           break;
 
         default:
@@ -694,7 +703,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
       formData.append("parameter", parameter);
       formData.append("ticket", payload.ticket_id);
       formData.append("kpi", payload.kpi);
-      formData.append("site_sos", payload.site_sos);      
+      formData.append("site_sos", payload.site_sos);
       formData.append("site_exclude", payload.site_exclude);
 
       await saveSite(formData).unwrap();
@@ -736,7 +745,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
               record.RCA ??
               record.detail_rca ??
               record.action ??
-              record.button_req
+              record.button_req,
           )
         }
         onChange={(pag) => setPagination(pag)}
@@ -744,7 +753,9 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
         {columns.map((column, columnIndex) =>
           column.children ? (
             <ColumnGroup
-              key={column.key ?? column.dataIndex ?? column.title ?? columnIndex}
+              key={
+                column.key ?? column.dataIndex ?? column.title ?? columnIndex
+              }
               title={column.title}
               onHeaderCell={() => ({
                 className: "!bg-blue-pacific",
@@ -752,7 +763,9 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
             >
               {column.children.map((child, childIndex) => (
                 <Column
-                  key={child.key ?? child.dataIndex ?? child.title ?? childIndex}
+                  key={
+                    child.key ?? child.dataIndex ?? child.title ?? childIndex
+                  }
                   title={child.title}
                   dataIndex={child.dataIndex}
                   width="fit-content"
@@ -769,7 +782,9 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
             </ColumnGroup>
           ) : (
             <Column
-              key={column.key ?? column.dataIndex ?? column.title ?? columnIndex}
+              key={
+                column.key ?? column.dataIndex ?? column.title ?? columnIndex
+              }
               title={column.title}
               dataIndex={column.dataIndex}
               width={column.width}
@@ -786,10 +801,19 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
               render={(text, record, index) => {
                 if (isSkeletonRow(record)) {
                   if (column.key === "no") {
-                    return <Skeleton.Input active size="small" style={{ width: 40 }} />;
+                    return (
+                      <Skeleton.Input
+                        active
+                        size="small"
+                        style={{ width: 40 }}
+                      />
+                    );
                   }
 
-                  if (column.dataIndex?.startsWith("button") || column.dataIndex === "action") {
+                  if (
+                    column.dataIndex?.startsWith("button") ||
+                    column.dataIndex === "action"
+                  ) {
                     return (
                       <div className="flex justify-center">
                         <Skeleton.Avatar active size="small" shape="square" />
@@ -807,7 +831,9 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
                 }
 
                 if (column.key === "no") {
-                  return (pagination.current - 1) * pagination.pageSize + index + 1;
+                  return (
+                    (pagination.current - 1) * pagination.pageSize + index + 1
+                  );
                 }
                 const statusDouble =
                   record.exclude > 1 ||
@@ -877,7 +903,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
                 return formatTableValue(text);
               }}
             />
-          )
+          ),
         )}
       </Table>
       <ModalInput

@@ -27,6 +27,7 @@ import React, { useEffect, useState } from "react";
 import MTTR from "./Mttr";
 import Popup from "./Popup";
 import PopupUpload from "./PopupUpload";
+import { qosmoUrl } from "@/modules/vaccess/utils/qosmoApi";
 
 let HEADER = {headers:{Rtoken:''}}
 try {
@@ -203,12 +204,19 @@ function generateWeeksByMonth(year, month) {
   return result;
 }
 
+function getInitialWeekSelection() {
+  const todayFriday = getFriday(new Date());
+  const week = getWeekNumberFriday(todayFriday);
+  const year = todayFriday.getFullYear();
+  return `${week}-${year}`;
+}
+
 const ResumeRCA = ()=>{
     // const [PARAMETER,setParameter] = useState('MTTRq Critical')
     const [PARAMETER,setParameter] = useState('packetloss_>5%')
      const [FILTER] = useState({max_year:0,max_week:0,years:[]})
     const [LOADING,setLOADING] = useState(false)
-    const [WEEK,setWeek] = useState("")
+    const [WEEK,setWeek] = useState(getInitialWeekSelection())
     const [WEEKStart,setWeekStart] = useState("")
     const [WEEKEnd,setWeekEnd] = useState("")
     const [YEAR,setYear] = useState(0)
@@ -218,6 +226,7 @@ const ResumeRCA = ()=>{
     const [MAXMONTH,setMaxMonth] = useState(0)
     const [YEARS,setYEARS] = useState([])
     const [POPUPLOAD,setPOPUPLOAD] = useState(false)
+    const [BOOTSTRAPPING, setBOOTSTRAPPING] = useState(true)
     const MONTHS = [
       {month:1,name:'January'},
       {month:2,name:'February'},
@@ -241,27 +250,32 @@ const ResumeRCA = ()=>{
 
 
     async function setWeekFilter(){
-      let D = {}
-      if(!PARAMETER.includes('MTTR')){
-        let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vrca.php?cmd=last-week-twamp`,HEADER)
-        let {data} = await res.json()
-        D=data
-      }else{
-         let res = await fetch(`https://qosmo.telkom.co.id/baseapi/vrca.php?cmd=last-week-ticket`,HEADER)
+      setBOOTSTRAPPING(true)
+      try {
+        let D = {}
+        if(!PARAMETER.includes('MTTR')){
+          let res = await fetch(qosmoUrl("/baseapi/vrca.php?cmd=last-week-twamp"),HEADER)
           let {data} = await res.json()
           D=data
-      }
+        }else{
+           let res = await fetch(qosmoUrl("/baseapi/vrca.php?cmd=last-week-ticket"),HEADER)
+            let {data} = await res.json()
+            D=data
+        }
 
-      const maxWeek = Number(D.max_week)
-      const maxYear = Number(D.max_year)
-      setYear(D.max_year)
-      setMaxYear(Number(maxYear))
-      setMaxWeek(Number(maxWeek))
-      if(PARAMETER.includes('MTTR')){
-        setMaxMonth(Number(D.max_month))
-        setMonth(Number(D.max_month))
+        const maxWeek = Number(D.max_week)
+        const maxYear = Number(D.max_year)
+        setYear(D.max_year)
+        setMaxYear(Number(maxYear))
+        setMaxWeek(Number(maxWeek))
+        if(PARAMETER.includes('MTTR')){
+          setMaxMonth(Number(D.max_month))
+          setMonth(Number(D.max_month))
+        }
+        setWeek(`${maxWeek}-${maxYear}`)
+      } finally {
+        setBOOTSTRAPPING(false)
       }
-      setWeek(`${maxWeek}-${maxYear}`)
     }
 
     useEffect(()=>{
@@ -287,13 +301,9 @@ const ResumeRCA = ()=>{
         // console.log(wrca)
     },[MONTH,PARAMETER])    
     
-    if(WEEK){
     return (
         <div className="bg-white text-gray-800 p-2 grid grid-cols-2 gap-2 overflow-hidde" style={{fontFamily:'Poppins',height:'auto'}}>
             {POPUPLOAD && <PopupUpload close={()=>setPOPUPLOAD(false)}></PopupUpload>}
-            {LOADING && <div className="fixed left-0 top-0 bottom-0 right-0 flex items-center justify-center" style={{background:'rgba(0,0,0,0.7)'}}>
-              <span id="loader" className="loader"></span>
-            </div>}
             <div className="flex gap-2" style={{fontSize:'0.8em',height:'fit-content'}}>
                 <div className="flex">
                     <div className="border px-4 py-1 rounded-l-sm">PARAMETER</div>
@@ -363,9 +373,11 @@ const ResumeRCA = ()=>{
                 } */}
             </div>
             <div></div>
-            {(PARAMETER!='MTTRq Major' && PARAMETER!='MTTRq Minor' && PARAMETER!='MTTRq Critical') ? <Traffic mode={PARAMETER} week={WEEK} setLOADING={setLOADING}/> : <MTTR parameter={PARAMETER} week={WEEK} weekstart={WEEKStart} weekend={WEEKEnd} setLOADING={setLOADING}/>}
+            {(PARAMETER!='MTTRq Major' && PARAMETER!='MTTRq Minor' && PARAMETER!='MTTRq Critical')
+              ? <Traffic mode={PARAMETER} week={WEEK} setLOADING={setLOADING}/>
+              : <MTTR parameter={PARAMETER} week={WEEK} weekstart={WEEKStart} weekend={WEEKEnd} setLOADING={setLOADING}/>}
         </div>
-);}
+    );
 }
 
 export default ResumeRCA

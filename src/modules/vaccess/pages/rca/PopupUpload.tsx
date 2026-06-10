@@ -4,6 +4,7 @@ import {
 import { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import { qosmoUrl } from "@/modules/vaccess/utils/qosmoApi";
 
 const DownloadTemplate = () => {
     const data = [
@@ -46,8 +47,7 @@ const PopupUpload = ({close}) =>{
     setMessage(null);
 
     try {
-        let qosmo = true ? "https://qosmo.telkom.co.id/baseapi/upload.php" : "http://10.60.174.187:90/api/upload.php"
-      const response = await fetch(qosmo, {
+      const response = await fetch(qosmoUrl("/baseapi/upload.php"), {
         method: "POST",
         body: formData,
       });
