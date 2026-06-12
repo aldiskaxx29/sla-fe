@@ -6,6 +6,7 @@ import { useAuthRouter } from "@/modules/auth/router/auth.router";
 import { useDashboardRouter } from "@/modules/dashboard/router/dashboard.router";
 import { useSiteRouter } from "@/modules/site/router/site.router";
 import { useMondayRouter } from "@/modules/monday/router/monday.router";
+import { useDailyMonitoringRouter } from "@/modules/daily-monitoring/router/dailyMonitoring.router";
 // import { useQualityHealthinessRouter } from "@/modules/quality-healthiness/router/quality-healthiness.router";
 import { useOneRouter } from "@/modules/one/router/one.router";
 import { useExecutiveRouter } from "@/modules/executive/router/executive.router";
@@ -19,6 +20,7 @@ import { useApproverRouter } from "@/modules/approver/router/approver.router";
 import { useProfileRouter } from "@/modules/profile/router/profile.router";
 import { useAccessPredictionRouter } from "@/modules/vaccess/router/prediction.router";
 import { useResumeRCARouter } from "@/modules/vaccess/router/resumerca.router";
+import { useTutelaRouter } from "@/modules/tutela/router/tutela.router";
 
 const useRouter = () => {
   const app = useAppRouter();
@@ -26,6 +28,7 @@ const useRouter = () => {
   const dashboard = useDashboardRouter();
   const site = useSiteRouter();
   const monday = useMondayRouter();
+  const dailyMonitoring = useDailyMonitoringRouter();
   // const qualityHealthiness = useQualityHealthinessRouter();
   const executive = useExecutiveRouter();
   const elibrary = useELibraryRouter();
@@ -38,6 +41,7 @@ const useRouter = () => {
   const profile = useProfileRouter();
   const acessprediction = useAccessPredictionRouter();
   const resumerca = useResumeRCARouter();
+  const tutela = useTutelaRouter();
 
   const routes = useRoutes([
     ...app,
@@ -60,10 +64,12 @@ const useRouter = () => {
           path: "",
           element: <AppLayoutDefault />,
           children: [
+            ...tutela,
             ...dashboard,
             // ...qualityHealthiness,
             ...site,
             ...monday,
+            ...dailyMonitoring,
             ...one,
             ...executive,
             ...elibrary,

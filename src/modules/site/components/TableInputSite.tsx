@@ -284,6 +284,12 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
       },
       { title: "Area", dataIndex: "area", key: "area", search: true },
       {
+        title: "District",
+        dataIndex: "district",
+        key: "district",
+        search: true,
+      },
+      {
         title: "Site ID",
         dataIndex: "site_id",
         key: "site_id",
@@ -490,6 +496,13 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
         title: "Site Id",
         dataIndex: "site_id",
         key: "site_id",
+        align: "center",
+        search: true,
+      },
+      {
+        title: "District",
+        dataIndex: "district",
+        key: "district",
         align: "center",
         search: true,
       },

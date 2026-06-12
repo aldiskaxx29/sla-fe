@@ -3,7 +3,7 @@ import { Button, Image, Layout, Spin } from "antd";
 import "./index.css";
 
 // React
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 // Components
 import {
@@ -18,7 +18,7 @@ import notification from "@/assets/notification.svg";
 import profile from "@/assets/profile.svg";
 
 // Router
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useLogoutMutation } from "@/modules/auth/rtk/auth.rtk";
 
 import { toast } from "react-toastify";
@@ -26,8 +26,6 @@ import { toast } from "react-toastify";
 const { Header, Content } = Layout;
 
 const AppLayoutDefault = () => {
-  // Hook
-  const { menuId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
   // const [current, setCurrent] = useState<string | undefined>("MM");
@@ -37,17 +35,6 @@ const AppLayoutDefault = () => {
   const handleMenuSelect = (menu: string) => {
     navigate(menu);
   };
-
-  const titleNavigation = useMemo(() => {
-    // if (menuId === "msa") return "MONITORING ACHIEVEMENT SLA MSA";
-    // if (menuId === "cnop") return "MONITORING ACHIEVEMENT SLA CNOP";
-    if (menuId === "msa") return "ACHIEVEMENT SLA WISA";
-    // if (menuId === "cnop") return "ACHIEVEMENT SLA CNOP";
-    if (location.pathname.includes("site")) return "REKONSILIASI";
-    if (location.pathname.includes("support")) return "REPORT SUPPORT NEEDED";
-    // if (menuId) setType(menuId);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [menuId]);
 
   // Sync selected key with props (route changes)
   // useEffect(() => {
@@ -63,6 +50,7 @@ const AppLayoutDefault = () => {
   const slaOpt = [
     { label: "Achievement WISA", value: "msa" },
     // { label: "Achievement CNOP", value: "cnop" },
+    { label: "Daily Monitoring", value: "daily-monitoring" },
     // { label: "Reconsiliation", value: "input-site" },
     { label: "Report Reconsilation", value: "report-site" },
     { label: "Resume RCA", value: "resume-rca" },
@@ -129,8 +117,8 @@ const AppLayoutDefault = () => {
   return (
     <>
       {loading && <Spin fullscreen tip="Harap Tunggu..." />}
-      <Layout hasSider className=" !bg-white">
-        <Layout className="">
+      <Layout hasSider className="min-h-screen !bg-white">
+        <Layout className="min-h-screen flex flex-col">
           <Header className="!bg-white flex justify-between items-center sticky !px-6 z-20">
             <div className="flex items-center gap-4">
               <Image src={qosmo} alt="icon" width={128} preview={false} />
@@ -262,6 +250,7 @@ const AppLayoutDefault = () => {
                       [
                         "/msa",
                         "/cnop",
+                        "/daily-monitoring",
                         "/report-site",
                         "/report-support-needed",
                       ].includes(location.pathname)
@@ -432,6 +421,27 @@ const AppLayoutDefault = () => {
                       Telkom Akses
                     </p>
                   </Button>
+
+                  <Button
+                    className={`${
+                      location.pathname.includes("tutela")
+                        ? "!bg-[#A6AEC1]"
+                        : "!bg-[#576278]"
+                    } !border-0 !rounded-4xl !shadow-none`}
+                    onClick={() => {
+                      handleMenuSelect("tutela");
+                    }}
+                  >
+                    <p
+                      className={
+                        location.pathname.includes("tutela")
+                          ? "text-white"
+                          : "text-[#C6C6C6]"
+                      }
+                    >
+                      Tutela
+                    </p>
+                  </Button>
                 </div>
               )}
 
@@ -566,7 +576,7 @@ const AppLayoutDefault = () => {
               </div>
             </div>
           </Header>
-          <Content className="z-10">
+          <Content className="z-10 flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
             <AppRouteWrapper />
           </Content>
         </Layout>
