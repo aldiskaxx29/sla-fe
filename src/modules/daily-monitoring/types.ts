@@ -36,6 +36,7 @@ type DailyMonitoringDoneBlock = {
 };
 
 type DailyMonitoringAchievementBlock = {
+  ach: string;
   ta: string;
   pst: string;
 };
@@ -74,4 +75,3 @@ export type DailyMonitoringSummaryView = {
   totalTickets: number;
   rows: MttrQualityRow[];
 };
-

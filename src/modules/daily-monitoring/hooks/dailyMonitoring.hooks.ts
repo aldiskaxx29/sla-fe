@@ -52,7 +52,11 @@ const mapRow = (
     closingTicketH1: formatNumber(row.closing_ticket.h_minus_1),
     closingTicketH: formatNumber(row.closing_ticket.h),
     doneTaPst: formatTriple(row.done.ta, row.done.pst),
-    achTaPst: formatTriple(row.achievement.ta, row.achievement.pst),
+    achTaPst: formatTriple(
+      row.achievement.ach,
+      row.achievement.ta,
+      row.achievement.pst
+    ),
     achLevel: toAchievementLevel({
       ta: row.achievement.ta,
       pst: row.achievement.pst,
@@ -76,7 +80,11 @@ const mapTotalRow = (
     closingTicketH1: formatNumber(total.closing_ticket.h_minus_1),
     closingTicketH: formatNumber(total.closing_ticket.h),
     doneTaPst: formatTriple(total.done.ta, total.done.pst),
-    achTaPst: formatTriple(total.achievement.ta, total.achievement.pst),
+    achTaPst: formatTriple(
+      total.achievement.ach,
+      total.achievement.ta,
+      total.achievement.pst
+    ),
     achLevel: toAchievementLevel(total.achievement),
   };
 };
