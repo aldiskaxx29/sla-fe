@@ -107,7 +107,6 @@ const DailyMonitoringPage = () => {
             </div>
             <p className="daily-monitoring-page-subtitle ml-4 font-medium text-gray-600">
               {formatMonitoringDate(summary?.reportDate) || "Memuat tanggal..."}
-              {summary ? ` · Total Tickets: ${summary.totalTickets}` : ""}
             </p>
           </header>
 
