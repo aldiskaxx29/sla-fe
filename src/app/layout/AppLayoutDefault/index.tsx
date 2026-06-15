@@ -422,7 +422,7 @@ const AppLayoutDefault = () => {
                     </p>
                   </Button>
 
-                  <Button
+                  {/* <Button
                     className={`${
                       location.pathname.includes("tutela")
                         ? "!bg-[#A6AEC1]"
@@ -441,7 +441,7 @@ const AppLayoutDefault = () => {
                     >
                       Tutela
                     </p>
-                  </Button>
+                  </Button> */}
                 </div>
               )}
 

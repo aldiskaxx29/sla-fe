@@ -1,4 +1,8 @@
 import type { MttrQualityRow } from "../types";
+import { DownloadOutlined } from "@ant-design/icons";
+import { Button } from "antd";
+import { useState } from "react";
+import * as XLSX from "xlsx";
 
 const mttrQualityRows: MttrQualityRow[] = [
   {
@@ -153,9 +157,27 @@ const renderSplitValue = (value: string) =>
 
 type MttrQualityTableProps = {
   rows?: MttrQualityRow[];
+  summaryRows?: Array<{
+    ticketId: string;
+    regionTsel: string;
+    status: string;
+    area: string;
+    ttrCustomerDecimal: string;
+    network: string;
+    sitegroup: string;
+    regtsel: string;
+    statusPersen: string;
+  }>;
+  isLoading?: boolean;
+  totalTickets?: number;
 };
 
-const MttrQualityTable = ({ rows }: MttrQualityTableProps) => {
+const MttrQualityTable = ({
+  rows,
+  summaryRows,
+  isLoading,
+  totalTickets,
+}: MttrQualityTableProps) => {
   const colWidths = [
     "5%",
     "12%",
@@ -168,13 +190,61 @@ const MttrQualityTable = ({ rows }: MttrQualityTableProps) => {
     "12%",
   ];
   const tableRows = rows ?? mttrQualityRows;
+  const skeletonRows = Array.from({ length: 4 }, (_, index) => index);
+  const [exporting, setExporting] = useState(false);
+
+  const nextFrame = () =>
+    new Promise<void>((resolve) => {
+      requestAnimationFrame(() => resolve());
+    });
+
+  const exportSummaryRows = async () => {
+    if (exporting) return;
+
+    setExporting(true);
+    await nextFrame();
+
+    try {
+      const exportRows =
+        summaryRows?.map((row, index) => ({
+          No: index + 1,
+          "Ticket ID": row.ticketId || "-",
+          "Region Tsel": row.regionTsel || "-",
+          Status: row.status || "-",
+          Area: row.area || "-",
+          "TTR Customer Decimal": row.ttrCustomerDecimal || "-",
+          Network: row.network || "-",
+          Sitegroup: row.sitegroup || "-",
+          Regtsel: row.regtsel || "-",
+        })) ?? [];
+
+      const worksheet = XLSX.utils.json_to_sheet(exportRows);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Summary Rows");
+      XLSX.writeFile(workbook, "mttrq-summary-rows.xlsx");
+    } finally {
+      setExporting(false);
+    }
+  };
 
   return (
     <section className="rounded-2xl border border-[#D8DEE6] bg-white">
-      <div className="border-b border-[#D8DEE6] px-4 py-3">
+      <div className="border-b border-[#D8DEE6] px-4 py-3 flex items-center">
         <h2 className="daily-monitoring-section-title font-bold uppercase tracking-wide text-blue-600">
           B. MTTR QUALITY CNOP MERAH
         </h2>
+        <Button
+          type="link"
+          icon={<DownloadOutlined />}
+          className="ms-auto"
+          loading={exporting}
+          onClick={() => {
+            void exportSummaryRows();
+          }}
+          disabled={!summaryRows?.length}
+        >
+          Download Data
+        </Button>
       </div>
 
       <div>
@@ -245,70 +315,83 @@ const MttrQualityTable = ({ rows }: MttrQualityTableProps) => {
             </tr>
           </thead>
           <tbody>
-            {tableRows.map((row, index) => {
-              const isTotalRow = row.area === "Total";
-              const rowClass = isTotalRow
-                ? "bg-[#d1d5db] font-bold text-black"
-                : index % 2 === 0
-                  ? "bg-white"
-                  : "bg-slate-50";
+            {isLoading
+              ? skeletonRows.map((index) => (
+                  <tr key={`mttrq-skeleton-${index}`} className="bg-white">
+                    {Array.from({ length: 9 }, (_, cellIndex) => (
+                      <td
+                        key={cellIndex}
+                        className="border border-[#D8DEE6] px-4 py-3"
+                      >
+                        <div className="mx-auto h-5 w-full max-w-[120px] animate-pulse rounded bg-slate-200" />
+                      </td>
+                    ))}
+                  </tr>
+                ))
+              : tableRows.map((row, index) => {
+                  const isTotalRow = row.area === "Total";
+                  const rowClass = isTotalRow
+                    ? "bg-[#d1d5db] font-bold text-black"
+                    : index % 2 === 0
+                      ? "bg-white"
+                      : "bg-slate-50";
 
-              return (
-                <tr key={index} className={rowClass}>
-                  <td className="border border-[#D8DEE6] px-4 py-3 font-medium text-slate-700">
-                    {row.no}
-                  </td>
+                  return (
+                    <tr key={index} className={rowClass}>
+                      <td className="border border-[#D8DEE6] px-4 py-3 font-medium text-slate-700">
+                        {row.no}
+                      </td>
 
-                  {isTotalRow ? (
-                    <td
-                      colSpan={2}
-                      className="border border-[#D8DEE6] px-4 py-3 font-bold uppercase text-center text-slate-800"
-                    >
-                      {row.area}
-                    </td>
-                  ) : (
-                    <>
-                      <td className="border border-[#D8DEE6] px-4 py-3 font-semibold text-slate-800">
-                        {row.area}
+                      {isTotalRow ? (
+                        <td
+                          colSpan={2}
+                          className="border border-[#D8DEE6] px-4 py-3 font-bold uppercase text-center text-slate-800"
+                        >
+                          {row.area}
+                        </td>
+                      ) : (
+                        <>
+                          <td className="border border-[#D8DEE6] px-4 py-3 font-semibold text-slate-800">
+                            {row.area}
+                          </td>
+                          <td className="border border-[#D8DEE6] px-4 py-3 text-slate-700">
+                            {row.reg}
+                          </td>
+                        </>
+                      )}
+
+                      <td className="border border-[#D8DEE6] px-4 py-3 text-slate-700">
+                        {row.openFoRip}
                       </td>
                       <td className="border border-[#D8DEE6] px-4 py-3 text-slate-700">
-                        {row.reg}
+                        {row.kuningMerah96Jam}
                       </td>
-                    </>
-                  )}
-
-                  <td className="border border-[#D8DEE6] px-4 py-3 text-slate-700">
-                    {row.openFoRip}
-                  </td>
-                  <td className="border border-[#D8DEE6] px-4 py-3 text-slate-700">
-                    {row.kuningMerah96Jam}
-                  </td>
-                  <td className="border border-[#D8DEE6] px-4 py-3 text-slate-700">
-                    {row.closingTicketH1}
-                  </td>
-                  <td className="border border-[#D8DEE6] px-4 py-3 text-slate-700">
-                    {row.closingTicketH}
-                  </td>
-                  <td className="border border-[#D8DEE6] px-3 py-2.5 text-slate-700">
-                    {row.doneTaPst}
-                  </td>
-                  <td className="border border-[#D8DEE6] px-4 py-3">
-                    <div className="flex items-center justify-center h-full">
-                      <div
-                        className={`dm-badge inline-flex items-center gap-3 rounded-full px-4 py-2 text-[22px] font-semibold leading-none`}
-                      >
-                        <span
-                          className={`block aspect-square h-4 w-4 shrink-0 rounded-full ${row.achLevel === "good" ? "bg-emerald-500" : "bg-rose-500"}`}
-                        ></span>
-                        <span className="flex items-center">
-                          {renderSplitValue(row.achTaPst)}
-                        </span>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
+                      <td className="border border-[#D8DEE6] px-4 py-3 text-slate-700">
+                        {row.closingTicketH1}
+                      </td>
+                      <td className="border border-[#D8DEE6] px-4 py-3 text-slate-700">
+                        {row.closingTicketH}
+                      </td>
+                      <td className="border border-[#D8DEE6] px-3 py-2.5 text-slate-700">
+                        {row.doneTaPst}
+                      </td>
+                      <td className="border border-[#D8DEE6] px-4 py-3">
+                        <div className="flex items-center justify-center h-full">
+                          <div
+                            className={`dm-badge inline-flex items-center gap-3 rounded-full px-4 py-2 text-[22px] font-semibold leading-none`}
+                          >
+                            <span
+                              className={`block aspect-square h-4 w-4 shrink-0 rounded-full ${row.achLevel === "good" ? "bg-emerald-500" : "bg-rose-500"}`}
+                            ></span>
+                            <span className="flex items-center">
+                              {renderSplitValue(row.achTaPst)}
+                            </span>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
           </tbody>
         </table>
       </div>
@@ -317,7 +400,7 @@ const MttrQualityTable = ({ rows }: MttrQualityTableProps) => {
         <p className="font-semibold text-slate-700">Keterangan:</p>
         <p>Kuning: TTR &lt; Threshold</p>
         <p>Merah: TTR &gt; Threshold</p>
-        <p>- : Tidak ada Ticket</p>
+        <p>Total Ticket: {totalTickets ?? "-"}</p>
         <p className="mt-2 font-semibold text-slate-700">Sumber Data:</p>
         <p>
           <a

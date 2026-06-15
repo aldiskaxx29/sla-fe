@@ -82,6 +82,17 @@ export type DailyMonitoringSummaryResponse = {
   status: string;
   tanggal: string;
   total_tickets: number;
+  summary_rows?: Array<{
+    ticket_id: string | null;
+    region_tsel: string | null;
+    status: string | null;
+    area: string | null;
+    ttr_customer_decimal: string | number | null;
+    network: string | null;
+    sitegroup: string | null;
+    regtsel: string | null;
+    status_persen: string | number | null;
+  }>;
   summary_table: {
     data: DailyMonitoringSummaryRow[];
     total: DailyMonitoringSummaryTotal;
@@ -92,6 +103,17 @@ export type DailyMonitoringSummaryView = {
   reportDate: string;
   totalTickets: number;
   rows: MttrQualityRow[];
+  summaryRows: Array<{
+    ticketId: string;
+    regionTsel: string;
+    status: string;
+    area: string;
+    ttrCustomerDecimal: string;
+    network: string;
+    sitegroup: string;
+    regtsel: string;
+    statusPersen: string;
+  }>;
 };
 
 export type DailyMonitoringPacketLossRegion = {

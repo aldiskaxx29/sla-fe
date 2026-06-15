@@ -104,11 +104,24 @@ const normalizeDailyMonitoringSummary = (
   response: DailyMonitoringSummaryResponse
 ): DailyMonitoringSummaryView => {
   const rows = response.summary_table?.data?.map(mapRow) ?? [];
+  const summaryRows =
+    response.summary_rows?.map((row) => ({
+      ticketId: String(row.ticket_id ?? ""),
+      regionTsel: String(row.region_tsel ?? ""),
+      status: String(row.status ?? ""),
+      area: String(row.area ?? ""),
+      ttrCustomerDecimal: String(row.ttr_customer_decimal ?? ""),
+      network: String(row.network ?? ""),
+      sitegroup: String(row.sitegroup ?? ""),
+      regtsel: String(row.regtsel ?? ""),
+      statusPersen: String(row.status_persen ?? ""),
+    })) ?? [];
 
   return {
     reportDate: response.tanggal,
     totalTickets: Number(response.total_tickets) || 0,
     rows: [...rows, mapTotalRow(response.summary_table.total)],
+    summaryRows,
   };
 };
 

@@ -1,5 +1,5 @@
-import { DownloadOutlined } from "@ant-design/icons";
-import { Button, message, Spin } from "antd";
+import { FileImageOutlined } from "@ant-design/icons";
+import { Button, message } from "antd";
 import { toBlob } from "html-to-image";
 import { useEffect, useRef, useState } from "react";
 
@@ -94,14 +94,11 @@ const DailyMonitoringPage = () => {
 
   return (
     <div className="min-h-full px-4 py-4 md:px-6">
-      {isLoading || isPacketLossLoading ? (
-        <Spin fullscreen tip="Sedang Memuat Data..." />
-      ) : null}
       <div className="mx-auto flex w-full max-w-[1800px] flex-col gap-4">
         <div className="flex justify-end">
           <Button
             type="primary"
-            icon={<DownloadOutlined />}
+            icon={<FileImageOutlined />}
             onClick={handleExportImage}
             loading={exporting || isLoading}
             disabled={isLoading}
@@ -124,7 +121,8 @@ const DailyMonitoringPage = () => {
             <p className="daily-monitoring-page-subtitle ml-4 font-medium text-gray-600">
               {packetLoss
                 ? `${packetLoss.date} | ${packetLoss.time}`
-                : formatMonitoringDate(summary?.reportDate) || "Memuat tanggal..."}
+                : formatMonitoringDate(summary?.reportDate) ||
+                  "Memuat tanggal..."}
             </p>
           </header>
 
@@ -132,8 +130,14 @@ const DailyMonitoringPage = () => {
             <PacketLossTable
               rows={packetLoss?.rows}
               section={packetLoss?.section}
+              isLoading={isPacketLossLoading}
             />
-            {summary ? <MttrQualityTable rows={summary.rows} /> : null}
+            <MttrQualityTable
+              rows={summary?.rows}
+              summaryRows={summary?.summaryRows}
+              isLoading={isLoading}
+              totalTickets={summary?.totalTickets}
+            />
           </div>
         </div>
       </div>
