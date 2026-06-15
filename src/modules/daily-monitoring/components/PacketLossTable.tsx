@@ -261,87 +261,93 @@ const packetLossRows: PacketLossRow[] = [
 // };
 
 const PacketLossTable = () => {
+  const colWidths = [
+    "5%",
+    "24%",
+    "7%",
+    "11%",
+    "7%",
+    "7%",
+    "8%",
+    "8%",
+    "9%",
+    "14%",
+  ];
+
   return (
     <section className="rounded-2xl  bg-white">
       <div className="border-b border-[#D8DEE6] px-4 py-3">
-        <h2 className="text-lg font-bold text-blue-600 uppercase tracking-wide">
+        <h2 className="daily-monitoring-section-title font-bold uppercase tracking-wide text-blue-600">
           A. PL 5% &amp; 1-5%
         </h2>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[1080px] border-collapse table-fixed text-center text-[16px]">
+      <div>
+        <table className="daily-monitoring-table w-full border-collapse table-fixed text-center text-[26px] lg:text-[28px]">
           <colgroup>
-            <col style={{ width: "4%" }} /> {/* No */}
-            <col style={{ width: "16%" }} /> {/* Region */}
-            <col style={{ width: "8%" }} /> {/* Target */}
-            <col style={{ width: "10%" }} /> {/* Site Degrade */}
-            <col style={{ width: "6%" }} /> {/* H-1 */}
-            <col style={{ width: "6%" }} /> {/* H */}
-            <col style={{ width: "8%" }} /> {/* Growth */}
-            <col style={{ width: "10%" }} /> {/* Not Clear */}
-            <col style={{ width: "10%" }} /> {/* Ach */}
-            <col style={{ width: "22%" }} /> {/* Remark */}
+            {colWidths.map((width, index) => (
+              <col key={index} style={{ width }} />
+            ))}
           </colgroup>
           <thead className="text-black">
             <tr>
               <th
                 rowSpan={2}
-                className="border border-[#D8DEE6] bg-gray-400 px-2 py-2 font-semibold text-black"
+                className="dm-th-main border border-[#D8DEE6] bg-gray-400 px-4 py-3 text-[24px] font-semibold leading-none whitespace-nowrap text-black lg:text-[22px]"
               >
                 No
               </th>
               <th
                 rowSpan={2}
-                className="border border-[#D8DEE6] bg-gray-400 px-2 py-2 font-semibold text-black"
+                className="dm-th-main border border-[#D8DEE6] bg-gray-400 px-4 py-3 text-[24px] font-semibold leading-none whitespace-nowrap text-black lg:text-[22px]"
               >
                 Region
               </th>
               <th
                 rowSpan={2}
-                className="border border-[#D8DEE6] bg-gray-400 px-2 py-2 font-semibold text-black"
+                className="dm-th-main border border-[#D8DEE6] bg-gray-400 px-4 py-3 text-[24px] font-semibold leading-none whitespace-nowrap text-black lg:text-[22px]"
               >
                 Target
               </th>
               <th
                 rowSpan={2}
-                className="border border-[#D8DEE6] bg-gray-400 px-2 py-2 font-semibold text-black"
+                className="dm-th-main border border-[#D8DEE6] bg-gray-400 px-4 py-3 text-[24px] font-semibold leading-none whitespace-nowrap text-black lg:text-[22px]"
               >
                 Site Degrade
               </th>
               <th
                 colSpan={3}
-                className="border border-[#D8DEE6] bg-gray-400 px-2 py-2 font-semibold text-black"
+                className="dm-th-main border border-[#D8DEE6] bg-gray-400 px-4 py-3 text-[24px] font-semibold leading-none whitespace-nowrap text-black lg:text-[22px]"
               >
                 CLEAR
               </th>
               <th
                 rowSpan={2}
-                className="border border-[#D8DEE6] bg-gray-400 px-2 py-2 font-semibold text-black"
+                className="dm-th-main border border-[#D8DEE6] bg-gray-400 px-4 py-3 text-[24px] font-semibold leading-none whitespace-nowrap text-black lg:text-[22px]"
               >
                 Not Clear
               </th>
               <th
                 rowSpan={2}
-                className="border border-[#D8DEE6] bg-gray-400 px-2 py-2 font-semibold text-black"
+                className="dm-th-main border border-[#D8DEE6] bg-gray-400 px-3 py-2.5 text-[24px] font-semibold leading-none whitespace-nowrap text-black lg:text-[22px]"
               >
                 Ach
               </th>
               <th
                 rowSpan={2}
-                className="border border-[#D8DEE6] bg-gray-400 px-2 py-2 font-semibold text-black"
+                className="dm-th-main border border-[#D8DEE6] bg-gray-400 px-3 py-2.5 text-[24px] font-semibold leading-none whitespace-nowrap text-black lg:text-[22px]"
               >
                 Remark
               </th>
             </tr>
             <tr>
-              <th className="border border-[#D8DEE6] bg-gray-400 px-2 py-2 font-medium text-black">
+              <th className="dm-th-sub border border-[#D8DEE6] bg-gray-400 px-4 py-3 text-[17px] font-medium leading-none whitespace-nowrap text-black lg:text-[20px]">
                 H-1
               </th>
-              <th className="border border-[#D8DEE6] bg-gray-400 px-2 py-2 font-medium text-black">
+              <th className="dm-th-sub border border-[#D8DEE6] bg-gray-400 px-4 py-3 text-[17px] font-medium leading-none whitespace-nowrap text-black lg:text-[20px]">
                 H
               </th>
-              <th className="border border-[#D8DEE6] bg-gray-400 px-2 py-2 font-medium text-black">
+              <th className="dm-th-sub border border-[#D8DEE6] bg-gray-400 px-4 py-3 text-[17px] font-medium leading-none whitespace-nowrap text-black lg:text-[20px]">
                 Growth
               </th>
             </tr>
@@ -357,45 +363,45 @@ const PacketLossTable = () => {
 
               return (
                 <tr key={index} className={rowClass}>
-                  <td className="border border-[#D8DEE6] px-2 py-2 font-medium text-slate-700">
+                  <td className="border border-[#D8DEE6] px-4 py-3 font-medium text-slate-700">
                     {row.no}
                   </td>
                   <td
-                    className={`border border-[#D8DEE6] px-2 py-2 text-slate-800 ${isTotalRow ? "text-center uppercase" : "font-semibold text-left"}`}
+                    className={`border border-[#D8DEE6] px-4 py-3 text-slate-800 ${isTotalRow ? "text-center uppercase" : "font-semibold text-left"}`}
                   >
                     {row.region}
                   </td>
-                  <td className="border border-[#D8DEE6] px-2 py-2 text-slate-700">
+                  <td className="border border-[#D8DEE6] px-4 py-3 text-slate-700">
                     {row.target}
                   </td>
-                  <td className="border border-[#D8DEE6] px-2 py-2 text-slate-700">
+                  <td className="border border-[#D8DEE6] px-4 py-3 text-slate-700">
                     {row.siteDegrade}
                   </td>
-                  <td className="border border-[#D8DEE6] px-2 py-2 text-slate-700">
+                  <td className="border border-[#D8DEE6] px-4 py-3 text-slate-700">
                     {row.clearH1}
                   </td>
-                  <td className="border border-[#D8DEE6] px-2 py-2 text-slate-700">
+                  <td className="border border-[#D8DEE6] px-4 py-3 text-slate-700">
                     {row.clearH}
                   </td>
-                  <td className="border border-[#D8DEE6] px-2 py-2 text-slate-700">
+                  <td className="border border-[#D8DEE6] px-4 py-3 text-slate-700">
                     {row.growth}
                   </td>
-                  <td className="border border-[#D8DEE6] px-2 py-2 text-slate-700">
+                  <td className="border border-[#D8DEE6] px-3 py-2.5 text-slate-700">
                     {row.notClear}
                   </td>
-                  <td className="border border-[#D8DEE6] px-2 py-2 flex justify-center items-center h-full">
+                  <td className="border border-[#D8DEE6] px-4 py-3 flex items-center justify-center h-full">
                     {!isSpacerRow && (
-                      <span
-                        className={`inline-flex min-w-[64px] items-center justify-center rounded-full px-2 py-1  font-bold`}
+                    <span
+                        className={`dm-badge inline-flex min-w-[104px] items-center justify-center rounded-full px-3.5 py-2 font-bold leading-none`}
                       >
                         <span
-                          className={`mr-1.5 h-3 w-3 rounded-full ${row.achLevel === "good" ? "bg-emerald-500" : "bg-rose-500"}`}
+                          className={`mr-2 block aspect-square h-4 w-4 shrink-0 rounded-full ${row.achLevel === "good" ? "bg-emerald-500" : "bg-rose-500"}`}
                         ></span>
                         {row.ach}
                       </span>
                     )}
                   </td>
-                  <td className="border border-[#D8DEE6] px-2 py-2 text-slate-700 text-left">
+                  <td className="border border-[#D8DEE6] px-4 py-3 text-left text-slate-700">
                     {row.remark}
                   </td>
                 </tr>
@@ -405,8 +411,8 @@ const PacketLossTable = () => {
         </table>
       </div>
 
-      <div className="space-y-1 border-t border-[#D8DEE6] bg-white px-4 py-3 text-[12px] text-slate-600">
-        <p className="font-medium text-slate-700">
+      <div className="daily-monitoring-notes space-y-2 border-t border-[#D8DEE6] bg-white px-4 py-5 text-4xl leading-[1.5] text-slate-600">
+        <p className="font-semibold text-slate-700">
           *Pembaruan Data Weekly Setiap Hari Kamis
         </p>
         <p>
@@ -415,7 +421,7 @@ const PacketLossTable = () => {
             href="https://qosmo.telkom.co.id/Monday"
             target="_blank"
             rel="noreferrer"
-            className="font-medium text-sky-700 underline"
+            className="font-semibold text-sky-700 underline"
           >
             Packet Loss: https://qosmo.telkom.co.id/Monday
           </a>

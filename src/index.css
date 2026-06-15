@@ -82,3 +82,79 @@ gap: 24;
         transform: rotate(360deg);
     }
     } 
+
+.daily-monitoring-export-root {
+  --dm-page-title-size: 2rem;
+  --dm-page-title-line-height: 1.1;
+  --dm-page-subtitle-size: 1rem;
+  --dm-section-title-size: 1.5rem;
+  --dm-table-body-size: 0.875rem;
+  --dm-table-head-size: 0.6875rem;
+  --dm-table-head-main-size: 0.75rem;
+  --dm-table-head-compact-size: 0.75rem;
+  --dm-table-head-sub-size: 0.6875rem;
+  --dm-table-badge-size: 0.8125rem;
+  --dm-notes-size: 0.875rem;
+}
+
+.daily-monitoring-export-root[data-export-mode="true"] {
+  --dm-page-title-size: 4.5rem;
+  --dm-page-title-line-height: 1;
+  --dm-page-subtitle-size: 1.875rem;
+  --dm-section-title-size: 3rem;
+  --dm-table-body-size: 1.625rem;
+  --dm-table-head-size: 1.5rem;
+  --dm-table-head-main-size: 1.5rem;
+  --dm-table-head-compact-size: 1.125rem;
+  --dm-table-head-sub-size: 1.0625rem;
+  --dm-table-badge-size: 1.375rem;
+  --dm-notes-size: 2rem;
+}
+
+.daily-monitoring-page-title {
+  font-size: var(--dm-page-title-size) !important;
+  line-height: var(--dm-page-title-line-height) !important;
+}
+
+.daily-monitoring-page-subtitle {
+  font-size: var(--dm-page-subtitle-size) !important;
+  line-height: 1.25 !important;
+}
+
+.daily-monitoring-section-title {
+  font-size: var(--dm-section-title-size) !important;
+  line-height: 1.1 !important;
+}
+
+.daily-monitoring-table {
+  font-size: var(--dm-table-body-size) !important;
+}
+
+.daily-monitoring-table th {
+  font-size: var(--dm-table-head-size) !important;
+}
+
+.daily-monitoring-table .dm-th-main {
+  font-size: var(--dm-table-head-main-size) !important;
+}
+
+.daily-monitoring-table .dm-th-compact {
+  font-size: var(--dm-table-head-compact-size) !important;
+}
+
+.daily-monitoring-table .dm-th-sub {
+  font-size: var(--dm-table-head-sub-size) !important;
+}
+
+.daily-monitoring-table td {
+  font-size: var(--dm-table-body-size) !important;
+}
+
+.daily-monitoring-table .dm-badge {
+  font-size: var(--dm-table-badge-size) !important;
+}
+
+.daily-monitoring-notes {
+  font-size: var(--dm-notes-size) !important;
+  line-height: 1.5 !important;
+}

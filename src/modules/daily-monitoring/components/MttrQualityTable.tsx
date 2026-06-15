@@ -1,17 +1,4 @@
-type MttrQualityLevel = "good" | "warning" | "danger";
-
-type MttrQualityRow = {
-  no: string;
-  area: string;
-  reg: string;
-  openFoRip: string;
-  kuningMerah96Jam: string;
-  closingTicketH1: string;
-  closingTicketH: string;
-  doneTaPst: string;
-  achTaPst: string;
-  achLevel: MttrQualityLevel;
-};
+import type { MttrQualityRow } from "../types";
 
 const mttrQualityRows: MttrQualityRow[] = [
   {
@@ -164,90 +151,101 @@ const renderSplitValue = (value: string) =>
     </span>
   ));
 
-const MttrQualityTable = () => {
+type MttrQualityTableProps = {
+  rows?: MttrQualityRow[];
+};
+
+const MttrQualityTable = ({ rows }: MttrQualityTableProps) => {
+  const colWidths = [
+    "5%",
+    "12%",
+    "14%",
+    "14%",
+    "17%",
+    "8%",
+    "8%",
+    "10%",
+    "12%",
+  ];
+  const tableRows = rows ?? mttrQualityRows;
+
   return (
     <section className="rounded-2xl border border-[#D8DEE6] bg-white">
       <div className="border-b border-[#D8DEE6] px-4 py-3">
-        <h2 className="text-lg font-bold text-blue-600 uppercase tracking-wide">
+        <h2 className="daily-monitoring-section-title font-bold uppercase tracking-wide text-blue-600">
           B. MTTR QUALITY CNOP MERAH
         </h2>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[1220px] border-collapse table-fixed text-center text-[16px]">
+      <div>
+        <table className="daily-monitoring-table w-full border-collapse table-fixed text-center text-[26px] lg:text-[28px]">
           <colgroup>
-            <col style={{ width: "4%" }} /> {/* No */}
-            <col style={{ width: "10%" }} /> {/* Area */}
-            <col style={{ width: "12%" }} /> {/* Reg */}
-            <col style={{ width: "14%" }} /> {/* Open | FO | RIP */}
-            <col style={{ width: "16%" }} /> {/* Kuning/Merah/>96 Jam */}
-            <col style={{ width: "7%" }} /> {/* Closing Ticket H-1 */}
-            <col style={{ width: "7%" }} /> {/* Closing Ticket H */}
-            <col style={{ width: "10%" }} /> {/* Done TA | PST */}
-            <col style={{ width: "20%" }} /> {/* Ach | TA | PST */}
+            {colWidths.map((width, index) => (
+              <col key={index} style={{ width }} />
+            ))}
           </colgroup>
           <thead>
             <tr>
               <th
                 rowSpan={2}
-                className="border border-[#D8DEE6] bg-gray-400 px-2 py-2 font-semibold text-black"
+                className="dm-th-main border border-[#D8DEE6] bg-gray-400 px-4 py-3 text-[24px] font-semibold leading-none whitespace-nowrap text-black lg:text-[24px]"
               >
                 No
               </th>
               <th
                 rowSpan={2}
-                className="border border-[#D8DEE6] bg-gray-400 px-2 py-2 font-semibold text-black"
+                className="dm-th-main border border-[#D8DEE6] bg-gray-400 px-4 py-3 text-[24px] font-semibold leading-none whitespace-nowrap text-black lg:text-[24px]"
               >
                 Area
               </th>
               <th
                 rowSpan={2}
-                className="border border-[#D8DEE6] bg-gray-400 px-2 py-2 font-semibold text-black"
+                className="dm-th-main border border-[#D8DEE6] bg-gray-400 px-4 py-3 text-[24px] font-semibold leading-none whitespace-nowrap text-black lg:text-[24px]"
               >
                 Reg
               </th>
               <th
                 rowSpan={2}
-                className="border border-[#D8DEE6] bg-gray-400 px-2 py-2 font-semibold text-black"
+                className="dm-th-main border border-[#D8DEE6] bg-gray-400 px-4 py-3 text-[24px] font-semibold leading-none whitespace-nowrap text-black lg:text-[24px]"
               >
                 Open | FO | RIP
               </th>
               <th
                 rowSpan={2}
-                className="border border-[#D8DEE6] bg-gray-400 px-2 py-2 font-semibold text-black"
+                className="dm-th-compact border border-[#D8DEE6] bg-gray-400 px-4 py-3 text-[18px] font-semibold leading-none whitespace-nowrap text-black lg:text-[20px] "
               >
                 Kuning/Merah/&gt;96 Jam
               </th>
               <th
                 colSpan={2}
-                className="border border-[#D8DEE6] bg-gray-400 px-2 py-2 font-semibold text-black"
+                className="dm-th-main border border-[#D8DEE6] bg-gray-400 px-4 py-3 text-[24px] font-semibold leading-none whitespace-nowrap text-black lg:text-[24px]"
               >
                 Closing Ticket
               </th>
-              <th className="border border-[#D8DEE6] bg-gray-400 px-2 py-2 font-semibold text-black">
+              <th className="dm-th-main border border-[#D8DEE6] bg-gray-400 px-3 py-2.5 text-[24px] font-semibold leading-none whitespace-nowrap text-black lg:text-[24px]">
                 Done
               </th>
               <th
                 rowSpan={2}
-                className="border border-[#D8DEE6] bg-gray-400 px-2 py-2 font-semibold text-black"
+                className="dm-th-main border border-[#D8DEE6] bg-gray-400 px-3 py-2.5 text-[24px] font-semibold leading-none whitespace-nowrap text-black lg:text-[24px]"
               >
                 Ach | TA | PST
               </th>
             </tr>
             <tr>
-              <th className="border border-[#D8DEE6] bg-gray-400 px-2 py-2 font-medium text-black">
+              <th className="dm-th-sub border border-[#D8DEE6] bg-gray-400 px-4 py-3 text-[17px] font-medium leading-none whitespace-nowrap text-black lg:text-[19px]">
                 H-1
               </th>
-              <th className="border border-[#D8DEE6] bg-gray-400 px-2 py-2 font-medium text-black">
+              <th className="dm-th-sub border border-[#D8DEE6] bg-gray-400 px-4 py-3 text-[17px] font-medium leading-none whitespace-nowrap text-black lg:text-[19px]">
                 H
               </th>
-              <th className="border border-[#D8DEE6] bg-gray-400 px-2 py-2 font-medium text-black">
+              <th className="dm-th-sub border border-[#D8DEE6] bg-gray-400 px-4 py-3 text-[17px] font-medium leading-none whitespace-nowrap text-black lg:text-[19px]">
                 TA | PST
               </th>
             </tr>
           </thead>
           <tbody>
-            {mttrQualityRows.map((row, index) => {
+            {tableRows.map((row, index) => {
               const isTotalRow = row.area === "Total";
               const rowClass = isTotalRow
                 ? "bg-[#d1d5db] font-bold text-black"
@@ -257,50 +255,50 @@ const MttrQualityTable = () => {
 
               return (
                 <tr key={index} className={rowClass}>
-                  <td className="border border-[#D8DEE6] px-2 py-2 font-medium text-slate-700">
+                  <td className="border border-[#D8DEE6] px-4 py-3 font-medium text-slate-700">
                     {row.no}
                   </td>
 
                   {isTotalRow ? (
                     <td
                       colSpan={2}
-                      className="border border-[#D8DEE6] px-2 py-2 font-bold uppercase text-center text-slate-800"
+                      className="border border-[#D8DEE6] px-4 py-3 font-bold uppercase text-center text-slate-800"
                     >
                       {row.area}
                     </td>
                   ) : (
                     <>
-                      <td className="border border-[#D8DEE6] px-2 py-2 font-semibold text-slate-800">
+                      <td className="border border-[#D8DEE6] px-4 py-3 font-semibold text-slate-800">
                         {row.area}
                       </td>
-                      <td className="border border-[#D8DEE6] px-2 py-2 text-slate-700">
+                      <td className="border border-[#D8DEE6] px-4 py-3 text-slate-700">
                         {row.reg}
                       </td>
                     </>
                   )}
 
-                  <td className="border border-[#D8DEE6] px-2 py-2 text-slate-700">
+                  <td className="border border-[#D8DEE6] px-4 py-3 text-slate-700">
                     {row.openFoRip}
                   </td>
-                  <td className="border border-[#D8DEE6] px-2 py-2 text-slate-700">
+                  <td className="border border-[#D8DEE6] px-4 py-3 text-slate-700">
                     {row.kuningMerah96Jam}
                   </td>
-                  <td className="border border-[#D8DEE6] px-2 py-2 text-slate-700">
+                  <td className="border border-[#D8DEE6] px-4 py-3 text-slate-700">
                     {row.closingTicketH1}
                   </td>
-                  <td className="border border-[#D8DEE6] px-2 py-2 text-slate-700">
+                  <td className="border border-[#D8DEE6] px-4 py-3 text-slate-700">
                     {row.closingTicketH}
                   </td>
-                  <td className="border border-[#D8DEE6] px-2 py-2 text-slate-700">
+                  <td className="border border-[#D8DEE6] px-3 py-2.5 text-slate-700">
                     {row.doneTaPst}
                   </td>
-                  <td className="border border-[#D8DEE6] px-2 py-2">
+                  <td className="border border-[#D8DEE6] px-4 py-3">
                     <div className="flex items-center justify-center h-full">
                       <div
-                        className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[16px] font-semibold `}
+                        className={`dm-badge inline-flex items-center gap-3 rounded-full px-4 py-2 text-[22px] font-semibold leading-none`}
                       >
                         <span
-                          className={`h-3 w-3 rounded-full ${row.achLevel === "good" ? "bg-emerald-500" : "bg-rose-500"}`}
+                          className={`block aspect-square h-4 w-4 shrink-0 rounded-full ${row.achLevel === "good" ? "bg-emerald-500" : "bg-rose-500"}`}
                         ></span>
                         <span className="flex items-center">
                           {renderSplitValue(row.achTaPst)}
@@ -315,18 +313,18 @@ const MttrQualityTable = () => {
         </table>
       </div>
 
-      <div className="space-y-1 border-t border-[#D8DEE6] bg-white px-4 py-3 text-[12px] text-slate-600">
-        <p className="font-medium text-slate-700">Keterangan:</p>
+      <div className="daily-monitoring-notes space-y-2 border-t border-[#D8DEE6] bg-white px-4 py-5 text-4xl leading-[1.5] text-slate-600">
+        <p className="font-semibold text-slate-700">Keterangan:</p>
         <p>Kuning: TTR &lt; Threshold</p>
         <p>Merah: TTR &gt; Threshold</p>
         <p>- : Tidak ada Ticket</p>
-        <p className="font-medium text-slate-700 mt-2">Sumber Data:</p>
+        <p className="mt-2 font-semibold text-slate-700">Sumber Data:</p>
         <p>
           <a
             href="https://qosmo.telkom.co.id/ticket"
             target="_blank"
             rel="noreferrer"
-            className="font-medium text-sky-700 underline"
+            className="font-semibold text-sky-700 underline"
           >
             MTTRq: https://qosmo.telkom.co.id/ticket
           </a>

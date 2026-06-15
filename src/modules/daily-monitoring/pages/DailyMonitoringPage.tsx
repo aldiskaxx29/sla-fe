@@ -1,24 +1,120 @@
+import { DownloadOutlined } from "@ant-design/icons";
+import { Button, message, Spin } from "antd";
+import { toBlob } from "html-to-image";
+import { useEffect, useRef, useState } from "react";
+
 import MttrQualityTable from "@/modules/daily-monitoring/components/MttrQualityTable";
 import PacketLossTable from "@/modules/daily-monitoring/components/PacketLossTable";
+import { useDailyMonitoringSummary } from "@/modules/daily-monitoring/hooks/dailyMonitoring.hooks";
+
+const formatMonitoringDate = (value?: string) => {
+  if (!value) return "";
+
+  const date = new Date(`${value}T00:00:00`);
+  if (Number.isNaN(date.getTime())) return value;
+
+  return new Intl.DateTimeFormat("id-ID", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(date);
+};
 
 const DailyMonitoringPage = () => {
-  return (
-    <div className="min-h-full  px-4 py-4 md:px-6">
-      <div className="mx-auto flex w-full max-w-[1800px] flex-col gap-6">
-        <header className=" flex flex-col justify-center items-center gap-2">
-          <div className="bg-gray-200 p-4 w-full flex justify-center items-center">
-            <h1 className="text-2xl font-bold uppercase text-blue-600">
-              Daily Monitoring Quality CNOP
-            </h1>
-          </div>
-          <p className="ml-4 text-sm text-gray-600">
-            11 Juni 2026 Pukul 14:00 WIB
-          </p>
-        </header>
+  const captureRef = useRef<HTMLDivElement>(null);
+  const [exporting, setExporting] = useState(false);
+  const { data: summary, error, isLoading } = useDailyMonitoringSummary();
 
-        <div className="grid grid-cols-1 gap-6">
-          <PacketLossTable />
-          <MttrQualityTable />
+  useEffect(() => {
+    if (error) {
+      message.error(error);
+    }
+  }, [error]);
+
+  const handleExportImage = async () => {
+    if (!captureRef.current || exporting || isLoading) return;
+
+    try {
+      setExporting(true);
+
+      const node = captureRef.current;
+      node.setAttribute("data-export-mode", "true");
+      const width = node.scrollWidth;
+      const height = node.scrollHeight;
+
+      const blob = await toBlob(node, {
+        cacheBust: true,
+        backgroundColor: "#f8fafc",
+        pixelRatio: 6,
+        width,
+        height,
+        style: {
+          width: `${width}px`,
+          height: `${height}px`,
+          transform: "none",
+          overflow: "visible",
+        },
+      });
+
+      if (!blob) {
+        message.error("Gagal membuat file gambar.");
+        return;
+      }
+
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `daily-monitoring-${new Date()
+        .toISOString()
+        .slice(0, 10)}.png`;
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      message.error("Gagal mengekspor image.");
+      console.error(error);
+    } finally {
+      captureRef.current?.removeAttribute("data-export-mode");
+      setExporting(false);
+    }
+  };
+
+  return (
+    <div className="min-h-full px-4 py-4 md:px-6">
+      {isLoading ? <Spin fullscreen tip="Sedang Memuat Data..." /> : null}
+      <div className="mx-auto flex w-full max-w-[1800px] flex-col gap-4">
+        <div className="flex justify-end">
+          <Button
+            type="primary"
+            icon={<DownloadOutlined />}
+            onClick={handleExportImage}
+            loading={exporting || isLoading}
+            disabled={isLoading}
+          >
+            Export Image
+          </Button>
+        </div>
+
+        <div
+          ref={captureRef}
+          id="daily-monitoring-export-root"
+          className="daily-monitoring-export-root flex flex-col gap-6 bg-slate-100"
+        >
+          <header className="flex flex-col items-center justify-center gap-2">
+            <div className="flex w-full items-center justify-center bg-gray-200 p-4">
+              <h1 className="daily-monitoring-page-title font-bold uppercase tracking-wide text-blue-600">
+                Daily Monitoring Quality CNOP
+              </h1>
+            </div>
+            <p className="daily-monitoring-page-subtitle ml-4 font-medium text-gray-600">
+              {formatMonitoringDate(summary?.reportDate) || "Memuat tanggal..."}
+              {summary ? ` · Total Tickets: ${summary.totalTickets}` : ""}
+            </p>
+          </header>
+
+          <div className="grid grid-cols-1 gap-6">
+            <PacketLossTable />
+            {summary ? <MttrQualityTable rows={summary.rows} /> : null}
+          </div>
         </div>
       </div>
     </div>

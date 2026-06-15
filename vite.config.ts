@@ -19,6 +19,12 @@ export default defineConfig({
         secure: true,
         rewrite: (path) => path.replace(/^\/qosmo/, ""),
       },
+      "/daily-monitoring-api": {
+        target: "http://10.60.174.188:8089",
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/daily-monitoring-api/, ""),
+      },
     },
     allowedHosts: [
       '10.60.174.187:8089',
