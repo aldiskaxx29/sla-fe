@@ -27,6 +27,7 @@ export type PacketLossRow = {
   ach: string;
   remark: string;
   achLevel: PacketLossLevel;
+  downloadType?: "region" | "area" | "total";
   isSpacerRow?: boolean;
   isTotalRow?: boolean;
 };

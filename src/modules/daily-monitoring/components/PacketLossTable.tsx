@@ -29,7 +29,7 @@ const PacketLossTable = ({
   ];
   const tableRows = rows ?? [];
   const skeletonRows = Array.from({ length: 4 }, (_, index) => index);
-  const [exporting, setExporting] = useState(false);
+  const [exportingKey, setExportingKey] = useState<string | null>(null);
 
   const nextFrame = () =>
     new Promise<void>((resolve) => {
@@ -48,37 +48,62 @@ const PacketLossTable = ({
     return filenameMatch?.[1] ?? "";
   };
 
-  const downloadPacketLossFile = async () => {
-    if (exporting) return;
+  const buildDownloadKey = (type: string, value: string) => `${type}:${value}`;
 
-    setExporting(true);
+  const downloadBlob = async (url: string, fallbackFileName: string) => {
+    const response = await axios(url, "get", {
+      responseType: "blob",
+    });
+
+    const blob = response.result as Blob;
+    const disposition = response.headers?.["content-disposition"] as
+      | string
+      | undefined;
+    const fileName = getFileNameFromHeaders(disposition) || fallbackFileName;
+
+    const objectUrl = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = objectUrl;
+    anchor.download = fileName;
+    anchor.click();
+    URL.revokeObjectURL(objectUrl);
+  };
+
+  const downloadPacketLossFile = async () => {
+    const downloadKey = "all";
+    if (exportingKey) return;
+
+    setExportingKey(downloadKey);
     await nextFrame();
 
     try {
-      const response = await axios(
+      await downloadBlob(
         "daily-monitoring/pl-quality-cnop/download",
-        "get",
-        {
-          responseType: "blob",
-        }
+        "packet-loss-download.xlsx",
       );
-
-      const blob = response.result as Blob;
-      const disposition = response.headers?.["content-disposition"] as
-        | string
-        | undefined;
-      const fileName =
-        getFileNameFromHeaders(disposition) ||
-        "packet-loss-download.xlsx";
-
-      const objectUrl = URL.createObjectURL(blob);
-      const anchor = document.createElement("a");
-      anchor.href = objectUrl;
-      anchor.download = fileName;
-      anchor.click();
-      URL.revokeObjectURL(objectUrl);
     } finally {
-      setExporting(false);
+      setExportingKey(null);
+    }
+  };
+
+  const downloadPacketLossRowFile = async (
+    type: "region" | "area",
+    value: string,
+  ) => {
+    const downloadKey = buildDownloadKey(type, value);
+    if (exportingKey) return;
+
+    setExportingKey(downloadKey);
+    await nextFrame();
+
+    try {
+      const queryValue = type === "region" ? value.toLowerCase() : value;
+      await downloadBlob(
+        `daily-monitoring/pl-quality-cnop/download?type=${encodeURIComponent(type)}&value=${encodeURIComponent(queryValue)}`,
+        "packet-loss-download.xlsx",
+      );
+    } finally {
+      setExportingKey(null);
     }
   };
 
@@ -90,9 +115,9 @@ const PacketLossTable = ({
         </h2>
         <Button
           type="link"
-          icon={<DownloadOutlined />}
           className="ms-auto"
-          loading={exporting}
+          icon={<DownloadOutlined />}
+          loading={exportingKey === "all"}
           onClick={() => {
             void downloadPacketLossFile();
           }}
@@ -243,7 +268,38 @@ const PacketLossTable = ({
                         {row.growth}
                       </td>
                       <td className="border border-[#D8DEE6] px-3 py-2.5 text-slate-700">
-                        {row.notClear}
+                        {row.downloadType &&
+                        !row.isSpacerRow &&
+                        !row.isTotalRow ? (
+                          <Button
+                            type="text"
+                            size="small"
+                            loading={
+                              exportingKey ===
+                              buildDownloadKey(
+                                row.downloadType,
+                                row.downloadType === "region"
+                                  ? row.region
+                                  : row.no,
+                              )
+                            }
+                            className="h-auto p-0 font-inherit text-slate-700 hover:text-blue-600"
+                            onClick={(event) => {
+                              event.preventDefault();
+                              event.stopPropagation();
+                              void downloadPacketLossRowFile(
+                                row.downloadType as "region" | "area",
+                                row.downloadType === "region"
+                                  ? row.region
+                                  : row.no,
+                              );
+                            }}
+                          >
+                            {row.notClear}
+                          </Button>
+                        ) : (
+                          row.notClear
+                        )}
                       </td>
                       <td className="border border-[#D8DEE6] px-4 py-3">
                         <div className="flex h-full items-center justify-center">

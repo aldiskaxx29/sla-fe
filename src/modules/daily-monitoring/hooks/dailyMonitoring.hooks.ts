@@ -144,6 +144,7 @@ const mapPacketLossRow = (
     ach: String(row.ach ?? ""),
     remark: String(row.remark ?? ""),
     achLevel: toPacketLossLevel(String(row.ach ?? "")),
+    downloadType: isTotalRow ? "total" : labelKey,
     isSpacerRow: false,
     isTotalRow,
   };
@@ -166,6 +167,7 @@ const normalizeDailyMonitoringPacketLoss = (
     ach: String(response.total.ach ?? ""),
     remark: "",
     achLevel: toPacketLossLevel(String(response.total.ach ?? "")),
+    downloadType: "total",
     isSpacerRow: false,
     isTotalRow: true,
   };
@@ -189,6 +191,7 @@ const normalizeDailyMonitoringPacketLoss = (
         ach: "",
         remark: "",
         achLevel: "warning",
+        downloadType: undefined,
         isSpacerRow: true,
       },
       ...areaRows,
