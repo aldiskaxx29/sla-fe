@@ -6,9 +6,12 @@ import {
   MttrQualityLevel,
   MttrQualityRow,
 } from "../types";
-import { dailyMonitoringUrl } from "../utils/dailyMonitoringApi";
 
-const SUMMARY_ENDPOINT = dailyMonitoringUrl("/api_summary_monitor.php");
+const DAILY_MONITORING_API_BASE_URL =
+  import.meta.env.VITE_DAILY_MONITORING_API_BASE_URL ||
+  "/daily-monitoring-api";
+
+const SUMMARY_ENDPOINT = `${DAILY_MONITORING_API_BASE_URL}/api_summary_monitor.php`;
 
 const formatNumber = (value: number | string | null | undefined) =>
   String(value ?? "");
