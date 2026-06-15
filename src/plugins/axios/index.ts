@@ -52,9 +52,19 @@ const axios_handleSuccessResponse = (
   return mapResponse;
 };
 
+const resolveBaseUrl = (baseUrl: string | undefined) => {
+  if (!baseUrl) return "";
+
+  if (import.meta.env.DEV && baseUrl.includes("qosmo.telkom.co.id/api")) {
+    return "/qosmo/api";
+  }
+
+  return baseUrl;
+};
+
 const config: AxiosRequestConfig = {
   withCredentials: true,
-  baseURL: import.meta.env.VITE_APP_BASE_URL,
+  baseURL: resolveBaseUrl(import.meta.env.VITE_APP_BASE_URL),
   timeout: 10000,
 };
 
@@ -62,6 +72,13 @@ const _axios = defaultAxios.create(config);
 
 _axios.interceptors.request.use(
   async (config) => {
+    const accessToken = localStorage.getItem("access_token");
+
+    if (accessToken) {
+      config.headers = config.headers ?? {};
+      config.headers.Authorization = `Bearer ${accessToken}`;
+    }
+
     return config;
   },
   (error) => {

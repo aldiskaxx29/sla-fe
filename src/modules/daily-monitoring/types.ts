@@ -13,6 +13,24 @@ export type MttrQualityRow = {
   achLevel: MttrQualityLevel;
 };
 
+export type PacketLossLevel = "good" | "warning" | "danger";
+
+export type PacketLossRow = {
+  no: string;
+  region: string;
+  target: string;
+  siteDegradeH1: string;
+  siteDegradeH: string;
+  clear: string;
+  growth: string;
+  notClear: string;
+  ach: string;
+  remark: string;
+  achLevel: PacketLossLevel;
+  isSpacerRow?: boolean;
+  isTotalRow?: boolean;
+};
+
 type DailyMonitoringCountBlock = {
   total: number;
   fo: number;
@@ -74,4 +92,58 @@ export type DailyMonitoringSummaryView = {
   reportDate: string;
   totalTickets: number;
   rows: MttrQualityRow[];
+};
+
+export type DailyMonitoringPacketLossRegion = {
+  no: number;
+  region: string;
+  target: number;
+  site_degrade_h1: number;
+  site_degrade_h: number;
+  clear: number;
+  growth: string;
+  not_clear: number;
+  ach: string;
+  remark: string | null;
+};
+
+export type DailyMonitoringPacketLossArea = {
+  no: number;
+  area: string;
+  target: number;
+  site_degrade_h1: number;
+  site_degrade_h: number;
+  clear: number;
+  growth: string;
+  not_clear: number;
+  ach: string;
+  remark: string | null;
+};
+
+export type DailyMonitoringPacketLossTotal = {
+  target: number;
+  site_degrade_h1: number;
+  site_degrade_h: number;
+  clear: number;
+  growth: string;
+  not_clear: number;
+  ach: string;
+};
+
+export type DailyMonitoringPacketLossResponse = {
+  title: string;
+  section: string;
+  date: string;
+  time: string;
+  regions: DailyMonitoringPacketLossRegion[];
+  areas: DailyMonitoringPacketLossArea[];
+  total: DailyMonitoringPacketLossTotal;
+};
+
+export type DailyMonitoringPacketLossView = {
+  title: string;
+  section: string;
+  date: string;
+  time: string;
+  rows: PacketLossRow[];
 };

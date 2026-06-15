@@ -5,7 +5,10 @@ import { useEffect, useRef, useState } from "react";
 
 import MttrQualityTable from "@/modules/daily-monitoring/components/MttrQualityTable";
 import PacketLossTable from "@/modules/daily-monitoring/components/PacketLossTable";
-import { useDailyMonitoringSummary } from "@/modules/daily-monitoring/hooks/dailyMonitoring.hooks";
+import {
+  useDailyMonitoringPacketLoss,
+  useDailyMonitoringSummary,
+} from "@/modules/daily-monitoring/hooks/dailyMonitoring.hooks";
 
 const formatMonitoringDate = (value?: string) => {
   if (!value) return "";
@@ -24,12 +27,23 @@ const DailyMonitoringPage = () => {
   const captureRef = useRef<HTMLDivElement>(null);
   const [exporting, setExporting] = useState(false);
   const { data: summary, error, isLoading } = useDailyMonitoringSummary();
+  const {
+    data: packetLoss,
+    error: packetLossError,
+    isLoading: isPacketLossLoading,
+  } = useDailyMonitoringPacketLoss();
 
   useEffect(() => {
     if (error) {
       message.error(error);
     }
   }, [error]);
+
+  useEffect(() => {
+    if (packetLossError) {
+      message.error(packetLossError);
+    }
+  }, [packetLossError]);
 
   const handleExportImage = async () => {
     if (!captureRef.current || exporting || isLoading) return;
@@ -80,7 +94,9 @@ const DailyMonitoringPage = () => {
 
   return (
     <div className="min-h-full px-4 py-4 md:px-6">
-      {isLoading ? <Spin fullscreen tip="Sedang Memuat Data..." /> : null}
+      {isLoading || isPacketLossLoading ? (
+        <Spin fullscreen tip="Sedang Memuat Data..." />
+      ) : null}
       <div className="mx-auto flex w-full max-w-[1800px] flex-col gap-4">
         <div className="flex justify-end">
           <Button
@@ -102,16 +118,21 @@ const DailyMonitoringPage = () => {
           <header className="flex flex-col items-center justify-center gap-2">
             <div className="flex w-full items-center justify-center bg-gray-200 p-4">
               <h1 className="daily-monitoring-page-title font-bold uppercase tracking-wide text-blue-600">
-                Daily Monitoring Quality CNOP
+                {packetLoss?.title || "Daily Monitoring Quality CNOP"}
               </h1>
             </div>
             <p className="daily-monitoring-page-subtitle ml-4 font-medium text-gray-600">
-              {formatMonitoringDate(summary?.reportDate) || "Memuat tanggal..."}
+              {packetLoss
+                ? `${packetLoss.date} | ${packetLoss.time}`
+                : formatMonitoringDate(summary?.reportDate) || "Memuat tanggal..."}
             </p>
           </header>
 
           <div className="grid grid-cols-1 gap-6">
-            <PacketLossTable />
+            <PacketLossTable
+              rows={packetLoss?.rows}
+              section={packetLoss?.section}
+            />
             {summary ? <MttrQualityTable rows={summary.rows} /> : null}
           </div>
         </div>

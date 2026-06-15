@@ -1,10 +1,16 @@
 import { useCallback, useEffect, useState } from "react";
 
+import { axios } from "@/plugins/axios";
+
 import {
+  DailyMonitoringPacketLossResponse,
+  DailyMonitoringPacketLossView,
   DailyMonitoringSummaryResponse,
   DailyMonitoringSummaryView,
   MttrQualityLevel,
   MttrQualityRow,
+  PacketLossLevel,
+  PacketLossRow,
 } from "../types";
 
 const DAILY_MONITORING_API_BASE_URL =
@@ -34,6 +40,11 @@ const toAchievementLevel = (
   const pst = parsePercent(achievement.pst);
 
   return ta >= 100 && pst >= 100 ? "good" : "danger";
+};
+
+const toPacketLossLevel = (ach: string): PacketLossLevel => {
+  const numeric = Number(String(ach).replace("%", "").replace(",", "."));
+  return Number.isFinite(numeric) && numeric >= 100 ? "good" : "danger";
 };
 
 const mapRow = (
@@ -101,6 +112,78 @@ const normalizeDailyMonitoringSummary = (
   };
 };
 
+const mapPacketLossRow = (
+  row: DailyMonitoringPacketLossResponse["regions"][number] | DailyMonitoringPacketLossResponse["areas"][number],
+  labelKey: "region" | "area",
+  isTotalRow = false
+): PacketLossRow => {
+  const label = row[labelKey];
+
+  return {
+    no: isTotalRow ? "" : String(row.no ?? ""),
+    region: isTotalRow ? "TOTAL" : String(label ?? ""),
+    target: String(row.target ?? ""),
+    siteDegradeH1: String(row.site_degrade_h1 ?? ""),
+    siteDegradeH: String(row.site_degrade_h ?? ""),
+    clear: String(row.clear ?? ""),
+    growth: String(row.growth ?? ""),
+    notClear: String(row.not_clear ?? ""),
+    ach: String(row.ach ?? ""),
+    remark: String(row.remark ?? ""),
+    achLevel: toPacketLossLevel(String(row.ach ?? "")),
+    isSpacerRow: false,
+    isTotalRow,
+  };
+};
+
+const normalizeDailyMonitoringPacketLoss = (
+  response: DailyMonitoringPacketLossResponse
+): DailyMonitoringPacketLossView => {
+  const regionRows = response.regions?.map((row) => mapPacketLossRow(row, "region")) ?? [];
+  const areaRows = response.areas?.map((row) => mapPacketLossRow(row, "area")) ?? [];
+  const totalRow: PacketLossRow = {
+    no: "",
+    region: "TOTAL",
+    target: String(response.total.target ?? ""),
+    siteDegradeH1: String(response.total.site_degrade_h1 ?? ""),
+    siteDegradeH: String(response.total.site_degrade_h ?? ""),
+    clear: String(response.total.clear ?? ""),
+    growth: String(response.total.growth ?? ""),
+    notClear: String(response.total.not_clear ?? ""),
+    ach: String(response.total.ach ?? ""),
+    remark: "",
+    achLevel: toPacketLossLevel(String(response.total.ach ?? "")),
+    isSpacerRow: false,
+    isTotalRow: true,
+  };
+
+  return {
+    title: response.title,
+    section: response.section,
+    date: response.date,
+    time: response.time,
+    rows: [
+      ...regionRows,
+      {
+        no: "",
+        region: "",
+        target: "",
+        siteDegradeH1: "",
+        siteDegradeH: "",
+        clear: "",
+        growth: "",
+        notClear: "",
+        ach: "",
+        remark: "",
+        achLevel: "warning",
+        isSpacerRow: true,
+      },
+      ...areaRows,
+      totalRow,
+    ],
+  };
+};
+
 const useDailyMonitoringSummary = () => {
   const [data, setData] = useState<DailyMonitoringSummaryView | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -148,4 +231,41 @@ const useDailyMonitoringSummary = () => {
   };
 };
 
-export { useDailyMonitoringSummary };
+const useDailyMonitoringPacketLoss = () => {
+  const [data, setData] = useState<DailyMonitoringPacketLossView | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchPacketLoss = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await axios("daily-monitoring/pl-quality-cnop", "get", {});
+      const payload = response.result as DailyMonitoringPacketLossResponse;
+      setData(normalizeDailyMonitoringPacketLoss(payload));
+    } catch (fetchError) {
+      setData(null);
+      setError(
+        fetchError instanceof Error
+          ? fetchError.message
+          : "Gagal memuat data Packet Loss."
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void fetchPacketLoss();
+  }, [fetchPacketLoss]);
+
+  return {
+    data,
+    error,
+    fetchPacketLoss,
+    isLoading,
+  };
+};
+
+export { useDailyMonitoringPacketLoss, useDailyMonitoringSummary };
