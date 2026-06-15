@@ -53,6 +53,8 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
     return typeof value === "number" ? value : String(value);
   };
 
+  const renderTableValue = (value: unknown) => formatTableValue(value);
+
   const handleSearch = (
     selectedKeys: string[],
     confirm: FilterDropdownProps["confirm"],
@@ -205,24 +207,6 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
     else return "Week";
   }, [week]);
 
-  const groupingRcaRegional: Record<"packetloss" | "latency" | "jitter", any> =
-    {
-      packetloss: {
-        title: `Update Progres Regional`,
-        key: `grouping_rca_packetloss_regional_2`,
-        dataIndex: `grouping_rca_packetloss_regional_2`,
-      },
-      latency: {
-        title: `Update Progres Regional`,
-        key: `grouping_rca_latency_regional_2`,
-        dataIndex: `grouping_rca_latency_regional_2`,
-      },
-      jitter: {
-        title: `Update Progres Regional`,
-        key: `grouping_rca_jitter_regional_2`,
-        dataIndex: `grouping_rca_jitter_regional_2`,
-      },
-    } as const;
   const groupingRcaCnq: Record<"packetloss" | "latency" | "jitter", any> = {
     packetloss: {
       title: `Update Progres`,
@@ -301,6 +285,14 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
         dataIndex: "status_saat_ini",
         key: "status_saat_ini",
         align: "center",
+        filters: [
+          { text: "CLEAR", value: "CLEAR" },
+          { text: "CONSECUTIVE", value: "CONSECUTIVE" },
+          { text: "NOT CLEAR", value: "NOT CLEAR" },
+        ],
+        filterSearch: true,
+        filterMultiple: true,
+        onFilter: (value, record) => record.status_saat_ini === value,
       },
       {
         title: `${dynamicTitle} Status`,
@@ -420,6 +412,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
         search: true,
         width: 220,
         ellipsis: true,
+        render: renderTableValue,
       },
       // {
       //   title: `Update Progres Cnq`,
@@ -439,20 +432,6 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
         title: `User Update`,
         key: `user_update_${dynamicKey}_cnq`,
         dataIndex: `user_update_${dynamicKey}_cnq`,
-      },
-      ...(groupingRcaRegional[dynamicKey as DynamicKey]
-        ? [groupingRcaRegional[dynamicKey as DynamicKey]]
-        : []),
-      {
-        title: `Last Update Regional`,
-        key: `last_update_${dynamicKey}_regional`,
-        dataIndex: `last_update_${dynamicKey}_regional`,
-      },
-
-      {
-        title: `User Update Regional`,
-        key: `user_update_${dynamicKey}_regional`,
-        dataIndex: `user_update_${dynamicKey}_regional`,
       },
       {
         title: "EXCLUDED",
@@ -511,6 +490,14 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
         dataIndex: "status_saat_ini",
         key: "status_saat_ini",
         align: "center",
+        filters: [
+          { text: "CLEAR", value: "CLEAR" },
+          { text: "CONSECUTIVE", value: "CONSECUTIVE" },
+          { text: "NOT CLEAR", value: "NOT CLEAR" },
+        ],
+        filterSearch: true,
+        filterMultiple: true,
+        onFilter: (value, record) => record.status_saat_ini === value,
       },
       {
         title: "FINAL SEVERITY",
@@ -562,6 +549,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
         align: "center",
         width: 220,
         ellipsis: true,
+        render: renderTableValue,
       },
       // {
       //   title: "INPUT EVIDENCE",
@@ -799,6 +787,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
                     className: "!bg-blue-pacific",
                   })}
                   fixed={child.fixed}
+                  render={child.render ?? renderTableValue}
                   {...(child.search
                     ? getColumnSearchProps(child.dataIndex)
                     : {})}
@@ -898,6 +887,17 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
                   );
                 }
                 if (column.dataIndex == "ttr_final") {
+                  if (
+                    record.ttr_customer_jam === null ||
+                    record.ttr_customer_jam === undefined ||
+                    record.ttr_selisih === null ||
+                    record.ttr_selisih === undefined ||
+                    record.ttr_customer_jam === "" ||
+                    record.ttr_selisih === ""
+                  ) {
+                    return "-";
+                  }
+
                   const parseTimeToMinutes = (time) => {
                     const parts = time.split(":").map(Number);
                     const hours = parts[0] || 0;

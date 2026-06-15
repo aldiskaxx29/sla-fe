@@ -275,9 +275,9 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
       if (Number.isNaN(value) || Number.isNaN(target))
         return text as React.ReactNode;
 
-      const isAboveTarget = value > target;
-      // Packetloss: merah jika di atas target. Lainnya: hijau jika di atas target.
-      const isGood = isPacketloss ? !isAboveTarget : isAboveTarget;
+      // Packetloss tetap mengikuti rule existing: hijau jika <= target.
+      // KPI lain: hijau jika >= target, termasuk nilai yang sama dengan target.
+      const isGood = isPacketloss ? value <= target : value >= target;
 
       return (
         <span
