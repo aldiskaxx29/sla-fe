@@ -36,10 +36,11 @@ const parsePercent = (value: string) => {
 const toAchievementLevel = (
   achievement: DailyMonitoringSummaryResponse["summary_table"]["total"]["achievement"]
 ): MttrQualityLevel => {
+  const ach = parsePercent(achievement.ach);
   const ta = parsePercent(achievement.ta);
   const pst = parsePercent(achievement.pst);
 
-  return ta >= 100 && pst >= 100 ? "good" : "danger";
+  return ach >= 100 || ta >= 100 || pst >= 100 ? "good" : "danger";
 };
 
 const toPacketLossLevel = (ach: string): PacketLossLevel => {
