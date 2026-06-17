@@ -1,5 +1,5 @@
 import { lazy } from "react";
-import { RouteObject } from "react-router-dom";
+import { Navigate, RouteObject } from "react-router-dom";
 
 import { AppRouteGuard } from "@/app/components";
 
@@ -8,12 +8,16 @@ const Tutela = lazy(() => import("@/modules/tutela/pages/TutelaPage"));
 const useTutelaRouter = (): RouteObject[] => {
   return [
     {
-      path: "tutela",
+      path: "onx",
       element: (
         <AppRouteGuard>
           <Tutela />
         </AppRouteGuard>
       ),
+    },
+    {
+      path: "tutela",
+      element: <Navigate to="/onx" replace />,
     },
   ];
 };

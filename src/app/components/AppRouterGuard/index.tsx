@@ -4,6 +4,8 @@ import { useMemo } from "react";
 // React Router DOM
 import { useLocation, Navigate } from "react-router-dom";
 
+import { getPostLoginRedirectPath } from "@/modules/auth/rtk/auth.rtk";
+
 // Interfaces
 import { IAppRouteGuardProps } from "./interfaces";
 
@@ -25,7 +27,6 @@ const AppRouteGuard = ({ children, permissible }: IAppRouteGuardProps) => {
     return location.pathname.includes("auth");
   }, [location.pathname]);
 
-  const readPermissions = ["sla"];
   // auth_authenticatedUser?.roles?.permissionGroupResponses
   //   ?.filter(({ permissions }: IPermissionList) =>
   //     permissions.some(({ granted }) => granted)
@@ -72,7 +73,7 @@ const AppRouteGuard = ({ children, permissible }: IAppRouteGuardProps) => {
     auth_authenticatedUser?.id &&
     (isAuthRoute || location.pathname === "/")
   ) {
-    return <Navigate to={`/msa`} replace />;
+    return <Navigate to={getPostLoginRedirectPath()} replace />;
   }
 
   if (!permissible && permissible !== undefined) {

@@ -198,15 +198,6 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
     if (parameter.includes("jitter")) return "Jitter";
     if (parameter.includes("latency")) return "Latency";
   }, [parameter]);
-  const monthOrWeek = useMemo(() => {
-    if (week.includes("all")) return "month";
-    else return "week";
-  }, [week]);
-  const titleMonthOrWeek = useMemo(() => {
-    if (week.includes("all")) return "Month";
-    else return "Week";
-  }, [week]);
-
   const groupingRcaCnq: Record<"packetloss" | "latency" | "jitter", any> = {
     packetloss: {
       title: `Update Progres`,
@@ -239,10 +230,11 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
           (pagination.current - 1) * pagination.pageSize + index + 1,
       },
       {
-        title: `${titleMonthOrWeek}`,
-        dataIndex: `${monthOrWeek}`,
-        key: `${monthOrWeek}`,
+        title: "Week",
+        dataIndex: "week",
+        key: "week",
         search: true,
+        render: (_text, record) => formatTableValue(record.week ?? _text),
       },
       {
         title: "Region",
@@ -446,7 +438,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
         align: "center",
       },
     ],
-    [dynamicKey, dynamicTitle, monthOrWeek, titleMonthOrWeek],
+    [dynamicKey, dynamicTitle],
   );
 
   const columns2 = useMemo(

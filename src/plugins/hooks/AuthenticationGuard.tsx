@@ -1,4 +1,7 @@
-import { isAuthenticated } from "@/modules/auth/rtk/auth.rtk";
+import {
+  getPostLoginRedirectPath,
+  isAuthenticated,
+} from "@/modules/auth/rtk/auth.rtk";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 
 interface GuardProps {
@@ -25,7 +28,11 @@ export const AuthRouteGuard: React.FC<GuardProps> = ({
   }
   if (!requireAuth && authed) {
     return (
-      <Navigate to={redirectTo || "/executive"} state={{ from: location }} replace />
+      <Navigate
+        to={redirectTo || getPostLoginRedirectPath()}
+        state={{ from: location }}
+        replace
+      />
     );
   }
   return <Outlet {...props} />;

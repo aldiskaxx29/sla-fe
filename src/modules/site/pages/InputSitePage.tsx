@@ -2,7 +2,7 @@ import AppDropdown from "@/app/components/AppDropdown";
 import xlxsIcon from "@/assets/file-spreadsheet.svg";
 import { Button, Image, Upload } from "antd";
 import dayjs from "dayjs";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { TableInputSite } from "../components/TableInputSite";
 import { useSite } from "../hooks/site.hooks";
 import {
@@ -20,8 +20,13 @@ const SitePage = () => {
   const [prev, setPrev] = useState("corrective");
   const [loading, setLoading] = useState(false);
   const [parameter, setParameter] = useState("packetloss ran to core");
-  const { dataSite, getSite } = useSite();
+  const { getSite } = useSite();
   const [trigger, setTrigger] = useState(0);
+  const [siteResponse, setSiteResponse] = useState<Record<string, any> | null>(
+    null,
+  );
+  const activeSiteRequestRef = useRef<{ abort?: () => void } | null>(null);
+  const requestSeqRef = useRef(0);
 
   const [pagination, setPagination] = useState({
     current: 1,
@@ -50,31 +55,42 @@ const SitePage = () => {
     [month],
   );
 
-  const normalizedWeek = useMemo(() => {
-    if (!selectedWeeks.length) return "";
-    return selectedWeeks.includes(week) ? week : selectedWeeks[0];
-  }, [selectedWeeks, week]);
-
-  const effectiveWeek = isMttrqParameter ? "" : normalizedWeek;
+  const effectiveWeek = useMemo(() => {
+    if (isMttrqParameter) return "";
+    if (week) return week;
+    return selectedWeeks.find((item) => item !== "all") ?? selectedWeeks[0] ?? "";
+  }, [isMttrqParameter, selectedWeeks, week]);
   const effectiveMonth = month;
 
   const fetchSite = useCallback(async () => {
+    activeSiteRequestRef.current?.abort?.();
+    const requestSeq = requestSeqRef.current + 1;
+    requestSeqRef.current = requestSeq;
+    setSiteResponse(null);
     setLoading(true);
     try {
-      await getSite({
+      const request = getSite({
         query: {
           prev,
           exclude,
           parameter,
           year,
           month: effectiveMonth,
+          _t: Date.now(),
           ...(!isMttrqParameter && { week: effectiveWeek }),
         },
-      }).unwrap();
+      });
+      activeSiteRequestRef.current = request;
+      const result = (await request.unwrap()) as Record<string, any>;
+      if (requestSeqRef.current === requestSeq) {
+        setSiteResponse(result);
+      }
     } catch (error) {
       console.error("Failed to fetch site data:", error);
     } finally {
-      setLoading(false);
+      if (requestSeqRef.current === requestSeq) {
+        setLoading(false);
+      }
     }
   }, [
     exclude,
@@ -102,6 +118,12 @@ const SitePage = () => {
     effectiveWeek,
     fetchSite,
   ]);
+
+  useEffect(() => {
+    return () => {
+      activeSiteRequestRef.current?.abort?.();
+    };
+  }, []);
 
   const optPrev = [
     // { label: "All", value: "all" },
@@ -149,9 +171,16 @@ const SitePage = () => {
   }, [month]);
 
   useEffect(() => {
-    if (!normalizedWeek || normalizedWeek === week) return;
-    setWeek(normalizedWeek);
-  }, [normalizedWeek, week]);
+    if (isMttrqParameter) return;
+    if (!selectedWeeks.length) return;
+    if (!week) {
+      setWeek(selectedWeeks.find((item) => item !== "all") ?? selectedWeeks[0]);
+      return;
+    }
+    if (!selectedWeeks.includes(week)) {
+      setWeek(selectedWeeks.find((item) => item !== "all") ?? selectedWeeks[0]);
+    }
+  }, [isMttrqParameter, selectedWeeks, week]);
 
   const [downloadTemplate] = useLazyDownload_templateQuery();
 
@@ -302,9 +331,9 @@ const SitePage = () => {
         </div>
       </div>
       <div className="w-full overflow-x-auto">
-        <TableInputSite
-          dataSource={dataSite?.data ?? []}
-          isLoading={loading || !dataSite?.data}
+          <TableInputSite
+          dataSource={siteResponse?.data ?? []}
+          isLoading={loading || !siteResponse?.data}
           parameter={parameter}
           week={effectiveWeek}
           month={effectiveMonth}

@@ -25,6 +25,18 @@ export const isAuthenticated = (): boolean => {
   return !!localStorage.getItem("access_token");
 };
 
+export const getPostLoginRedirectPath = (): string => {
+  try {
+    const userData = localStorage.getItem("user_data");
+    if (!userData) return "/msa";
+
+    const parsedData = JSON.parse(userData);
+    return parsedData?.nik === "826229" ? "/monday" : "/msa";
+  } catch {
+    return "/msa";
+  }
+};
+
 export const getCurrentUser = () => {
   try {
     const userData = localStorage.getItem("user_data");
