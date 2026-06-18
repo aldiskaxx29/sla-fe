@@ -25,6 +25,7 @@ interface TableHistoryProps {
   week;
   month;
   year;
+  tableKey: string;
   setTrigger: React.Dispatch<React.SetStateAction<number>>;
   pagination;
   setPagination: React.Dispatch<any>;
@@ -37,6 +38,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
   week,
   month,
   year,
+  tableKey,
   setTrigger,
   pagination,
   setPagination,
@@ -234,7 +236,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
         dataIndex: "week",
         key: "week",
         search: true,
-        render: (_text, record) => formatTableValue(record.week ?? _text),
+        render: (_text, record) => formatTableValue(week || record.week || _text),
       },
       {
         title: "Region",
@@ -730,27 +732,50 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
   const tableData = isLoading ? skeletonRows : dataSource;
   const isSkeletonRow = (record: Record<string, unknown>) =>
     Boolean((record as { __skeleton?: boolean }).__skeleton);
+  const resolvedTableData = useMemo(() => {
+    if (isLoading) return skeletonRows;
+
+    return tableData.map((record, index) => ({
+      ...record,
+      __tableKey: `${tableKey}-${index}-${String(
+        record.id ??
+          record.site_id ??
+          record.ticket_id ??
+          record.no ??
+          record.month ??
+          record.week ??
+          record.RCA ??
+          record.detail_rca ??
+          record.action ??
+          record.button_req,
+      )}`,
+    }));
+  }, [isLoading, skeletonRows, tableData, tableKey]);
 
   return (
-    <div className="mt-8 min-w-max">
+    <div key={tableKey} className="mt-8 min-w-max">
       <Table
-        dataSource={tableData}
+        key={tableKey}
+        dataSource={resolvedTableData}
         bordered
         className="rounded-xl"
         scroll={{ x: "max-content" }}
         pagination={pagination}
         rowKey={(record) =>
           String(
-            record.id ??
-              record.site_id ??
-              record.ticket_id ??
-              record.no ??
-              record.month ??
-              record.week ??
-              record.RCA ??
-              record.detail_rca ??
-              record.action ??
-              record.button_req,
+            (record as Record<string, unknown>).__tableKey ??
+              `${tableKey}-${
+                record.id ??
+                record.site_id ??
+                record.ticket_id ??
+                record.no ??
+                record.month ??
+                record.week ??
+                record.RCA ??
+                record.detail_rca ??
+                record.action ??
+                record.button_req
+              }`,
           )
         }
         onChange={(pag) => setPagination(pag)}

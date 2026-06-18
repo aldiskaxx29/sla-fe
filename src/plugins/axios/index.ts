@@ -55,8 +55,14 @@ const axios_handleSuccessResponse = (
 const resolveBaseUrl = (baseUrl: string | undefined) => {
   if (!baseUrl) return "";
 
-  if (import.meta.env.DEV && baseUrl.includes("qosmo.telkom.co.id/api")) {
-    return "/qosmo/api";
+  if (import.meta.env.DEV) {
+    if (baseUrl.startsWith("http://10.60.174.187:8089")) {
+      return "/api";
+    }
+
+    if (baseUrl.includes("qosmo.telkom.co.id/api")) {
+      return "/qosmo/api";
+    }
   }
 
   return baseUrl;

@@ -27,11 +27,15 @@ const DailyMonitoringPage = () => {
   const captureRef = useRef<HTMLDivElement>(null);
   const [exporting, setExporting] = useState(false);
   const { data: summary, error, isLoading } = useDailyMonitoringSummary();
+  const [splitPacketLoss, setSplitPacketLoss] = useState(false);
   const {
     data: packetLoss,
     error: packetLossError,
     isLoading: isPacketLossLoading,
-  } = useDailyMonitoringPacketLoss();
+  } = useDailyMonitoringPacketLoss(splitPacketLoss ? "split" : "combined");
+  const activePacketLossView = splitPacketLoss
+    ? packetLoss?.split?.p5 ?? packetLoss?.split?.p15
+    : packetLoss?.combined;
 
   useEffect(() => {
     if (error) {
@@ -100,8 +104,8 @@ const DailyMonitoringPage = () => {
             type="primary"
             icon={<FileImageOutlined />}
             onClick={handleExportImage}
-            loading={exporting || isLoading}
-            disabled={isLoading}
+            loading={exporting || isLoading || isPacketLossLoading}
+            disabled={isLoading || isPacketLossLoading}
           >
             Export Image
           </Button>
@@ -115,23 +119,44 @@ const DailyMonitoringPage = () => {
           <header className="flex flex-col items-center justify-center gap-2">
             <div className="flex w-full items-center justify-center bg-gray-200 p-4">
               <h1 className="daily-monitoring-page-title font-bold uppercase tracking-wide text-blue-600">
-                {packetLoss?.title || "Daily Monitoring Quality CNOP"}
+                {activePacketLossView?.title || "Daily Monitoring Quality CNOP"}
               </h1>
             </div>
             <p className="daily-monitoring-page-subtitle ml-4 font-medium text-gray-600">
-              {packetLoss
-                ? `${packetLoss.date} | ${packetLoss.time}`
+              {activePacketLossView
+                ? `${activePacketLossView.date} | ${activePacketLossView.time}`
                 : formatMonitoringDate(summary?.reportDate) ||
                   "Memuat tanggal..."}
             </p>
           </header>
 
           <div className="grid grid-cols-1 gap-6">
-            <PacketLossTable
-              rows={packetLoss?.rows}
-              section={packetLoss?.section}
-              isLoading={isPacketLossLoading}
-            />
+            {splitPacketLoss ? (
+              <>
+                <PacketLossTable
+                  rows={packetLoss?.split?.p5.rows}
+                  section={packetLoss?.split?.p5.section || "A. PL 5%"}
+                  isLoading={isPacketLossLoading}
+                  showSplitToggle
+                  splitView={splitPacketLoss}
+                  onSplitViewChange={setSplitPacketLoss}
+                />
+                <PacketLossTable
+                  rows={packetLoss?.split?.p15.rows}
+                  section={packetLoss?.split?.p15.section || "B. PL 1-5%"}
+                  isLoading={isPacketLossLoading}
+                />
+              </>
+            ) : (
+              <PacketLossTable
+                rows={packetLoss?.combined?.rows}
+                section={packetLoss?.combined?.section}
+                isLoading={isPacketLossLoading}
+                showSplitToggle
+                splitView={splitPacketLoss}
+                onSplitViewChange={setSplitPacketLoss}
+              />
+            )}
             <MttrQualityTable
               rows={summary?.rows}
               summaryRows={summary?.summaryRows}

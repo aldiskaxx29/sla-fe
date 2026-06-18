@@ -155,6 +155,17 @@ const renderSplitValue = (value: string) =>
     </span>
   ));
 
+const getTrafficLightClass = (level: "good" | "warning" | "danger") => {
+  switch (level) {
+    case "good":
+      return "bg-emerald-500";
+    case "warning":
+      return "bg-amber-400";
+    default:
+      return "bg-rose-500";
+  }
+};
+
 type MttrQualityTableProps = {
   rows?: MttrQualityRow[];
   summaryRows?: Array<{
@@ -381,7 +392,7 @@ const MttrQualityTable = ({
                             className={`dm-badge inline-flex items-center gap-3 rounded-full px-4 py-2 text-[22px] font-semibold leading-none`}
                           >
                             <span
-                              className={`block aspect-square h-4 w-4 shrink-0 rounded-full ${row.achLevel === "good" ? "bg-emerald-500" : "bg-rose-500"}`}
+                              className={`block aspect-square h-4 w-4 shrink-0 rounded-full ${getTrafficLightClass(row.achLevel)}`}
                             ></span>
                             <span className="flex items-center">
                               {renderSplitValue(row.achTaPst)}

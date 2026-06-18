@@ -10,20 +10,21 @@ import type {
 import { toast } from "react-toastify";
 import { authLogout } from "@/modules/auth/redux/auth.slice";
 
-const baseQuery = fetchBaseQuery({
-  baseUrl: import.meta.env.VITE_APP_BASE_URL || "api.local",
-  credentials: "omit",
-  prepareHeaders(headers) {
-    headers.set("ngrok-skip-browser-warning", "any");
-    return headers;
-  },
-  headers: {
-    Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-  },
-  paramsSerializer: (params) => {
-    return new URLSearchParams(params).toString().replace(/\+/g, "%20");
-  },
-});
+const resolveBaseUrl = (baseUrl: string | undefined) => {
+  if (!baseUrl) return "/api";
+
+  if (import.meta.env.DEV) {
+    if (baseUrl.startsWith("http://10.60.174.187:8089")) {
+      return "/api";
+    }
+
+    if (baseUrl.startsWith("https://qosmo.telkom.co.id")) {
+      return "/qosmo/api";
+    }
+  }
+
+  return baseUrl;
+};
 
 const baseQueryWithReauth: BaseQueryFn<
   string | FetchArgs,
@@ -113,7 +114,28 @@ const baseQueryWithReauth: BaseQueryFn<
     }
   }
 
-  const result = await baseQuery(args, api, extraOptions);
+  const resolvedArgs =
+    typeof args === "string"
+      ? args
+      : {
+          ...args,
+          url: args.url,
+        };
+
+  const result = await fetchBaseQuery({
+    baseUrl: resolveBaseUrl(import.meta.env.VITE_APP_BASE_URL),
+    credentials: "omit",
+    prepareHeaders(headers) {
+      headers.set("ngrok-skip-browser-warning", "any");
+      return headers;
+    },
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+    },
+    paramsSerializer: (params) => {
+      return new URLSearchParams(params).toString().replace(/\+/g, "%20");
+    },
+  })(resolvedArgs, api, extraOptions);
 
   // Error handling umum
   if (result.error?.status && result.error?.originalStatus >= 400) {
@@ -125,16 +147,12 @@ const baseQueryWithReauth: BaseQueryFn<
   }
 
   // Jika token invalid atau session expired
-  if (result.error?.status === 401 || result.error?.status === 302) {
-    localStorage.removeItem("token"); // hapus token biar auto logout
+  if (result.error?.status === 401) {
     api.dispatch(authLogout());
   }
 
-  // Jika FETCH_ERROR (misal jaringan mati / gagal fetch)
-  if (result.error?.status === "FETCH_ERROR") {
-    localStorage.removeItem("token");
-    api.dispatch(authLogout());
-  }
+  // FETCH_ERROR bisa juga muncul dari abort / request yang dibatalkan saat filter berubah.
+  // Jangan auto logout untuk kondisi ini.
 
   return result;
 };

@@ -1,20 +1,37 @@
 import type { PacketLossRow } from "../types";
 import { axios } from "@/plugins/axios";
 import { DownloadOutlined } from "@ant-design/icons";
-import { Button } from "antd";
+import { Button, Switch } from "antd";
 import { useState } from "react";
 
 type PacketLossTableProps = {
   rows?: PacketLossRow[];
   section?: string;
   isLoading?: boolean;
+  showSplitToggle?: boolean;
+  splitView?: boolean;
+  onSplitViewChange?: (checked: boolean) => void;
 };
 
 const PacketLossTable = ({
   rows,
   section,
   isLoading,
+  showSplitToggle = false,
+  splitView = false,
+  onSplitViewChange,
 }: PacketLossTableProps) => {
+  const getTrafficLightClass = (level: "good" | "warning" | "danger") => {
+    switch (level) {
+      case "good":
+        return "bg-emerald-500";
+      case "warning":
+        return "bg-amber-400";
+      default:
+        return "bg-rose-500";
+    }
+  };
+
   const colWidths = [
     "5%",
     "24%",
@@ -113,17 +130,30 @@ const PacketLossTable = ({
         <h2 className="daily-monitoring-section-title font-bold uppercase tracking-wide text-blue-600">
           {section || "A. PL 5% &amp; 1-5%"}
         </h2>
-        <Button
-          type="link"
-          className="ms-auto"
-          icon={<DownloadOutlined />}
-          loading={exportingKey === "all"}
-          onClick={() => {
-            void downloadPacketLossFile();
-          }}
-        >
-          Download Data
-        </Button>
+        <div className="ms-auto flex items-center gap-3">
+          {showSplitToggle && (
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-slate-600">
+                Split Table
+              </span>
+              <Switch
+                checked={splitView}
+                onChange={(checked) => onSplitViewChange?.(checked)}
+              />
+            </div>
+          )}
+          <Button
+            type="link"
+            className="ms-auto"
+            icon={<DownloadOutlined />}
+            loading={exportingKey === "all"}
+            onClick={() => {
+              void downloadPacketLossFile();
+            }}
+          >
+            Download Data
+          </Button>
+        </div>
       </div>
 
       <div>
@@ -307,7 +337,7 @@ const PacketLossTable = ({
                             className={`dm-badge inline-flex min-w-[104px] items-center justify-center rounded-full px-3.5 py-2 font-bold leading-none`}
                           >
                             <span
-                              className={`mr-2 block aspect-square h-4 w-4 shrink-0 rounded-full ${row.achLevel === "good" ? "bg-emerald-500" : "bg-rose-500"}`}
+                              className={`mr-2 block aspect-square h-4 w-4 shrink-0 rounded-full ${getTrafficLightClass(row.achLevel)}`}
                             />
                             {row.ach}
                           </span>

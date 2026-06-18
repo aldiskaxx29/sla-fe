@@ -61,6 +61,10 @@ const SitePage = () => {
     return selectedWeeks.find((item) => item !== "all") ?? selectedWeeks[0] ?? "";
   }, [isMttrqParameter, selectedWeeks, week]);
   const effectiveMonth = month;
+  const tableKey = useMemo(
+    () => `${parameter}-${year}-${effectiveMonth}-${effectiveWeek}-${prev}-${exclude}`,
+    [parameter, year, effectiveMonth, effectiveWeek, prev, exclude],
+  );
 
   const fetchSite = useCallback(async () => {
     activeSiteRequestRef.current?.abort?.();
@@ -118,6 +122,13 @@ const SitePage = () => {
     effectiveWeek,
     fetchSite,
   ]);
+
+  useEffect(() => {
+    setPagination((current) => ({
+      ...current,
+      current: 1,
+    }));
+  }, [exclude, parameter, year, month, prev, week]);
 
   useEffect(() => {
     return () => {
@@ -331,7 +342,8 @@ const SitePage = () => {
         </div>
       </div>
       <div className="w-full overflow-x-auto">
-          <TableInputSite
+        <TableInputSite
+          tableKey={tableKey}
           dataSource={siteResponse?.data ?? []}
           isLoading={loading || !siteResponse?.data}
           parameter={parameter}

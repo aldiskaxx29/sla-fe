@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { axios } from "@/plugins/axios";
 
@@ -18,6 +18,8 @@ const DAILY_MONITORING_API_BASE_URL =
   "/daily-monitoring-api";
 
 const SUMMARY_ENDPOINT = `${DAILY_MONITORING_API_BASE_URL}/api_summary_monitor.php`;
+const PACKET_LOSS_ENDPOINT = "daily-monitoring/pl-quality-cnop";
+const PACKET_LOSS_DETAIL_ENDPOINT = "daily-monitoring/pl-quality-cnop/detail";
 
 const formatNumber = (value: number | string | null | undefined) =>
   String(value ?? "");
@@ -33,17 +35,22 @@ const parsePercent = (value: string) => {
   return Number.isFinite(numeric) ? numeric : 0;
 };
 
+const toTrafficLightLevel = (value: string): MttrQualityLevel | PacketLossLevel => {
+  const percent = parsePercent(value);
+
+  if (percent >= 96) return "good";
+  if (percent >= 75) return "warning";
+  return "danger";
+};
+
 const toAchievementLevel = (
   achievement: DailyMonitoringSummaryResponse["summary_table"]["total"]["achievement"]
 ): MttrQualityLevel => {
-  const ach = parsePercent(achievement.ach);
-
-  return ach >= 100 ? "good" : "danger";
+  return toTrafficLightLevel(achievement.ach);
 };
 
 const toPacketLossLevel = (ach: string): PacketLossLevel => {
-  const numeric = Number(String(ach).replace("%", "").replace(",", "."));
-  return Number.isFinite(numeric) && numeric >= 100 ? "good" : "danger";
+  return toTrafficLightLevel(ach);
 };
 
 const mapRow = (
@@ -199,6 +206,25 @@ const normalizeDailyMonitoringPacketLoss = (
   };
 };
 
+type PacketLossMode = "combined" | "split";
+type PacketLossDetailKey = "p5" | "p15";
+
+type DailyMonitoringPacketLossData = {
+  combined?: DailyMonitoringPacketLossView;
+  split?: Record<PacketLossDetailKey, DailyMonitoringPacketLossView>;
+};
+
+const fetchPacketLossView = async (
+  pl?: PacketLossDetailKey
+): Promise<DailyMonitoringPacketLossView> => {
+  const response = await axios(pl ? PACKET_LOSS_DETAIL_ENDPOINT : PACKET_LOSS_ENDPOINT, "get", {
+    ...(pl ? { params: { pl } } : {}),
+  });
+
+  const payload = response.result as DailyMonitoringPacketLossResponse;
+  return normalizeDailyMonitoringPacketLoss(payload);
+};
+
 const useDailyMonitoringSummary = () => {
   const [data, setData] = useState<DailyMonitoringSummaryView | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -246,20 +272,42 @@ const useDailyMonitoringSummary = () => {
   };
 };
 
-const useDailyMonitoringPacketLoss = () => {
-  const [data, setData] = useState<DailyMonitoringPacketLossView | null>(null);
+const useDailyMonitoringPacketLoss = (mode: PacketLossMode = "combined") => {
+  const [data, setData] = useState<DailyMonitoringPacketLossData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const requestSeqRef = useRef(0);
 
   const fetchPacketLoss = useCallback(async () => {
+    const requestSeq = requestSeqRef.current + 1;
+    requestSeqRef.current = requestSeq;
     setIsLoading(true);
     setError(null);
 
     try {
-      const response = await axios("daily-monitoring/pl-quality-cnop", "get", {});
-      const payload = response.result as DailyMonitoringPacketLossResponse;
-      setData(normalizeDailyMonitoringPacketLoss(payload));
+      if (mode === "split") {
+        const [p5, p15] = await Promise.all([
+          fetchPacketLossView("p5"),
+          fetchPacketLossView("p15"),
+        ]);
+
+        if (requestSeqRef.current !== requestSeq) return;
+        setData({
+          split: {
+            p5,
+            p15,
+          },
+        });
+        return;
+      }
+
+      const combined = await fetchPacketLossView();
+      if (requestSeqRef.current !== requestSeq) return;
+      setData({
+        combined,
+      });
     } catch (fetchError) {
+      if (requestSeqRef.current !== requestSeq) return;
       setData(null);
       setError(
         fetchError instanceof Error
@@ -267,9 +315,11 @@ const useDailyMonitoringPacketLoss = () => {
           : "Gagal memuat data Packet Loss."
       );
     } finally {
-      setIsLoading(false);
+      if (requestSeqRef.current === requestSeq) {
+        setIsLoading(false);
+      }
     }
-  }, []);
+  }, [mode]);
 
   useEffect(() => {
     void fetchPacketLoss();
