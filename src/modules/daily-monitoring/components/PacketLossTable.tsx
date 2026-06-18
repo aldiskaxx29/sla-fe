@@ -371,12 +371,12 @@ const PacketLossTable = ({
         <p>
           Sumber Data:{" "}
           <a
-            href="https://qosmo.telkom.co.id/daily_monitoring"
+            href="https://qosmo.telkom.co.id/daily-monitoring"
             target="_blank"
             rel="noreferrer"
             className="font-semibold text-sky-700 underline"
           >
-            Packet Loss: https://qosmo.telkom.co.id/daily_monitoring
+            Packet Loss: https://qosmo.telkom.co.id/daily-monitoring
           </a>
         </p>
       </div>
