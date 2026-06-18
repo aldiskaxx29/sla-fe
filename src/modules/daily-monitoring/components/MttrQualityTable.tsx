@@ -420,7 +420,7 @@ const MttrQualityTable = ({
             rel="noreferrer"
             className="font-semibold text-sky-700 underline"
           >
-            MTTRq: https://qosmo.telkom.co.id/ticket
+            MTTRq: https://qosmo.telkom.co.id/daily_monitoring
           </a>
         </p>
       </div>

@@ -376,7 +376,7 @@ const PacketLossTable = ({
             rel="noreferrer"
             className="font-semibold text-sky-700 underline"
           >
-            Packet Loss: https://qosmo.telkom.co.id/Monday
+            Packet Loss: https://qosmo.telkom.co.id/daily_monitoring
           </a>
         </p>
       </div>
