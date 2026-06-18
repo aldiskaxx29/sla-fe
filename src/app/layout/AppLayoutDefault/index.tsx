@@ -275,6 +275,26 @@ const AppLayoutDefault = () => {
                           </p>
                         </Button>
                       )} */}
+                      <Button
+                          className={`${
+                            location.pathname.includes("executive")
+                              ? "!bg-[#A6AEC1]"
+                              : "!bg-[#576278]"
+                          } !border-0 !rounded-4xl !shadow-none`}
+                          onClick={() => {
+                            handleMenuSelect("executive");
+                          }}
+                        >
+                          <p
+                            className={
+                              location.pathname.includes("executive")
+                                ? "text-white "
+                                : "text-[#C6C6C6] "
+                            }
+                          >
+                            Executive Summary
+                          </p>
+                        </Button>
 
                       <Button
                         className={`${
