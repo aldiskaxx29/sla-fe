@@ -115,6 +115,7 @@ const DailyMonitoringPage = () => {
           ref={captureRef}
           id="daily-monitoring-export-root"
           className="daily-monitoring-export-root flex flex-col gap-6 bg-slate-100"
+          data-split-mode={splitPacketLoss ? "true" : "false"}
         >
           <header className="flex flex-col items-center justify-center gap-2">
             <div className="flex w-full items-center justify-center bg-gray-200 p-4">
@@ -140,11 +141,13 @@ const DailyMonitoringPage = () => {
                   showSplitToggle
                   splitView={splitPacketLoss}
                   onSplitViewChange={setSplitPacketLoss}
+                  pl="p5"
                 />
                 <PacketLossTable
                   rows={packetLoss?.split?.p15.rows}
                   section="B. PL 1-5%"
                   isLoading={isPacketLossLoading}
+                  pl="p15"
                 />
               </>
             ) : (
@@ -157,12 +160,14 @@ const DailyMonitoringPage = () => {
                 onSplitViewChange={setSplitPacketLoss}
               />
             )}
-            <MttrQualityTable
-              rows={summary?.rows}
-              summaryRows={summary?.summaryRows}
-              isLoading={isLoading}
-              totalTickets={summary?.totalTickets}
-            />
+            <div className="daily-monitoring-hide-on-split-export">
+              <MttrQualityTable
+                rows={summary?.rows}
+                summaryRows={summary?.summaryRows}
+                isLoading={isLoading}
+                totalTickets={summary?.totalTickets}
+              />
+            </div>
           </div>
         </div>
       </div>

@@ -11,6 +11,7 @@ type PacketLossTableProps = {
   showSplitToggle?: boolean;
   splitView?: boolean;
   onSplitViewChange?: (checked: boolean) => void;
+  pl?: "p5" | "p15";
 };
 
 const PacketLossTable = ({
@@ -20,6 +21,7 @@ const PacketLossTable = ({
   showSplitToggle = false,
   splitView = false,
   onSplitViewChange,
+  pl,
 }: PacketLossTableProps) => {
   const getTrafficLightClass = (level: "good" | "warning" | "danger") => {
     switch (level) {
@@ -67,6 +69,13 @@ const PacketLossTable = ({
 
   const buildDownloadKey = (type: string, value: string) => `${type}:${value}`;
 
+  const appendPlQuery = (url: string) => {
+    if (!pl) return url;
+
+    const separator = url.includes("?") ? "&" : "?";
+    return `${url}${separator}pl=${encodeURIComponent(pl)}`;
+  };
+
   const downloadBlob = async (url: string, fallbackFileName: string) => {
     const response = await axios(url, "get", {
       responseType: "blob",
@@ -95,7 +104,7 @@ const PacketLossTable = ({
 
     try {
       await downloadBlob(
-        "daily-monitoring/pl-quality-cnop/download",
+        appendPlQuery("daily-monitoring/pl-quality-cnop/download"),
         "packet-loss-download.xlsx",
       );
     } finally {
@@ -116,7 +125,9 @@ const PacketLossTable = ({
     try {
       const queryValue = type === "region" ? value.toLowerCase() : value;
       await downloadBlob(
-        `daily-monitoring/pl-quality-cnop/download?type=${encodeURIComponent(type)}&value=${encodeURIComponent(queryValue)}`,
+        appendPlQuery(
+          `daily-monitoring/pl-quality-cnop/download?type=${encodeURIComponent(type)}&value=${encodeURIComponent(queryValue)}`,
+        ),
         "packet-loss-download.xlsx",
       );
     } finally {
@@ -130,7 +141,7 @@ const PacketLossTable = ({
         <h2 className="daily-monitoring-section-title font-bold uppercase tracking-wide text-blue-600">
           {section || "A. PL 5% &amp; 1-5%"}
         </h2>
-        <div className="ms-auto flex items-center gap-3">
+        <div className="daily-monitoring-export-controls ms-auto flex items-center gap-3">
           {showSplitToggle && (
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium text-slate-600">

@@ -111,6 +111,14 @@ gap: 24;
   --dm-notes-size: 2rem;
 }
 
+.daily-monitoring-export-root[data-export-mode="true"][data-split-mode="true"] .daily-monitoring-hide-on-split-export {
+  display: none !important;
+}
+
+.daily-monitoring-export-root[data-export-mode="true"] .daily-monitoring-export-controls {
+  display: none !important;
+}
+
 .daily-monitoring-page-title {
   font-size: var(--dm-page-title-size) !important;
   line-height: var(--dm-page-title-line-height) !important;
