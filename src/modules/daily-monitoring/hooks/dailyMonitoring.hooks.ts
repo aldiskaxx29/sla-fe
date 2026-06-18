@@ -207,6 +207,33 @@ const normalizeDailyMonitoringPacketLoss = (
   };
 };
 
+const normalizeDailyMonitoringPacketLossDetail = (
+  response: DailyMonitoringPacketLossDetailResponse,
+  pl: PacketLossDetailKey,
+): DailyMonitoringPacketLossView => {
+  const nested = response[pl];
+
+  if (!nested) {
+    return {
+      title: response.title,
+      section: response.section,
+      date: response.date,
+      time: response.time,
+      rows: [],
+    };
+  }
+
+  const nestedView = normalizeDailyMonitoringPacketLoss(nested);
+
+  return {
+    ...nestedView,
+    title: response.title,
+    section: response.section,
+    date: response.date,
+    time: response.time,
+  };
+};
+
 type PacketLossMode = "combined" | "split";
 type PacketLossDetailKey = "p5" | "p15";
 
@@ -222,16 +249,18 @@ const fetchPacketLossView = async (
     ...(pl ? { params: { pl } } : {}),
   });
 
-  const rawPayload = response.result as
+  const payload = response.result as
     | DailyMonitoringPacketLossResponse
-    | DailyMonitoringPacketLossDetailResponse
-    | Record<string, unknown>;
+    | DailyMonitoringPacketLossDetailResponse;
 
-  const payload = pl
-    ? ((rawPayload?.[pl] as DailyMonitoringPacketLossResponse) ?? (rawPayload as DailyMonitoringPacketLossResponse))
-    : (rawPayload as DailyMonitoringPacketLossResponse);
+  if (pl) {
+    return normalizeDailyMonitoringPacketLossDetail(
+      payload as DailyMonitoringPacketLossDetailResponse,
+      pl,
+    );
+  }
 
-  return normalizeDailyMonitoringPacketLoss(payload);
+  return normalizeDailyMonitoringPacketLoss(payload as DailyMonitoringPacketLossResponse);
 };
 
 const useDailyMonitoringSummary = () => {
