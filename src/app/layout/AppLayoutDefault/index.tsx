@@ -112,8 +112,12 @@ const AppLayoutDefault = () => {
   const user = JSON.parse(localStorage.getItem("user_data"));
   const level = user?.level_user;
   const nik = user?.nik;
-  const isRestrictedToMonday = nik === "990141";
-  const isMondayAndOnxOnly = nik === "826229";
+  // const isRestrictedToMonday = nik === "990141";
+  // const isMondayAndOnxOnly = nik === "826229";
+  // const isMondayAndOnxOnly = nik === "826229";
+  const allowedNik = ["826229","900116"];
+
+  const isMondayAndOnxOnly = allowedNik.includes(nik);
   // const userData = localStorage.getItem("user_data");
   // const parsedData = JSON.parse(userData);
   // console.log('user siapa', parsedData.level_user)
@@ -249,7 +253,7 @@ const AppLayoutDefault = () => {
                     </>
                   ) : (
                     <>
-                      {!isRestrictedToMonday && (
+                      {/* {!isRestrictedToMonday && (
                         <Button
                           className={`${
                             location.pathname.includes("executive")
@@ -270,7 +274,7 @@ const AppLayoutDefault = () => {
                             Executive Summary
                           </p>
                         </Button>
-                      )}
+                      )} */}
 
                       <Button
                         className={`${
