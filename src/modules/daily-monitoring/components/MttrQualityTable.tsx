@@ -415,7 +415,7 @@ const MttrQualityTable = ({
         <p className="mt-2 font-semibold text-slate-700">Sumber Data:</p>
         <p>
           <a
-            href="https://qosmo.telkom.co.id/ticket"
+            href="https://qosmo.telkom.co.id/daily_monitoring"
             target="_blank"
             rel="noreferrer"
             className="font-semibold text-sky-700 underline"

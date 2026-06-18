@@ -371,7 +371,7 @@ const PacketLossTable = ({
         <p>
           Sumber Data:{" "}
           <a
-            href="https://qosmo.telkom.co.id/Monday"
+            href="https://qosmo.telkom.co.id/daily_monitoring"
             target="_blank"
             rel="noreferrer"
             className="font-semibold text-sky-700 underline"
