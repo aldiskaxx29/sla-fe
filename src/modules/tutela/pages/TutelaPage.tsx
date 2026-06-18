@@ -1,5 +1,4 @@
-import { useEffect, useMemo } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
 
 const TUTELA_ORIGIN = "http://10.62.205.124:3001";
 
@@ -10,34 +9,21 @@ const MENU_PATHS: Record<string, string> = {
   "isp-provider-experience": "/onx/isp-provider-experience",
 };
 
-const getMenuFromHash = (hash: string) => {
-  const cleanHash = hash.replace(/^#/, "").toLowerCase();
-  return MENU_PATHS[cleanHash] || MENU_PATHS.dashboard;
-};
-
-const getHashFromMenu = (menu: string) => {
-  const normalized = menu.toLowerCase();
-  if (
-    normalized === "isp-provider-experience" ||
-    normalized === "isp-provider"
-  ) {
-    return "#isp-provider";
+const getMenuFromPath = (pathname: string) => {
+  const cleanPath = pathname.replace(/^\/onx\/?/, "").toLowerCase();
+  if (cleanPath in MENU_PATHS) {
+    return cleanPath;
   }
 
-  if (normalized === "mobile-experience") {
-    return "#mobile-experience";
-  }
-
-  return "#dashboard";
+  return "dashboard";
 };
 
 const TutelaPage = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
+  const [menu, setMenu] = useState(() => getMenuFromPath(window.location.pathname));
 
   const src = useMemo(() => {
-    return `${TUTELA_ORIGIN}${getMenuFromHash(location.hash)}`;
-  }, [location.hash]);
+    return `${TUTELA_ORIGIN}${MENU_PATHS[menu] || MENU_PATHS.dashboard}`;
+  }, [menu]);
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
@@ -57,17 +43,15 @@ const TutelaPage = () => {
 
       if (!route) return;
 
-      const nextHash = getHashFromMenu(route);
-      const nextUrl = `/onx${nextHash}`;
-
-      if (`${location.pathname}${location.hash}` !== nextUrl) {
-        navigate(nextUrl, { replace: true });
+      const normalizedRoute = route.toLowerCase();
+      if (normalizedRoute in MENU_PATHS) {
+        setMenu(normalizedRoute);
       }
     };
 
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
-  }, [location.hash, location.pathname, navigate]);
+  }, []);
 
   return (
     <iframe

@@ -16,6 +16,10 @@ const useTutelaRouter = (): RouteObject[] => {
       ),
     },
     {
+      path: "onx/*",
+      element: <Navigate to="/onx" replace />,
+    },
+    {
       path: "tutela",
       element: <Navigate to="/onx" replace />,
     },
