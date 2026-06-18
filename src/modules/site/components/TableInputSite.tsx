@@ -274,20 +274,24 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
         align: "center",
         search: true,
       },
-      {
-        title: "Status Saat Ini",
-        dataIndex: "status_saat_ini",
-        key: "status_saat_ini",
-        align: "center",
-        filters: [
-          { text: "CLEAR", value: "CLEAR" },
-          { text: "CONSECUTIVE", value: "CONSECUTIVE" },
-          { text: "NOT CLEAR", value: "NOT CLEAR" },
-        ],
-        filterSearch: true,
-        filterMultiple: true,
-        onFilter: (value, record) => record.status_saat_ini === value,
-      },
+      ...(parameter.includes("packetloss")
+        ? [
+            {
+              title: "Status Saat Ini",
+              dataIndex: "status_saat_ini",
+              key: "status_saat_ini",
+              align: "center",
+              filters: [
+                { text: "CLEAR", value: "CLEAR" },
+                { text: "CONSECUTIVE", value: "CONSECUTIVE" },
+                { text: "NOT CLEAR", value: "NOT CLEAR" },
+              ],
+              filterSearch: true,
+              filterMultiple: true,
+              onFilter: (value, record) => record.status_saat_ini === value,
+            },
+          ]
+        : []),
       {
         title: `${dynamicTitle} Status`,
         key: `${dynamicKey}_status`,
@@ -440,7 +444,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
         align: "center",
       },
     ],
-    [dynamicKey, dynamicTitle],
+    [dynamicKey, dynamicTitle, parameter],
   );
 
   const columns2 = useMemo(
@@ -479,20 +483,24 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
         align: "center",
         search: true,
       },
-      {
-        title: "Status Saat Ini",
-        dataIndex: "status_saat_ini",
-        key: "status_saat_ini",
-        align: "center",
-        filters: [
-          { text: "CLEAR", value: "CLEAR" },
-          { text: "CONSECUTIVE", value: "CONSECUTIVE" },
-          { text: "NOT CLEAR", value: "NOT CLEAR" },
-        ],
-        filterSearch: true,
-        filterMultiple: true,
-        onFilter: (value, record) => record.status_saat_ini === value,
-      },
+      ...(parameter.includes("packetloss")
+        ? [
+            {
+              title: "Status Saat Ini",
+              dataIndex: "status_saat_ini",
+              key: "status_saat_ini",
+              align: "center",
+              filters: [
+                { text: "CLEAR", value: "CLEAR" },
+                { text: "CONSECUTIVE", value: "CONSECUTIVE" },
+                { text: "NOT CLEAR", value: "NOT CLEAR" },
+              ],
+              filterSearch: true,
+              filterMultiple: true,
+              onFilter: (value, record) => record.status_saat_ini === value,
+            },
+          ]
+        : []),
       {
         title: "FINAL SEVERITY",
         dataIndex: "final_severity",
@@ -570,7 +578,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
         align: "center",
       },
     ],
-    [],
+    [parameter],
   );
 
   const { saveSite, getSite } = useSite();
