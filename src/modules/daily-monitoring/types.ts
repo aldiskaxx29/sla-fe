@@ -163,6 +163,11 @@ export type DailyMonitoringPacketLossResponse = {
   total: DailyMonitoringPacketLossTotal;
 };
 
+export type DailyMonitoringPacketLossDetailResponse = DailyMonitoringPacketLossResponse & {
+  p5?: DailyMonitoringPacketLossResponse;
+  p15?: DailyMonitoringPacketLossResponse;
+};
+
 export type DailyMonitoringPacketLossView = {
   title: string;
   section: string;

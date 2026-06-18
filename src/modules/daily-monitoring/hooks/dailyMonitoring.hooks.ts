@@ -4,6 +4,7 @@ import { axios } from "@/plugins/axios";
 
 import {
   DailyMonitoringPacketLossResponse,
+  DailyMonitoringPacketLossDetailResponse,
   DailyMonitoringPacketLossView,
   DailyMonitoringSummaryResponse,
   DailyMonitoringSummaryView,
@@ -221,7 +222,15 @@ const fetchPacketLossView = async (
     ...(pl ? { params: { pl } } : {}),
   });
 
-  const payload = response.result as DailyMonitoringPacketLossResponse;
+  const rawPayload = response.result as
+    | DailyMonitoringPacketLossResponse
+    | DailyMonitoringPacketLossDetailResponse
+    | Record<string, unknown>;
+
+  const payload = pl
+    ? ((rawPayload?.[pl] as DailyMonitoringPacketLossResponse) ?? (rawPayload as DailyMonitoringPacketLossResponse))
+    : (rawPayload as DailyMonitoringPacketLossResponse);
+
   return normalizeDailyMonitoringPacketLoss(payload);
 };
 
