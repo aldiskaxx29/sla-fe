@@ -135,7 +135,7 @@ const DailyMonitoringPage = () => {
               <>
                 <PacketLossTable
                   rows={packetLoss?.split?.p5.rows}
-                  section={packetLoss?.split?.p5.section || "A. PL 5%"}
+                  section="A. PL 5%"
                   isLoading={isPacketLossLoading}
                   showSplitToggle
                   splitView={splitPacketLoss}
@@ -143,7 +143,7 @@ const DailyMonitoringPage = () => {
                 />
                 <PacketLossTable
                   rows={packetLoss?.split?.p15.rows}
-                  section={packetLoss?.split?.p15.section || "B. PL 1-5%"}
+                  section="B. PL 1-5%"
                   isLoading={isPacketLossLoading}
                 />
               </>
