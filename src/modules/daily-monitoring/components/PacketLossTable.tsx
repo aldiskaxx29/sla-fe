@@ -324,7 +324,8 @@ const PacketLossTable = ({
                                   : row.no,
                               )
                             }
-                            className="h-auto p-0 font-inherit text-slate-700 hover:text-blue-600"
+                            className="daily-monitoring-not-clear-button h-auto p-0 text-slate-700 hover:text-blue-600"
+                            style={{ fontSize: "inherit", lineHeight: "inherit" }}
                             onClick={(event) => {
                               event.preventDefault();
                               event.stopPropagation();

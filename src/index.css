@@ -163,6 +163,11 @@ gap: 24;
   font-size: var(--dm-table-badge-size) !important;
 }
 
+.daily-monitoring-export-root[data-export-mode="true"] .daily-monitoring-not-clear-button {
+  font-size: inherit !important;
+  line-height: inherit !important;
+}
+
 .daily-monitoring-notes {
   font-size: var(--dm-notes-size) !important;
   line-height: 1.5 !important;
