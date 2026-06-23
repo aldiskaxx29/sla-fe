@@ -75,10 +75,7 @@ const mapRow = (
       row.achievement.ta,
       row.achievement.pst
     ),
-    achLevel: toAchievementLevel({
-      ta: row.achievement.ta,
-      pst: row.achievement.pst,
-    }),
+    achLevel: toAchievementLevel(row.achievement),
   };
 };
 
