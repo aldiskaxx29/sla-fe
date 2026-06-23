@@ -115,7 +115,7 @@ const AppLayoutDefault = () => {
   // const isRestrictedToMonday = nik === "990141";
   // const isMondayAndOnxOnly = nik === "826229";
   // const isMondayAndOnxOnly = nik === "826229";
-  const allowedNik = ["826229","900116"];
+  const allowedNik = ["826229","900116","870006"];
 
   const isMondayAndOnxOnly = allowedNik.includes(nik);
   // const userData = localStorage.getItem("user_data");

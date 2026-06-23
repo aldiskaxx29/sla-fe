@@ -32,7 +32,7 @@ export const getPostLoginRedirectPath = (): string => {
 
     const parsedData = JSON.parse(userData);
     // return parsedData?.nik === "826229" ? "/monday" : "/msa";
-    const allowedNik = ["826229", "900116"];
+    const allowedNik = ["826229", "900116","870006"];
 
     return allowedNik.includes(parsedData?.nik)
       ? "/monday"
