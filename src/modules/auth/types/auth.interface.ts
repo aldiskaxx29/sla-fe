@@ -54,6 +54,7 @@ export interface IAuthAuthenticatedUser {
   name: string;
   email: string;
   level_user: number;
+  level: string;
   treg: string;
   id_telegram: string;
   unit: string;

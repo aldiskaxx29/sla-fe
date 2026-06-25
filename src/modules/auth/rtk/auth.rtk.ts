@@ -1,3 +1,4 @@
+import { getMenuRedirectPath, getVisibleMenus } from "@/app/config/menuConfig";
 import { emptySplitApi } from "@/app/redux/app.rtx";
 import {
   IAuthLoginRequest,
@@ -48,16 +49,9 @@ export const getPostLoginRedirectPath = (): string => {
     if (!userData) return "/msa";
 
     const parsedData = JSON.parse(userData);
+    const firstVisibleMenu = getVisibleMenus(parsedData?.level)[0];
 
-    const allowedNik = ["826229", "900116", "870006"];
-
-    if (parsedData?.level_user == 5) {
-      return "/one";
-    }
-
-    return allowedNik.includes(parsedData?.nik)
-      ? "/monday"
-      : "/msa";
+    return firstVisibleMenu ? getMenuRedirectPath(firstVisibleMenu) : "/msa";
   } catch {
     return "/msa";
   }
@@ -99,7 +93,7 @@ export const authApi = emptySplitApi.injectEndpoints({
       transformErrorResponse: (
         response:
           | import("@reduxjs/toolkit/query").FetchBaseQueryError
-          | { data?: { message?: string } }
+          | { data?: { message?: string } },
       ) => ({
         status: "status" in response ? response.status : undefined,
         message:
@@ -109,7 +103,10 @@ export const authApi = emptySplitApi.injectEndpoints({
     }),
 
     /** Step 2a: Verifikasi OTP yang dikirim ke email (first login / setup 2FA) */
-    verifyOtpEmail: builder.mutation<IAuthLoginResponse, IAuthVerifyOtpEmailRequest>({
+    verifyOtpEmail: builder.mutation<
+      IAuthLoginResponse,
+      IAuthVerifyOtpEmailRequest
+    >({
       query: (body) => ({
         method: "POST",
         url: "login/verify-otp-email",
@@ -118,7 +115,7 @@ export const authApi = emptySplitApi.injectEndpoints({
       transformErrorResponse: (
         response:
           | import("@reduxjs/toolkit/query").FetchBaseQueryError
-          | { data?: { message?: string } }
+          | { data?: { message?: string } },
       ) => ({
         status: "status" in response ? response.status : undefined,
         message:
@@ -128,7 +125,10 @@ export const authApi = emptySplitApi.injectEndpoints({
     }),
 
     /** Resend OTP Email */
-    resendOtpEmail: builder.mutation<IAuthLoginResponse, IAuthResendOtpEmailRequest>({
+    resendOtpEmail: builder.mutation<
+      IAuthLoginResponse,
+      IAuthResendOtpEmailRequest
+    >({
       query: (body) => ({
         method: "POST",
         url: "login/resend-otp-email",
@@ -137,7 +137,7 @@ export const authApi = emptySplitApi.injectEndpoints({
       transformErrorResponse: (
         response:
           | import("@reduxjs/toolkit/query").FetchBaseQueryError
-          | { data?: { message?: string } }
+          | { data?: { message?: string } },
       ) => ({
         status: "status" in response ? response.status : undefined,
         message:
@@ -160,7 +160,7 @@ export const authApi = emptySplitApi.injectEndpoints({
       transformErrorResponse: (
         response:
           | import("@reduxjs/toolkit/query").FetchBaseQueryError
-          | { data?: { message?: string } }
+          | { data?: { message?: string } },
       ) => ({
         status: "status" in response ? response.status : undefined,
         message:
@@ -170,7 +170,10 @@ export const authApi = emptySplitApi.injectEndpoints({
     }),
 
     /** Reset Token 2FA (ketika user tidak punya akses authenticator) */
-    resetToken: builder.mutation<IAuthResetTokenResponse, IAuthResetTokenRequest>({
+    resetToken: builder.mutation<
+      IAuthResetTokenResponse,
+      IAuthResetTokenRequest
+    >({
       query: (body) => ({
         method: "POST",
         url: "reset2fa",
@@ -179,7 +182,7 @@ export const authApi = emptySplitApi.injectEndpoints({
       transformErrorResponse: (
         response:
           | import("@reduxjs/toolkit/query").FetchBaseQueryError
-          | { data?: { message?: string } }
+          | { data?: { message?: string } },
       ) => ({
         status: "status" in response ? response.status : undefined,
         message:

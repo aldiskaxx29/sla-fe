@@ -100,6 +100,7 @@ const baseQueryWithReauth: BaseQueryFn<
             name: "Mock User",
             email: "mock@example.com",
             level_user: 1,
+            level: "Administrator",
             treg: "0",
             id_telegram: "",
             unit: "regional",
@@ -140,8 +141,9 @@ const baseQueryWithReauth: BaseQueryFn<
   // Error handling umum
   if (result.error?.status && result.error?.originalStatus >= 400) {
     const { status, data } = result.error;
+    const errorData = data as { message?: string } | undefined;
     const msg =
-      (typeof data === "object" && (data as any).message) ||
+      (typeof data === "object" && errorData?.message) ||
       `Request failed with status ${status}`;
     toast.error(msg);
   }

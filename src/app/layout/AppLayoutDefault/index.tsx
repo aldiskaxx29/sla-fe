@@ -4,6 +4,7 @@ import "./index.css";
 
 // React
 import { useEffect, useRef, useState } from "react";
+import { useSelector } from "react-redux";
 
 // Components
 import {
@@ -22,41 +23,35 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useLogoutMutation } from "@/modules/auth/rtk/auth.rtk";
 
 import { toast } from "react-toastify";
+import type { RootState } from "@/plugins/redux";
+import {
+  ADMIN_MENU_CONFIG,
+  getVisibleMenus,
+  MENU_CONFIG,
+  type MenuConfigItem,
+} from "@/app/config/menuConfig";
 
 const { Header, Content } = Layout;
+
+const getStoredUser = () => {
+  try {
+    return JSON.parse(localStorage.getItem("user_data") ?? "null");
+  } catch {
+    return null;
+  }
+};
 
 const AppLayoutDefault = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  // const [current, setCurrent] = useState<string | undefined>("MM");
-  // const [type, setType] = useState("msa");
+  const authenticatedUser = useSelector(
+    (state: RootState) => state.auth.auth_authenticatedUser
+  );
 
   // Handle menu selection
   const handleMenuSelect = (menu: string) => {
     navigate(menu);
   };
-
-  // Sync selected key with props (route changes)
-  // useEffect(() => {
-  //   if (menuId) setCurrent(menuId);
-  // }, [menuId]);
-
-  const networkOpt = [
-    // { label: "Access Perf(Home)", value: "network/access-perf" },
-    { label: "Core Perf", value: "network/core-perf" },
-    { label: "CDN Perf", value: "network/cdn-perf" },
-    { label: "Quality Healthiness", value: "network/quality-healthiness" },
-  ];
-  const slaOpt = [
-    { label: "Achievement WISA", value: "msa" },
-    // { label: "Achievement CNOP", value: "cnop" },
-    { label: "Daily Monitoring", value: "daily-monitoring" },
-    // { label: "Reconsiliation", value: "input-site" },
-    { label: "Report Reconsilation", value: "report-site" },
-    { label: "Resume RCA", value: "resume-rca" },
-    { label: "Week-to-Date Achievement", value: "access-prediction" },
-    // { label: "Report Support Needed", value: "report-support-needed" },
-  ];
 
   const [open1, setOpen1] = useState(false);
   const [open2, setOpen2] = useState(false);
@@ -109,18 +104,85 @@ const AppLayoutDefault = () => {
     setProfileOpen(false);
   };
 
-  const user = JSON.parse(localStorage.getItem("user_data"));
-  const level = user?.level_user;
-  const nik = user?.nik;
-  // const isRestrictedToMonday = nik === "990141";
-  // const isMondayAndOnxOnly = nik === "826229";
-  // const isMondayAndOnxOnly = nik === "826229";
-  const allowedNik = ["826229","900116","870006"];
+  const user = authenticatedUser ?? getStoredUser();
+  const userRole = user?.level;
+  const visibleMenus = getVisibleMenus(userRole, MENU_CONFIG);
+  const visibleAdminMenus = getVisibleMenus(userRole, ADMIN_MENU_CONFIG);
 
-  const isMondayAndOnxOnly = allowedNik.includes(nik);
-  // const userData = localStorage.getItem("user_data");
-  // const parsedData = JSON.parse(userData);
-  // console.log('user siapa', parsedData.level_user)
+  const isActiveMenu = (menu: MenuConfigItem) =>
+    menu.activePaths.some((path) => location.pathname.includes(path));
+
+  const renderMenuButton = (menu: MenuConfigItem) => (
+    <Button
+      key={menu.key}
+      className={`${
+        isActiveMenu(menu) ? "!bg-[#A6AEC1]" : "!bg-[#576278]"
+      } !border-0 !rounded-4xl !shadow-none`}
+      onClick={() => {
+        if (menu.type === "external" && menu.externalUrl) {
+          window.open(menu.externalUrl, "_blank");
+          return;
+        }
+
+        if (menu.path) {
+          handleMenuSelect(menu.path);
+        }
+      }}
+    >
+      <p className={isActiveMenu(menu) ? "text-white " : "text-[#C6C6C6] "}>
+        {menu.label}
+      </p>
+    </Button>
+  );
+
+  const renderDropdownMenu = (menu: MenuConfigItem) => {
+    const isOpen = menu.key === "sla" ? open2 : open1;
+    const setOpen = menu.key === "sla" ? setOpen2 : setOpen1;
+
+    return (
+      <div
+        key={menu.key}
+        ref={containerRef}
+        onMouseEnter={() => setOpen(true)}
+        onMouseLeave={() => setOpen(false)}
+        className={`relative inline-block px-4 py-2 rounded-full cursor-pointer ${
+          isActiveMenu(menu)
+            ? "!bg-[#A6AEC1] text-white"
+            : "!bg-[#576278] text-[#C6C6C6]"
+        }`}
+      >
+        {menu.label}
+        {isOpen && (
+          <div
+            className={`absolute left-0 top-full -mt-2 bg-[#576278] border rounded shadow ${
+              menu.key === "sla" ? "z-100 w-[300px]" : "z-10 w-full"
+            }`}
+          >
+            {menu.options?.map((option) => (
+              <p
+                key={option.value}
+                className={`px-4 py-2 hover:bg-gray-500 cursor-pointer ${
+                  location.pathname?.includes(option.value)
+                    ? "!bg-[#A6AEC1] text-white"
+                    : "!bg-[#576278] text-[#C6C6C6]"
+                }`}
+                onClick={() => {
+                  handleMenuSelect(option.value);
+                  setOpen(false);
+                }}
+              >
+                {option.label}
+              </p>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderMainMenu = (menu: MenuConfigItem) =>
+    menu.type === "dropdown" ? renderDropdownMenu(menu) : renderMenuButton(menu);
+
   return (
     <>
       {loading && <Spin fullscreen tip="Harap Tunggu..." />}
@@ -136,389 +198,9 @@ const AppLayoutDefault = () => {
               </div> */}
             </div>
             <div className="flex gap-4">
-              {level == 5 && (
+              {visibleMenus.length > 0 && (
                 <div className="text-sm flex justify-between items-center bg-[#576278] rounded-[54px] px-3 py-2">
-                  <Button
-                    className={`${
-                      location.pathname.includes("one")
-                        ? "!bg-[#A6AEC1]"
-                        : "!bg-[#576278]"
-                    } !border-0 !rounded-4xl !shadow-none`}
-                    onClick={() => {
-                      handleMenuSelect("one");
-                    }}
-                  >
-                    <p
-                      className={
-                        location.pathname.includes("one")
-                          ? "text-white "
-                          : "text-[#C6C6C6] "
-                      }
-                    >
-                      One Visibility
-                    </p>
-                  </Button>
-                </div>
-              )}
-              {level == 6 && (
-                <div className="text-sm flex justify-between items-center bg-[#576278] rounded-[54px] px-3 py-2">
-                  <Button
-                    className={`${
-                      location.pathname.includes("executive")
-                        ? "!bg-[#A6AEC1]"
-                        : "!bg-[#576278]"
-                    } !border-0 !rounded-4xl !shadow-none`}
-                    onClick={() => {
-                      handleMenuSelect("executive");
-                    }}
-                  >
-                    <p
-                      className={
-                        location.pathname.includes("executive")
-                          ? "text-white "
-                          : "text-[#C6C6C6] "
-                      }
-                    >
-                      Executive Summary
-                    </p>
-                  </Button>
-
-                  <Button
-                    className={`${
-                      location.pathname.includes("one")
-                        ? "!bg-[#A6AEC1]"
-                        : "!bg-[#576278]"
-                    } !border-0 !rounded-4xl !shadow-none`}
-                    onClick={() => {
-                      handleMenuSelect("one");
-                    }}
-                  >
-                    <p
-                      className={
-                        location.pathname.includes("one")
-                          ? "text-white "
-                          : "text-[#C6C6C6] "
-                      }
-                    >
-                      One Visibility
-                    </p>
-                  </Button>
-                </div>
-              )}
-              {(level == 1 || level == 2 || level == 3 || level == 4) && (
-                <div className="text-sm flex justify-between items-center bg-[#576278] rounded-[54px] px-3 py-2">
-                  {isMondayAndOnxOnly ? (
-                    <>
-                      <Button
-                        className={`${
-                          location.pathname.includes("monday")
-                            ? "!bg-[#A6AEC1]"
-                            : "!bg-[#576278]"
-                        } !border-0 !rounded-4xl !shadow-none`}
-                        onClick={() => {
-                          handleMenuSelect("monday");
-                        }}
-                      >
-                        <p
-                          className={
-                            location.pathname.includes("monday")
-                              ? "text-white "
-                              : "text-[#C6C6C6] "
-                          }
-                        >
-                          Monday Monitoring
-                        </p>
-                      </Button>
-
-                      <Button
-                        className={`${
-                          location.pathname.includes("onx")
-                            ? "!bg-[#A6AEC1]"
-                            : "!bg-[#576278]"
-                        } !border-0 !rounded-4xl !shadow-none`}
-                        onClick={() => {
-                          handleMenuSelect("onx");
-                        }}
-                      >
-                        <p
-                          className={
-                            location.pathname.includes("onx")
-                              ? "text-white "
-                              : "text-[#C6C6C6] "
-                          }
-                        >
-                          Onx
-                        </p>
-                      </Button>
-                    </>
-                  ) : (
-                    <>
-                      {/* {!isRestrictedToMonday && (
-                        <Button
-                          className={`${
-                            location.pathname.includes("executive")
-                              ? "!bg-[#A6AEC1]"
-                              : "!bg-[#576278]"
-                          } !border-0 !rounded-4xl !shadow-none`}
-                          onClick={() => {
-                            handleMenuSelect("executive");
-                          }}
-                        >
-                          <p
-                            className={
-                              location.pathname.includes("executive")
-                                ? "text-white "
-                                : "text-[#C6C6C6] "
-                            }
-                          >
-                            Executive Summary
-                          </p>
-                        </Button>
-                      )} */}
-                      <Button
-                          className={`${
-                            location.pathname.includes("executive")
-                              ? "!bg-[#A6AEC1]"
-                              : "!bg-[#576278]"
-                          } !border-0 !rounded-4xl !shadow-none`}
-                          onClick={() => {
-                            handleMenuSelect("executive");
-                          }}
-                        >
-                          <p
-                            className={
-                              location.pathname.includes("executive")
-                                ? "text-white "
-                                : "text-[#C6C6C6] "
-                            }
-                          >
-                            Executive Summary
-                          </p>
-                        </Button>
-
-                      <Button
-                        className={`${
-                          location.pathname.includes("monday")
-                            ? "!bg-[#A6AEC1]"
-                            : "!bg-[#576278]"
-                        } !border-0 !rounded-4xl !shadow-none`}
-                        onClick={() => {
-                          handleMenuSelect("monday");
-                        }}
-                      >
-                        <p
-                          className={
-                            location.pathname.includes("monday")
-                              ? "text-white "
-                              : "text-[#C6C6C6] "
-                          }
-                        >
-                          Monday Monitoring
-                        </p>
-                      </Button>
-
-                      <div
-                        ref={containerRef}
-                        onMouseEnter={() => setOpen2(true)}
-                        onMouseLeave={() => setOpen2(false)}
-                        className={`relative inline-block px-4 py-2 rounded-full cursor-pointer ${
-                          [
-                            "/msa",
-                            "/cnop",
-                            "/daily-monitoring",
-                            "/report-site",
-                            "/report-support-needed",
-                          ].includes(location.pathname)
-                            ? "!bg-[#A6AEC1] text-white"
-                            : "!bg-[#576278] text-[#C6C6C6]"
-                        }`}
-                      >
-                        SLA
-                        {open2 && (
-                          <div className="z-100 absolute left-0 top-full -mt-2 w-[300px] bg-[#576278] border rounded shadow opacity-100">
-                            {slaOpt.map((option) => (
-                              <p
-                                key={option.value}
-                                className={`px-4 py-2 hover:bg-gray-500 cursor-pointer ${
-                                  location.pathname?.includes(option.value)
-                                    ? "!bg-[#A6AEC1] text-white"
-                                    : "!bg-[#576278] text-[#C6C6C6]"
-                                }`}
-                                onClick={() => {
-                                  handleMenuSelect(option.value);
-                                  setOpen2(false);
-                                }}
-                              >
-                                {option.label}
-                              </p>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-
-                      <div
-                        ref={containerRef}
-                        onMouseEnter={() => setOpen1(true)}
-                        onMouseLeave={() => setOpen1(false)}
-                        className={`relative inline-block px-4 py-2 rounded-full cursor-pointer ${
-                          location.pathname?.includes("network")
-                            ? "!bg-[#A6AEC1] text-white"
-                            : "!bg-[#576278] text-[#C6C6C6]"
-                        }`}
-                      >
-                        Network Performance
-                        {open1 && (
-                          <div className="absolute left-0 top-full -mt-2 w-full bg-[#576278] border rounded shadow z-10">
-                            {networkOpt.map((option) => (
-                              <p
-                                key={option.value}
-                                className={`px-4 py-2 hover:bg-gray-500 cursor-pointer ${
-                                  location.pathname?.includes(option.value)
-                                    ? "!bg-[#A6AEC1] text-white"
-                                    : "!bg-[#576278] text-[#C6C6C6]"
-                                }`}
-                                onClick={() => {
-                                  handleMenuSelect(option.value);
-                                  setOpen1(false);
-                                }}
-                              >
-                                {option.label}
-                              </p>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-
-                      <Button
-                        className={`${
-                          location.pathname.includes("input-site")
-                            ? "!bg-[#A6AEC1]"
-                            : "!bg-[#576278]"
-                        } !border-0 !rounded-4xl !shadow-none`}
-                        onClick={() => {
-                          handleMenuSelect("input-site");
-                        }}
-                      >
-                        <p
-                          className={
-                            location.pathname.includes("input-site")
-                              ? "text-white "
-                              : "text-[#C6C6C6] "
-                          }
-                        >
-                          Reconsiliation
-                        </p>
-                      </Button>
-
-                      <Button
-                        className={`${
-                          location.pathname.includes("one")
-                            ? "!bg-[#A6AEC1]"
-                            : "!bg-[#576278]"
-                        } !border-0 !rounded-4xl !shadow-none`}
-                        onClick={() => {
-                          handleMenuSelect("one");
-                        }}
-                      >
-                        <p
-                          className={
-                            location.pathname.includes("one")
-                              ? "text-white "
-                              : "text-[#C6C6C6] "
-                          }
-                        >
-                          One Visibility
-                        </p>
-                      </Button>
-
-                      <Button
-                        className={`${
-                          location.pathname.includes("ticket")
-                            ? "!bg-[#A6AEC1]"
-                            : "!bg-[#576278]"
-                        } !border-0 !rounded-4xl !shadow-none`}
-                      >
-                        <p
-                          className={
-                            location.pathname.includes("ticket")
-                              ? "text-white "
-                              : "text-[#C6C6C6] "
-                          }
-                          onClick={() => {
-                            handleMenuSelect("ticket");
-                          }}
-                        >
-                          Ticket Quality
-                        </p>
-                      </Button>
-
-                      <Button
-                        className={`${
-                          location.pathname.includes("elibrary")
-                            ? "!bg-[#A6AEC1]"
-                            : "!bg-[#576278]"
-                        } !border-0 !rounded-4xl !shadow-none`}
-                        onClick={() => {
-                          handleMenuSelect("elibrary");
-                        }}
-                      >
-                        <p
-                          className={
-                            location.pathname.includes("elibrary")
-                              ? "text-white "
-                              : "text-[#C6C6C6] "
-                          }
-                        >
-                          E-Library
-                        </p>
-                      </Button>
-
-                      <Button
-                        className={`${
-                          location.pathname.includes("onx")
-                            ? "!bg-[#A6AEC1]"
-                            : "!bg-[#576278]"
-                        } !border-0 !rounded-4xl !shadow-none`}
-                        onClick={() => {
-                          handleMenuSelect("onx");
-                        }}
-                      >
-                        <p
-                          className={
-                            location.pathname.includes("onx")
-                              ? "text-white "
-                              : "text-[#C6C6C6] "
-                          }
-                        >
-                          Onx
-                        </p>
-                      </Button>
-
-                      <Button
-                        className={`${
-                          location.pathname.includes("msa")
-                            ? "!bg-[#576278]"
-                            : "!bg-[#576278]"
-                        } !border-0 !rounded-4xl !shadow-none`}
-                        onClick={() => {
-                          handleMenuSelect("msa");
-                        }}
-                      >
-                        <p
-                          className={`cursor-pointer ${
-                            location.pathname.includes("dashboard-ta")
-                              ? "text-white"
-                              : "text-[#C6C6C6]"
-                          }`}
-                          onClick={() =>
-                            window.open("http://10.60.174.188:8008/", "_blank")
-                          }
-                        >
-                          Telkom Akses
-                        </p>
-                      </Button>
-                    </>
-                  )}
+                  {visibleMenus.map(renderMainMenu)}
                 </div>
               )}
 
@@ -545,8 +227,7 @@ const AppLayoutDefault = () => {
                   {profileOpen && (
                     <div className="absolute right-0 top-full bg-white border border-gray-200 rounded-lg shadow-lg z-50">
                       <div className="flex flex-col divide-y divide-gray-100">
-                        {JSON.parse(localStorage.getItem("user_data"))
-                          ?.level_user == 1 && (
+                        {visibleAdminMenus.length > 0 && (
                           <>
                             <button
                               className="w-full text-left px-4 py-2 text-sm text-black hover:bg-black-50 transition-colors duration-150 cursor-pointer"

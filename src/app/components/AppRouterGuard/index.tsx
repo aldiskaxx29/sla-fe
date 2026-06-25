@@ -1,96 +1,41 @@
-// React
-import { useMemo } from "react";
-
 // React Router DOM
 import { useLocation, Navigate } from "react-router-dom";
 
-import { getPostLoginRedirectPath } from "@/modules/auth/rtk/auth.rtk";
+import {
+  getCurrentUser,
+  getPostLoginRedirectPath,
+  isAuthenticated,
+} from "@/modules/auth/rtk/auth.rtk";
+import { getMenuByPath, getVisibleMenus } from "@/app/config/menuConfig";
 
 // Interfaces
 import { IAppRouteGuardProps } from "./interfaces";
 
-// Interfaces
-// import {
-//   IPermissionList,
-//   IPermission,
-// } from "@/modules/role/interfaces/role.interface";
-
-// Custom Hooks
-// import { useAuth } from "@/modules/auth/hooks/auth.hook";
-
 const AppRouteGuard = ({ children, permissible }: IAppRouteGuardProps) => {
-  // Hook
-  //   const { auth_authenticatedUser } = useAuth();
-  const auth_authenticatedUser = { id: "1" };
   const location = useLocation();
-  const isAuthRoute = useMemo(() => {
-    return location.pathname.includes("auth");
-  }, [location.pathname]);
-
-  // auth_authenticatedUser?.roles?.permissionGroupResponses
-  //   ?.filter(({ permissions }: IPermissionList) =>
-  //     permissions.some(({ granted }) => granted)
-  //   )
-  //   .map(({ name }: IPermission) => {
-  //     let routeName = "";
-
-  //     switch (name) {
-  //       case "Dashboard":
-  //         routeName = "dashboard";
-  //         break;
-  //       case "Transaksi":
-  //         routeName = "transaction";
-  //         break;
-  //       case "Manajemen User":
-  //         routeName = "users";
-  //         break;
-  //       case "Manajemen Role":
-  //         routeName = "role";
-  //         break;
-  //       case "Manajemen Pelanggan":
-  //         routeName = "customer";
-  //         break;
-  //       case "Manajemen Outlet":
-  //         routeName = "outlet";
-  //         break;
-  //       case "Manajemen Kategori Outlet":
-  //         routeName = "outlet-category";
-  //         break;
-  //       case "Manajemen Produk":
-  //         routeName = "product";
-  //         break;
-  //       case "Manajemen Laporan":
-  //         routeName = "report";
-  //         break;
-  //       default:
-  //         routeName = "404";
-  //         break;
-  //     }
-  //     return routeName;
-  //   });
-
-  if (
-    auth_authenticatedUser?.id &&
-    (isAuthRoute || location.pathname === "/")
-  ) {
-    return <Navigate to={getPostLoginRedirectPath()} replace />;
-  }
+  const authed = isAuthenticated();
 
   if (!permissible && permissible !== undefined) {
     return <Navigate to="/access-denied" replace />;
   }
 
-  if (!isAuthRoute && !auth_authenticatedUser?.id) {
-    // return <Navigate to="/auth/login?isLoggedOut=true" replace />;
-    return <Navigate to="/auth/login" replace />;
+  if (location.pathname === "/login") {
+    return authed ? <Navigate to={getPostLoginRedirectPath()} replace /> : children;
   }
 
-  if (isAuthRoute && !auth_authenticatedUser?.id) {
-    return children;
+  if (!authed) {
+    return <Navigate to="/login" replace />;
   }
 
-  if (!isAuthRoute && auth_authenticatedUser?.id) {
-    return children;
+  const user = getCurrentUser();
+  const protectedMenu = getMenuByPath(location.pathname);
+
+  if (protectedMenu) {
+    const canAccess = getVisibleMenus(user?.level, [protectedMenu]).length > 0;
+
+    if (!canAccess) {
+      return <Navigate to={getPostLoginRedirectPath()} replace />;
+    }
   }
 
   return children;
