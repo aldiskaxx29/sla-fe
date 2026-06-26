@@ -15,7 +15,7 @@ const renderSplitValue = (value: string) =>
     <span key={`${part}-${index}`} className={index === 0 ? "font-medium" : ""}>
       {part.trim()}
       {index < array.length - 1 ? (
-        <span className="px-1 text-slate-400">|</span>
+        <span className="px-0.5 text-slate-400">|</span>
       ) : null}
     </span>
   ));
@@ -60,10 +60,10 @@ const MttrQualityTable = ({
     "14%",
     "14%",
     "17%",
-    "8%",
-    "8%",
+    "6%",
+    "6%",
     "10%",
-    "12%",
+    "16%",
   ];
   const tableRows = rows ?? [];
   const skeletonRows = Array.from({ length: 4 }, (_, index) => index);
@@ -112,7 +112,7 @@ const MttrQualityTable = ({
         <Button
           type="link"
           icon={<DownloadOutlined />}
-          className="ms-auto"
+          className="daily-monitoring-export-controls ms-auto"
           loading={exporting}
           onClick={() => {
             void exportSummaryRows();
@@ -254,11 +254,11 @@ const MttrQualityTable = ({
                         </td>
                         <td className="border border-[#D8DEE6] px-4 py-3">
                           <div className="flex h-full items-center justify-center">
-                            <div className="dm-badge inline-flex items-center gap-3 rounded-full px-4 py-2 text-[22px] font-semibold leading-none">
+                            <div className="dm-badge dm-badge-ach inline-flex max-w-full items-center justify-center gap-1 whitespace-nowrap rounded-full px-1 py-2 text-[22px] font-semibold leading-none">
                               <span
-                                className={`block aspect-square h-4 w-4 shrink-0 rounded-full ${getTrafficLightClass(row.achLevel)}`}
+                                className={`block aspect-square h-3 w-3 shrink-0 rounded-full ${getTrafficLightClass(row.achLevel)}`}
                               ></span>
-                              <span className="flex items-center">
+                              <span className="flex items-center whitespace-nowrap">
                                 {renderSplitValue(row.achTaPst)}
                               </span>
                             </div>

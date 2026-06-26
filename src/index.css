@@ -98,17 +98,35 @@ gap: 24;
 }
 
 .daily-monitoring-export-root[data-export-mode="true"] {
+  font-family: "Aptos", "Aptos Display", "Segoe UI", system-ui, -apple-system,
+    sans-serif !important;
   --dm-page-title-size: 4.5rem;
   --dm-page-title-line-height: 1;
   --dm-page-subtitle-size: 1.875rem;
   --dm-section-title-size: 3rem;
-  --dm-table-body-size: 1.625rem;
+  --dm-table-body-size: 1.875rem;
   --dm-table-head-size: 1.5rem;
   --dm-table-head-main-size: 1.5rem;
-  --dm-table-head-compact-size: 1.125rem;
+  --dm-table-head-compact-size: 1.375rem;
   --dm-table-head-sub-size: 1.5rem;
   --dm-table-badge-size: 1.375rem;
   --dm-notes-size: 2rem;
+}
+
+/* Padatkan jarak antar sel saat export (padding lebih kecil),
+   sekaligus beri ruang horizontal supaya teks tidak melebihi kolom. */
+.daily-monitoring-export-root[data-export-mode="true"] .daily-monitoring-table th,
+.daily-monitoring-export-root[data-export-mode="true"] .daily-monitoring-table td {
+  padding-top: 0.3rem !important;
+  padding-bottom: 0.3rem !important;
+  padding-left: 0.45rem !important;
+  padding-right: 0.45rem !important;
+  line-height: 1.1 !important;
+}
+
+.daily-monitoring-export-root[data-export-mode="true"] .daily-monitoring-table td {
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .daily-monitoring-export-root[data-export-mode="true"][data-split-mode="true"] .daily-monitoring-hide-on-split-export {
@@ -163,9 +181,17 @@ gap: 24;
   font-size: var(--dm-table-badge-size) !important;
 }
 
-.daily-monitoring-export-root[data-export-mode="true"] .daily-monitoring-not-clear-button {
-  font-size: inherit !important;
-  line-height: inherit !important;
+/* Badge Ach | TA | PST: paksa satu baris & sedikit lebih kecil saat export
+   supaya muat di kolomnya tanpa wrap/overlap. */
+.daily-monitoring-export-root[data-export-mode="true"] .dm-badge-ach {
+  font-size: 1.5rem !important;
+  white-space: nowrap !important;
+}
+
+.daily-monitoring-export-root[data-export-mode="true"] .daily-monitoring-not-clear-button,
+.daily-monitoring-export-root[data-export-mode="true"] .daily-monitoring-not-clear-button span {
+  font-size: var(--dm-table-body-size) !important;
+  line-height: 1.1 !important;
 }
 
 .daily-monitoring-notes {
