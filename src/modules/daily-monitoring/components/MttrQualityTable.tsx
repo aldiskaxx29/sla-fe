@@ -124,7 +124,7 @@ const MttrQualityTable = ({
       </div>
 
       <div>
-        <table className="daily-monitoring-table w-full border-collapse table-fixed text-center text-[26px] lg:text-[28px]">
+        <table className="daily-monitoring-table dm-mttrq-table w-full border-collapse table-fixed text-center text-[26px] lg:text-[28px]">
           <colgroup>
             {colWidths.map((width, index) => (
               <col key={index} style={{ width }} />
@@ -231,7 +231,7 @@ const MttrQualityTable = ({
                             <td className="border border-[#D8DEE6] px-4 py-3 font-semibold text-slate-800">
                               {row.area}
                             </td>
-                            <td className="border border-[#D8DEE6] px-4 py-3 text-slate-700">
+                            <td className="dm-reg-cell border border-[#D8DEE6] px-4 py-3 text-slate-700">
                               {row.reg}
                             </td>
                           </>
@@ -253,12 +253,12 @@ const MttrQualityTable = ({
                           {row.doneTaPst}
                         </td>
                         <td className="border border-[#D8DEE6] px-4 py-3">
-                          <div className="flex h-full items-center justify-center">
+                          <div className="dm-ach-cell flex h-full items-center justify-center">
                             <div className="dm-badge dm-badge-ach inline-flex max-w-full items-center justify-center gap-1 whitespace-nowrap rounded-full px-1 py-2 text-[22px] font-semibold leading-none">
                               <span
-                                className={`block aspect-square h-3 w-3 shrink-0 rounded-full ${getTrafficLightClass(row.achLevel)}`}
+                                className={`dm-ach-bullet block aspect-square h-3 w-3 shrink-0 rounded-full ${getTrafficLightClass(row.achLevel)}`}
                               ></span>
-                              <span className="flex items-center whitespace-nowrap">
+                              <span className="dm-ach-value flex items-center whitespace-nowrap">
                                 {renderSplitValue(row.achTaPst)}
                               </span>
                             </div>

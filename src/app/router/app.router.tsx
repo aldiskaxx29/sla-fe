@@ -25,6 +25,15 @@ const useAppRouter = (): RouteObject[] => {
           ),
         },
         {
+          path: "executive",
+          element: (
+            <Navigate
+              to={isAuthenticated() ? getPostLoginRedirectPath() : "/login"}
+              replace
+            />
+          ),
+        },
+        {
           path: "access-denied",
           // element: <AppAccessDenied />,
         },

@@ -53,14 +53,6 @@ export const NETWORK_OPTIONS: MenuOption[] = [
 
 export const MENU_CONFIG: MenuConfigItem[] = [
   {
-    key: "executive",
-    label: "Executive Summary",
-    path: "executive",
-    type: "button",
-    activePaths: ["executive"],
-    allowedRoles: ALL_MAIN_MENU_ROLES,
-  },
-  {
     key: "monday",
     label: "Monday Monitoring",
     path: "monday",

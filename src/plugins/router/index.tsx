@@ -9,7 +9,6 @@ import { useMondayRouter } from "@/modules/monday/router/monday.router";
 import { useDailyMonitoringRouter } from "@/modules/daily-monitoring/router/dailyMonitoring.router";
 // import { useQualityHealthinessRouter } from "@/modules/quality-healthiness/router/quality-healthiness.router";
 import { useOneRouter } from "@/modules/one/router/one.router";
-import { useExecutiveRouter } from "@/modules/executive/router/executive.router";
 import { useELibraryRouter } from "@/modules/elibrary/router/elibrary.router";
 import { useNetworkRouter } from "@/modules/network/router/network.router";
 import { useTicketRouter } from "@/modules/ticket/router/ticket.router";
@@ -30,7 +29,6 @@ const useRouter = () => {
   const monday = useMondayRouter();
   const dailyMonitoring = useDailyMonitoringRouter();
   // const qualityHealthiness = useQualityHealthinessRouter();
-  const executive = useExecutiveRouter();
   const elibrary = useELibraryRouter();
   const network = useNetworkRouter();
   const one = useOneRouter();
@@ -71,7 +69,6 @@ const useRouter = () => {
             ...monday,
             ...dailyMonitoring,
             ...one,
-            ...executive,
             ...elibrary,
             ...network,
             ...ticket,

@@ -325,7 +325,10 @@ const PacketLossTable = ({
                               )
                             }
                             className="daily-monitoring-not-clear-button h-auto p-0 text-slate-700 hover:text-blue-600"
-                            style={{ fontSize: "inherit", lineHeight: "inherit" }}
+                            style={{
+                              fontSize: "inherit",
+                              lineHeight: "inherit",
+                            }}
                             onClick={(event) => {
                               event.preventDefault();
                               event.stopPropagation();
@@ -344,9 +347,9 @@ const PacketLossTable = ({
                         )}
                       </td>
                       <td className="border border-[#D8DEE6] px-4 py-3">
-                        <div className="flex h-full items-center justify-center">
+                        <div className="dm-pl-ach-cell flex h-full items-center justify-center">
                           <span
-                            className={`dm-badge inline-flex min-w-[104px] items-center justify-center rounded-full px-3.5 py-2 font-bold leading-none`}
+                            className={`dm-badge dm-pl-ach-badge inline-flex min-w-[104px] items-center justify-center rounded-full px-3.5 py-2 font-bold leading-none`}
                           >
                             <span
                               className={`mr-2 block aspect-square h-4 w-4 shrink-0 rounded-full ${getTrafficLightClass(row.achLevel)}`}
@@ -370,7 +373,7 @@ const PacketLossTable = ({
           *Pembaruan Data Weekly Setiap Hari Kamis
         </p>
         <p>
-          Sumber Data:{" "}
+          <p className="font-semibold text-slate-700">Sumber Data:</p>
           <a
             href="https://qosmo.telkom.co.id/daily-monitoring"
             target="_blank"

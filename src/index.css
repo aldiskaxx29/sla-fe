@@ -184,7 +184,50 @@ gap: 24;
 /* Badge Ach | TA | PST: paksa satu baris & sedikit lebih kecil saat export
    supaya muat di kolomnya tanpa wrap/overlap. */
 .daily-monitoring-export-root[data-export-mode="true"] .dm-badge-ach {
-  font-size: 1.5rem !important;
+  font-size: 2rem !important;
+  white-space: nowrap !important;
+  gap: 0.6rem !important;
+}
+
+/* Saat export, bullet indikator pada kolom Ach | TA | PST dibuat rata kiri. */
+.daily-monitoring-export-root[data-export-mode="true"] .dm-ach-cell {
+  justify-content: flex-start !important;
+}
+
+.daily-monitoring-export-root[data-export-mode="true"] .dm-badge-ach {
+  justify-content: flex-start !important;
+}
+
+/* Bullet indikator dibesarkan saat export. */
+.daily-monitoring-export-root[data-export-mode="true"] .dm-ach-bullet {
+  height: 1.1rem !important;
+  width: 1.1rem !important;
+}
+
+/* Kolom Reg dibuat rata kiri hanya saat export. */
+.daily-monitoring-export-root[data-export-mode="true"] .dm-reg-cell {
+  text-align: left !important;
+}
+
+/* Saat export: padatkan kolom Area (col ke-2) supaya kolom
+   Ach | TA | PST (col ke-9) bisa lebih luas. */
+.daily-monitoring-export-root[data-export-mode="true"] .dm-mttrq-table col:nth-child(2) {
+  width: 9% !important;
+}
+
+.daily-monitoring-export-root[data-export-mode="true"] .dm-mttrq-table col:nth-child(9) {
+  width: 19% !important;
+}
+
+/* Kolom Ach pada tabel Packet Loss: bullet rata kiri hanya saat export. */
+.daily-monitoring-export-root[data-export-mode="true"] .dm-pl-ach-cell,
+.daily-monitoring-export-root[data-export-mode="true"] .dm-pl-ach-badge {
+  justify-content: flex-start !important;
+}
+
+/* Kolom Ach pada tabel Packet Loss: font diperbesar saat export. */
+.daily-monitoring-export-root[data-export-mode="true"] .dm-pl-ach-badge {
+  font-size: 1.75rem !important;
   white-space: nowrap !important;
 }
 
