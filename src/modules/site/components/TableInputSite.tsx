@@ -15,6 +15,7 @@ import { useSite } from "../hooks/site.hooks";
 import { toast } from "react-toastify";
 import Highlighter from "react-highlight-words";
 import { FilterDropdownProps } from "antd/es/table/interface";
+import type { Key } from "react";
 
 const { Column, ColumnGroup } = Table;
 
@@ -29,6 +30,8 @@ interface TableHistoryProps {
   setTrigger: React.Dispatch<React.SetStateAction<number>>;
   pagination;
   setPagination: React.Dispatch<any>;
+  regionFilters: Key[];
+  setRegionFilters: React.Dispatch<React.SetStateAction<Key[]>>;
 }
 
 const TableInputSite: React.FC<TableHistoryProps> = ({
@@ -42,6 +45,8 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
   setTrigger,
   pagination,
   setPagination,
+  regionFilters,
+  setRegionFilters,
 }) => {
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -258,7 +263,10 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
         ],
         filterSearch: true,
         filterMultiple: true,
-        onFilter: (value, record) => record.region_tsel === value,
+        filteredValue: regionFilters,
+        onFilter: (value, record) =>
+          Boolean((record as { __skeleton?: boolean }).__skeleton) ||
+          record.region_tsel === value,
       },
       { title: "Area", dataIndex: "area", key: "area", search: true },
       {
@@ -444,7 +452,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
         align: "center",
       },
     ],
-    [dynamicKey, dynamicTitle, parameter],
+    [dynamicKey, dynamicTitle, parameter, regionFilters],
   );
 
   const columns2 = useMemo(
@@ -786,7 +794,10 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
               }`,
           )
         }
-        onChange={(pag) => setPagination(pag)}
+        onChange={(pag, filters) => {
+          setPagination(pag);
+          setRegionFilters((filters.region_tsel ?? []) as Key[]);
+        }}
       >
         {columns.map((column, columnIndex) =>
           column.children ? (
@@ -833,6 +844,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
               fixed={column.fixed}
               align={column.align}
               filters={column.filters}
+              filteredValue={column.filteredValue}
               filterSearch={column.filterSearch}
               filterMultiple={column.filterMultiple}
               onFilter={column.onFilter}

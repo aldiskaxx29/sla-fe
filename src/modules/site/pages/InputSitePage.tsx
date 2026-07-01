@@ -3,6 +3,7 @@ import xlxsIcon from "@/assets/file-spreadsheet.svg";
 import { Button, Image, Upload } from "antd";
 import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { Key } from "react";
 import { TableInputSite } from "../components/TableInputSite";
 import { useSite } from "../hooks/site.hooks";
 import {
@@ -19,6 +20,7 @@ const SitePage = () => {
   const [prev, setPrev] = useState("corrective");
   const [loading, setLoading] = useState(false);
   const [parameter, setParameter] = useState("packetloss ran to core");
+  const [regionFilters, setRegionFilters] = useState<Key[]>([]);
   const { getSite } = useSite();
   const [trigger, setTrigger] = useState(0);
   const [siteResponse, setSiteResponse] = useState<Record<string, any> | null>(
@@ -351,8 +353,9 @@ const SitePage = () => {
           year={year}
           setTrigger={setTrigger}
           pagination={pagination}
-          onChange={(pag) => setPagination(pag)}
           setPagination={setPagination}
+          regionFilters={regionFilters}
+          setRegionFilters={setRegionFilters}
         />
       </div>
     </div>
