@@ -16,6 +16,7 @@ import ModalTwoFact from "../ModalTwoFact";
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isOpenTwoFact, setIsOpenTwoFact] = useState(false);
+  const [loginWarning, setLoginWarning] = useState("");
   const [loginData, setLoginData] = useState<{
     user_id: string | number;
     otp_expires_in?: number;
@@ -24,8 +25,24 @@ const LoginPage = () => {
 
   const [login, { isLoading }] = useLoginMutation();
 
+  const getLoginErrorMessage = (err: unknown) => {
+    if (err instanceof Error && err.message) return err.message;
+    if (err && typeof err === "object") {
+      const error = err as {
+        data?: { message?: string };
+        error?: string;
+        message?: string;
+      };
+
+      return error.data?.message || error.message || error.error;
+    }
+
+    return undefined;
+  };
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setLoginWarning("");
     const form = e.currentTarget;
     const formData = new FormData(form);
 
@@ -35,8 +52,10 @@ const LoginPage = () => {
     };
 
     if (!values.email || !values.password) {
+      const warningMessage = "Silahkan masukan NIK dan Password Anda!";
+      setLoginWarning(warningMessage);
       toast.dismiss();
-      toast.warning("Silahkan masukan NIK dan Password Anda!", {
+      toast.warning(warningMessage, {
         position: "top-right",
       });
       return;
@@ -70,16 +89,16 @@ const LoginPage = () => {
         });
         setIsOpenTwoFact(true);
       } else {
-        throw new Error(resp?.message || "Email atau password salah.");
+        throw new Error(resp?.message || "NIK atau password salah.");
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       const msg =
-        err?.data?.message ||
-        err?.message ||
-        "Login gagal. Periksa kembali NIK dan password Anda.";
+        getLoginErrorMessage(err) ||
+        "NIK atau password salah. Periksa kembali NIK dan password Anda.";
 
+      setLoginWarning(msg);
       toast.dismiss();
-      toast.error(msg, { position: "top-right" });
+      toast.warning(msg, { position: "top-right" });
       setIsOpenTwoFact(false);
     }
   };
@@ -106,6 +125,12 @@ const LoginPage = () => {
 
       {/* Login Form */}
       <form onSubmit={handleSubmit} autoComplete="off" className="space-y-4">
+        {loginWarning && (
+          <div className="rounded-lg border border-yellow-300 bg-yellow-50 px-4 py-3 text-sm font-medium text-yellow-800">
+            {loginWarning}
+          </div>
+        )}
+
         <div className="flex flex-col mb-4">
           <label htmlFor="email" className="text-gray-700 font-medium mb-1">
             Nik

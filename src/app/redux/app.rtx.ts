@@ -122,6 +122,15 @@ const baseQueryWithReauth: BaseQueryFn<
           ...args,
           url: args.url,
         };
+  const requestUrl =
+    typeof resolvedArgs === "string" ? resolvedArgs : resolvedArgs.url;
+  const isAuthEndpoint = [
+    "login",
+    "login/verify-otp-email",
+    "login/2fa",
+    "login/resend-otp-email",
+    "reset2fa",
+  ].includes(requestUrl.replace(/^\/+/, ""));
 
   const result = await fetchBaseQuery({
     baseUrl: resolveBaseUrl(import.meta.env.VITE_APP_BASE_URL),
@@ -149,7 +158,7 @@ const baseQueryWithReauth: BaseQueryFn<
   }
 
   // Jika token invalid atau session expired
-  if (result.error?.status === 401) {
+  if (result.error?.status === 401 && !isAuthEndpoint) {
     api.dispatch(authLogout());
   }
 
