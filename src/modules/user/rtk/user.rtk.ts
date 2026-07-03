@@ -24,6 +24,19 @@ export const userApi = emptySplitApi.injectEndpoints({
       },
       keepUnusedDataFor: 0,
     }),
+    getOneUser: builder.query({
+      query: (payload) => {
+        return {
+          method: "GET",
+          url: "/users/getOne",
+          params: payload,
+        };
+      },
+      transformResponse: (response: unknown) => {
+        return response;
+      },
+      keepUnusedDataFor: 0,
+    }),
     deleteUser: builder.mutation({
       query: (payload) => {
         return {
@@ -38,6 +51,7 @@ export const userApi = emptySplitApi.injectEndpoints({
 
 export const {
   useLazyGetAllUser_fetchDataQuery,
+  useGetOneUserQuery,
   useCreateUserMutation,
   useDeleteUserMutation,
 } = userApi;

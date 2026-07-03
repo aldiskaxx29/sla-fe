@@ -3,6 +3,7 @@ import { emptySplitApi } from "@/app/redux/app.rtx";
 import {
   IAuthLoginRequest,
   IAuthLoginResponse,
+  IAuthAuthenticatedUser,
   IAuthVerifyOtpEmailRequest,
   IAuthLogin2faRequest,
   IAuthResendOtpEmailRequest,
@@ -25,6 +26,13 @@ const clearAuthData = () => {
 export const isAuthenticated = (): boolean => {
   return !!localStorage.getItem("access_token");
 };
+
+const hasValue = (value: unknown) =>
+  value !== null && value !== undefined && value !== "";
+
+export const isUserAccessPending = (
+  user?: Partial<Pick<IAuthAuthenticatedUser, "level" | "level_user">> | null
+) => !hasValue(user?.level) || !hasValue(user?.level_user);
 
 // export const getPostLoginRedirectPath = (): string => {
 //   try {
@@ -49,6 +57,8 @@ export const getPostLoginRedirectPath = (): string => {
     if (!userData) return "/msa";
 
     const parsedData = JSON.parse(userData);
+    if (isUserAccessPending(parsedData)) return "/confirm";
+
     const firstVisibleMenu = getVisibleMenus(parsedData?.level)[0];
 
     return firstVisibleMenu ? getMenuRedirectPath(firstVisibleMenu) : "/msa";

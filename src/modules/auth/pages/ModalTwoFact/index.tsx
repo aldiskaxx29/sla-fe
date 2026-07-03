@@ -1,5 +1,7 @@
 import { Button, Form, Image, Input, Modal } from "antd";
 import {
+  getPostLoginRedirectPath,
+  isUserAccessPending,
   useLogin_2faMutation,
   useResendOtpEmailMutation,
   useResetTokenMutation,
@@ -9,6 +11,7 @@ import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { authSetAuthenticatedUser } from "../../redux/auth.slice";
 import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 interface LoginData {
   user_id: string | number;
@@ -34,6 +37,7 @@ type StepType = "EMAIL_OTP" | "SCAN_QR" | "AUTHENTICATOR" | "EMAIL_RESET";
 const ModalTwoFact = ({ open, loginData, onCancel }: ModalTwoFactProps) => {
   const [form] = Form.useForm();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const [login_2fa, { isLoading: isLoading2fa }] = useLogin_2faMutation();
   const [verifyOtpEmail, { isLoading: isLoadingVerify }] = useVerifyOtpEmailMutation();
@@ -43,6 +47,20 @@ const ModalTwoFact = ({ open, loginData, onCancel }: ModalTwoFactProps) => {
   const [step, setStep] = useState<StepType>("EMAIL_OTP");
   const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
   const [encryptedUserId, setEncryptedUserId] = useState<string | null>(null);
+
+  const handleLoginSuccess = useCallback(
+    (resp) => {
+      toast.success(resp.message || "Login berhasil!");
+      if (resp.user) {
+        dispatch(authSetAuthenticatedUser({ ...resp.user, access_token: resp.token }));
+      }
+
+      navigate(isUserAccessPending(resp.user) ? "/confirm" : getPostLoginRedirectPath(), {
+        replace: true,
+      });
+    },
+    [dispatch, navigate],
+  );
 
   // Reset state saat modal dibuka
   useEffect(() => {
@@ -98,11 +116,7 @@ const ModalTwoFact = ({ open, loginData, onCancel }: ModalTwoFactProps) => {
         }).unwrap();
 
         if (resp?.status && resp?.token) {
-          toast.success(resp.message || "Login berhasil!");
-          if (resp.user) {
-            dispatch(authSetAuthenticatedUser({ ...resp.user, access_token: resp.token }));
-          }
-          window.location.reload();
+          handleLoginSuccess(resp);
         }
       } else if (step === "AUTHENTICATOR") {
         // Step 3: Verifikasi kode Authenticator → POST /login/2fa
@@ -112,11 +126,7 @@ const ModalTwoFact = ({ open, loginData, onCancel }: ModalTwoFactProps) => {
         }).unwrap();
 
         if (resp?.status && resp?.token) {
-          toast.success(resp.message || "Login berhasil!");
-          if (resp.user) {
-            dispatch(authSetAuthenticatedUser({ ...resp.user, access_token: resp.token }));
-          }
-          window.location.reload();
+          handleLoginSuccess(resp);
         }
       } else if (step === "EMAIL_RESET") {
         // Verify OTP yang dikirim ke email setelah reset → POST /login/verify-otp-email
@@ -143,7 +153,7 @@ const ModalTwoFact = ({ open, loginData, onCancel }: ModalTwoFactProps) => {
           : "Kode Authenticator salah. Periksa kembali kode Anda.");
       toast.error(msg);
     }
-  }, [form, login_2fa, verifyOtpEmail, step, loginData, encryptedUserId, dispatch]);
+  }, [form, login_2fa, verifyOtpEmail, step, loginData, encryptedUserId, handleLoginSuccess]);
 
   const handleResendOtp = async () => {
     if (!loginData?.user_id) return;

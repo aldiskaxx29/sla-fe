@@ -50,6 +50,8 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
 }) => {
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
+  const [rcaFilters, setRcaFilters] = useState<Key[]>([]);
+  const [columnFilters, setColumnFilters] = useState<Record<string, Key[]>>({});
   const searchInput = useRef<InputRef>(null);
 
   const formatTableValue = (value: unknown): string | number => {
@@ -62,6 +64,34 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
 
   const renderTableValue = (value: unknown) => formatTableValue(value);
 
+  const normalizeRcaFilterValue = (value: unknown) =>
+    String(value ?? "")
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, " ")
+      .replace("majeur", "major");
+
+  const isSameFilter = (first: Key[], second: Key[]) =>
+    first.length === second.length &&
+    first.every((value, index) => value === second[index]);
+
+  const getColumnFilterValue = (dataIndex: string) =>
+    columnFilters[dataIndex] ?? [];
+
+  const setColumnFilterValue = (dataIndex: string, values: Key[]) => {
+    setColumnFilters((current) => {
+      if (values.length === 0) {
+        const { [dataIndex]: _removed, ...rest } = current;
+        return rest;
+      }
+
+      return {
+        ...current,
+        [dataIndex]: values,
+      };
+    });
+  };
+
   const handleSearch = (
     selectedKeys: string[],
     confirm: FilterDropdownProps["confirm"],
@@ -70,6 +100,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
+    setColumnFilterValue(dataIndex, selectedKeys as Key[]);
   };
 
   const handleReset = (
@@ -80,7 +111,8 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
   ) => {
     clearFilters();
     setSearchText("");
-    handleSearch(selectedKeys as string[], confirm, dataIndex);
+    setColumnFilterValue(dataIndex, []);
+    confirm();
   };
 
   const snakeToPascal_Mixins = (snakeCaseStr) => {
@@ -96,6 +128,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
   };
 
   const getColumnSearchProps = (dataIndex) => ({
+    filteredValue: getColumnFilterValue(dataIndex),
     filterDropdown: ({
       setSelectedKeys,
       selectedKeys,
@@ -296,7 +329,11 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
               ],
               filterSearch: true,
               filterMultiple: true,
-              onFilter: (value, record) => record.status_saat_ini === value,
+              filteredValue: getColumnFilterValue("status_saat_ini"),
+              onFilter: (value, record) =>
+                Boolean((record as { __skeleton?: boolean }).__skeleton) ||
+                String(record.status_saat_ini ?? "").trim() ===
+                  String(value ?? "").trim(),
             },
           ]
         : []),
@@ -304,6 +341,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
         title: `${dynamicTitle} Status`,
         key: `${dynamicKey}_status`,
         dataIndex: `${dynamicKey}_status`,
+        search: true,
       },
       ...(dynamicKey === "packetloss"
         ? [
@@ -323,7 +361,11 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
               ],
               filterSearch: true,
               filterMultiple: true,
-              onFilter: (value, record) => record.distribution_pl === value,
+              filteredValue: getColumnFilterValue("distribution_pl"),
+              onFilter: (value, record) =>
+                Boolean((record as { __skeleton?: boolean }).__skeleton) ||
+                String(record.distribution_pl ?? "").trim() ===
+                  String(value ?? "").trim(),
             },
           ]
         : []),
@@ -395,6 +437,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
           { text: "Cap OLT", value: "Cap OLT" },
           { text: "Warranty Redeploy", value: "Warranty Redeploy" },
           { text: "Obstacle", value: "Obstacle" },
+          { text: "Force Majeur", value: "Force Majeur" },
           { text: "ISR Segel Balmon", value: "ISR Segel Balmon" },
           {
             text: "ISR Interference Internal",
@@ -408,7 +451,10 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
         ],
         filterSearch: true,
         filterMultiple: true,
-        onFilter: (value, record) => record.RCA === value,
+        filteredValue: rcaFilters,
+        onFilter: (value, record) =>
+          Boolean((record as { __skeleton?: boolean }).__skeleton) ||
+          normalizeRcaFilterValue(record.RCA) === normalizeRcaFilterValue(value),
       },
       {
         title: "Detail RCA",
@@ -452,7 +498,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
         align: "center",
       },
     ],
-    [dynamicKey, dynamicTitle, parameter, regionFilters],
+    [columnFilters, dynamicKey, dynamicTitle, parameter, rcaFilters, regionFilters],
   );
 
   const columns2 = useMemo(
@@ -505,7 +551,11 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
               ],
               filterSearch: true,
               filterMultiple: true,
-              onFilter: (value, record) => record.status_saat_ini === value,
+              filteredValue: getColumnFilterValue("status_saat_ini"),
+              onFilter: (value, record) =>
+                Boolean((record as { __skeleton?: boolean }).__skeleton) ||
+                String(record.status_saat_ini ?? "").trim() ===
+                  String(value ?? "").trim(),
             },
           ]
         : []),
@@ -586,7 +636,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
         align: "center",
       },
     ],
-    [parameter],
+    [columnFilters, parameter],
   );
 
   const { saveSite, getSite } = useSite();
@@ -767,12 +817,65 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
       )}`,
     }));
   }, [isLoading, skeletonRows, tableData, tableKey]);
+  const filteredTableData = useMemo(() => {
+    if (isLoading) return resolvedTableData;
+
+    const activeFilters: Record<string, Key[]> = {
+      ...columnFilters,
+      ...(regionFilters.length ? { region_tsel: regionFilters } : {}),
+      ...(rcaFilters.length ? { RCA: rcaFilters } : {}),
+    };
+    const filterEntries = Object.entries(activeFilters).filter(
+      ([, values]) => values.length > 0,
+    );
+
+    if (filterEntries.length === 0) return resolvedTableData;
+
+    return resolvedTableData.filter((record) => {
+      if (isSkeletonRow(record)) return true;
+
+      return filterEntries.every(([dataIndex, values]) => {
+        const recordValue = record[dataIndex];
+
+        if (dataIndex === "RCA") {
+          return values.some(
+            (value) =>
+              normalizeRcaFilterValue(recordValue) ===
+              normalizeRcaFilterValue(value),
+          );
+        }
+
+        if (
+          ["region_tsel", "status_saat_ini", "distribution_pl"].includes(
+            dataIndex,
+          )
+        ) {
+          return values.some(
+            (value) =>
+              String(recordValue ?? "").trim() === String(value ?? "").trim(),
+          );
+        }
+
+        return values.some((value) =>
+          String(recordValue ?? "")
+            .toLowerCase()
+            .includes(String(value ?? "").toLowerCase()),
+        );
+      });
+    });
+  }, [
+    columnFilters,
+    isLoading,
+    rcaFilters,
+    regionFilters,
+    resolvedTableData,
+  ]);
 
   return (
     <div key={tableKey} className="mt-8 min-w-max">
       <Table
         key={tableKey}
-        dataSource={resolvedTableData}
+        dataSource={filteredTableData}
         bordered
         className="rounded-xl"
         scroll={{ x: "max-content" }}
@@ -795,8 +898,26 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
           )
         }
         onChange={(pag, filters) => {
-          setPagination(pag);
-          setRegionFilters((filters.region_tsel ?? []) as Key[]);
+          const nextRegionFilters = (filters.region_tsel ?? []) as Key[];
+          const nextRcaFilters = (filters.RCA ?? []) as Key[];
+          const nextColumnFilters = Object.fromEntries(
+            Object.entries(filters)
+              .filter(([key]) => key !== "region_tsel" && key !== "RCA")
+              .map(([key, value]) => [key, (value ?? []) as Key[]])
+              .filter(([, value]) => value.length > 0),
+          );
+          const filterChanged =
+            !isSameFilter(nextRegionFilters, regionFilters) ||
+            !isSameFilter(nextRcaFilters, rcaFilters) ||
+            JSON.stringify(nextColumnFilters) !== JSON.stringify(columnFilters);
+
+          setPagination({
+            ...pag,
+            current: filterChanged ? 1 : pag.current,
+          });
+          setRegionFilters(nextRegionFilters);
+          setRcaFilters(nextRcaFilters);
+          setColumnFilters(nextColumnFilters);
         }}
       >
         {columns.map((column, columnIndex) =>

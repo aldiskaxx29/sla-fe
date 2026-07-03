@@ -1,3 +1,4 @@
+import { lazy } from "react";
 import { useRoutes } from "react-router-dom";
 
 import { AppLayoutEmpty, AppLayoutAuth, AppLayoutDefault } from "@/app/layout";
@@ -20,6 +21,8 @@ import { useProfileRouter } from "@/modules/profile/router/profile.router";
 import { useAccessPredictionRouter } from "@/modules/vaccess/router/prediction.router";
 import { useResumeRCARouter } from "@/modules/vaccess/router/resumerca.router";
 import { useTutelaRouter } from "@/modules/tutela/router/tutela.router";
+
+const AuthConfirm = lazy(() => import("@/modules/auth/pages/ConfirmPage"));
 
 const useRouter = () => {
   const app = useAppRouter();
@@ -58,6 +61,20 @@ const useRouter = () => {
       path: "",
       element: <AuthRouteGuard  requireAuth={true}/>,
       children: [
+        {
+          path: "",
+          element: <AppLayoutAuth />,
+          children: [
+            {
+              path: "confirm",
+              element: <AuthConfirm />,
+            },
+            {
+              path: "confirmasi",
+              element: <AuthConfirm />,
+            },
+          ],
+        },
         {
           path: "",
           element: <AppLayoutDefault />,

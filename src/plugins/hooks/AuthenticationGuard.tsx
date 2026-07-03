@@ -1,6 +1,8 @@
 import {
+  getCurrentUser,
   getPostLoginRedirectPath,
   isAuthenticated,
+  isUserAccessPending,
 } from "@/modules/auth/rtk/auth.rtk";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 
@@ -21,6 +23,20 @@ export const AuthRouteGuard: React.FC<GuardProps> = ({
     return (
       <Navigate
         to={redirectTo || "/login"}
+        state={{ from: location }}
+        replace
+      />
+    );
+  }
+  if (
+    requireAuth &&
+    authed &&
+    ["/confirm", "/confirmasi"].includes(location.pathname) &&
+    !isUserAccessPending(getCurrentUser())
+  ) {
+    return (
+      <Navigate
+        to={redirectTo || getPostLoginRedirectPath()}
         state={{ from: location }}
         replace
       />
