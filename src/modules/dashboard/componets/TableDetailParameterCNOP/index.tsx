@@ -8,6 +8,17 @@ import { ModalDetail } from "../ModalDetail";
 
 const { Column, ColumnGroup } = Table;
 
+interface TableColumn {
+  title?: string;
+  dataIndex?: string;
+  key?: string;
+  fixed?: "left" | "right";
+  align?: "left" | "right" | "center";
+  width?: string;
+  children?: TableColumn[];
+  onCell?: (record: any, index?: number) => Record<string, unknown>;
+}
+
 interface TableDetailParameterCNOPProps {
   data: Record<string, unknown>[];
   loadingMainData?: boolean;
@@ -20,18 +31,18 @@ const TableDetailParameterCNOP: React.FC<TableDetailParameterCNOPProps> = ({
   loadingMainData,
   filterBy,
 }) => {
-  const [expandedRowKey, setExpandedRowKeys] = useState<number[] | string[]>(
+  const [expandedRowKey, setExpandedRowKeys] = useState<(number | string)[]>(
     []
   );
 
-  const [injectedData, setInjectedData] = useState([]);
+  const [injectedData, setInjectedData] = useState<Record<string, unknown>>({});
   const [dataSource, setDataSource] = useState(data);
   const { getWitel, getModalDetail, dataModalDetail } = useDashboard();
   const { detailParameter } = useParams();
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
-  const columns = useMemo(() => {
+  const columns = useMemo<TableColumn[]>(() => {
     if (!dataSource) return [];
     // Extract keys dynamically
     // Extract keys dynamically
@@ -61,7 +72,7 @@ const TableDetailParameterCNOP: React.FC<TableDetailParameterCNOPProps> = ({
     };
 
     // Static columns (always shown)
-    const baseColumns = [
+    const baseColumns: TableColumn[] = [
       {
         title: "Parameter",
         dataIndex: "parameter",
@@ -81,8 +92,8 @@ const TableDetailParameterCNOP: React.FC<TableDetailParameterCNOPProps> = ({
       },
     ];
 
-    const getCellStyles = (data) => {
-      const extractNumber = (str) => {
+    const getCellStyles = (data: Record<string, unknown>) => {
+      const extractNumber = (str: unknown) => {
         if (!str) return NaN;
         const match = str.toString().match(/^\d+/);
         return match ? Number(match.input) : NaN;
@@ -125,7 +136,7 @@ const TableDetailParameterCNOP: React.FC<TableDetailParameterCNOPProps> = ({
       return cellStyles;
     };
 
-    const getOnCell = (dataIndex) => (record, rowIndex) => {
+    const getOnCell = (dataIndex: string) => (record: Record<string, unknown>) => {
       const cellStyles = getCellStyles(record);
       const achievementKeys = Object.keys(record).filter((key) =>
         key.startsWith("ach_")
@@ -156,7 +167,7 @@ const TableDetailParameterCNOP: React.FC<TableDetailParameterCNOPProps> = ({
               dataIndex: weekKey,
               onCell: getOnCell(weekKey),
               key: weekKey,
-              align: "center",
+              align: "center" as const,
             };
           }),
           {
@@ -164,7 +175,7 @@ const TableDetailParameterCNOP: React.FC<TableDetailParameterCNOPProps> = ({
             dataIndex: `ach_fm_${monthNum}`,
             key: `ach_fm_${monthNum}`,
             onCell: getOnCell(`ach_fm_${monthNum}`),
-            align: "center",
+            align: "center" as const,
           },
         ],
       };
@@ -186,7 +197,7 @@ const TableDetailParameterCNOP: React.FC<TableDetailParameterCNOPProps> = ({
 
   const dataMapping = useMemo(() => {
     let coreIndex = 1;
-    if (!dataSource) return;
+    if (!dataSource) return [];
     const mappedData = dataSource.map((item, index) => {
       return {
         ...item,
@@ -203,7 +214,7 @@ const TableDetailParameterCNOP: React.FC<TableDetailParameterCNOPProps> = ({
         data.coreIndex == injectedData?.coreIndex &&
         data.parameter == injectedData?.parameter
       ) {
-        const mappingChildren = injectedData.children.map(
+        const mappingChildren = (injectedData.children as Record<string, unknown>[]).map(
           (childData, index) => {
             return {
               ...childData,
@@ -235,7 +246,7 @@ const TableDetailParameterCNOP: React.FC<TableDetailParameterCNOPProps> = ({
     return mappingData2;
   }, [dataSource, injectedData]);
 
-  const fetchWitelData = async (record) => {
+  const fetchWitelData = async (record: Record<string, unknown>) => {
     try {
       const res = await getWitel({
         query: {
@@ -245,7 +256,7 @@ const TableDetailParameterCNOP: React.FC<TableDetailParameterCNOPProps> = ({
           filter: filterBy,
           type: "cnop",
         },
-      }).unwrap();
+      }).unwrap() as { data?: Record<string, unknown>[] };
       const findData = dataMapping?.find(
         (data) =>
           data.coreIndex == record.coreIndex &&
@@ -265,9 +276,9 @@ const TableDetailParameterCNOP: React.FC<TableDetailParameterCNOPProps> = ({
   };
 
   const handleExpandCollaps = useCallback(
-    async (record) => {
-      if (record.is_parent && record.index > 0) {
-        const key = record.identIndex;
+    async (record: Record<string, unknown>) => {
+      if (record.is_parent && (record.index as number) > 0) {
+        const key = record.identIndex as string | number;
 
         setExpandedRowKeys((prevKeys) => {
           const isExpanded = prevKeys.includes(key);
@@ -281,7 +292,7 @@ const TableDetailParameterCNOP: React.FC<TableDetailParameterCNOPProps> = ({
         const isExpandedNow = expandedRowKey.includes(key);
 
         if (!isExpandedNow) {
-          const success = await fetchWitelData(record);
+          await fetchWitelData(record);
           setDataSource(dataMapping);
         }
       }
@@ -298,7 +309,7 @@ const TableDetailParameterCNOP: React.FC<TableDetailParameterCNOPProps> = ({
       setLoading(true);
       console.log(detailParameter?.includes("%3"));
 
-      const res = await getModalDetail({
+      await getModalDetail({
         query: {
           parameter: detailParameter?.includes("%3")
             ? "pl >5% ran to core"
@@ -448,7 +459,7 @@ const TableDetailParameterCNOP: React.FC<TableDetailParameterCNOPProps> = ({
               })}
               align={column.align}
               fixed={column.fixed}
-              render={(text, record, index) => {
+              render={(text, record) => {
                 if (column.dataIndex?.startsWith("ach")) {
                   const extractNumber = (str) => {
                     if (!str) return NaN;
@@ -493,7 +504,7 @@ const TableDetailParameterCNOP: React.FC<TableDetailParameterCNOPProps> = ({
         )}
       </Table>
       <ModalDetail
-        dataSource={dataModalDetail?.data}
+        dataSource={(dataModalDetail as { data?: Record<string, unknown>[] })?.data ?? []}
         title="Detail CNOP"
         isOpen={isOpen}
         handleCancel={controlModalDetail}

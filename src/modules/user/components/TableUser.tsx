@@ -1,22 +1,33 @@
-import { Button, Table } from "antd";
+import { Button, Input, Table } from "antd";
 
 import type { ColumnsType } from "antd/es/table";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useUser } from "../hooks/user.hooks";
 import ModalDetailUser from "./ModalDetailUser";
 import ModalDeleteUser from "./ModalDeleteUser";
+import ModalEditUser from "./ModalEditUser";
 
 const TableUser = () => {
   const { dataAllUser, getAllUser } = useUser();
   const [openDetail, setOpenDetail] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
+  const [openEdit, setOpenEdit] = useState(false);
   const [dataDetail, setDataDetail] = useState({});
+  const [searchNik, setSearchNik] = useState("");
   const columns: ColumnsType<any> = [
     {
       title: "No",
       dataIndex: "no",
       key: "no",
       render: (text, record, index) => index + 1,
+      onHeaderCell: () => ({
+        className: "!bg-blue-pacific !p-3",
+      }),
+    },
+    {
+      title: "NIK",
+      dataIndex: "nik",
+      key: "nik",
       onHeaderCell: () => ({
         className: "!bg-blue-pacific !p-3",
       }),
@@ -80,6 +91,13 @@ const TableUser = () => {
           </Button>
           <Button
             type="primary"
+            className="!bg-amber-500 !text-white"
+            onClick={() => handleEditClick(record)}
+          >
+            Edit
+          </Button>
+          <Button
+            type="primary"
             className="!bg-red-500 !text-white"
             onClick={() => handleDeleteClick(record)}
           >
@@ -105,6 +123,18 @@ const TableUser = () => {
     setOpenDelete(true);
   };
 
+  const handleEditClick = (record: any) => {
+    // Handle the edit button click here
+    setDataDetail(record);
+    setOpenEdit(true);
+  };
+
+  const handleEditCancel = () => {
+    setOpenEdit(false);
+    setDataDetail({});
+    fetchUser();
+  };
+
   const handleDetailCancel = (isDelete) => {
     setOpenDetail(false);
     setDataDetail({});
@@ -126,11 +156,30 @@ const TableUser = () => {
     // Fetch data here and set it to state if needed
     fetchUser();
   }, []);
+
+  const filteredData = useMemo(() => {
+    const data = dataAllUser?.data ?? [];
+    const keyword = searchNik.trim().toLowerCase();
+    if (!keyword) return data;
+    return data.filter((item: any) =>
+      String(item?.nik ?? "").toLowerCase().includes(keyword)
+    );
+  }, [dataAllUser, searchNik]);
+
   return (
     <>
+      <div className="mb-4 flex justify-end">
+        <Input.Search
+          allowClear
+          placeholder="Cari berdasarkan NIK"
+          value={searchNik}
+          onChange={(e) => setSearchNik(e.target.value)}
+          className="max-w-xs"
+        />
+      </div>
       <Table
         columns={columns}
-        dataSource={dataAllUser?.data}
+        dataSource={filteredData}
         bordered
         className="rounded-xl"
       ></Table>
@@ -143,6 +192,11 @@ const TableUser = () => {
         open={openDelete}
         data={dataDetail}
         onCancel={() => handleDetailCancel(true)}
+      />
+      <ModalEditUser
+        open={openEdit}
+        data={dataDetail}
+        onCancel={handleEditCancel}
       />
     </>
   );

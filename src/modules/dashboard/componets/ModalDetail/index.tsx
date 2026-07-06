@@ -6,6 +6,16 @@ import { useParams } from "react-router-dom";
 
 const { Column, ColumnGroup } = Table;
 
+interface TableColumn {
+  title?: string;
+  dataIndex?: string;
+  key?: string;
+  fixed?: "left" | "right";
+  align?: "left" | "right" | "center";
+  width?: string;
+  children?: TableColumn[];
+}
+
 interface ModalDetailProps {
   title: string;
   isOpen: boolean;
@@ -21,20 +31,10 @@ const ModalDetail: React.FC<ModalDetailProps> = ({
 }) => {
   const { detailParameter } = useParams();
 
-  const columns = useMemo(() => {
+  const columns = useMemo<TableColumn[]>(() => {
     if (!dataSource) return [];
-    // Extract keys dynamically
-    const sampleRecord = dataSource && dataSource[0];
 
-    const weeklyKeys = Object.keys(sampleRecord).filter((key) =>
-      /^ach_\d+_\d+$/.test(key)
-    );
-    const monthlyKeys = Object.keys(sampleRecord).filter((key) =>
-      /^ach_fm_\d+$/.test(key)
-    );
-
-    // Static columns (always shown)
-    const baseColumns = [
+    const baseColumns: TableColumn[] = [
       { title: "No.", dataIndex: "no", key: "no", fixed: "left" },
       {
         title: "Region",
@@ -61,7 +61,7 @@ const ModalDetail: React.FC<ModalDetailProps> = ({
       },
     ];
 
-    const dynamicColumns = [{}];
+    const dynamicColumns: TableColumn[] = [];
     if (detailParameter?.includes("pl")) {
       dynamicColumns.push({
         title: "Packetloss",

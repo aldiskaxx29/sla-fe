@@ -8,6 +8,17 @@ import arrowTopRight from "@/assets/arrow-up-right.svg";
 
 const { Column, ColumnGroup } = Table;
 
+interface TableColumn {
+  title?: string;
+  dataIndex?: string;
+  key?: string;
+  fixed?: "left" | "right";
+  align?: "left" | "right" | "center";
+  width?: number;
+  children?: TableColumn[];
+  onCell?: (record: any, index?: number) => Record<string, unknown>;
+}
+
 const getCellStyles = (data) => {
   const extractNumber = (str) => {
     if (!str) return NaN;
@@ -44,7 +55,7 @@ const getCellStyles = (data) => {
 };
 
 // Function to categorize data
-const categorizeData = (data) => {
+const categorizeData = (data: Record<string, unknown>[]): TableColumn[] => {
   const sampleRecord = data[1];
 
   // Identify weekly & monthly keys
@@ -56,7 +67,7 @@ const categorizeData = (data) => {
   );
 
   // Map months
-  const monthMapping = {
+  const monthMapping: Record<string, string> = {
     ach_fm_1: "January",
     ach_fm_2: "February",
     ach_fm_3: "March",
@@ -72,7 +83,7 @@ const categorizeData = (data) => {
   };
 
   // Static columns (always shown)
-  const baseColumns = [
+  const baseColumns: TableColumn[] = [
     { title: "No", dataIndex: "no", key: "no", fixed: "left", width: 40 },
     {
       title: "Parameter",
@@ -95,7 +106,7 @@ const categorizeData = (data) => {
     },
   ];
 
-  const getOnCell = (dataIndex) => (record, rowIndex) => {
+  const getOnCell = (dataIndex: string) => (record: Record<string, unknown>) => {
     const cellStyles = getCellStyles(record);
     const achievementKeys = Object.keys(record).filter((key) =>
       key.startsWith("ach_")
@@ -109,7 +120,7 @@ const categorizeData = (data) => {
   };
 
   // Group weekly data under each month
-  const groupedColumns = monthlyKeys.map((monthKey) => {
+  const groupedColumns: TableColumn[] = monthlyKeys.map((monthKey) => {
     const monthNum = parseInt(monthKey.replace("ach_fm_", ""));
     const relatedWeeks = weeklyKeys.filter((weekKey) =>
       weekKey.startsWith(`ach_${monthNum}_`)
@@ -126,7 +137,7 @@ const categorizeData = (data) => {
             dataIndex: weekKey,
             key: weekKey,
             onCell: getOnCell(weekKey),
-            align: "center",
+            align: "center" as const,
           };
         }),
         {
@@ -259,7 +270,7 @@ const TableCNOP = ({ data }) => {
               onHeaderCell={() => ({
                 className: "!bg-blue-pacific",
               })}
-              render={(text, record, index) => {
+              render={(text, record) => {
                 if (column.dataIndex?.startsWith("ach")) {
                   const extractNumber = (str) => {
                     if (!str) return NaN;

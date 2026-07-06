@@ -77,14 +77,15 @@ const PacketLossTable = ({
   };
 
   const downloadBlob = async (url: string, fallbackFileName: string) => {
-    const response = await axios(url, "get", {
+    const response = await axios<{
+      result: Blob;
+      headers?: { "content-disposition"?: string };
+    }>(url, "get", {
       responseType: "blob",
     });
 
-    const blob = response.result as Blob;
-    const disposition = response.headers?.["content-disposition"] as
-      | string
-      | undefined;
+    const blob = response.result;
+    const disposition = response.headers?.["content-disposition"];
     const fileName = getFileNameFromHeaders(disposition) || fallbackFileName;
 
     const objectUrl = URL.createObjectURL(blob);

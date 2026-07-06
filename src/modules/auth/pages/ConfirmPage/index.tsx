@@ -6,6 +6,7 @@ import {
   isUserAccessPending,
   useLogoutMutation,
 } from "../../rtk/auth.rtk";
+import type { IAuthAuthenticatedUser } from "../../types/auth.interface";
 import { useGetOneUserQuery } from "@/modules/user/rtk/user.rtk";
 
 type StoredUser = {
@@ -57,7 +58,7 @@ const ConfirmPage = () => {
 
     localStorage.setItem("user_data", JSON.stringify(nextUser));
 
-    if (!isUserAccessPending(nextUser)) {
+    if (!isUserAccessPending(nextUser as Partial<Pick<IAuthAuthenticatedUser, "level" | "level_user">>)) {
       window.location.href = getPostLoginRedirectPath();
     }
   }, [storedUser, userResponse]);

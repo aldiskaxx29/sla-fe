@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import type { IApiResponseBase } from "@/app/interfaces/app-api.interface";
 import { axios } from "@/plugins/axios";
 
 import {
@@ -242,7 +243,7 @@ type DailyMonitoringPacketLossData = {
 const fetchPacketLossView = async (
   pl?: PacketLossDetailKey
 ): Promise<DailyMonitoringPacketLossView> => {
-  const response = await axios(pl ? PACKET_LOSS_DETAIL_ENDPOINT : PACKET_LOSS_ENDPOINT, "get", {
+  const response = await axios<IApiResponseBase>(pl ? PACKET_LOSS_DETAIL_ENDPOINT : PACKET_LOSS_ENDPOINT, "get", {
     ...(pl ? { params: { pl } } : {}),
   });
 

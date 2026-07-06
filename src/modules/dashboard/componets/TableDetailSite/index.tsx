@@ -3,9 +3,16 @@ import { Table } from "antd";
 
 const { Column } = Table;
 
-// Function to categorize data
-const categorizeData = (data, tipe) => {
-  const baseColumns = [
+interface TableColumn {
+  title?: string;
+  dataIndex?: string;
+  key?: string;
+  width?: number;
+  align?: "left" | "right" | "center";
+}
+
+const categorizeData = (_data: unknown, tipe: string): TableColumn[] => {
+  const baseColumns: TableColumn[] = [
     { title: "No", dataIndex: "no", key: "no", width: 60 },
     { title: "Site ID", dataIndex: "site_id", key: "site_id", width: 100 },
     {
@@ -13,18 +20,18 @@ const categorizeData = (data, tipe) => {
       dataIndex: "region_tsel",
       key: "region_tsel",
       width: 100,
-      align: "center",
+      align: "center" as const,
     },
     {
       title: "Treg",
       dataIndex: "region",
       key: "region",
       width: 100,
-      align: "center",
+      align: "center" as const,
     },
     { title: "Witel", dataIndex: "witel", key: "witel", width: 100 },
   ];
-  let colDynamic = [{}];
+  let colDynamic: TableColumn[] = [];
 
   if (tipe === "R") {
     colDynamic = [
@@ -75,9 +82,9 @@ const categorizeData = (data, tipe) => {
   return [...baseColumns, ...colDynamic];
 };
 
-const TableDetailSite = ({ data, tipe }) => {
+const TableDetailSite = ({ data, tipe }: { data: Record<string, unknown>[]; tipe: string }) => {
   const dataWithIndex = useMemo(
-    () => data.map((item, index) => ({ ...item, no: index + 1 })),
+    () => data.map((item, index) => ({ ...item, no: index + 1 })) as Record<string, unknown>[],
     [data]
   );
 
@@ -89,7 +96,7 @@ const TableDetailSite = ({ data, tipe }) => {
   return (
     <Table
       dataSource={dataWithIndex}
-      rowKey={(record) => record.ticket_id}
+      rowKey={(record) => record.ticket_id as string}
       bordered
       pagination={{ pageSize: 1000000, hideOnSinglePage: true }}
       scroll={{
@@ -108,8 +115,9 @@ const TableDetailSite = ({ data, tipe }) => {
             className: "!p-3",
           })}
           width={column.width}
-          render={(text, record, index) => {
+          render={(text, _record, index) => {
             if (column.dataIndex === "no") return index + 1;
+            return text;
             return text;
           }}
         />

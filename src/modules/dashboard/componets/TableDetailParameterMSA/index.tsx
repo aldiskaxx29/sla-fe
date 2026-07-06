@@ -1,4 +1,3 @@
-// Antd
 import { DownOutlined, UpOutlined } from "@ant-design/icons";
 import { Spin, Table } from "antd";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -6,6 +5,16 @@ import { useDashboard } from "../../hooks/dashboard.hooks";
 import { useParams } from "react-router-dom";
 
 const { Column, ColumnGroup } = Table;
+
+interface TableColumn {
+  title?: string;
+  dataIndex?: string;
+  key?: string;
+  fixed?: "left" | "right";
+  align?: "left" | "right" | "center";
+  width?: number;
+  children?: TableColumn[];
+}
 
 interface TableDetailParameterMSAProps {
   data: Record<string, unknown>[];
@@ -19,10 +28,10 @@ const TableDetailParameterMSA: React.FC<TableDetailParameterMSAProps> = ({
   loadingMainData,
 }) => {
   const [dataSource, setDataSource] = useState(data);
-  const [injectedData, setInjectedData] = useState([]);
+  const [injectedData, setInjectedData] = useState<Record<string, unknown>>({});
   const { getWitel, getModalDetail } = useDashboard();
   const { detailParameter } = useParams();
-  const [expandedRowKey, setExpandedRowKeys] = useState<number[] | string[]>(
+  const [expandedRowKey, setExpandedRowKeys] = useState<(number | string)[]>(
     []
   );
 
@@ -43,10 +52,8 @@ const TableDetailParameterMSA: React.FC<TableDetailParameterMSAProps> = ({
     return { month, year };
   };
 
-  const columns = useMemo(() => {
+  const columns = useMemo<TableColumn[]>(() => {
     if (!data) return [];
-    // Extract keys dynamically
-    // Extract keys dynamically
     const sampleRecord = data[0];
 
     const weeklyKeys = Object.keys(sampleRecord).filter((key) =>
@@ -56,8 +63,7 @@ const TableDetailParameterMSA: React.FC<TableDetailParameterMSAProps> = ({
       /^ach_fm_\d+$/.test(key)
     );
 
-    // Map months
-    const monthMapping = {
+    const monthMapping: Record<string, string> = {
       ach_fm_1: "January",
       ach_fm_2: "February",
       ach_fm_3: "March",
@@ -72,8 +78,7 @@ const TableDetailParameterMSA: React.FC<TableDetailParameterMSAProps> = ({
       ach_fm_12: "December",
     };
 
-    // Static columns (always shown)
-    const baseColumns = [
+    const baseColumns: TableColumn[] = [
       {
         title: "Parameter",
         dataIndex: "parameter",
@@ -101,23 +106,22 @@ const TableDetailParameterMSA: React.FC<TableDetailParameterMSAProps> = ({
       },
     ];
 
-    const rekonScore = [
+    const rekonScore: TableColumn[] = [
       {
         title: "Score Before Rekon",
         dataIndex: "score_before_rekon",
         key: "score_before_rekon",
-        align: "center",
+        align: "center" as const,
       },
       {
         title: "Score After Rekon",
         dataIndex: "score_after_rekon",
         key: "score_after_rekon",
-        align: "center",
+        align: "center" as const,
       },
     ];
 
-    // Group weekly data under each month
-    const groupedColumns = monthlyKeys.map((monthKey) => {
+    const groupedColumns: TableColumn[] = monthlyKeys.map((monthKey) => {
       const monthNum = parseInt(monthKey.replace("ach_fm_", ""));
       const relatedWeeks = weeklyKeys.filter((weekKey) =>
         weekKey.startsWith(`ach_${monthNum}_`)
@@ -132,28 +136,28 @@ const TableDetailParameterMSA: React.FC<TableDetailParameterMSAProps> = ({
             return {
               title: `W${weekNum}`,
               dataIndex: weekKey,
-              align: "center",
+              align: "center" as const,
               key: weekKey,
             };
           }),
           {
             title: "Real",
             dataIndex: `realisasi_fm_${monthNum}`,
-            align: "center",
+            align: "center" as const,
             key: `realisasi_fm_${monthNum}`,
           },
           {
             title: "Ach",
             dataIndex: `ach_fm_${monthNum}`,
-            align: "center",
+            align: "center" as const,
             key: `ach_fm_${monthNum}`,
           },
         ],
       };
     });
-    const findLastKey = parseInt(groupedColumns[0].key.split("_")[2]);
+    const findLastKey = parseInt(groupedColumns[0]?.key?.split("_")[2] ?? "0");
 
-    const lastMonth = [
+    const lastMonth: TableColumn[] = [
       {
         title: monthMapping[`ach_fm_${findLastKey}`],
         key: `ach_fm_${findLastKey}`,
@@ -161,19 +165,19 @@ const TableDetailParameterMSA: React.FC<TableDetailParameterMSAProps> = ({
           {
             title: "Realisasi",
             dataIndex: `realisasi_fm_${findLastKey}`,
-            align: "center",
+            align: "center" as const,
             key: `realisasi_fm_${findLastKey}`,
           },
           {
             title: "Achivement",
             dataIndex: `ach_fm_${findLastKey}`,
-            align: "center",
+            align: "center" as const,
             key: `ach_fm_${findLastKey}`,
           },
           {
             title: "Score",
             dataIndex: `score_fm_${findLastKey}`,
-            align: "center",
+            align: "center" as const,
             key: `score_fm_${findLastKey}`,
           },
         ],
@@ -186,7 +190,7 @@ const TableDetailParameterMSA: React.FC<TableDetailParameterMSAProps> = ({
 
   const dataMapping = useMemo(() => {
     let coreIndex = 1;
-    if (!dataSource) return;
+    if (!dataSource) return [];
 
     const mappedData = dataSource.map((item, index) => {
       return {
@@ -204,7 +208,7 @@ const TableDetailParameterMSA: React.FC<TableDetailParameterMSAProps> = ({
         data.coreIndex == injectedData?.coreIndex &&
         data.parameter == injectedData?.parameter
       ) {
-        const mappingChildren = injectedData.children.map(
+        const mappingChildren = (injectedData.children as Record<string, unknown>[]).map(
           (childData, index) => {
             return {
               ...childData,
@@ -236,7 +240,7 @@ const TableDetailParameterMSA: React.FC<TableDetailParameterMSAProps> = ({
     return mappingData2;
   }, [dataSource, injectedData]);
 
-  const fetchWitelData = async (record) => {
+  const fetchWitelData = async (record: Record<string, unknown>) => {
     try {
       const { month, year } = resolveMonthYearFromRecord(record);
       const res = await getWitel({
@@ -248,7 +252,7 @@ const TableDetailParameterMSA: React.FC<TableDetailParameterMSAProps> = ({
           month,
           year,
         },
-      }).unwrap();
+      }).unwrap() as { data?: Record<string, unknown>[] };
       const findData = dataMapping?.find(
         (data) =>
           data.coreIndex == record.coreIndex &&
@@ -268,9 +272,9 @@ const TableDetailParameterMSA: React.FC<TableDetailParameterMSAProps> = ({
   };
 
   const handleExpandCollaps = useCallback(
-    async (record) => {
+    async (record: Record<string, unknown>) => {
       if (record.is_parent) {
-        const key = record.identIndex;
+        const key = record.identIndex as string | number;
 
         setExpandedRowKeys((prevKeys) => {
           const isExpanded = prevKeys.includes(key);
@@ -284,9 +288,7 @@ const TableDetailParameterMSA: React.FC<TableDetailParameterMSAProps> = ({
         const isExpandedNow = expandedRowKey.includes(key);
 
         if (!isExpandedNow) {
-          const success = await fetchWitelData(record);
-          setDataSource(dataMapping);
-          if (!success) await fetchWitelData(record);
+          await fetchWitelData(record);
           setDataSource(dataMapping);
         }
       }
@@ -294,9 +296,9 @@ const TableDetailParameterMSA: React.FC<TableDetailParameterMSAProps> = ({
     [dataMapping, expandedRowKey]
   );
 
-  const fetchModalDetail = useCallback(async (record, col) => {
+  const fetchModalDetail = useCallback(async (record: Record<string, unknown>, col: string) => {
     try {
-      const res = await getModalDetail({
+      await getModalDetail({
         query: {
           parameter: detailParameter?.replace(/%20/g, " "),
           filter: record.parameter,
@@ -304,13 +306,12 @@ const TableDetailParameterMSA: React.FC<TableDetailParameterMSAProps> = ({
           level: record.is_parent ? "region" : "witel",
         },
       }).unwrap();
-      console.log(res);
     } catch (error) {
       console.log(error);
     }
   }, []);
 
-  const openModalDetail = (record, col) => {
+  const openModalDetail = (record: Record<string, unknown>, col: string) => {
     if (!record.index && record.is_parent) return;
 
     fetchModalDetail(record, col);
@@ -329,7 +330,7 @@ const TableDetailParameterMSA: React.FC<TableDetailParameterMSAProps> = ({
         bordered
         pagination={{ pageSize: 1000000, hideOnSinglePage: true }}
         className="rounded-xl "
-        rowKey={(record) => record.identIndex}
+        rowKey={(record) => record?.identIndex}
         scroll={{ x: "max-content" }}
         expandable={{
           expandedRowKeys: expandedRowKey,
@@ -341,16 +342,16 @@ const TableDetailParameterMSA: React.FC<TableDetailParameterMSAProps> = ({
                 <UpOutlined
                   className="m-2"
                   onClick={(e) => {
-                    e.stopPropagation(); // Stop the event here
-                    handleExpandCollaps(record, expanded);
+                    e.stopPropagation();
+                    handleExpandCollaps(record);
                   }}
                 />
               ) : (
                 <DownOutlined
                   className="m-2"
                   onClick={(e) => {
-                    e.stopPropagation(); // Stop the event here
-                    handleExpandCollaps(record, expanded);
+                    e.stopPropagation();
+                    handleExpandCollaps(record);
                   }}
                 />
               )
@@ -393,7 +394,7 @@ const TableDetailParameterMSA: React.FC<TableDetailParameterMSAProps> = ({
                         return (
                           <span
                             onClick={() =>
-                              openModalDetail(record, child.dataIndex)
+                              openModalDetail(record, child.dataIndex!)
                             }
                             className={`${
                               !isBelowTarget
@@ -407,7 +408,7 @@ const TableDetailParameterMSA: React.FC<TableDetailParameterMSAProps> = ({
                       return (
                         <span
                           onClick={() =>
-                            openModalDetail(record, child.dataIndex)
+                            openModalDetail(record, child.dataIndex!)
                           }
                           className={`${
                             isBelowTarget
@@ -438,7 +439,7 @@ const TableDetailParameterMSA: React.FC<TableDetailParameterMSAProps> = ({
               })}
               align={column.align}
               fixed={column.fixed}
-              render={(text, record, index) => {
+              render={(text, record) => {
                 if (column.dataIndex?.startsWith("ach")) {
                   const isBelowTarget = Number(text) < Number(record.target);
                   return (

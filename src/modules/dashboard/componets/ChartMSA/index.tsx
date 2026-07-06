@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { Line } from "react-chartjs-2";
-import { Image, Slider } from "antd";
+import { Slider } from "antd";
 import zoomPlugin from "chartjs-plugin-zoom";
 import {
   Chart as ChartJS,
@@ -12,8 +12,6 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
-import ArrowDown from "@/assets/arrow_down.svg";
-import ArrowUp from "@/assets/arrow_up.svg";
 
 ChartJS.register(
   CategoryScale,
@@ -126,7 +124,7 @@ const ChartMSA: React.FC<ChartMSAProps> = ({ title, description, data, extra }) 
       zoom: {
         pan: {
           enabled: true,
-          mode: "x",
+          mode: "x" as const,
         },
         zoom: {
           wheel: {
@@ -135,7 +133,7 @@ const ChartMSA: React.FC<ChartMSAProps> = ({ title, description, data, extra }) 
           pinch: {
             enabled: true,
           },
-          mode: "x",
+          mode: "x" as const,
         },
       },
     },
@@ -189,8 +187,8 @@ const ChartMSA: React.FC<ChartMSAProps> = ({ title, description, data, extra }) 
         max={data.week.length - 1}
         value={range}
         styles={{ track: { background: "#dddddd" } }}
-        onChange={setRange}
-        tooltip={{ formatter: (value) => data.week[value] }}
+        onChange={(value) => setRange(value as [number, number])}
+        tooltip={{ formatter: (value) => (value !== undefined ? data.week[value] : "") }}
       />
     </div>
   );

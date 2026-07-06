@@ -2,16 +2,14 @@ import { useMemo } from "react";
 import { Table } from "antd";
 
 const { Column } = Table;
-
-// Function to categorize data
 const categorizeData = (data) => {
   const baseColumns = [
-    { 
-      title: "No", 
-      dataIndex: "no", 
-      key: "no", 
+    {
+      title: "No",
+      dataIndex: "no",
+      key: "no",
       width: 60,
-      align: "center", 
+      align: "center",
     },
     {
       title: "Region",
@@ -80,12 +78,12 @@ const categorizeData = (data) => {
 const TableDetailTicket = ({ data }) => {
   const dataWithIndex = useMemo(
     () => data.map((item, index) => ({ ...item, no: index + 1 })),
-    [data]
+    [data],
   );
 
   const categorizedData = useMemo(
     () => categorizeData(dataWithIndex),
-    [dataWithIndex]
+    [dataWithIndex],
   );
 
   return (

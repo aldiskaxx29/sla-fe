@@ -1,6 +1,5 @@
 import { Button, Image } from "antd";
 import warningIcon from "@/assets/warning.svg";
-import checkIcon from "@/assets/check.svg";
 import xlxsIcon from "@/assets/file-spreadsheet.svg";
 import ChartMSA from "@/modules/dashboard/componets/ChartMSA";
 import { TableHistoryCNOP } from "@/modules/dashboard/componets/TableHistoryCNOP";
@@ -105,10 +104,7 @@ const CNOPmenu = ({
     fetchComply();
   }, []);
 
-
-  const handleExportXlsx = () => {
-
-  }
+  const handleExportXlsx = () => {};
 
   return (
     <div>
@@ -162,7 +158,9 @@ const CNOPmenu = ({
               value={filter}
             />
             <Button
-              onClick={() => {handleExportXlsx}}
+              onClick={() => {
+                handleExportXlsx;
+              }}
               className="!h-11 !px-3 py-2.5 !border-0 !rounded-full !bg-[#EDFFFD]"
             >
               <p className="text-brand-secondary font-medium">Export as XLS</p>
@@ -196,7 +194,7 @@ const CNOPmenu = ({
               >
                 Nation Wide
               </button>
-              {/* <button
+              <button
                 className={
                   level === "area"
                     ? "text-brand-secondary border-b-2 pb-4 border-brand-secondary"
@@ -215,7 +213,7 @@ const CNOPmenu = ({
                 onClick={() => setLevel("region")}
               >
                 Regional
-              </button> */}
+              </button>
             </div>
           </div>
           <div className=" flex gap-4 w-full overflow-auto">
