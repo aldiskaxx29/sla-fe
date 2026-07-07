@@ -50,6 +50,31 @@ const ChartMSA: React.FC<ChartMSAProps> = ({ title, description, data, extra }) 
     12: "Dec",
   };
 
+  const fullMonthMapping: Record<number, string> = {
+    1: "January",
+    2: "February",
+    3: "March",
+    4: "April",
+    5: "May",
+    6: "June",
+    7: "July",
+    8: "August",
+    9: "September",
+    10: "October",
+    11: "November",
+    12: "December",
+  };
+
+  const formatWeekLabel = (week: string) => {
+    const match = week.match(/ach_(\d+)_(\d+)/);
+    if (match) {
+      const monthNumber = parseInt(match[1]);
+      const weekNumber = parseInt(match[2]);
+      return `ach ${fullMonthMapping[monthNumber]} week ${weekNumber}`;
+    }
+    return week;
+  };
+
   // Default range covers full data
   const [range, setRange] = useState<[number, number]>([
     0,
@@ -188,7 +213,7 @@ const ChartMSA: React.FC<ChartMSAProps> = ({ title, description, data, extra }) 
         value={range}
         styles={{ track: { background: "#dddddd" } }}
         onChange={(value) => setRange(value as [number, number])}
-        tooltip={{ formatter: (value) => (value !== undefined ? data.week[value] : "") }}
+        tooltip={{ formatter: (value) => (value !== undefined ? formatWeekLabel(data.week[value]) : "") }}
       />
     </div>
   );
