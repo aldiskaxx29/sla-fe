@@ -9,7 +9,8 @@ const UserPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const userData = JSON.parse(localStorage.getItem("user_data"));
+    const storedUserData = localStorage.getItem("user_data");
+    const userData = storedUserData ? JSON.parse(storedUserData) : null;
     if (!userData || userData.level_user !== 1) {
       navigate("/"); // redirect to home
     }

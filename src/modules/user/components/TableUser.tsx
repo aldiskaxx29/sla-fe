@@ -6,6 +6,7 @@ import { useUser } from "../hooks/user.hooks";
 import ModalDetailUser from "./ModalDetailUser";
 import ModalDeleteUser from "./ModalDeleteUser";
 import ModalEditUser from "./ModalEditUser";
+import { USER_LEVEL_MAP } from "../constants";
 
 const TableUser = () => {
   const { dataAllUser, getAllUser } = useUser();
@@ -19,7 +20,7 @@ const TableUser = () => {
       title: "No",
       dataIndex: "no",
       key: "no",
-      render: (text, record, index) => index + 1,
+      render: (_, __, index) => index + 1,
       onHeaderCell: () => ({
         className: "!bg-blue-pacific !p-3",
       }),
@@ -67,24 +68,14 @@ const TableUser = () => {
         className: "!bg-blue-pacific !p-3",
       }),
       render: (value) => {
-        const levelMap = {
-          0: "All",
-          1: "Administrator",
-          2: "TIF HO",
-          3: "TIF Regional",
-          4: "Mitra",
-          5: "TSEL",
-          6: "Guest",
-        };
-    
-        return levelMap[value] || "-";
+        return USER_LEVEL_MAP[value] || "-";
       },
     },
     {
       title: "Action",
       key: "action",
       width: 100,
-      render: (text, record) => (
+      render: (_, record) => (
         <div className="flex gap-4">
           <Button type="primary" onClick={() => handleDetailClick(record)}>
             Detail
@@ -158,7 +149,7 @@ const TableUser = () => {
   }, []);
 
   const filteredData = useMemo(() => {
-    const data = dataAllUser?.data ?? [];
+    const data = (dataAllUser as any)?.data ?? [];
     const keyword = searchNik.trim().toLowerCase();
     if (!keyword) return data;
     return data.filter((item: any) =>

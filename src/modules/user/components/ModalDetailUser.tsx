@@ -1,4 +1,5 @@
 import { Modal } from "antd";
+import { USER_LEVEL_MAP } from "../constants";
 
 const ModalDetailUser = ({ open, onCancel, data }) => {
   return (
@@ -24,7 +25,7 @@ const ModalDetailUser = ({ open, onCancel, data }) => {
           </div>
           <div>
             <p className="text-base font-semibold">Level User</p>
-            <p className="">{data.level_user}</p>
+            <p className="">{USER_LEVEL_MAP[data.level_user] || data.level_user}</p>
           </div>
         </div>
         <div className="grid grid-cols-2 gap-4">

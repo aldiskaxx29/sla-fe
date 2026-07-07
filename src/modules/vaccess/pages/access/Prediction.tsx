@@ -17,7 +17,7 @@ try {
     // console.log(error)
 }
 
-function getStartEnd(date = new Date(),max_date=new Date()) {
+function getStartEnd(date = new Date()) {
     if([5,6,0].includes(date.getDay())){
         date.setDate(date.getDate()-4)
     }
@@ -88,7 +88,7 @@ function getWeek(date = new Date()) {
   }
 
   const diffDays = Math.floor(
-    (date - firstFriday) / (1000 * 60 * 60 * 24)
+    (date.getTime() - firstFriday.getTime()) / (1000 * 60 * 60 * 24)
   );
 
 //   console.log(diffDays,date)
@@ -100,16 +100,13 @@ const Prediction = ()=>{
     const [topLoading,setTopLoading] = useState(true)
     const [maxDateReady,setMaxDateReady] = useState(false)
     const [PL18,setPL18] = useState(0)
-    const [PL18DATA,setPL18DATA] = useState([])
+    const [PL18DATA,setPL18DATA] = useState<any[]>([])
     const [JIT2,setJIT2] = useState(0)
-    const [JIT2DATA,setJIT2DATA] = useState([])
-    const [JITTER2,setJITTER2] = useState(0)
-    const [PDETAIL,setPDetail] = useState([])
-    const [POPDATA,setPOPDATA] = useState([])
-    const [RAWDATA,setRAWDATA] = useState([])
-    const [RAWDATALAST,setRAWDATALAST] = useState([])
-    const [LAST,setLAST] = useState([])
-    const [NOW,setNOW] = useState([])
+    const [JIT2DATA,setJIT2DATA] = useState<any[]>([])
+    const [PDETAIL,setPDetail] = useState<any[]>([])
+    const [POPDATA,setPOPDATA] = useState<any[]>([])
+    const [RAWDATA] = useState<any[]>([])
+    const [RAWDATALAST] = useState<any[]>([])
     const [POPDOWNLOAD,setPOPDOWNLOAD] = useState(false)
     const [POPMODE,setPOPMODE] = useState("")
     
@@ -239,7 +236,7 @@ const Prediction = ()=>{
         XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet 1");
 
         // download file
-        let {start,end}= getStartEnd(new Date(MAX_DATE))
+        let {start}= getStartEnd(new Date(MAX_DATE))
         let {start_date,end_date} = getRange7Hari(start)
         let filename = "RAW LAST WEEK-"+`${start_date}`+`-${end_date}`
         XLSX.writeFile(workbook, filename+".xlsx");
@@ -298,12 +295,7 @@ const Prediction = ()=>{
         PredictionWeek(start,end)
     }
 
-    function exportExcel() {
-        const table = document.getElementById("excel-prediction");
-        const wb = XLSX.utils.table_to_book(table, { sheet: "Sheet1" });
-        let filename = "PREDIKSI W"+getWeek(new Date(MAX_DATE))+"_"+Date.now()
-        XLSX.writeFile(wb, filename+".xlsx");
-    }
+
 
     function PopTable(region,mode){
         setPOPMODE(mode)
@@ -413,7 +405,7 @@ const Prediction = ()=>{
             <div>
                 <div className="grid grid-cols-7 mb-1">
                     <div className="col-span-6 flex justify-between items-center">
-                        <div className="text-md font-bold text-red-700 flex gap-2">PREDIKSI <div>W{getWeek(new Date(getStartEnd(new  Date(MAX_DATE)).currentDate))} ({getStartEnd(new Date(MAX_DATE)).startText} - {getStartEnd(new Date(MAX_DATE),new Date(MAX_DATE)).currentText})</div></div>
+                        <div className="text-md font-bold text-red-700 flex gap-2">PREDIKSI <div>W{getWeek(new Date(getStartEnd(new  Date(MAX_DATE)).currentDate))} ({getStartEnd(new Date(MAX_DATE)).startText} - {getStartEnd(new Date(MAX_DATE)).currentText})</div></div>
                         <div onClick={()=>setPOPDOWNLOAD(true)} className="cursor-pointer flex items-center gap-1" style={{fontSize:'0.8em',color:RAWDATA.length ? 'black' :'gray'}}>
                             Export As Excel
                             <FileExcelFilled style={{color:'green',fontSize:'1.7em'}}></FileExcelFilled>
@@ -542,7 +534,12 @@ const Prediction = ()=>{
                     </div>
                 </div>
             </div>
-            <DailyTracking start={getStartEnd(new Date(MAX_DATE)).start} end={getStartEnd(new Date(MAX_DATE)).end}></DailyTracking>
+            <DailyTracking 
+              start={getStartEnd(new Date(MAX_DATE)).start} 
+              end={getStartEnd(new Date(MAX_DATE)).end}
+              setPOP={setPOP}
+              setTITLEPOP={setTITLEPOP}
+            />
     </div>);
 }
 
