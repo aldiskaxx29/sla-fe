@@ -1,192 +1,307 @@
-import {
- RightOutlined,
- CaretDownOutlined
-} from "@ant-design/icons";
+import { RightOutlined } from "@ant-design/icons";
 import React, { useEffect, useState } from "react";
 import { Skeleton } from "antd";
 import Popup from "./Popup";
 import { qosmoUrl } from "@/modules/vaccess/utils/qosmoApi";
-let HEADER = {headers:{Rtoken:''}}
-try {
-    let data = JSON.parse(localStorage.getItem('user_data')??"{}")
-    HEADER = {headers:{
-        Rtoken:btoa(data.level_user)
-    }}
-} catch (error) {
-    // console.log(error)
+
+interface ActionPlanProgressProps {
+  mode: string;
+  week: string;
+  DATATABLE: any;
 }
-const ActionPlanProgress = React.memo(({mode,week,DATATABLE,LABELS})=>{
-    const [POPUP,setPOPUP] = useState(false)
-    const [POPDATA,setPOPDATA] = useState([])
-    const [DATA,setData] = useState({})
-    const [loading, setLoading] = useState(true)
-    const TB = {
-        SUMBAGUT : {total_site:0,t_pl5:0,t_pl15:0,t_latency:0,t_jitter:0,r_pl5:0,r_pl15:0,r_latency:0,r_jitter:0},
-        SUMBAGSEL : {total_site:0,t_pl5:0,t_pl15:0,t_latency:0,t_jitter:0,r_pl5:0,r_pl15:0,r_latency:0,r_jitter:0},
-        JABOTABEK_INNER : {total_site:0,t_pl5:0,t_pl15:0,t_latency:0,t_jitter:0,r_pl5:0,r_pl15:0,r_latency:0,r_jitter:0},
-        "JAWA BARAT" : {total_site:0,t_pl5:0,t_pl15:0,t_latency:0,t_jitter:0,r_pl5:0,r_pl15:0,r_latency:0,r_jitter:0},
-        "JAWA TENGAH" : {total_site:0,t_pl5:0,t_pl15:0,t_latency:0,t_jitter:0,r_pl5:0,r_pl15:0,r_latency:0,r_jitter:0},
-        "JAWA TIMUR" : {total_site:0,t_pl5:0,t_pl15:0,t_latency:0,t_jitter:0,r_pl5:0,r_pl15:0,r_latency:0,r_jitter:0},
-        BALINUSRA : {total_site:0,t_pl5:0,t_pl15:0,t_latency:0,t_jitter:0,r_pl5:0,r_pl15:0,r_latency:0,r_jitter:0},
-        KALIMANTAN : {total_site:0,t_pl5:0,t_pl15:0,t_latency:0,t_jitter:0,r_pl5:0,r_pl15:0,r_latency:0,r_jitter:0},
-        SULAWESI : {total_site:0,t_pl5:0,t_pl15:0,t_latency:0,t_jitter:0,r_pl5:0,r_pl15:0,r_latency:0,r_jitter:0},
-        SUMBAGTENG : {total_site:0,t_pl5:0,t_pl15:0,t_latency:0,t_jitter:0,r_pl5:0,r_pl15:0,r_latency:0,r_jitter:0},
-        PUMA : {total_site:0,t_pl5:0,t_pl15:0,t_latency:0,t_jitter:0,r_pl5:0,r_pl15:0,r_latency:0,r_jitter:0},
-        JABOTABEK_OUTER : {total_site:0,t_pl5:0,t_pl15:0,t_latency:0,t_jitter:0,r_pl5:0,r_pl15:0,r_latency:0,r_jitter:0},
-    }
-    const [dropdown,setDropdown] = useState({})
 
-    function DropdownSelect(select){
-        let dropdownT = dropdown
-        if(!dropdownT.hasOwnProperty(select)){
-            dropdownT[select]=true
-        }else{
-            dropdownT[select] = !dropdownT[select]
+interface HeaderType {
+  headers: {
+    Rtoken: string;
+  };
+}
+
+let HEADER: HeaderType = { headers: { Rtoken: "" } };
+try {
+  const data = JSON.parse(localStorage.getItem("user_data") ?? "{}");
+  HEADER = {
+    headers: {
+      Rtoken: btoa(data.level_user ?? ""),
+    },
+  };
+} catch (error) {
+  // console.log(error)
+}
+
+const ActionPlanProgress = React.memo(({ mode, week, DATATABLE }: ActionPlanProgressProps) => {
+  const [POPUP, setPOPUP] = useState(false);
+  const [POPDATA, setPOPDATA] = useState<any[]>([]);
+  const [DATA, setData] = useState<any>({});
+  const [loading, setLoading] = useState(true);
+
+  const TB: Record<string, any> = {
+    SUMBAGUT: { total_site: 0, t_pl5: 0, t_pl15: 0, t_latency: 0, t_jitter: 0, r_pl5: 0, r_pl15: 0, r_latency: 0, r_jitter: 0 },
+    SUMBAGSEL: { total_site: 0, t_pl5: 0, t_pl15: 0, t_latency: 0, t_jitter: 0, r_pl5: 0, r_pl15: 0, r_latency: 0, r_jitter: 0 },
+    JABOTABEK_INNER: { total_site: 0, t_pl5: 0, t_pl15: 0, t_latency: 0, t_jitter: 0, r_pl5: 0, r_pl15: 0, r_latency: 0, r_jitter: 0 },
+    "JAWA BARAT": { total_site: 0, t_pl5: 0, t_pl15: 0, t_latency: 0, t_jitter: 0, r_pl5: 0, r_pl15: 0, r_latency: 0, r_jitter: 0 },
+    "JAWA TENGAH": { total_site: 0, t_pl5: 0, t_pl15: 0, t_latency: 0, t_jitter: 0, r_pl5: 0, r_pl15: 0, r_latency: 0, r_jitter: 0 },
+    "JAWA TIMUR": { total_site: 0, t_pl5: 0, t_pl15: 0, t_latency: 0, t_jitter: 0, r_pl5: 0, r_pl15: 0, r_latency: 0, r_jitter: 0 },
+    BALINUSRA: { total_site: 0, t_pl5: 0, t_pl15: 0, t_latency: 0, t_jitter: 0, r_pl5: 0, r_pl15: 0, r_latency: 0, r_jitter: 0 },
+    KALIMANTAN: { total_site: 0, t_pl5: 0, t_pl15: 0, t_latency: 0, t_jitter: 0, r_pl5: 0, r_pl15: 0, r_latency: 0, r_jitter: 0 },
+    SULAWESI: { total_site: 0, t_pl5: 0, t_pl15: 0, t_latency: 0, t_jitter: 0, r_pl5: 0, r_pl15: 0, r_latency: 0, r_jitter: 0 },
+    SUMBAGTENG: { total_site: 0, t_pl5: 0, t_pl15: 0, t_latency: 0, t_jitter: 0, r_pl5: 0, r_pl15: 0, r_latency: 0, r_jitter: 0 },
+    PUMA: { total_site: 0, t_pl5: 0, t_pl15: 0, t_latency: 0, t_jitter: 0, r_pl5: 0, r_pl15: 0, r_latency: 0, r_jitter: 0 },
+    JABOTABEK_OUTER: { total_site: 0, t_pl5: 0, t_pl15: 0, t_latency: 0, t_jitter: 0, r_pl5: 0, r_pl15: 0, r_latency: 0, r_jitter: 0 },
+  };
+
+  const [dropdown, setDropdown] = useState<Record<string, boolean>>({});
+
+  function DropdownSelect(select: string) {
+    const dropdownT = { ...dropdown };
+    if (!dropdownT.hasOwnProperty(select)) {
+      dropdownT[select] = true;
+    } else {
+      dropdownT[select] = !dropdownT[select];
+    }
+    setDropdown(dropdownT);
+  }
+
+  async function PopTableAction(rca: string, rca2: string, status: string, region = "") {
+    let sites: any[] = [];
+    if (rca2 === "" && region === "") {
+      Object.keys(DATATABLE.sites).forEach((b) => {
+        if (DATATABLE.sites[b]) {
+          const POPD =
+            DATATABLE.sites[b]
+              .filter((a: any) => a.rca === rca && a.status.toUpperCase() === status.toUpperCase())
+              .map((a: any) => a) || [];
+          sites = [...sites, ...POPD];
         }
-        setDropdown({...dropdownT})
-    }
-
-    async function PopTableAction(rca,rca2,status,region=''){
-        let sites = []
-        if(rca2=='' && region==''){
-            Object.keys(DATATABLE.sites).forEach(b=>{
-                if(DATATABLE.sites[b]){
-                    let POPD = DATATABLE.sites[b].filter(a=>a.rca==rca && a.status.toUpperCase()==status.toUpperCase()).map(a=>a) || [];
-                    sites = [...sites,...POPD]
-                }
-            })
-        }else if(rca2!='' && region==''){
-            Object.keys(DATATABLE.sites).forEach(b=>{
-                if(DATATABLE.sites[b]){
-                    let POPD = DATATABLE.sites[b].filter(a=>a.rca==rca && a.rca2==rca2 && a.status.toUpperCase()==status.toUpperCase()).map(a=>a) || [];
-                    sites = [...sites,...POPD]
-                }
-            })
-        }else{
-            // if(DATATABLE.sites[region]){
-            //     let POPD = DATATABLE.sites[region].filter(a=>a.rca==rca && a.rca2==rca2 && a.status.toUpperCase().includes(status.toUpperCase())).map(a=>a) || [];
-            //     sites = [...sites,...POPD]
-            // }
+      });
+    } else if (rca2 !== "" && region === "") {
+      Object.keys(DATATABLE.sites).forEach((b) => {
+        if (DATATABLE.sites[b]) {
+          const POPD =
+            DATATABLE.sites[b]
+              .filter(
+                (a: any) =>
+                  a.rca === rca && a.rca2 === rca2 && a.status.toUpperCase() === status.toUpperCase()
+              )
+              .map((a: any) => a) || [];
+          sites = [...sites, ...POPD];
         }
-        // console.log(rca,rca2,status,sites)
-        setPOPUP(true);
-        setPOPDATA(sites)
+      });
     }
+    setPOPUP(true);
+    setPOPDATA(sites);
+  }
 
-    async function Init(){
-        setLoading(true)
-        let res = await fetch(qosmoUrl(`/baseapi/vrecon.php?cmd=action-plan&traffic=${mode.split('_')[0].toLowerCase()}&week=${week.split('-')[0]}&year=${week.split('-')[1]}&dist=${mode.split('_')[1]}`),HEADER)
-        let {data} = await res.json()
-        try {
-            let d = {}
-            if(data){
-                d=data
-            }
-            let blank = {Blank:{}}
-            if(d.hasOwnProperty('Blank')){
-                blank.Blank = d.Blank
-            }
-            d = {...data}
-            if(d.hasOwnProperty('Blank')){
-                delete d.Blank
-                d = {...d,...blank}
-            }
-            Object.keys(d).forEach(a=>{
-                let temp = {Blank:{}}
-                if(d[a].hasOwnProperty('Blank')){
-                    temp.Blank = d[a].Blank
-                    delete d[a].Blank
-                    d[a] = {...d[a],...temp}
-                }
-            })
-            // console.log(d,blank)
-            setData(d)            
-        } catch (error) {
-            
-        } finally {
-            setLoading(false)
+  async function Init() {
+    setLoading(true);
+    try {
+      const res = await fetch(
+        qosmoUrl(
+          `/baseapi/vrecon.php?cmd=action-plan&traffic=${mode.split("_")[0].toLowerCase()}&week=${
+            week.split("-")[0]
+          }&year=${week.split("-")[1]}&dist=${mode.split("_")[1]}`
+        ),
+        HEADER
+      );
+      const { data } = await res.json();
+      let d: any = {};
+      if (data) {
+        d = data;
+      }
+      const blank: any = { Blank: {} };
+      if (d.hasOwnProperty("Blank")) {
+        blank.Blank = d.Blank;
+      }
+      d = { ...data };
+      if (d.hasOwnProperty("Blank")) {
+        delete d.Blank;
+        d = { ...d, ...blank };
+      }
+      Object.keys(d).forEach((a) => {
+        const temp: any = { Blank: {} };
+        if (d[a].hasOwnProperty("Blank")) {
+          temp.Blank = d[a].Blank;
+          delete d[a].Blank;
+          d[a] = { ...d[a], ...temp };
         }
+      });
+      setData(d);
+    } catch (error) {
+      // console.error(error);
+    } finally {
+      setLoading(false);
     }
+  }
 
-    useEffect(()=>{
-        Init()
-    },[mode,week])
+  useEffect(() => {
+    Init();
+  }, [mode, week]);
 
-    // if(LABELS.length)
-    return(
-        <div className="relative flex flex-col" style={{height:'90vh'}}>
-            {POPUP && <Popup close={()=>setPOPUP(false)} data={POPDATA}></Popup>}
-            <div className="text-md font-bold text-red-700 flex gap-2">ACTION PLAN & PROGRESS</div>
-            {loading ? (
-                <div className="columns-2 auto-rows-fr gap-3 items-top" style={{gridTemplateRows:'auto',height:'fit-content', minHeight:'60vh'}}>
-                    {Array.from({ length: 4 }).map((_, index) => (
-                        <div key={`action-plan-skeleton-${index}`} className="flex flex-col break-inside-avoid mb-2 items-center justify-center w-full">
-                            <div className="w-full rounded-t-lg bg-sky-700 px-4 py-2">
-                                <Skeleton.Input active size="small" style={{ width: "70%" }} />
-                            </div>
-                            <div className="w-full rounded-b-lg bg-gray-300 px-4 py-3">
-                                <Skeleton active paragraph={{ rows: 6 }} title={false} />
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            ) : (
-            <div className="columns-2 auto-rows-fr gap-3 items-top" style={{gridTemplateRows:'auto',height:'fit-content'}}>
-                {Object.keys(DATA).map((a,i)=>{
-                    let num=1
-                    return(
-                    <div className="flex flex-col break-inside-avoid mb-2 items-cente ustify-center w-full" key={i}>
-                        <div className="py-2 bg-sky-700 text-white rounded-t-lg text-md font-bold w-full text-center">{a} Issue</div>
-                        <div className="rounded-b-lg flex flex-col bg-gray-300 to-sky-200 w-full py-1 px-4" style={{height:'auto'}}>
-                                <div className="uppercase w-full grid whitespace-nowrap items-center text-center" style={{gridTemplateColumns:'5% 47% 16% 16% 16%',fontSize:'0.8em'}}>
-                                    <div className="px-2 py-2 font-bold border-b-2 border-gray-800"> &nbsp;</div>
-                                    <div className="px-2 py-2 font-bold border-b-2 border-gray-800">Action Plan</div>
-                                    <div className="px-2 py-2 font-bold border-b-2 border-gray-800">OGP</div>
-                                    <div className="px-2 py-2 font-bold border-b-2 border-gray-800">Close</div>
-                                    <div className="px-2 py-2 font-bold border-b-2 border-gray-800">Total</div>
-                                </div>
-                                {Object.keys(DATA[a]).map((b,u)=>{
-                                if(!['OGP','CLOSED'].includes(b))
-                                return(
-                                <div key={a+b} className="uppercas w-full grid whitespace-nowrap items-center overflow-y-auto" style={{gridTemplateColumns:'5% 47% 16% 16% 16%',fontSize:'0.8em'}}>
-                                    <div className="px-2 py-2 h-full flex items-center justify-center border-b-2 border-gray-800">{num++}</div>
-                                    <div className="px-2 py-2 h-full flex items-center border-b-2 border-gray-800 cursor-pointer" onClick={()=>DropdownSelect(a+b)}><RightOutlined/>{b}</div>
-                                    <div onClick={()=>PopTableAction(a,b,'OGP')} className="px-2 py-2 h-full flex items-center justify-center cursor-pointer text-center border-b-2 border-gray-800">{[0,0,...(Object.keys(DATA[a][b] && DATA[a][b].OGP || {}).map(x=>DATA[a][b].OGP[x]))].reduce((z,x)=>z+x)}</div>
-                                    <div onClick={()=>PopTableAction(a,b,'CLOSED')} className="px-2 py-2 h-full flex items-center justify-center text-center border-b-2 border-gray-800">{[0,0,...(Object.keys(DATA[a][b] && DATA[a][b].CLOSED || {}).map(x=>DATA[a][b].CLOSED[x]))].reduce((z,x)=>z+x)}</div>
-                                    <div className="px-2 py-2 h-full flex items-center justify-center text-center border-b-2 border-gray-800">{[0,0,...(Object.keys(DATA[a][b] && DATA[a][b].OGP || {}).map(x=>DATA[a][b].OGP[x]))].reduce((z,x)=>z+x)+[0,0,...(Object.keys(DATA[a][b] && DATA[a][b].CLOSED || {}).map(x=>DATA[a][b].CLOSED[x]))].reduce((z,x)=>z+x)}</div>
-                                
-                                    {dropdown[a+b] &&
-                                        Object.keys(TB).map((c,i)=>{
-                                        let TOGP = DATA[a][b] && DATA[a][b].OGP && DATA[a][b].OGP[c] ? DATA[a][b].OGP[c] : 0;
-                                        let TCLOSED = DATA[a][b] && DATA[a][b].CLOSED && DATA[a][b].CLOSED[c] ? DATA[a][b].CLOSED[c] : 0;
-                                        let TTOTAL = (DATA[a][b] && DATA[a][b].OGP && DATA[a][b].OGP[c] ? DATA[a][b].OGP[c] : 0)+(DATA[a][b] && DATA[a][b].CLOSED && DATA[a][b].CLOSED[c] ? DATA[a][b].CLOSED[c] : 0);
-                                        if(TTOTAL>0)
-                                        return(<React.Fragment key={a+b+i}>
-                                                <div className="px-2 py-2 border-b-2 border-gray-800">&nbsp;</div>
-                                                <div className="px-2 py-2 border-b-2 border-gray-800 text-left">{c}</div>
-                                                <div onClick={()=>PopTableAction(a,b,'OGP',c.replace('_',' '))} className="px-2 cursor-pointer py-2 border-b-2 border-gray-800 text-center">{TOGP}</div>
-                                                <div onClick={()=>PopTableAction(a,b,'CLOSED',c.replace('_',' '))} className="px-2 cursor-pointer py-2 border-b-2 border-gray-800 text-center">{TCLOSED}</div>
-                                                <div className="px-2 py-2 border-b-2 border-gray-800 text-center">{TTOTAL}</div>
-                                            </React.Fragment>
-                                        )})
-                                    }
-                            </div>
-                            )}
-                        )}
-                            <div className="uppercase w-full font-bold grid whitespace-nowrap items-center" style={{gridTemplateColumns:'5% 47% 16% 16% 16%',fontSize:'0.8em'}}>
-                                <div className="px-2 py-2 h-full flex items-center justify-center border-b-2 border-gray-800">&nbsp;</div>
-                                <div className="px-2 py-2 h-full flex items-center border-b-2 border-gray-800 font-bold">TOTAL</div>
-                                <div onClick={()=>PopTableAction(a,'','OGP','')} className="px-2 py-2 h-full flex items-center justify-center cursor-pointer text-center border-b-2 border-gray-800">{[0,0,...(Object.keys(DATA[a].OGP || {}).map(x=>DATA[a].OGP[x]))].reduce((z,x)=>z+x)}</div>
-                                <div onClick={()=>PopTableAction(a,'','CLOSED','')} className="px-2 py-2 h-full flex items-center justify-center cursor-pointer text-center border-b-2 border-gray-800">{[0,0,...(Object.keys(DATA[a].CLOSED || {}).map(x=>DATA[a].CLOSED[x]))].reduce((z,x)=>z+x)}</div>
-                                <div className="px-2 py-2 h-full flex items-center justify-center text-center border-b-2 border-gray-800">{[0,0,...(Object.keys(DATA[a].OGP || {}).map(x=>DATA[a].OGP[x]))].reduce((z,x)=>z+x)+[0,0,...(Object.keys(DATA[a].CLOSED || {}).map(x=>DATA[a].CLOSED[x]))].reduce((z,x)=>z+x)}</div>
-                            </div>
-                        </div>
-                    </div>
-                )})}
+  return (
+    <div className="relative flex flex-col" style={{ height: "90vh" }}>
+      {POPUP && <Popup close={() => setPOPUP(false)} data={POPDATA}></Popup>}
+      <div className="text-md font-bold text-red-700 flex gap-2">ACTION PLAN & PROGRESS</div>
+      {loading ? (
+        <div
+          className="columns-2 auto-rows-fr gap-3 items-top"
+          style={{ gridTemplateRows: "auto", height: "fit-content", minHeight: "60vh" }}
+        >
+          {Array.from({ length: 4 }).map((_, index) => (
+            <div
+              key={`action-plan-skeleton-${index}`}
+              className="flex flex-col break-inside-avoid mb-2 items-center justify-center w-full"
+            >
+              <div className="w-full rounded-t-lg bg-sky-700 px-4 py-2">
+                <Skeleton.Input active size="small" style={{ width: "70%" }} />
+              </div>
+              <div className="w-full rounded-b-lg bg-gray-300 px-4 py-3">
+                <Skeleton active paragraph={{ rows: 6 }} title={false} />
+              </div>
             </div>
-            )}
+          ))}
         </div>
-    )
-})
+      ) : (
+        <div className="columns-2 auto-rows-fr gap-3 items-top" style={{ gridTemplateRows: "auto", height: "fit-content" }}>
+          {Object.keys(DATA).map((a, i) => {
+            let num = 1;
+            return (
+              <div className="flex flex-col break-inside-avoid mb-2 items-center justify-center w-full" key={i}>
+                <div className="py-2 bg-sky-700 text-white rounded-t-lg text-md font-bold w-full text-center">
+                  {a} Issue
+                </div>
+                <div className="rounded-b-lg flex flex-col bg-gray-300 to-sky-200 w-full py-1 px-4" style={{ height: "auto" }}>
+                  <div
+                    className="uppercase w-full grid whitespace-nowrap items-center text-center"
+                    style={{ gridTemplateColumns: "5% 47% 16% 16% 16%", fontSize: "0.8em" }}
+                  >
+                    <div className="px-2 py-2 font-bold border-b-2 border-gray-800"> &nbsp;</div>
+                    <div className="px-2 py-2 font-bold border-b-2 border-gray-800">Action Plan</div>
+                    <div className="px-2 py-2 font-bold border-b-2 border-gray-800">OGP</div>
+                    <div className="px-2 py-2 font-bold border-b-2 border-gray-800">Close</div>
+                    <div className="px-2 py-2 font-bold border-b-2 border-gray-800">Total</div>
+                  </div>
+                  {Object.keys(DATA[a]).map((b) => {
+                    if (!["OGP", "CLOSED"].includes(b))
+                      return (
+                        <div
+                          key={a + b}
+                          className="uppercase w-full grid whitespace-nowrap items-center overflow-y-auto"
+                          style={{ gridTemplateColumns: "5% 47% 16% 16% 16%", fontSize: "0.8em" }}
+                        >
+                          <div className="px-2 py-2 h-full flex items-center justify-center border-b-2 border-gray-800">
+                            {num++}
+                          </div>
+                          <div
+                            className="px-2 py-2 h-full flex items-center border-b-2 border-gray-800 cursor-pointer"
+                            onClick={() => DropdownSelect(a + b)}
+                          >
+                            <RightOutlined />
+                            {b}
+                          </div>
+                          <div
+                            onClick={() => PopTableAction(a, b, "OGP")}
+                            className="px-2 py-2 h-full flex items-center justify-center cursor-pointer text-center border-b-2 border-gray-800"
+                          >
+                            {[
+                              0,
+                              0,
+                              ...Object.keys((DATA[a][b] && DATA[a][b].OGP) || {}).map(
+                                (x) => DATA[a][b].OGP[x]
+                              ),
+                            ].reduce((z, x) => z + x)}
+                          </div>
+                          <div
+                            onClick={() => PopTableAction(a, b, "CLOSED")}
+                            className="px-2 py-2 h-full flex items-center justify-center text-center border-b-2 border-gray-800"
+                          >
+                            {[
+                              0,
+                              0,
+                              ...Object.keys((DATA[a][b] && DATA[a][b].CLOSED) || {}).map(
+                                (x) => DATA[a][b].CLOSED[x]
+                              ),
+                            ].reduce((z, x) => z + x)}
+                          </div>
+                          <div className="px-2 py-2 h-full flex items-center justify-center text-center border-b-2 border-gray-800">
+                            {[
+                              0,
+                              0,
+                              ...Object.keys((DATA[a][b] && DATA[a][b].OGP) || {}).map(
+                                (x) => DATA[a][b].OGP[x]
+                              ),
+                            ].reduce((z, x) => z + x) +
+                              [
+                                0,
+                                0,
+                                ...Object.keys((DATA[a][b] && DATA[a][b].CLOSED) || {}).map(
+                                  (x) => DATA[a][b].CLOSED[x]
+                                ),
+                              ].reduce((z, x) => z + x)}
+                          </div>
 
-export default ActionPlanProgress
+                          {dropdown[a + b] &&
+                            Object.keys(TB).map((c, idx) => {
+                              const TOGP = DATA[a][b] && DATA[a][b].OGP && DATA[a][b].OGP[c] ? DATA[a][b].OGP[c] : 0;
+                              const TCLOSED = DATA[a][b] && DATA[a][b].CLOSED && DATA[a][b].CLOSED[c] ? DATA[a][b].CLOSED[c] : 0;
+                              const TTOTAL =
+                                (DATA[a][b] && DATA[a][b].OGP && DATA[a][b].OGP[c] ? DATA[a][b].OGP[c] : 0) +
+                                (DATA[a][b] && DATA[a][b].CLOSED && DATA[a][b].CLOSED[c] ? DATA[a][b].CLOSED[c] : 0);
+                              if (TTOTAL > 0)
+                                return (
+                                  <React.Fragment key={a + b + idx}>
+                                    <div className="px-2 py-2 border-b-2 border-gray-800">&nbsp;</div>
+                                    <div className="px-2 py-2 border-b-2 border-gray-800 text-left">{c}</div>
+                                    <div
+                                      onClick={() => PopTableAction(a, b, "OGP", c.replace("_", " "))}
+                                      className="px-2 cursor-pointer py-2 border-b-2 border-gray-800 text-center"
+                                    >
+                                      {TOGP}
+                                    </div>
+                                    <div
+                                      onClick={() => PopTableAction(a, b, "CLOSED", c.replace("_", " "))}
+                                      className="px-2 cursor-pointer py-2 border-b-2 border-gray-800 text-center"
+                                    >
+                                      {TCLOSED}
+                                    </div>
+                                    <div className="px-2 py-2 border-b-2 border-gray-800 text-center">{TTOTAL}</div>
+                                  </React.Fragment>
+                                );
+                              return null;
+                            })}
+                        </div>
+                      );
+                    return null;
+                  })}
+                  <div
+                    className="uppercase w-full font-bold grid whitespace-nowrap items-center"
+                    style={{ gridTemplateColumns: "5% 47% 16% 16% 16%", fontSize: "0.8em" }}
+                  >
+                    <div className="px-2 py-2 h-full flex items-center justify-center border-b-2 border-gray-800">&nbsp;</div>
+                    <div className="px-2 py-2 h-full flex items-center border-b-2 border-gray-800 font-bold">TOTAL</div>
+                    <div
+                      onClick={() => PopTableAction(a, "", "OGP", "")}
+                      className="px-2 py-2 h-full flex items-center justify-center cursor-pointer text-center border-b-2 border-gray-800"
+                    >
+                      {[0, 0, ...Object.keys(DATA[a].OGP || {}).map((x) => DATA[a].OGP[x])].reduce((z, x) => z + x)}
+                    </div>
+                    <div
+                      onClick={() => PopTableAction(a, "", "CLOSED", "")}
+                      className="px-2 py-2 h-full flex items-center justify-center cursor-pointer text-center border-b-2 border-gray-800"
+                    >
+                      {[0, 0, ...Object.keys(DATA[a].CLOSED || {}).map((x) => DATA[a].CLOSED[x])].reduce((z, x) => z + x)}
+                    </div>
+                    <div className="px-2 py-2 h-full flex items-center justify-center text-center border-b-2 border-gray-800">
+                      {[0, 0, ...Object.keys(DATA[a].OGP || {}).map((x) => DATA[a].OGP[x])].reduce((z, x) => z + x) +
+                        [0, 0, ...Object.keys(DATA[a].CLOSED || {}).map((x) => DATA[a].CLOSED[x])].reduce((z, x) => z + x)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+});
+
+export default ActionPlanProgress;

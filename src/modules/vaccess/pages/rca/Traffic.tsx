@@ -1,4 +1,4 @@
-import React, { use, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Bar } from "react-chartjs-2";
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import ActionPlanProgress from "./ActionPlanProgress";
@@ -67,7 +67,7 @@ const StackedBarChart = ({ labels, chartdata, PopChart }) => {
         stacked: true,
         ticks: {
           font: {
-            weight: "bold",
+            weight: "bold" as const,
           },
           // color: 'black'
         },
@@ -85,14 +85,13 @@ const StackedBarChart = ({ labels, chartdata, PopChart }) => {
         },
       },
     },
-    onClick: (event, elements, chart) => {
+    onClick: (_event, elements, chart) => {
       if (!elements.length) return;
 
       const { datasetIndex, index } = elements[0];
 
       const label = chart.data.labels[index];
       const dataset = chart.data.datasets[datasetIndex];
-      const action = ["Capacity", "Technical", "Impact Gamas", "Issue TSEL"];
       PopChart(label, dataset.label);
       // POP()
       // console.log('Klik:', {
@@ -103,7 +102,7 @@ const StackedBarChart = ({ labels, chartdata, PopChart }) => {
     },
     plugins: {
       legend: {
-        position: "bottom",
+        position: "bottom" as const,
         labels: {
           boxWidth: 15,
         },
@@ -133,13 +132,13 @@ const StackedBarChart = ({ labels, chartdata, PopChart }) => {
       },
       datalabels: {
         display: (context) => Number(context.raw) > 0,
-        anchor: (context) => (context.datasetIndex === 0 ? "end" : "end"),
-        align: (context) => (context.datasetIndex === 0 ? "end" : "start"),
+        anchor: (context) => (context.datasetIndex === 0 ? ("end" as const) : ("end" as const)),
+        align: (context) => (context.datasetIndex === 0 ? ("end" as const) : ("start" as const)),
         offset: (context) => (context.datasetIndex === 0 ? 4 : 10),
         clamp: true,
         clip: false,
         font: {
-          weight: "bold",
+          weight: "bold" as const,
         },
       },
       //   datalabels: {
@@ -162,15 +161,22 @@ const StackedBarChart = ({ labels, chartdata, PopChart }) => {
     </div>
   );
 };
-const TRAFFIC = React.memo(({ ShowPopup, mode, week, setLOADING }) => {
+interface TrafficProps {
+  ShowPopup?: () => void;
+  mode: string;
+  week: string;
+  setLOADING: (loading: boolean) => void;
+}
+
+const TRAFFIC = React.memo(({ ShowPopup, mode, week, setLOADING }: TrafficProps) => {
   const [refresh, setRefresh] = useState(false);
   const [POPUP, setPOPUP] = useState(false);
-  const [POPDATA, setPOPDATA] = useState([]);
+  const [POPDATA, setPOPDATA] = useState<any[]>([]);
   const [NASIONAL, setNasional] = useState(0);
-  const [LABELS, setLabels] = useState([]);
-  const [DATACHART, setDataChart] = useState({});
-  const [DATATABLE, setDataTable] = useState({ progress: {}, sites: {} });
-  const TB = {
+  const [LABELS, setLabels] = useState<string[]>([]);
+  const [DATACHART, setDataChart] = useState<any>({});
+  const [DATATABLE, setDataTable] = useState<any>({ progress: {}, sites: {} });
+  const TB: any = {
     SUMBAGUT: {},
     SUMBAGSEL: {},
     JABOTABEK_INNER: {},
@@ -185,7 +191,7 @@ const TRAFFIC = React.memo(({ ShowPopup, mode, week, setLOADING }) => {
     JABOTABEK_OUTER: {},
   };
 
-  const [PROGRES, setProgress] = useState(TB);
+  const [PROGRES, setProgress] = useState<any>(TB);
 
   async function Nasional() {
     let res = await fetch(
@@ -301,8 +307,8 @@ const TRAFFIC = React.memo(({ ShowPopup, mode, week, setLOADING }) => {
       HEADER,
     );
     let { data } = await res.json();
-    let chart = { OGP: [], close: [] };
-    let group = [];
+    let chart: any = { OGP: [], close: [] };
+    let group: string[] = [];
 
     Object.keys(data).forEach((a) => {
       group.push(a);
@@ -315,7 +321,7 @@ const TRAFFIC = React.memo(({ ShowPopup, mode, week, setLOADING }) => {
     }
     setLabels(group);
 
-    group.forEach((a, i) => {
+    group.forEach((a) => {
       try {
         chart["OGP"].push(data[a]["OGP"] || 0);
       } catch (error) {
@@ -332,8 +338,8 @@ const TRAFFIC = React.memo(({ ShowPopup, mode, week, setLOADING }) => {
     setDataChart({ OGP: chart.OGP, close: chart.close });
   }
 
-  async function PopTable(region, rca) {
-    let POPD = [];
+  async function PopTable(region: string, rca: string) {
+    let POPD: any[] = [];
     if (region != "nationwide" && rca != "") {
       POPD =
         DATATABLE.sites[region].filter((a) => a.rca == rca).map((a) => a) || [];
@@ -355,8 +361,8 @@ const TRAFFIC = React.memo(({ ShowPopup, mode, week, setLOADING }) => {
     setPOPDATA(POPD);
   }
 
-  async function PopChart(rca, status) {
-    let POPD = [];
+  async function PopChart(rca: string, status: string) {
+    let POPD: any[] = [];
     Object.keys(DATATABLE.sites).forEach((a) => {
       POPD = [
         ...POPD,
@@ -468,7 +474,7 @@ const TRAFFIC = React.memo(({ ShowPopup, mode, week, setLOADING }) => {
                   })}
                 </tr>
                 <tr className="uppercas">
-                  {LABELS.map((a, i) => {
+                  {LABELS.map((_, i) => {
                     return (
                       <React.Fragment key={i}>
                         <th
@@ -587,12 +593,12 @@ const TRAFFIC = React.memo(({ ShowPopup, mode, week, setLOADING }) => {
                               .map((a) => PROGRES[a]["p_" + c.toLowerCase()])
                               .reduce((a, b) => a + b) /
                               Object.keys(PROGRES)
-                                .map((a) =>
-                                  PROGRES[a]["p_" + c.toLowerCase()] != 0
-                                    ? 1
-                                    : 0,
-                                )
-                                .reduce((a, b) => a + b) || 0,
+                                  .map((a) =>
+                                    PROGRES[a]["p_" + c.toLowerCase()] != 0
+                                      ? 1
+                                      : 0,
+                                  )
+                                  .reduce((a: number, b: number) => a + b, 0) || 0,
                           )}
                           %
                         </td>
@@ -610,7 +616,6 @@ const TRAFFIC = React.memo(({ ShowPopup, mode, week, setLOADING }) => {
           mode={mode}
           week={week}
           DATATABLE={DATATABLE}
-          LABELS={LABELS}
         ></ActionPlanProgress>
       )}
     </React.Fragment>

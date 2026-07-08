@@ -2,6 +2,7 @@ import { Button, Form, Input, Modal, Select } from "antd";
 import { useCreateUserMutation } from "../rtk/user.rtk";
 import { toast } from "react-toastify";
 import { useUser } from "../hooks/user.hooks";
+import { USER_LEVEL_OPTIONS } from "../constants";
 
 const { Option } = Select;
 
@@ -92,14 +93,7 @@ const ModalAddUser = ({ open, onCancel }) => {
             name="level_user"
             rules={[{ required: true, message: "Masukkan Level User" }]}
           >
-            <Select placeholder="Pilih Level User">
-              <Option value="1">Admin</Option>
-              <Option value="2">TIF HO</Option>
-              <Option value="3">TIF Regional</Option>
-              <Option value="4">Mitra</Option>
-              <Option value="5">TSEL</Option>
-              <Option value="5">Guest</Option>
-            </Select>
+            <Select placeholder="Pilih Level User" options={USER_LEVEL_OPTIONS} />
           </Form.Item>
 
           <Form.Item
