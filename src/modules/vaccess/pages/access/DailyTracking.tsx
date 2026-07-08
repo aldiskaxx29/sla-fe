@@ -171,6 +171,7 @@ const DailyTracking=({start,end})=>{
             try {
                 let res = await fetch(qosmoUrl(`/baseapi/vaccess.php?cmd=daily-tracking-${DAILYMODE.toLowerCase()}&region=${DRegion}&start=${start}&end=${end}`),HEADER)
                 let {data} = await res.json()
+                console.log('dataa', data)
                 setDailyTracking({...data})
                 let clear = []
                 let spike = []

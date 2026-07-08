@@ -268,31 +268,64 @@ const Prediction = ()=>{
         setTBSITE({...TBT})
     }
 
+    // async function PredictionWeekDetail(start,end){
+    //     let res = await fetch(qosmoUrl(`/baseapi/vaccess.php?cmd=prediction-week-detail&start=${start}&end=${end}`),HEADER)
+    //     let {data} = await res.json()
+    //     // console.log('tess', data)
+    //     let TBT = RESETTB
+    //     let dmax = data.map(a=>Number(a.lat));
+    //     let MAX = Math.max(...dmax);
+    //     // console.log(MAX,dmax);
+    //     data.forEach((a)=>{
+    //         try {
+    //             if(Number(a.pl5)>=MAX && TBT[a.region.replace(" ","_")]){
+    //                 TBT[a.region.replace(" ","_")].r_pl5+=1
+    //             }
+    //             if(Number(a.pl15)>=MAX && TBT[a.region.replace(" ","_")]){
+    //                 TBT[a.region.replace(" ","_")].r_pl15+=1
+    //             }
+    //             if(Number(a.lat)>=MAX && TBT[a.region.replace(" ","_")]){
+    //                 TBT[a.region.replace(" ","_")].r_lat+=1
+    //             }
+    //             if(Number(a.jit)>=MAX && TBT[a.region.replace(" ","_")]){
+    //                 TBT[a.region.replace(" ","_")].r_jit+=1
+    //             }
+    //         } catch (error) {
+    //             // console.log(error)
+    //         }
+    //     })        
+    //     setTB({...TBT})
+    //     setPDetail(data)
+    //     PredictionWeek(start,end)
+    // }
+
     async function PredictionWeekDetail(start,end){
         let res = await fetch(qosmoUrl(`/baseapi/vaccess.php?cmd=prediction-week-detail&start=${start}&end=${end}`),HEADER)
         let {data} = await res.json()
         let TBT = RESETTB
-        let dmax = data.map(a=>Number(a.lat));
-        let MAX = Math.max(...dmax);
-        // console.log(MAX,dmax);
+    
         data.forEach((a)=>{
             try {
-                if(Number(a.pl5)>=MAX && TBT[a.region.replace(" ","_")]){
-                    TBT[a.region.replace(" ","_")].r_pl5+=1
+                const region = a.region.replace(" ","_")
+                if(!TBT[region]) return
+                if(a.status_pl !== 'CONSECUTIVE') return
+    
+                if(Number(a.pl5)>0){
+                    TBT[region].r_pl5+=1
                 }
-                if(Number(a.pl15)>=MAX && TBT[a.region.replace(" ","_")]){
-                    TBT[a.region.replace(" ","_")].r_pl15+=1
+                if(Number(a.pl15)>0){
+                    TBT[region].r_pl15+=1
                 }
-                if(Number(a.lat)>=MAX && TBT[a.region.replace(" ","_")]){
-                    TBT[a.region.replace(" ","_")].r_lat+=1
+                if(Number(a.lat)>0){
+                    TBT[region].r_lat+=1
                 }
-                if(Number(a.jit)>=MAX && TBT[a.region.replace(" ","_")]){
-                    TBT[a.region.replace(" ","_")].r_jit+=1
+                if(Number(a.jit)>0){
+                    TBT[region].r_jit+=1
                 }
             } catch (error) {
                 // console.log(error)
             }
-        })        
+        })
         setTB({...TBT})
         setPDetail(data)
         PredictionWeek(start,end)
@@ -305,29 +338,61 @@ const Prediction = ()=>{
         XLSX.writeFile(wb, filename+".xlsx");
     }
 
+    // function PopTable(region,mode){
+    //     setPOPMODE(mode)
+    //     let dmax = PDETAIL.map(a=>Number(a.lat));
+    //     let MAX = Math.max(...dmax);
+    //     if(region=='nationwide'){
+    //         // console.log(PDETAIL.filter(a=>a[mode]>=MAX && [...Object.keys(TBSITE).map(a=>a.replace("_"," "))].includes(a.region)))
+    //         setPOPDATA(PDETAIL.filter(a=>a[mode]>=MAX && [...Object.keys(TBSITE).map(a=>a.replace("_"," "))].includes(a.region)).map(a=>{
+    //         let c=a
+    //         c.pop_value = a['av_'+(mode=='lat' ||mode=='jit' ? mode :'pl')]
+
+    //         if(mode!='lat' && mode!='jit'){
+    //             c.pl_last = a['pl_last'];
+    //         }
+    //         return c}))
+    //     }else{
+    //         setPOPDATA(PDETAIL.filter(a=>a.region==region && a[mode]>=MAX).map(a=>{
+    //         let c=a
+    //         c.pop_value = a['av_'+(mode=='lat' ||mode=='jit' ? mode :'pl')]
+
+    //         if(mode!='lat' && mode!='jit'){
+    //             c.pl_last = a['pl_last'];
+    //         }
+
+    //         return c}))
+    //     }
+    //     setPOP(true);
+    //     if(mode=='pl5'){
+    //         setTITLEPOP("SITE POTENTIAL PACKET LOSS 5%")
+    //     }else if(mode=='pl15'){
+    //         setTITLEPOP("SITE POTENTIAL PACKET LOSS 1-5%")
+    //     }else if(mode=='lat'){
+    //         setTITLEPOP("SITE POTENTIAL LATENCY")
+    //     }else if(mode=='jit'){
+    //         setTITLEPOP("SITE POTENTIAL JITTER")
+    //     }
+    // }
+
     function PopTable(region,mode){
         setPOPMODE(mode)
-        let dmax = PDETAIL.map(a=>Number(a.lat));
-        let MAX = Math.max(...dmax);
+    
         if(region=='nationwide'){
-            // console.log(PDETAIL.filter(a=>a[mode]>=MAX && [...Object.keys(TBSITE).map(a=>a.replace("_"," "))].includes(a.region)))
-            setPOPDATA(PDETAIL.filter(a=>a[mode]>=MAX && [...Object.keys(TBSITE).map(a=>a.replace("_"," "))].includes(a.region)).map(a=>{
+            setPOPDATA(PDETAIL.filter(a=>a.status_pl==='CONSECUTIVE' && Number(a[mode])>0 && [...Object.keys(TBSITE).map(a=>a.replace("_"," "))].includes(a.region)).map(a=>{
             let c=a
             c.pop_value = a['av_'+(mode=='lat' ||mode=='jit' ? mode :'pl')]
-
             if(mode!='lat' && mode!='jit'){
                 c.pl_last = a['pl_last'];
             }
             return c}))
         }else{
-            setPOPDATA(PDETAIL.filter(a=>a.region==region && a[mode]>=MAX).map(a=>{
+            setPOPDATA(PDETAIL.filter(a=>a.region==region && a.status_pl==='CONSECUTIVE' && Number(a[mode])>0).map(a=>{
             let c=a
             c.pop_value = a['av_'+(mode=='lat' ||mode=='jit' ? mode :'pl')]
-
             if(mode!='lat' && mode!='jit'){
                 c.pl_last = a['pl_last'];
             }
-
             return c}))
         }
         setPOP(true);
@@ -406,6 +471,7 @@ const Prediction = ()=>{
         }
     },[MAX_DATE,maxDateReady])
 
+    // console.log('TBSITE',TBSITE)
     return (
         <div className="bg-white h-full text-gray-800 p-2" style={{fontFamily:'Poppins'}}>
             {POP && <Popup title={TITLEPOP} close={setPOP} data={POPDATA} mode={POPMODE}></Popup>}

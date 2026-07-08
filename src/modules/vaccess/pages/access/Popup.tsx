@@ -27,20 +27,19 @@ const Popup = ({title,close,data,mode}) =>{
         "JABOTABEK OUTER" : "12-JABOTABEK OUTER",
     }
     return(
-        <div className="fixed flex top-20 justify-center left-0 right-0 bottom-0">
-            <div className="bg-gray-900 opacity-70 absolute h-full w-full"></div>
-            <div className="bg-white px-3 py-5 mx-auto rounded-sm border border-gray-200 relative h-fit z-2 mt-8 mb-30">
-                <CloseOutlined onClick={()=>close(false)} className="absolute cursor-pointer right-0 text-white bg-red-600 w-8 h-8 flex justify-center items-center rounded-full" style={{color:'#fff',right:-15,top:-20}}></CloseOutlined>
-                <div className="italic text-red-700 font-bold text-md text-center">{title}</div>
-                <div className="flex justify-end">
-                <div onClick={exportExcel} className="cursor-pointer flex items-center gap-1" style={{fontSize:'0.8em'}}>
-                        Export As Excel
-                        <FileExcelFilled style={{color:'green',fontSize:'1.7em'}}></FileExcelFilled>
-                </div>
-                </div>
-                <div className="h-full py-2">
-                {/* <div className="overflow-y-auto scrollbar-thin mb-2" style={{minHeight:'fit-content',maxHeight:'60vh'}}> */}
-                <div className="overflow-y-auto scrollbar-thin mb-2" style={{minHeight:'500px',maxHeight:'700px'}}>
+        <div className="fixed inset-0 z-150 flex justify-center items-start overflow-y-auto py-10">
+            <div className="fixed inset-0 bg-gray-900 opacity-70"></div>
+                <div className="bg-white px-3 py-5 mx-auto rounded-sm border border-gray-200 relative z-10 h-fit max-h-[85vh] flex flex-col">
+                    <CloseOutlined onClick={()=>close(false)} className="absolute cursor-pointer right-0 text-white bg-red-600 w-8 h-8 flex justify-center items-center rounded-full" style={{color:'#fff',right:-15,top:-20}}></CloseOutlined>
+                    <div className="italic text-red-700 font-bold text-md text-center">{title}</div>
+                    <div className="flex justify-end">
+                    <div onClick={exportExcel} className="cursor-pointer flex items-center gap-1" style={{fontSize:'0.8em'}}>
+                            Export As Excel
+                            <FileExcelFilled style={{color:'green',fontSize:'1.7em'}}></FileExcelFilled>
+                    </div>
+                    </div>
+                    <div className="py-2 overflow-hidden flex-1">
+                    <div className="overflow-y-auto scrollbar-thin h-full" style={{maxHeight:'65vh'}}>
                     <table className="w-220 border" id="excel">
                         <thead>
                             <tr>
@@ -69,7 +68,7 @@ const Popup = ({title,close,data,mode}) =>{
                             })}
                         </tbody>
                     </table>
-                </div>
+                    </div>
                 </div>
             </div>
         </div>
