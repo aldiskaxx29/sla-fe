@@ -31,6 +31,14 @@ export default defineConfig({
         secure: false,
         rewrite: (path) => path.replace(/^\/daily-monitoring-api/, ""),
       },
+      // ONX (Tutela) dashboard API — endpoints are auth-free (cookie-only upstream,
+      // called here without credentials). See src/modules/onx.
+      "/onx-api": {
+        target: "http://10.62.205.124",
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/onx-api/, ""),
+      },
     },
     allowedHosts: [
       '10.60.174.187:8089',

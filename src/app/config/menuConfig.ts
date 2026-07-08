@@ -130,7 +130,12 @@ export const MENU_CONFIG: MenuConfigItem[] = [
     path: "onx",
     type: "button",
     activePaths: ["onx"],
-    allowedRoles: ALL_MAIN_MENU_ROLES,
+    allowedRoles: [
+      ...ALL_MAIN_MENU_ROLES,
+      USER_ROLES.VICE_PRESIDENT,
+      USER_ROLES.TSEL,
+      USER_ROLES.GUEST,
+    ],
   },
   {
     key: "telkom-akses",

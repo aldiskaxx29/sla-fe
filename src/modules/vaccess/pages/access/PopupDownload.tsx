@@ -42,7 +42,7 @@ const PopupDownload = ({ close }: PopupDownloadProps) => {
   }, []);
 
   return (
-    <div className="fixed flex top-20 justify-center left-0 right-0 bottom-0">
+    <div className="fixed flex top-20 justify-center left-0 right-0 bottom-0" style={{ zIndex: 1000 }}>
       <div className="bg-gray-900 opacity-70 absolute h-full w-full"></div>
       <div className="bg-white px-3 py-5 mx-auto rounded-sm border border-gray-200 relative h-fit z-2 mt-8 mb-30">
         <CloseOutlined

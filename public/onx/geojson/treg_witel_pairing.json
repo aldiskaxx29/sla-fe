@@ -1,0 +1,250 @@
+[
+  {
+    "treg": "TREG1",
+    "witel": "ACEH"
+  },
+  {
+    "treg": "TREG1",
+    "witel": "BABEL"
+  },
+  {
+    "treg": "TREG1",
+    "witel": "BENGKULU"
+  },
+  {
+    "treg": "TREG1",
+    "witel": "JAMBI"
+  },
+  {
+    "treg": "TREG1",
+    "witel": "LAMPUNG"
+  },
+  {
+    "treg": "TREG1",
+    "witel": "MEDAN"
+  },
+  {
+    "treg": "TREG1",
+    "witel": "RIDAR"
+  },
+  {
+    "treg": "TREG1",
+    "witel": "RIKEP"
+  },
+  {
+    "treg": "TREG1",
+    "witel": "SUMBAR"
+  },
+  {
+    "treg": "TREG1",
+    "witel": "SUMSEL"
+  },
+  {
+    "treg": "TREG1",
+    "witel": "SUMUT"
+  },
+  {
+    "treg": "TREG2",
+    "witel": "BANTEN"
+  },
+  {
+    "treg": "TREG2",
+    "witel": "BEKASI"
+  },
+  {
+    "treg": "TREG2",
+    "witel": "BOGOR"
+  },
+  {
+    "treg": "TREG2",
+    "witel": "JAKBAR"
+  },
+  {
+    "treg": "TREG2",
+    "witel": "JAKPUS"
+  },
+  {
+    "treg": "TREG2",
+    "witel": "JAKSEL"
+  },
+  {
+    "treg": "TREG2",
+    "witel": "JAKTIM"
+  },
+  {
+    "treg": "TREG2",
+    "witel": "JAKUT"
+  },
+  {
+    "treg": "TREG2",
+    "witel": "KARAWANG"
+  },
+  {
+    "treg": "TREG2",
+    "witel": "SUKABUMI"
+  },
+  {
+    "treg": "TREG2",
+    "witel": "TANGERANG"
+  },
+  {
+    "treg": "TREG3",
+    "witel": "BANDUNG"
+  },
+  {
+    "treg": "TREG3",
+    "witel": "BANDUNG BARAT"
+  },
+  {
+    "treg": "TREG3",
+    "witel": "CIREBON"
+  },
+  {
+    "treg": "TREG3",
+    "witel": "KARAWANG"
+  },
+  {
+    "treg": "TREG3",
+    "witel": "SUKABUMI"
+  },
+  {
+    "treg": "TREG3",
+    "witel": "TASIKMALAYA"
+  },
+  {
+    "treg": "TREG4",
+    "witel": "KUDUS"
+  },
+  {
+    "treg": "TREG4",
+    "witel": "MAGELANG"
+  },
+  {
+    "treg": "TREG4",
+    "witel": "PEKALONGAN"
+  },
+  {
+    "treg": "TREG4",
+    "witel": "PURWOKERTO"
+  },
+  {
+    "treg": "TREG4",
+    "witel": "SEMARANG"
+  },
+  {
+    "treg": "TREG4",
+    "witel": "SOLO"
+  },
+  {
+    "treg": "TREG4",
+    "witel": "YOGYAKARTA"
+  },
+  {
+    "treg": "TREG5",
+    "witel": "DENPASAR"
+  },
+  {
+    "treg": "TREG5",
+    "witel": "JEMBER"
+  },
+  {
+    "treg": "TREG5",
+    "witel": "KEDIRI"
+  },
+  {
+    "treg": "TREG5",
+    "witel": "MADIUN"
+  },
+  {
+    "treg": "TREG5",
+    "witel": "MADURA"
+  },
+  {
+    "treg": "TREG5",
+    "witel": "MALANG"
+  },
+  {
+    "treg": "TREG5",
+    "witel": "NTB"
+  },
+  {
+    "treg": "TREG5",
+    "witel": "NTT"
+  },
+  {
+    "treg": "TREG5",
+    "witel": "PASURUAN"
+  },
+  {
+    "treg": "TREG5",
+    "witel": "SIDOARJO"
+  },
+  {
+    "treg": "TREG5",
+    "witel": "SINGARAJA"
+  },
+  {
+    "treg": "TREG5",
+    "witel": "SURABAYA UTARA"
+  },
+  {
+    "treg": "TREG6",
+    "witel": "BALIKPAPAN"
+  },
+  {
+    "treg": "TREG6",
+    "witel": "KALBAR"
+  },
+  {
+    "treg": "TREG6",
+    "witel": "KALSEL"
+  },
+  {
+    "treg": "TREG6",
+    "witel": "KALTARA"
+  },
+  {
+    "treg": "TREG6",
+    "witel": "KALTENG"
+  },
+  {
+    "treg": "TREG6",
+    "witel": "SAMARINDA"
+  },
+  {
+    "treg": "TREG7",
+    "witel": "GORONTALO"
+  },
+  {
+    "treg": "TREG7",
+    "witel": "MALUKU"
+  },
+  {
+    "treg": "TREG7",
+    "witel": "MALUKU UTARA"
+  },
+  {
+    "treg": "TREG7",
+    "witel": "PAPUA"
+  },
+  {
+    "treg": "TREG7",
+    "witel": "PAPUA BARAT"
+  },
+  {
+    "treg": "TREG7",
+    "witel": "SULAWESI BARAT"
+  },
+  {
+    "treg": "TREG7",
+    "witel": "SULAWESI TENGAH"
+  },
+  {
+    "treg": "TREG7",
+    "witel": "SULAWESI TENGGARA"
+  },
+  {
+    "treg": "TREG7",
+    "witel": "SULAWESI UTARA"
+  }
+]

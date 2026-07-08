@@ -4,7 +4,7 @@ import {
 
 const PopupTTR = ({close,data}) =>{
     return(
-        <div className="fixed flex top-20 justify-center left-0 right-0 bottom-0">
+        <div className="fixed flex top-20 justify-center left-0 right-0 bottom-0" style={{ zIndex: 1000 }}>
             <div className="bg-gray-900 opacity-70 absolute h-full w-full"></div>
             <div className="bg-white px-3 py-5 mx-auto rounded-sm border border-gray-200 relative h-fit z-2 top-10 mb-15">
                 <CloseOutlined onClick={()=>close(false)} className="absolute cursor-pointer right-0 text-white bg-red-600 w-8 h-8 flex justify-center items-center rounded-full" style={{color:'#fff',right:-15,top:-20}}></CloseOutlined>

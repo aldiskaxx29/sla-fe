@@ -3,7 +3,10 @@ import { Navigate, RouteObject } from "react-router-dom";
 
 import { AppRouteGuard } from "@/app/components";
 
+const TutelaLayout = lazy(() => import("@/modules/tutela/pages/TutelaLayout"));
 const Tutela = lazy(() => import("@/modules/tutela/pages/TutelaPage"));
+const MobileExperience = lazy(() => import("@/modules/tutela/pages/MobileExperiencePage"));
+const IspProvider = lazy(() => import("@/modules/tutela/pages/IspProviderPage"));
 
 const useTutelaRouter = (): RouteObject[] => {
   return [
@@ -11,9 +14,23 @@ const useTutelaRouter = (): RouteObject[] => {
       path: "onx",
       element: (
         <AppRouteGuard>
-          <Tutela />
+          <TutelaLayout />
         </AppRouteGuard>
       ),
+      children: [
+        {
+          index: true,
+          element: <Tutela />,
+        },
+        {
+          path: "mobile-experience",
+          element: <MobileExperience />,
+        },
+        {
+          path: "isp-provider",
+          element: <IspProvider />,
+        },
+      ],
     },
     {
       path: "onx/*",
