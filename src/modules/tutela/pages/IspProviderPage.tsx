@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, useRef } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { Select, DatePicker, Spin, Table } from "antd";
 import {
   CompassOutlined,
@@ -318,7 +318,7 @@ const IspProviderPage = () => {
             type: "fill",
             source: "regions",
             paint: {
-              "fill-color": matchExpr,
+              "fill-color": matchExpr as any,
               "fill-opacity": 0.6,
             },
           });
@@ -1171,7 +1171,7 @@ const IspProviderPage = () => {
                         },
                       },
                     ]}
-                    rowKey={(record) => record.location}
+                    rowKey={(record: any) => record.location}
                     pagination={{ pageSize: 12 }}
                     className="border border-slate-100"
                   />

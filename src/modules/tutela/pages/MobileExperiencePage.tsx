@@ -398,7 +398,7 @@ const MobileExperiencePage = () => {
             type: "fill",
             source: "regions",
             paint: {
-              "fill-color": matchExpr,
+              "fill-color": matchExpr as any,
               "fill-opacity": 0.6,
             },
           });
@@ -1068,7 +1068,7 @@ const MobileExperiencePage = () => {
                         },
                       },
                     ]}
-                    rowKey={(record) => record.location}
+                    rowKey={(record: any) => record.location}
                     pagination={{ pageSize: 10 }}
                     className="border border-slate-100"
                   />
