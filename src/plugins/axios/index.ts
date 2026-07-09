@@ -98,7 +98,19 @@ _axios.interceptors.response.use(
   (value: AxiosResponse<unknown>) => {
     return value;
   },
-  (error) => {
+  (error: AxiosError) => {
+    // On 401 Unauthorized: clear the stored session and send the user to login.
+    if (error.response?.status === 401) {
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("user_data");
+      if (
+        typeof window !== "undefined" &&
+        window.location.pathname !== "/login"
+      ) {
+        window.location.href = "/login";
+      }
+    }
+
     return Promise.reject(
       new Error(JSON.stringify(axios_handleErrorResponse(error)))
     );
