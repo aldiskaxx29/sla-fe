@@ -21,9 +21,9 @@ const TutelaLayout = () => {
   const activeTab = getActiveTab();
 
   return (
-    <div className="flex flex-col min-h-[calc(100vh-80px)] bg-slate-50 text-slate-800 p-6">
+    <div className="flex flex-col h-[calc(100vh-80px)] bg-slate-50 text-slate-800 p-6 overflow-hidden">
       {/* Top Module Header Navigation */}
-      <div className="flex flex-row gap-4 mb-6 bg-white p-3 rounded-xl border border-slate-200 shadow-xs flex-wrap">
+      <div className="flex flex-row gap-4 mb-6 bg-white p-3 rounded-xl border border-slate-200 shadow-xs flex-wrap flex-shrink-0">
         <button
           onClick={() => navigate("/onx")}
           className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold transition-all duration-150 cursor-pointer ${
@@ -60,7 +60,7 @@ const TutelaLayout = () => {
       </div>
 
       {/* Renders Active Sub-Page Element */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col overflow-hidden">
         <Outlet />
       </div>
     </div>
