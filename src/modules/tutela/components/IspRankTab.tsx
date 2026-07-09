@@ -123,7 +123,8 @@ const KpiBarChart: React.FC<{ data: RankEntry[] }> = ({ data }) => {
             opacity: d.mean != null ? 1 : 0,
           },
         })),
-        barWidth: 14,
+        barWidth: 18,
+        barCategoryGap: "60%",
         showBackground: true,
         backgroundStyle: { color: "#f1f5f9" },
         label: {
@@ -269,7 +270,7 @@ const KpiCard: React.FC<{ cardDef: KpiCardDef; data: RankEntry[] | undefined }> 
       <div className="border-t border-slate-100 mx-3" />
 
       {/* Bar Chart */}
-      <div className="flex-1 min-h-[110px] px-1 py-1">
+      <div className="flex-1 min-h-[150px] px-1 py-2">
         {data && data.some((d) => d.mean != null) ? (
           <KpiBarChart data={data} />
         ) : (
