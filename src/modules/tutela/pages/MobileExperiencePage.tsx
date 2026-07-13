@@ -117,6 +117,7 @@ const MobileExperiencePage = () => {
     mapWinnerColors,
     handleOperatorToggle,
     isRangeTime,
+    benchmarkSummary,
   } = useMobileExperience();
 
   return (
@@ -272,6 +273,7 @@ const MobileExperiencePage = () => {
                   mapWinnerColors={mapWinnerColors}
                   mapDataList={mapDataList}
                   getOperatorConfig={getOperatorConfig}
+                  benchmarkSummary={benchmarkSummary}
                 />
               </div>
             )}

@@ -62,7 +62,7 @@ export const useMobileExperience = () => {
   const [timeRangeStart, setTimeRangeStart] = useState<string>("");
   const [timeRangeEnd, setTimeRangeEnd] = useState<string>("");
 
-  const [mapType, setMapType] = useState<"experience" | "benchmark">("experience");
+  const [mapType, setMapType] = useState<"experience" | "benchmark">("benchmark");
   const [selectedBenchmarks, setSelectedBenchmarks] = useState<string[]>(["win", "par", "lose", "unrecorded"]);
 
   useEffect(() => {
@@ -73,7 +73,7 @@ export const useMobileExperience = () => {
     } else {
       setLevel("national");
     }
-  }, [activeSubTab]);
+  }, [activeSubTab, level]);
 
   useEffect(() => {
     if (mapType === "benchmark" && granularity !== "7 days" && granularity !== "30 days") {
@@ -86,6 +86,7 @@ export const useMobileExperience = () => {
   const [regions, setRegions] = useState<string[]>([]);
   const [cities, setCities] = useState<string[]>([]);
   const [defaultTimes, setDefaultTimes] = useState<Record<string, string>>({});
+  const [totalCityCount, setTotalCityCount] = useState<number>(0);
 
   // Trend specific filter states
   const [category, setCategory] = useState<"operator" | "location">("operator");
@@ -97,11 +98,12 @@ export const useMobileExperience = () => {
     if (regions.length > 0 && selectedLocations.length === 0) {
       setSelectedLocations(regions.slice(0, 5));
     }
-  }, [regions]);
+  }, [regions, selectedLocations]);
 
   // Data states
   const [loading, setLoading] = useState(false);
   const [mapDataList, setMapDataList] = useState<any[]>([]);
+  const [benchmarkSummary, setBenchmarkSummary] = useState<any[]>([]);
   const [trendChartDataList, setTrendChartDataList] = useState<any[]>([]);
   const [cityLoseList, setCityLoseList] = useState<any | null>(null);
   const [cityLoseFlagList, setCityLoseFlagList] = useState<any[]>([]);
@@ -122,9 +124,10 @@ export const useMobileExperience = () => {
       .then((res) => res.json())
       .then((data) => {
         const uniqueCities = Array.from(
-          new Set<string>(data.map((item: any) => item.city)),
+          new Set<string>(data.map((item: any) => item.kabupaten)),
         ).sort();
         setCities(uniqueCities);
+        setTotalCityCount(uniqueCities.length);
       })
       .catch((err) => console.error("Failed to load cities:", err));
 
@@ -147,10 +150,16 @@ export const useMobileExperience = () => {
             }
           });
           setDefaultTimes(defaults);
-          if (defaults["7 days"]) {
-            setTime(defaults["7 days"]);
-            setTimeRangeEnd(defaults["7 days"]);
-            setTimeRangeStart(String(Number(defaults["7 days"]) - 4));
+          const pickGran = defaults["7 days"]
+            ? "7 days"
+            : defaults["30 days"]
+            ? "30 days"
+            : null;
+          if (pickGran) {
+            if (pickGran !== granularity) setGranularity(pickGran as any);
+            setTime(defaults[pickGran]);
+            setTimeRangeEnd(defaults[pickGran]);
+            setTimeRangeStart(String(Number(defaults[pickGran]) - 4));
           }
         }
       })
@@ -203,29 +212,69 @@ export const useMobileExperience = () => {
         .catch((err) => console.error("Map data fetch failed:", err))
         .finally(() => setLoading(false));
     } else {
-      // Benchmark Mode
+      // Benchmark Mode - fetches current week and prev week for delta computation
       const mappedKpi = getBenchmarkKpi(kpi);
-      const params = new URLSearchParams({
-        kpi: mappedKpi,
-        granularity: apiGranularity,
-        level: level,
-        columns: 'null as "3", yearweek, region, location, telkomsel, xl, "Indosat Ooredoo" as indosat, null as smartfren, benchmark, case when winner = \'Indosat Ooredoo\' then \'indosat\' else winner end as winner',
-        filters: `yearweek = ${time}`
-      });
+      
+      const sortedWeeks = [...weeksList].map(Number).sort((a, b) => b - a);
+      const curIdx = sortedWeeks.indexOf(Number(time));
+      const prevWeek =
+        curIdx >= 0 && curIdx < sortedWeeks.length - 1
+          ? sortedWeeks[curIdx + 1]
+          : null;
 
-      fetch(`/onx-api/api/v2/onx-benchmark-mobile/${mappedKpi}-${apiGranularity}-kabupaten?${params.toString()}`)
-        .then((res) => res.json())
-        .then((resData) => {
-          if (resData.statusCode === 200 && resData.data) {
-            setMapDataList(resData.data);
-          } else {
-            setMapDataList([]);
-          }
+      const buildUrl = (week: number | string) => {
+        const params = new URLSearchParams({
+          kpi: mappedKpi,
+          granularity: apiGranularity,
+          columns: 'null as "3", yearweek, region, location, telkomsel, xl, "Indosat Ooredoo" as indosat, null as smartfren, benchmark, case when winner = \'Indosat Ooredoo\' then \'indosat\' else winner end as winner',
+          filters: `yearweek = ${week}`
+        });
+        return `/onx-api/api/v2/onx-benchmark-mobile/${mappedKpi}-${apiGranularity}-kabupaten?${params.toString()}`;
+      };
+
+      const fetchWeek = (week: number | string | null) =>
+        week == null
+          ? Promise.resolve([] as any[])
+          : fetch(buildUrl(week))
+              .then((res) => res.json())
+              .then((resData) =>
+                resData.statusCode === 200 && resData.data ? resData.data : []
+              )
+              .catch(() => []);
+
+      Promise.all([fetchWeek(time), fetchWeek(prevWeek)])
+        .then(([curData, prevData]) => {
+          setMapDataList(curData);
+
+          const countByStatus = (rows: any[]) => {
+            const counts: Record<string, number> = {};
+            rows.forEach((r) => {
+              const b = (r.benchmark ?? "").toLowerCase();
+              if (b) counts[b] = (counts[b] ?? 0) + 1;
+            });
+            return counts;
+          };
+
+          const curCounts = countByStatus(curData);
+          const prevCounts = countByStatus(prevData);
+          const denom = totalCityCount || curData.length || 1;
+
+          const summary = ["win", "par", "lose", "unrecorded"]
+            .filter((b) => curCounts[b] || prevCounts[b])
+            .map((b) => ({
+              benchmark: b,
+              value: curCounts[b] ?? 0,
+              percentage: ((curCounts[b] ?? 0) / denom) * 100,
+              prevValue: prevCounts[b] ?? 0,
+              prevPercentage: ((prevCounts[b] ?? 0) / denom) * 100,
+            }));
+
+          setBenchmarkSummary(summary);
         })
         .catch((err) => console.error("Benchmark map data fetch failed:", err))
         .finally(() => setLoading(false));
     }
-  }, [activeSubTab, granularity, time, mapType, level, kpi]);
+  }, [activeSubTab, granularity, time, mapType, level, kpi, weeksList, totalCityCount]);
 
   // Fetch Trend and City Lose Data
   useEffect(() => {
@@ -422,6 +471,7 @@ export const useMobileExperience = () => {
     setSelectedLocations,
     loading,
     mapDataList,
+    benchmarkSummary,
     trendChartDataList,
     cityLoseList,
     cityLoseFlagList,

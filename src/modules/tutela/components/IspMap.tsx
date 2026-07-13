@@ -68,11 +68,14 @@ const buildFillColor = (
   } else {
     if (mapDataList.length === 0) return "#e2e8f0";
     const expr: any[] = ["match", ["downcase", ["get", propKey]]];
+    const seen = new Set<string>();
     mapDataList.forEach((row) => {
       if (row.location && row.benchmark) {
         const b = row.benchmark.toLowerCase();
-        if (selectedBenchmarks.includes(b)) {
-          expr.push(row.location.toLowerCase(), BENCHMARK_COLORS[b] || "#e2e8f0");
+        const locKey = row.location.toLowerCase();
+        if (selectedBenchmarks.includes(b) && !seen.has(locKey)) {
+          seen.add(locKey);
+          expr.push(locKey, BENCHMARK_COLORS[b] || "#e2e8f0");
         }
       }
     });

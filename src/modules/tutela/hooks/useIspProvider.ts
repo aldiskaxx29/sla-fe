@@ -418,6 +418,15 @@ export const useIspProvider = () => {
     if (mapDataList.length === 0) return {};
 
     const winners: Record<string, string> = {};
+    const isLowerBetter = [
+      "latency",
+      "jitter",
+      "packetLoss",
+      "packetloss",
+    ].includes(kpi);
+    const selectedSet = new Set(
+      selectedProviders.map((p) => p.toLowerCase().trim())
+    );
 
     if (providerPriority === "all") {
       // Group provider rows per location.
@@ -430,31 +439,14 @@ export const useIspProvider = () => {
         }
       });
 
-      const isLowerBetter = [
-        "latency",
-        "jitter",
-        "packetLoss",
-        "packetloss",
-      ].includes(kpi);
-
-      // Winner is computed across the full canonical provider list — NOT the
-      // sidebar selection — to match the reference app. A provider row is only
-      // considered when its name maps to a canonical provider id (this excludes
-      // API extras like "Indihome - Telkomsel", "Indibiz", etc.).
-      const canonicalIds = new Set(
-        winnerProviderList("all").map((p) => p.id)
-      );
-
       Object.keys(grouped).forEach((locKey) => {
         const rows = grouped[locKey];
         let bestVal = isLowerBetter ? Infinity : -Infinity;
         let winnerOp = "";
 
         rows.forEach((row) => {
-          // Reference matches the provider name exactly against the canonical
-          // list, which excludes API extras (e.g. "Indihome - Telkomsel").
           const providerId = (row.provider ?? "").toLowerCase().trim();
-          if (!canonicalIds.has(providerId)) return;
+          if (!selectedSet.has(providerId)) return;
           const val = row[kpi];
           if (val === undefined || val === null) return;
           if (isLowerBetter ? val < bestVal : val > bestVal) {
@@ -468,16 +460,43 @@ export const useIspProvider = () => {
         }
       });
     } else {
-      // Nine mode: the winner is provided directly by the API.
+      // Nine mode: compute winner from selected providers' column values.
+      const COLUMN_TO_PROVIDER: Record<string, string> = {
+        biznet: "biznet",
+        cbn: "cbn",
+        iconnets: "iconnets",
+        indihome: "indihome",
+        indosathifi: "indosat hifi",
+        megavision: "megavision",
+        myrepublic: "myrepublic",
+        oxygen_id: "oxygen.id",
+        xlhome: "xl home",
+      };
+
       mapDataList.forEach((row) => {
-        if (row.location && row.winner) {
-          winners[row.location] = getProviderConfig(row.winner).color;
+        if (!row.location) return;
+
+        let bestVal = isLowerBetter ? Infinity : -Infinity;
+        let winnerOp = "";
+
+        Object.entries(COLUMN_TO_PROVIDER).forEach(([col, providerId]) => {
+          if (!selectedSet.has(providerId)) return;
+          const val = row[col];
+          if (val === undefined || val === null) return;
+          if (isLowerBetter ? val < bestVal : val > bestVal) {
+            bestVal = val;
+            winnerOp = providerId;
+          }
+        });
+
+        if (winnerOp) {
+          winners[row.location] = getProviderConfig(winnerOp).color;
         }
       });
     }
 
     return winners;
-  }, [mapDataList, kpi, mapType, providerPriority]);
+  }, [mapDataList, kpi, mapType, providerPriority, selectedProviders]);
 
   const handleProviderToggle = (prov: string) => {
     setSelectedProviders((prev) =>
