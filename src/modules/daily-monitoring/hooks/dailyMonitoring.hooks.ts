@@ -277,14 +277,13 @@ const useDailyMonitoringSummary = () => {
       //     Accept: "application/json",
       //   },
       // });
-      const token = localStorage.getItem('access_token');
-      console.log('token', token)
+      const token = import.meta.env.VITE_DAILY_MONITORING_TOKEN || localStorage.getItem('access_token');
       const response = await fetch(SUMMARY_ENDPOINT, {
-            method: "GET",
-            headers: {
-            Accept: "application/json",
-            "Authorization": `Bearer ${token}`  // <-- TAMBAHKAN INI
-          },
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       if (!response.ok) {
