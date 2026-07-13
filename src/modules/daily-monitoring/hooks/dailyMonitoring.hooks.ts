@@ -271,11 +271,20 @@ const useDailyMonitoringSummary = () => {
     setError(null);
 
     try {
+      // const response = await fetch(SUMMARY_ENDPOINT, {
+      //   method: "GET",
+      //   headers: {
+      //     Accept: "application/json",
+      //   },
+      // });
+      const token = localStorage.getItem('access_token');
+      console.log('token', token)
       const response = await fetch(SUMMARY_ENDPOINT, {
-        method: "GET",
-        headers: {
-          Accept: "application/json",
-        },
+            method: "GET",
+            headers: {
+            Accept: "application/json",
+            "Authorization": `Bearer ${token}`  // <-- TAMBAHKAN INI
+          },
       });
 
       if (!response.ok) {
