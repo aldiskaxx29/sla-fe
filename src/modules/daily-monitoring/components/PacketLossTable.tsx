@@ -284,13 +284,31 @@ const PacketLossTable = ({
                       ? "bg-white"
                       : "bg-slate-50";
 
+                  const isArea = row.region?.startsWith("Area");
+                  const isAreaOrTotal =
+                    row.region?.startsWith("Area") ||
+                    row.isTotalRow ||
+                    row.region === "TOTAL";
+
                   return (
                     <tr key={`${row.region}-${index}`} className={rowClass}>
                       <td className="border border-[#D8DEE6] px-4 py-3 font-medium text-slate-700">
                         {row.no}
                       </td>
-                      <td
+                      {/* <td
                         className={`border border-[#D8DEE6] px-4 py-3 text-slate-800 ${row.isTotalRow ? "text-center uppercase" : "font-semibold text-left"}`}
+                      >
+                        {row.region}
+                      </td> */}
+
+                      <td
+                        className={`border border-[#D8DEE6] px-4 py-3 text-slate-800 ${
+                          row.isTotalRow
+                            ? "text-center uppercase"
+                            : row.downloadType === "area"
+                              ? "font-semibold text-left"
+                              : "font-normal text-left"
+                        }`}
                       >
                         {row.region}
                       </td>
@@ -347,7 +365,7 @@ const PacketLossTable = ({
                           row.notClear
                         )}
                       </td>
-                      <td className="border border-[#D8DEE6] px-4 py-3">
+                      {/* <td className="border border-[#D8DEE6] px-4 py-3">
                         <div className="dm-pl-ach-cell flex h-full items-center justify-center">
                           <span
                             className={`dm-badge dm-pl-ach-badge inline-flex min-w-[104px] items-center justify-center rounded-full px-3.5 py-2 font-bold leading-none`}
@@ -358,7 +376,22 @@ const PacketLossTable = ({
                             {row.ach}
                           </span>
                         </div>
-                      </td>
+                      </td> */}
+
+                    <td className="border border-[#D8DEE6] px-4 py-3">
+                      <div className="dm-pl-ach-cell flex h-full items-center justify-center">
+                      <span
+  className={`dm-badge dm-pl-ach-badge inline-flex min-w-[104px] items-center justify-center rounded-full px-3.5 py-2 leading-none ${
+    isAreaOrTotal ? "font-semibold" : "font-normal"
+  }`}
+>
+  <span
+    className={`mr-2 block aspect-square h-4 w-4 shrink-0 rounded-full ${getTrafficLightClass(row.achLevel)}`}
+  />
+  {row.ach}
+</span>
+                      </div>
+                    </td>
                       <td className="border border-[#D8DEE6] px-4 py-3 text-left text-slate-700">
                         {row.remark || "-"}
                       </td>
