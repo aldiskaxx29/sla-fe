@@ -1,8 +1,33 @@
 import type { PacketLossRow } from "../types";
 import { axios } from "@/plugins/axios";
 import { DownloadOutlined } from "@ant-design/icons";
-import { Button, Switch } from "antd";
+import { Button, Switch, Modal, Table, Input } from "antd";
 import { useState } from "react";
+
+const ExpandableCell = ({ text, maxLength = 40 }: { text: string; maxLength?: number }) => {
+  const [expanded, setExpanded] = useState(false);
+  if (!text || text.length <= maxLength) {
+    return <span>{text}</span>;
+  }
+
+  return (
+    <span>
+      <span>{expanded ? text : `${text.slice(0, maxLength)}... `}</span>
+      <Button
+        type="link"
+        size="small"
+        style={{ padding: 0, height: "auto", fontSize: "inherit", lineHeight: "inherit", verticalAlign: "baseline" }}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setExpanded(!expanded);
+        }}
+      >
+        {expanded ? "Show Less" : "Show More"}
+      </Button>
+    </span>
+  );
+};
 
 type PacketLossTableProps = {
   rows?: PacketLossRow[];
@@ -48,7 +73,21 @@ const PacketLossTable = ({
   ];
   const tableRows = rows ?? [];
   const skeletonRows = Array.from({ length: 4 }, (_, index) => index);
+  
   const [exportingKey, setExportingKey] = useState<string | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalLoading, setModalLoading] = useState(false);
+  const [modalData, setModalData] = useState<any[]>([]);
+  const [modalTitle, setModalTitle] = useState("");
+  const [activeDetails, setActiveDetails] = useState<{ type: "region" | "area"; value: string } | null>(null);
+  const [searchText, setSearchText] = useState("");
+
+  const filteredModalData = modalData.filter((item) => {
+    if (!searchText) return true;
+    return Object.values(item).some((val) =>
+      String(val || "").toLowerCase().includes(searchText.toLowerCase())
+    );
+  });
 
   const nextFrame = () =>
     new Promise<void>((resolve) => {
@@ -74,6 +113,95 @@ const PacketLossTable = ({
 
     const separator = url.includes("?") ? "&" : "?";
     return `${url}${separator}pl=${encodeURIComponent(pl)}`;
+  };
+
+  const getColumns = (data: any[]) => {
+    if (!data || data.length === 0) return [];
+    const first = data[0];
+    const keys = Object.keys(first).filter((key) => key !== "no" && key !== "id");
+    const generated = keys.map((key) => {
+      let title = key.replace(/_/g, " ").toUpperCase();
+      if (key === "site_id") title = "Site ID";
+      if (key === "site_name") title = "Site Name";
+      if (key === "region") title = "Region";
+      if (key === "area") title = "Area";
+      if (key === "pl") title = "Packet Loss";
+      if (key === "p5") title = "PL 5%";
+      if (key === "p15") title = "PL 1-5%";
+
+      let colWidth = 110;
+      if (key === "site_name") colWidth = 350;
+      if (key === "site_id") colWidth = 150;
+      if (key === "region") colWidth = 120;
+      if (key === "area") colWidth = 120;
+
+      return {
+        title,
+        dataIndex: key,
+        key,
+        width: colWidth,
+        onHeaderCell: () => ({
+          style: { whiteSpace: "nowrap" },
+        }),
+        render: (value: any) => {
+          if (typeof value === "string") {
+            return <ExpandableCell text={value} maxLength={40} />;
+          }
+          return value;
+        },
+        sorter: (a: any, b: any) => {
+          const valA = a[key];
+          const valB = b[key];
+          if (typeof valA === "number" && typeof valB === "number") {
+            return valA - valB;
+          }
+          return String(valA || "").localeCompare(String(valB || ""));
+        },
+      };
+    });
+
+    const indexColumn = {
+      title: "No",
+      key: "row_index",
+      width: 70,
+      onHeaderCell: () => ({
+        style: { whiteSpace: "nowrap" },
+      }),
+      render: (_text: any, _record: any, index: number) => index + 1,
+    };
+
+    return [indexColumn, ...generated];
+  };
+
+  const fetchSiteDetails = async (type: "region" | "area", value: string) => {
+    setSearchText("");
+    setModalLoading(true);
+    setModalVisible(true);
+    setModalData([]);
+
+    const formattedType = type === "region" ? "Region" : "Area";
+    const plTitle = pl ? ` (PL ${pl === "p5" ? "5%" : "1-5%"})` : "";
+    setModalTitle(`Site Detail - ${formattedType}: ${value}${plTitle}`);
+
+    try {
+      const queryValue = type === "region" ? value.toLowerCase() : value;
+      const baseApiUrl = `daily-monitoring/pl-quality-cnop/sites?type=${encodeURIComponent(type)}&value=${encodeURIComponent(queryValue)}`;
+      const url = appendPlQuery(baseApiUrl);
+      
+      const response = await axios<any>(url, "get", {});
+
+      if (response.ok && response.result) {
+        const data = Array.isArray(response.result) ? response.result : (response.result.data || []);
+        setModalData(data);
+      } else {
+        setModalData([]);
+      }
+    } catch (err) {
+      console.error("Failed to fetch site details:", err);
+      setModalData([]);
+    } finally {
+      setModalLoading(false);
+    }
   };
 
   const downloadBlob = async (url: string, fallbackFileName: string) => {
@@ -335,13 +463,8 @@ const PacketLossTable = ({
                             type="text"
                             size="small"
                             loading={
-                              exportingKey ===
-                              buildDownloadKey(
-                                row.downloadType,
-                                row.downloadType === "region"
-                                  ? row.region
-                                  : row.no,
-                              )
+                              (modalLoading || exportingKey === buildDownloadKey(row.downloadType, row.downloadType === "region" ? row.region : row.no)) &&
+                              activeDetails?.value === (row.downloadType === "region" ? row.region : row.no)
                             }
                             className="daily-monitoring-not-clear-button h-auto p-0 text-slate-700 hover:text-blue-600"
                             style={{
@@ -351,12 +474,10 @@ const PacketLossTable = ({
                             onClick={(event) => {
                               event.preventDefault();
                               event.stopPropagation();
-                              void downloadPacketLossRowFile(
-                                row.downloadType as "region" | "area",
-                                row.downloadType === "region"
-                                  ? row.region
-                                  : row.no,
-                              );
+                              const type = row.downloadType as "region" | "area";
+                              const value = row.downloadType === "region" ? row.region : row.no;
+                              setActiveDetails({ type, value });
+                              void fetchSiteDetails(type, value);
                             }}
                           >
                             {row.notClear}
@@ -418,6 +539,52 @@ const PacketLossTable = ({
           </a>
         </p>
       </div>
+
+      <Modal
+        title={<span className="text-xl font-bold text-slate-800">{modalTitle}</span>}
+        open={modalVisible}
+        onCancel={() => setModalVisible(false)}
+        width={1000}
+        footer={[
+          <Button key="close" onClick={() => setModalVisible(false)}>
+            Close
+          </Button>,
+          <Button
+            key="download"
+            type="primary"
+            icon={<DownloadOutlined />}
+            loading={exportingKey === buildDownloadKey(activeDetails?.type || "", activeDetails?.value || "")}
+            onClick={() => {
+              if (activeDetails) {
+                void downloadPacketLossRowFile(activeDetails.type, activeDetails.value);
+              }
+            }}
+          >
+            Download Excel
+          </Button>
+        ]}
+      >
+        <div className="mt-4 flex flex-col gap-4">
+          <Input.Search
+            placeholder="Search by Site ID, Name, Region, Area, etc..."
+            allowClear
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+            onSearch={(value) => setSearchText(value)}
+            style={{ width: "100%", maxWidth: 360 }}
+          />
+          <div className="overflow-auto max-h-[60vh]">
+            <Table
+              dataSource={filteredModalData}
+              columns={getColumns(modalData)}
+              loading={modalLoading}
+              rowKey={(record, idx) => record.site_id || record.id || idx}
+              pagination={{ pageSize: 10, showSizeChanger: true }}
+              scroll={{ x: "max-content" }}
+            />
+          </div>
+        </div>
+      </Modal>
     </section>
   );
 };

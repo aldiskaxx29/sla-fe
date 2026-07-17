@@ -601,8 +601,8 @@ const Prediction = ()=>{
                 </div>
             </div>
             <DailyTracking 
-              start={getRange7Hari(getStartEnd(new Date(MAX_DATE)).start).start_date} 
-              end={getRange7Hari(getStartEnd(new Date(MAX_DATE)).start).end_date}
+              start={getStartEnd(new Date(MAX_DATE)).start} 
+              end={getStartEnd(new Date(MAX_DATE)).end}
               setPOP={setPOP}
               setTITLEPOP={setTITLEPOP}
             />

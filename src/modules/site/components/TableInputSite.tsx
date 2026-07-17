@@ -192,6 +192,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
       <SearchOutlined style={{ color: filtered ? "#1677ff" : undefined }} />
     ),
     onFilter: (value, record) =>
+      Boolean((record as { __skeleton?: boolean }).__skeleton) ||
       record[dataIndex]
         ?.toString()
         .toLowerCase()
@@ -1007,12 +1008,44 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
                     (pagination.current - 1) * pagination.pageSize + index + 1
                   );
                 }
-                const statusDouble =
-                  record.exclude > 1 ||
-                  record.status_latency > 1 ||
-                  record.status_jitter > 1 ||
-                  // record.status_packetloss_15 > 1 ||
-                  record.status_packetloss > 1;
+                let statusDouble = false;
+                let isChecked = false;
+
+                if (parameter?.includes("packetloss")) {
+                  statusDouble =
+                    Number(record.exclude) > 1 ||
+                    Number(record.status_packetloss_15) > 1 ||
+                    Number(record.status_packetloss_5) > 1;
+                  isChecked =
+                    record.exclude === 2 ||
+                    record.status_packetloss_15 === 2 ||
+                    record.status_packetloss_5 === 2;
+                } else if (parameter?.includes("jitter")) {
+                  statusDouble =
+                    Number(record.exclude) > 1 ||
+                    Number(record.status_jitter) > 1;
+                  isChecked =
+                    record.exclude === 2 ||
+                    record.status_jitter === 2;
+                } else if (parameter?.includes("latency")) {
+                  statusDouble =
+                    Number(record.exclude) > 1 ||
+                    Number(record.status_latency) > 1;
+                  isChecked =
+                    record.exclude === 2 ||
+                    record.status_latency === 2;
+                } else {
+                  statusDouble =
+                    Number(record.exclude) > 1 ||
+                    Number(record.status_latency) > 1 ||
+                    Number(record.status_jitter) > 1 ||
+                    Number(record.status_packetloss) > 1;
+                  isChecked =
+                    record.exclude === 2 ||
+                    record.status_latency === 2 ||
+                    record.status_packetloss === 2 ||
+                    record.status_jitter === 2;
+                }
                 if (column.dataIndex?.startsWith("site") && statusDouble)
                   return (
                     <div className="flex justify-center items-center gap-2">
@@ -1024,13 +1057,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
                   // return <Checkbox />;
                   return (
                     <Checkbox
-                      checked={
-                        record.exclude === 2 ||
-                        record.status_latency === 2 ||
-                        record.status_packetloss === 2 ||
-                        // record.status_packetloss_15 === 2 ||
-                        record.status_jitter === 2
-                      }
+                      checked={isChecked}
                       // disabled={!editable} // optional: bisa dibuat conditional
                     />
                   );

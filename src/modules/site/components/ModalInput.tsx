@@ -189,14 +189,26 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week, year }
             week: week,
           },
         }).unwrap();
-        const siteDetail = result as SiteDetail;
+        let initialExclude = false;
+        const currentParam = dataModal?.parameter || "";
+        if (currentParam.includes("packetloss")) {
+          initialExclude = result?.status_packetloss_15 === 2 || result?.status_packetloss_5 === 2;
+        } else if (currentParam.includes("jitter")) {
+          initialExclude = result?.status_jitter === 2;
+        } else if (currentParam.includes("latency")) {
+          initialExclude = result?.status_latency === 2;
+        } else {
+          initialExclude = !!result?.site_exclude;
+        }
+
         const siteDetails = {
           ...result,
           week: week,
+          site_exclude: initialExclude,
         } as SiteDetail;
         setOptionsKpi(result?.options);
         setChecked(result?.site_sos);
-        setExclude(result?.site_exclude);
+        setExclude(initialExclude);
         form.setFieldsValue(siteDetails);
         const parserEvidance = siteDetails.evidence
           ? JSON.parse(siteDetails?.evidence)

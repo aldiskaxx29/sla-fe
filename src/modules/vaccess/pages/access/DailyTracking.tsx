@@ -250,7 +250,7 @@ const DailyTracking = ({ start, end, setPOP, setTITLEPOP }: DailyTrackingProps) 
 
   useEffect(() => {
     fetchDailyTracking();
-  }, [DAILYMODE, DRegion]);
+  }, [DAILYMODE, DRegion, start, end]);
 
   return (
     <div className="flex flex-col gap-1 mt-2">

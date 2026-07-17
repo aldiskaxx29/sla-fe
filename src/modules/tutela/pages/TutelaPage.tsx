@@ -65,6 +65,20 @@ interface ChartData {
   excellentConsistentQuality?: OperatorData[];
 }
 
+const fetchWithRetry = async (url: string, retries = 3, delay = 1000): Promise<Response> => {
+  for (let i = 0; i <= retries; i++) {
+    try {
+      const res = await fetch(url);
+      if (res.ok) return res;
+      throw new Error(`HTTP error! status: ${res.status}`);
+    } catch (err) {
+      if (i === retries) throw err;
+      await new Promise((resolve) => setTimeout(resolve, delay * Math.pow(1.5, i)));
+    }
+  }
+  throw new Error("Fetch failed after retries");
+};
+
 const TutelaPage = () => {
   // General Filter States
   const [level, setLevel] = useState<"national" | "region" | "city">("national");
@@ -84,7 +98,7 @@ const TutelaPage = () => {
 
   // Load static resources & default lists on mount
   useEffect(() => {
-    fetch("/onx/geojson/treg_region_pairing.json")
+    fetchWithRetry("/onx/geojson/treg_region_pairing.json")
       .then((res) => res.json())
       .then((data) => {
         const uniqueRegions = Array.from(new Set<string>(data.map((item: any) => item.new_region))).sort();
@@ -92,7 +106,7 @@ const TutelaPage = () => {
       })
       .catch((err) => console.error("Failed to load regions:", err));
 
-    fetch("/onx/geojson/treg_city_pairing.json")
+    fetchWithRetry("/onx/geojson/treg_city_pairing.json")
       .then((res) => res.json())
       .then((data) => {
         const uniqueCities = Array.from(new Set<string>(data.map((item: any) => item.city))).sort();
@@ -100,15 +114,22 @@ const TutelaPage = () => {
       })
       .catch((err) => console.error("Failed to load cities:", err));
 
-    fetch("/onx-api/api/v-list-weeks")
+    fetchWithRetry("/onx-api/api/v-list-weeks")
       .then((res) => res.json())
       .then((data) => {
         const weeks = data.map((w: any) => String(w.yearweek));
         setWeeksList(weeks);
+        // Fallback: if time hasn't been set by defaults yet, set it to the latest week
+        setTime((prevTime) => {
+          if (!prevTime && weeks.length > 0) {
+            return weeks[0];
+          }
+          return prevTime;
+        });
       })
       .catch((err) => console.error("Failed to load weeks list:", err));
 
-    fetch("/onx-api/api/v2/v-onx-last-period-time")
+    fetchWithRetry("/onx-api/api/v2/v-onx-last-period-time")
       .then((res) => res.json())
       .then((resData) => {
         if (resData.statusCode === 200 && resData.data) {
@@ -131,8 +152,11 @@ const TutelaPage = () => {
   useEffect(() => {
     if (defaultTimes[granularity]) {
       setTime(defaultTimes[granularity]);
+    } else if (weeksList.length > 0) {
+      // Fallback: if there is no default time for this granularity, use the latest week
+      setTime(weeksList[0]);
     }
-  }, [granularity, defaultTimes]);
+  }, [granularity, defaultTimes, weeksList]);
 
   // Fetch Dashboard / Sub Metric Data
   useEffect(() => {
@@ -152,7 +176,7 @@ const TutelaPage = () => {
       urlParams.append("yearweek", time);
     }
 
-    fetch(`/onx-api/api/v2/user-experience/chart/${apiLevel}/${apiGranularity}?${urlParams.toString()}`)
+    fetchWithRetry(`/onx-api/api/v2/user-experience/chart/${apiLevel}/${apiGranularity}?${urlParams.toString()}`)
       .then((res) => res.json())
       .then((resData) => {
         if (resData.statusCode === 200 && resData.data) {

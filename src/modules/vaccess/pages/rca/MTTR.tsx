@@ -268,13 +268,18 @@ const RCACHART = React.memo(({ sitegroup, week, weekstart, weekend }: RcaChartPr
   const [DATACHART, setDataChart] = useState<number[]>([]);
 
   async function ChartData() {
+    const customHeader = {
+      headers: {
+        Rtoken: import.meta.env.VITE_QOSMO_RTOKEN || "MQ==",
+      }
+    };
     const res = await fetch(
       qosmoUrl(
         `/baseapi/vrca.php?cmd=chart-rca-not-clear&weekstart=${weekstart}&weekend=${weekend}&week=${
           week.split("-")[0]
         }&year=${week.split("-")[1]}&sitegroup=${sitegroup}`
       ),
-      HEADER
+      customHeader
     );
     const { data } = (await res.json()) || [];
     try {
