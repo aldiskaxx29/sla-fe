@@ -97,6 +97,42 @@ gap: 24;
   --dm-notes-size: 0.875rem;
 }
 
+@media (max-width: 768px) {
+  .daily-monitoring-export-root:not([data-export-mode="true"]) {
+    --dm-page-title-size: 1.25rem;
+    --dm-page-subtitle-size: 0.75rem;
+    --dm-section-title-size: 1.1rem;
+    --dm-table-body-size: 0.75rem;
+    --dm-table-head-size: 0.625rem;
+    --dm-table-head-main-size: 0.6875rem;
+    --dm-table-head-compact-size: 0.6875rem;
+    --dm-table-head-sub-size: 0.625rem;
+    --dm-table-badge-size: 0.75rem;
+    --dm-notes-size: 0.75rem;
+  }
+
+  .daily-monitoring-modal .ant-table {
+    font-size: 0.75rem !important;
+  }
+  .daily-monitoring-modal .ant-table-thead > tr > th {
+    font-size: 0.75rem !important;
+    padding: 8px 6px !important;
+  }
+  .daily-monitoring-modal .ant-table-tbody > tr > td {
+    font-size: 0.75rem !important;
+    padding: 8px 6px !important;
+  }
+  .daily-monitoring-modal .ant-input {
+    font-size: 0.75rem !important;
+  }
+  .daily-monitoring-modal .ant-btn {
+    font-size: 0.75rem !important;
+    height: auto !important;
+    padding: 4px 8px !important;
+  }
+}
+
+
 .daily-monitoring-export-root[data-export-mode="true"] {
   font-family: "Aptos", "Aptos Display", "Segoe UI", system-ui, -apple-system,
     sans-serif !important;
@@ -240,4 +276,25 @@ gap: 24;
 .daily-monitoring-notes {
   font-size: var(--dm-notes-size) !important;
   line-height: 1.5 !important;
+}
+
+.daily-monitoring-table-container {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 1024px) {
+  .daily-monitoring-table {
+    min-width: 1200px !important;
+  }
+}
+
+.daily-monitoring-export-root[data-export-mode="true"] .daily-monitoring-table-container {
+  overflow: visible !important;
+  width: auto !important;
+}
+
+.daily-monitoring-export-root[data-export-mode="true"] .daily-monitoring-table {
+  min-width: unset !important;
 }

@@ -105,14 +105,14 @@ const MttrQualityTable = ({
 
   return (
     <section className="rounded-2xl border border-[#D8DEE6] bg-white">
-      <div className="border-b border-[#D8DEE6] px-4 py-3 flex items-center">
+      <div className="border-b border-[#D8DEE6] px-4 py-3 flex flex-wrap items-center justify-between gap-2">
         <h2 className="daily-monitoring-section-title font-bold uppercase tracking-wide text-blue-600">
           B. MTTR QUALITY CNOP MERAH
         </h2>
         <Button
           type="link"
           icon={<DownloadOutlined />}
-          className="daily-monitoring-export-controls ms-auto"
+          className="daily-monitoring-export-controls"
           loading={exporting}
           onClick={() => {
             void exportSummaryRows();
@@ -123,7 +123,7 @@ const MttrQualityTable = ({
         </Button>
       </div>
 
-      <div>
+      <div className="daily-monitoring-table-container">
         <table className="daily-monitoring-table dm-mttrq-table w-full border-collapse table-fixed text-center text-[26px] lg:text-[28px]">
           <colgroup>
             {colWidths.map((width, index) => (

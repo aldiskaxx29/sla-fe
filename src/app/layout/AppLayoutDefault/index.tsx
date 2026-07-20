@@ -1,5 +1,6 @@
 // Antd
-import { Button, Image, Layout, Spin } from "antd";
+import { Button, Image, Layout, Spin, Drawer } from "antd";
+import { MenuOutlined, CloseOutlined } from "@ant-design/icons";
 import "./index.css";
 
 // React
@@ -56,6 +57,7 @@ const AppLayoutDefault = () => {
   const [open1, setOpen1] = useState(false);
   const [open2, setOpen2] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const containerRef = useRef(null);
 
   /* --------------------------------- Logout --------------------------------- */
@@ -183,32 +185,90 @@ const AppLayoutDefault = () => {
   const renderMainMenu = (menu: MenuConfigItem) =>
     menu.type === "dropdown" ? renderDropdownMenu(menu) : renderMenuButton(menu);
 
+  const renderMobileMenuItem = (menu: MenuConfigItem) => {
+    if (menu.type === "dropdown") {
+      return (
+        <div key={menu.key} className="mb-5 border-b border-slate-100 pb-4 last:border-0 last:pb-0">
+          <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 px-2 mb-2">
+            {menu.label}
+          </div>
+          <div className="space-y-1.5 pl-2">
+            {menu.options?.map((option) => {
+              const optionActive = location.pathname?.includes(option.value);
+              return (
+                <div
+                  key={option.value}
+                  className={`w-full p-2.5 rounded-lg text-sm font-medium cursor-pointer transition-colors ${
+                    optionActive
+                      ? "bg-[#576278] text-white"
+                      : "hover:bg-slate-50 text-slate-600"
+                  }`}
+                  onClick={() => {
+                    handleMenuSelect(option.value);
+                    setMobileMenuOpen(false);
+                  }}
+                >
+                  {option.label}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div
+        key={menu.key}
+        className={`w-full p-2.5 rounded-xl text-sm font-semibold cursor-pointer transition-colors mb-3 ${
+          isActiveMenu(menu)
+            ? "bg-[#576278] text-white"
+            : "hover:bg-slate-50 text-slate-600"
+        }`}
+        onClick={() => {
+          if (menu.type === "external" && menu.externalUrl) {
+            window.open(menu.externalUrl, "_blank");
+          } else if (menu.path) {
+            handleMenuSelect(menu.path);
+          }
+          setMobileMenuOpen(false);
+        }}
+      >
+        {menu.label}
+      </div>
+    );
+  };
+
+
   return (
     <>
       {loading && <Spin fullscreen tip="Harap Tunggu..." />}
       <Layout hasSider className="min-h-screen !bg-white">
         <Layout className="min-h-screen flex flex-col">
-          <Header className="!bg-white flex justify-between items-center sticky !px-6 z-20">
-            <div className="flex items-center gap-4">
-              <Image src={qosmo} alt="icon" width={128} preview={false} />
-              {/* <div className=" rounded-[54px] px-3 py-2 h-12 flex justify-center items-center">
-                <p className="font-semibold text-[#0E2133] text-2xl">
-                  {titleNavigation}
-                </p>
-              </div> */}
-            </div>
-            <div className="flex gap-4">
+          <Header className="!bg-white flex justify-between items-center sticky !px-3 md:!px-6 z-20">
+            <div className="flex items-center gap-2 md:gap-4">
               {visibleMenus.length > 0 && (
-                <div className="text-sm flex justify-between items-center bg-[#576278] rounded-[54px] px-3 py-2">
+                <Button
+                  type="text"
+                  className="lg:hidden flex items-center justify-center !p-1.5 !h-10 !w-10 hover:!bg-slate-100"
+                  icon={<MenuOutlined style={{ fontSize: 20 }} className="text-slate-700" />}
+                  onClick={() => setMobileMenuOpen(true)}
+                />
+              )}
+              <Image src={qosmo} alt="icon" width={128} preview={false} />
+            </div>
+            <div className="flex items-center gap-2 md:gap-4">
+              {visibleMenus.length > 0 && (
+                <div className="hidden lg:flex text-sm justify-between items-center bg-[#576278] rounded-[54px] px-3 py-2 gap-1">
                   {visibleMenus.map(renderMainMenu)}
                 </div>
               )}
 
-              <div className="flex rounded-[54px] border border-[#DBDADE] gap-4 px-3 py-1 h-12 items-center justify-center">
+              <div className="flex rounded-[54px] border border-[#DBDADE] gap-2 md:gap-4 px-2 md:px-3 py-1 h-12 items-center justify-center">
                 <Image
                   src={notification}
                   alt="icon"
-                  width={30}
+                  width={28}
                   preview={false}
                 />
 
@@ -339,6 +399,31 @@ const AppLayoutDefault = () => {
           </Content>
         </Layout>
       </Layout>
+      <Drawer
+        title={
+          <div className="flex items-center justify-between py-1 w-full">
+            <Image src={qosmo} alt="Qosmo" width={110} preview={false} />
+            <Button
+              type="text"
+              icon={<CloseOutlined style={{ fontSize: 16 }} className="text-slate-500" />}
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center justify-center !p-1 hover:!bg-slate-100"
+            />
+          </div>
+        }
+        placement="left"
+        closeIcon={null}
+        onClose={() => setMobileMenuOpen(false)}
+        open={mobileMenuOpen}
+        width={280}
+        styles={{ body: { padding: "16px 24px" } }}
+      >
+        <div className="flex flex-col h-full justify-between">
+          <div className="overflow-y-auto pr-1">
+            {visibleMenus.map(renderMobileMenuItem)}
+          </div>
+        </div>
+      </Drawer>
     </>
   );
 };

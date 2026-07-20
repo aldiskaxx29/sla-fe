@@ -34,7 +34,7 @@ const DailyMonitoringPage = () => {
     isLoading: isPacketLossLoading,
   } = useDailyMonitoringPacketLoss(splitPacketLoss ? "split" : "combined");
   const activePacketLossView = splitPacketLoss
-    ? packetLoss?.split?.p5 ?? packetLoss?.split?.p15
+    ? (packetLoss?.split?.p5 ?? packetLoss?.split?.p15)
     : packetLoss?.combined;
 
   useEffect(() => {
@@ -119,7 +119,7 @@ const DailyMonitoringPage = () => {
         >
           <header className="flex flex-col items-center justify-center gap-2">
             <div className="flex w-full items-center justify-center bg-gray-200 p-4">
-              <h1 className="daily-monitoring-page-title font-bold uppercase tracking-wide text-blue-600">
+              <h1 className="daily-monitoring-page-title font-bold uppercase max-md:text-center tracking-wide text-blue-600">
                 {activePacketLossView?.title || "Daily Monitoring Quality CNOP"}
               </h1>
             </div>

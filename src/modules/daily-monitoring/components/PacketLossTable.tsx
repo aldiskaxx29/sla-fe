@@ -266,11 +266,11 @@ const PacketLossTable = ({
 
   return (
     <section className="rounded-2xl bg-white">
-      <div className="border-b border-[#D8DEE6] px-4 py-3 flex items-center">
+      <div className="border-b border-[#D8DEE6] px-4 py-3 flex flex-wrap items-center justify-between gap-2">
         <h2 className="daily-monitoring-section-title font-bold uppercase tracking-wide text-blue-600">
           {section || "A. PL 5% &amp; 1-5%"}
         </h2>
-        <div className="daily-monitoring-export-controls ms-auto flex items-center gap-3">
+        <div className="daily-monitoring-export-controls flex flex-wrap items-center gap-3">
           {showSplitToggle && (
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium text-slate-600">
@@ -284,7 +284,6 @@ const PacketLossTable = ({
           )}
           <Button
             type="link"
-            className="ms-auto"
             icon={<DownloadOutlined />}
             loading={exportingKey === "all"}
             onClick={() => {
@@ -296,7 +295,7 @@ const PacketLossTable = ({
         </div>
       </div>
 
-      <div>
+      <div className="daily-monitoring-table-container">
         <table className="daily-monitoring-table w-full border-collapse table-fixed text-center text-[26px] lg:text-[28px]">
           <colgroup>
             {colWidths.map((width, index) => (
@@ -541,7 +540,8 @@ const PacketLossTable = ({
       </div>
 
       <Modal
-        title={<span className="text-xl font-bold text-slate-800">{modalTitle}</span>}
+        className="daily-monitoring-modal"
+        title={<span className="text-sm sm:text-xl font-bold text-slate-800">{modalTitle}</span>}
         open={modalVisible}
         onCancel={() => setModalVisible(false)}
         width={1000}
