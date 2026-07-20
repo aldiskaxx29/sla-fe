@@ -59,7 +59,26 @@ export const getPostLoginRedirectPath = (): string => {
     const parsedData = JSON.parse(userData);
     if (isUserAccessPending(parsedData)) return "/confirm";
 
-    const firstVisibleMenu = getVisibleMenus(parsedData?.level)[0];
+    const visibleMenus = getVisibleMenus(parsedData?.level);
+
+    // Detect mobile device (HP)
+    const isMobile =
+      typeof window !== "undefined" &&
+      (/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+        window.innerWidth <= 768);
+
+    if (isMobile) {
+      const hasDailyMonitoringAccess = visibleMenus.some(
+        (menu) =>
+          menu.key === "sla" &&
+          menu.options?.some((opt) => opt.value === "daily-monitoring")
+      );
+      if (hasDailyMonitoringAccess) {
+        return "/daily-monitoring";
+      }
+    }
+
+    const firstVisibleMenu = visibleMenus[0];
 
     return firstVisibleMenu ? getMenuRedirectPath(firstVisibleMenu) : "/msa";
   } catch {
