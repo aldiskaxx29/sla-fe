@@ -1,0 +1,15 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # 1. Protect GeoJSON folder: return 403 if no Bearer Authorization token is present
+  RewriteCond %{REQUEST_URI} ^/onx/geojson/
+  RewriteCond %{HTTP:Authorization} !^Bearer\ .+$
+  RewriteRule ^onx/geojson/ - [F,L]
+
+  # 2. SPA routing fallback
+  RewriteRule ^index\.html$ - [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule . /index.html [L]
+</IfModule>
