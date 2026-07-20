@@ -109,7 +109,11 @@ export const useIspProvider = () => {
 
   // Load static references
   useEffect(() => {
-    fetch("/onx/geojson/treg_region_pairing.json")
+    const token = localStorage.getItem("access_token");
+    const headers = token ? { Authorization: `Bearer ${token}` } : undefined;
+    const fetchWithAuth = (url: string) => fetch(url, { headers });
+
+    fetchWithAuth("/onx/geojson/treg_region_pairing.json")
       .then((res) => res.json())
       .then((data) => {
         const uniqueRegions = Array.from(
@@ -119,7 +123,7 @@ export const useIspProvider = () => {
       })
       .catch((err) => console.error("Failed to load regions:", err));
 
-    fetch("/onx/geojson/treg_city_pairing.json")
+    fetchWithAuth("/onx/geojson/treg_city_pairing.json")
       .then((res) => res.json())
       .then((data) => {
         const uniqueCities = Array.from(
@@ -130,7 +134,7 @@ export const useIspProvider = () => {
       })
       .catch((err) => console.error("Failed to load cities:", err));
 
-    fetch("/onx-api/api/v-list-weeks")
+    fetchWithAuth("/onx-api/api/v-list-weeks")
       .then((res) => res.json())
       .then((data) => {
         const weeks = data.map((w: any) => String(w.yearweek));
@@ -138,7 +142,7 @@ export const useIspProvider = () => {
       })
       .catch((err) => console.error("Failed to load weeks list:", err));
 
-    fetch("/onx-api/api/v2/v-onx-last-period-time")
+    fetchWithAuth("/onx-api/api/v2/v-onx-last-period-time")
       .then((res) => res.json())
       .then((resData) => {
         if (resData.statusCode === 200 && resData.data) {

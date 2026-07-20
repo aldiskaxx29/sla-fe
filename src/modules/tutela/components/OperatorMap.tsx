@@ -171,7 +171,10 @@ export const OperatorMap: React.FC<OperatorMapProps> = ({
 
     let cancelled = false;
 
-    fetch(geojsonPath)
+    const token = localStorage.getItem("access_token");
+    fetch(geojsonPath, {
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    })
       .then((r) => r.json())
       .then((data) => {
         if (cancelled || !mapRef.current) return;
