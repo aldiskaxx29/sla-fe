@@ -12,6 +12,7 @@ import {
   useLazyModal_detailQuery,
   useLazyDashboard_complyQuery,
   useLazyDetailsite_notclearQuery,
+  useLazyDetailsite_notclear_weekQuery,
   useLazyWeeklyMonthQuery,
 } from "../rtk/dashboard.rtk";
 
@@ -131,6 +132,16 @@ const useDashboard = () => {
   ] = useLazyDetailsite_notclearQuery();
 
   const [
+    getDetailsiteNotclearWeek,
+    {
+      isLoading: isLoadingDetailsiteNotclearWeek,
+      isError: isErrorDetailsiteNotclearWeek,
+      isSuccess: isSuccessDetailsiteNotclearWeek,
+      data: dataDetailsiteNotclearWeek,
+    },
+  ] = useLazyDetailsite_notclear_weekQuery();
+
+  const [
     getWeeklyMonth,
     {
       isLoading: isLoadingWeeklyMonth,
@@ -206,6 +217,8 @@ const useDashboard = () => {
     isErrorDetailsiteNotclear,
     isSuccessDetailsiteNotclear,
     dataDetailsiteNotclear,
+    getDetailsiteNotclearWeek,
+    isLoadingDetailsiteNotclearWeek,
     getWeeklyMonth,
     isLoadingWeeklyMonth,
     isErrorWeeklyMonth,

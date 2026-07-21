@@ -166,6 +166,18 @@ export const dashboardApi = emptySplitApi.injectEndpoints({
         return response;
       },
     }),
+    detailsite_notclear_week: builder.query({
+      query: (payload) => {
+        return {
+          method: "GET",
+          url: "dashboard/site/not-clear/week",
+          params: payload?.query,
+        };
+      },
+      transformResponse: (response: unknown) => {
+        return response;
+      },
+    }),
     weeklyMonth: builder.query({
       query: (payload) => {
         return {
@@ -196,5 +208,6 @@ export const {
   useLazyModal_detailQuery,
   useLazyDashboard_complyQuery,
   useLazyDetailsite_notclearQuery,
+  useLazyDetailsite_notclear_weekQuery,
   useLazyWeeklyMonthQuery,
 } = dashboardApi;

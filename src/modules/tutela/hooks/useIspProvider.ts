@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import dayjs from "dayjs";
+import { fetchWithRetry } from "../utils/fetch";
 import {
   getProviderConfig,
   winnerProviderList,
@@ -109,9 +110,7 @@ export const useIspProvider = () => {
 
   // Load static references
   useEffect(() => {
-    const token = localStorage.getItem("access_token");
-    const headers = token ? { Authorization: `Bearer ${token}` } : undefined;
-    const fetchWithAuth = (url: string) => fetch(url, { headers });
+    const fetchWithAuth = (url: string) => fetchWithRetry(url);
 
     fetchWithAuth("/onx/geojson/treg_region_pairing.json")
       .then((res) => res.json())
@@ -194,7 +193,7 @@ export const useIspProvider = () => {
       isNineProvider: providerPriority === "nine" ? "true" : "false",
     });
 
-    fetch(`/onx-api/api/v2/f-onx-benchmark-isp-city-lose?${params.toString()}`)
+    fetchWithRetry(`/onx-api/api/v2/f-onx-benchmark-isp-city-lose?${params.toString()}`)
       .then((res) => res.json())
       .then((resData) => {
         if (resData.statusCode === 200 && resData.data) {
@@ -239,7 +238,7 @@ export const useIspProvider = () => {
       filters,
     });
 
-    fetch(`/onx-api/api/v2/onx-isp-${apiGranularity}/${apiLevel}?${params.toString()}`)
+    fetchWithRetry(`/onx-api/api/v2/onx-isp-${apiGranularity}/${apiLevel}?${params.toString()}`)
       .then((res) => res.json())
       .then((resData) => {
         if (resData.statusCode === 200 && resData.data) {
@@ -310,7 +309,7 @@ export const useIspProvider = () => {
         filters,
       });
 
-      fetch(`${baseUrl}?${params.toString()}`)
+      fetchWithRetry(`${baseUrl}?${params.toString()}`)
         .then((res) => res.json())
         .then((resData) => {
           if (resData.statusCode === 200 && resData.data) {
@@ -366,7 +365,7 @@ export const useIspProvider = () => {
       const fetchWeek = (week: number | string | null) =>
         week == null
           ? Promise.resolve([] as any[])
-          : fetch(buildUrl(week))
+          : fetchWithRetry(buildUrl(week))
               .then((res) => res.json())
               .then((resData) =>
                 resData.statusCode === 200 && resData.data ? resData.data : []
@@ -518,7 +517,7 @@ export const useIspProvider = () => {
     const params = new URLSearchParams({ isNineProvider: isNine ? "true" : "false", yearweek: time });
     if (level !== "national" && location) params.append("location", location);
 
-    fetch(`/onx-api/api/v2/onx-isp-${apiGranularity}/rank/${apiLevel}?${params.toString()}`)
+    fetchWithRetry(`/onx-api/api/v2/onx-isp-${apiGranularity}/rank/${apiLevel}?${params.toString()}`)
       .then((res) => res.json())
       .then((resData) => {
         if (resData.statusCode === 200 && resData.data) {

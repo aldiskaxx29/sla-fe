@@ -14,23 +14,36 @@ import { toast } from "react-toastify";
 
 class TableFallbackBoundary extends Component<
   { children: React.ReactNode },
-  { hasError: boolean }
+  { hasError: boolean; error: Error | null }
 > {
   constructor(props: { children: React.ReactNode }) {
     super(props);
-    this.state = { hasError: false };
+    this.state = { hasError: false, error: null };
   }
 
-  static getDerivedStateFromError() {
-    return { hasError: true };
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: any) {
+    console.error("TableFallbackBoundary caught an error", error, errorInfo);
   }
 
   render() {
     if (this.state.hasError) {
       return (
         <div className="rounded-xl border border-dashed border-amber-300 bg-amber-50 px-4 py-5 text-sm text-amber-900">
-          Data tabel MSA gagal dirender. Silakan ubah filter atau muat ulang
-          halaman.
+          <div>
+            Data tabel MSA gagal dirender. Silakan ubah filter atau muat ulang
+            halaman.
+          </div>
+          {this.state.error && (
+            <pre className="mt-2 text-xs text-red-600 bg-white p-2 rounded border overflow-auto max-h-60 whitespace-pre-wrap">
+              {this.state.error.message}
+              {"\n"}
+              {this.state.error.stack}
+            </pre>
+          )}
         </div>
       );
     }
@@ -56,6 +69,7 @@ const MSAmenu = ({
   treg,
 }) => {
   const [exportLoading, setExportLoading] = useState(false);
+  const [showActualWeeks, setShowActualWeeks] = useState(false);
 
   const dataWithIndex = (dataSource) => {
     return dataSource?.map((item, index) => {
@@ -326,15 +340,32 @@ const MSAmenu = ({
               onChange={(value) => handlefilter(value)}
               value={filter}
             />
-            {/* <Button
-              onClick={handleDownloadMsa}
-              className="!h-11 !px-3 py-2.5 !border-0 !rounded-full !bg-[#EDFFFD]"
-            >
-              <p className="text-brand-secondary font-medium">
-                Export MSA as PPT
-              </p>
-              <Image src={xlxsIcon} alt="icon" width={16} preview={false} />
-            </Button> */}
+            <div className="flex flex-col justify-end">
+              <div className="inline-flex rounded-full border border-[#DBDBDB] bg-gray-50 p-1 h-11 items-center">
+                <button
+                  type="button"
+                  className={`px-4 py-1.5 text-xs font-semibold rounded-full transition-all cursor-pointer ${
+                    !showActualWeeks
+                      ? "bg-[#5195d4] text-white shadow-sm"
+                      : "text-gray-500 hover:text-gray-900"
+                  }`}
+                  onClick={() => setShowActualWeeks(false)}
+                >
+                  Minggu Bulanan
+                </button>
+                <button
+                  type="button"
+                  className={`px-4 py-1.5 text-xs font-semibold rounded-full transition-all cursor-pointer ${
+                    showActualWeeks
+                      ? "bg-[#5195d4] text-white shadow-sm"
+                      : "text-gray-500 hover:text-gray-900"
+                  }`}
+                  onClick={() => setShowActualWeeks(true)}
+                >
+                  Minggu Tahunan
+                </button>
+              </div>
+            </div>
             <Button
               onClick={handleDownloadMsa}
               loading={exportLoading}
@@ -351,6 +382,7 @@ const MSAmenu = ({
               treg={treg}
               data={dataWithIndex(msaRows)}
               loadingMainData={isLoadingSC || !dataSC || msaRows.length === 0}
+              showActualWeeks={showActualWeeks}
             ></TableParentChild>
           </TableFallbackBoundary>
         </div>

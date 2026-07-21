@@ -11,6 +11,7 @@ interface TableParentChildProps {
   data: Record<string, unknown>[];
   loadingMainData: boolean;
   treg: string;
+  showActualWeeks?: boolean;
 }
 
 interface WeeklyDetailData {
@@ -33,6 +34,7 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
   data,
   loadingMainData,
   treg,
+  showActualWeeks = false,
 }) => {
   const [loading, setLoading] = useState(false);
   const [loadingRowKey, setLoadingRowKey] = useState<number | string | null>(
@@ -47,8 +49,13 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
   const [injectedGrandChildData, setInjectedGrandChildData] = useState<
     Record<string, unknown>
   >({});
-  const { getWitel, getCNP, getDetailsiteNotclear, getWeeklyMonth } =
-    useDashboard();
+  const {
+    getWitel,
+    getCNP,
+    getDetailsiteNotclear,
+    getDetailsiteNotclearWeek,
+    getWeeklyMonth,
+  } = useDashboard();
   const { menuId } = useParams();
   const [expandedRowKey, setExpandedRowKeys] = useState<number[] | string[]>(
     [],
@@ -75,6 +82,21 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
     kpi: string;
     monthNum: number;
   } | null>(null);
+
+  // Site detail modal states (W1-W4 detail click inside Realisasi)
+  const [siteDetailModalVisible, setSiteDetailModalVisible] = useState(false);
+  const [siteDetailModalLoading, setSiteDetailModalLoading] = useState(false);
+  const [siteDetailModalData, setSiteDetailModalData] = useState<any[] | null>(
+    null,
+  );
+  const [siteDetailParams, setSiteDetailParams] = useState<{
+    year: number;
+    week: number | string;
+    type: string;
+    status: string;
+    region: string;
+  } | null>(null);
+
   const lastColumnsRef = useRef<any[]>([]);
   const skeletonRows = useMemo(
     () =>
@@ -259,38 +281,15 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
   };
 
   // Function to generate realisasi columns based on month
-  const generateRealisasiColumns = (monthNum: number, kpi?: string) => {
+  const generateRealisasiColumns = (
+    monthNum: number,
+    kpi?: string,
+    isAfterTable = false,
+  ) => {
     const weekCount = [3, 6, 8, 11].includes(monthNum) ? 5 : 4;
     const isPacketloss =
       kpi?.toLowerCase()?.includes("packetloss") &&
       kpi?.toLowerCase()?.includes("ran to core");
-
-    const renderAchievement = (
-      text: unknown,
-      record: Record<string, unknown>,
-    ): React.ReactNode => {
-      if (text === null || text === undefined || text === "") return "-";
-      const value = Number(text);
-      const target = Number(record.target);
-      if (Number.isNaN(value) || Number.isNaN(target))
-        return text as React.ReactNode;
-
-      // Packetloss tetap mengikuti rule existing: hijau jika <= target.
-      // KPI lain: hijau jika >= target, termasuk nilai yang sama dengan target.
-      const isGood = isPacketloss ? value <= target : value >= target;
-
-      return (
-        <span
-          className={
-            isGood
-              ? "text-green-500 font-semibold"
-              : "text-red-500 font-semibold"
-          }
-        >
-          {text as React.ReactNode}
-        </span>
-      );
-    };
 
     const columnsArray: Array<{
       title: string;
@@ -298,7 +297,8 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
       key: string;
       render: (
         text: unknown,
-        record?: Record<string, unknown>,
+        record?: any,
+        index?: number,
       ) => React.ReactNode;
       width?: number;
     }> = [
@@ -324,11 +324,63 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
 
     // Add week columns dynamically
     for (let i = 1; i <= weekCount; i++) {
+      const actualWeek = getActualWeekNum(monthNum, i);
+      const title = showActualWeeks && actualWeek ? `W${actualWeek}` : `W${i}`;
+
       columnsArray.push({
-        title: `W${i}`,
+        title: title,
         dataIndex: `ach_${monthNum}_${i}`,
         key: `ach_${monthNum}_${i}`,
-        render: renderAchievement,
+        render: (text: unknown, record?: any) => {
+          let cellValue = text;
+          if (cellValue === undefined || cellValue === null || cellValue === "") {
+            const standardKey = `ach_${monthNum}_${i}`;
+            if (record && typeof record === "object") {
+              if (record[standardKey] !== undefined) {
+                cellValue = record[standardKey];
+              } else {
+                const pattern = new RegExp(`^ach_${monthNum}_${i}_\\d+$`);
+                const foundKey = Object.keys(record).find((k) => pattern.test(k));
+                if (foundKey) {
+                  cellValue = record[foundKey];
+                }
+              }
+            }
+          }
+
+          if (cellValue === null || cellValue === undefined || cellValue === "") {
+            return "-";
+          }
+
+          const value = Number(cellValue);
+          const target = Number(record?.target);
+
+          if (Number.isNaN(value) || Number.isNaN(target)) {
+            return (
+              <span
+                className="cursor-pointer font-semibold text-blue-500 hover:underline"
+                onClick={() => fetchSiteDetailWeek(record, monthNum, i, isAfterTable)}
+              >
+                {cellValue as React.ReactNode}
+              </span>
+            );
+          }
+
+          // Packetloss tetap mengikuti rule existing: hijau jika <= target.
+          // KPI lain: hijau jika >= target, termasuk nilai yang sama dengan target.
+          const isGood = isPacketloss ? value <= target : value >= target;
+
+          return (
+            <span
+              className={`${
+                isGood ? "text-green-500" : "text-red-500"
+              } font-semibold cursor-pointer hover:underline`}
+              onClick={() => fetchSiteDetailWeek(record, monthNum, i, isAfterTable)}
+            >
+              {cellValue as React.ReactNode}
+            </span>
+          );
+        },
       });
     }
 
@@ -353,7 +405,25 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
       title: monthNames[monthNum],
       dataIndex: `ach_fm_${monthNum}`,
       key: `ach_fm_${monthNum}`,
-      render: renderAchievement,
+      render: (text: unknown, record?: any) => {
+        if (text === null || text === undefined || text === "") return "-";
+        const value = Number(text);
+        const target = Number(record?.target);
+        if (Number.isNaN(value) || Number.isNaN(target))
+          return text as React.ReactNode;
+
+        const isGood = isPacketloss ? value <= target : value >= target;
+
+        return (
+          <span
+            className={
+              isGood ? "text-green-500 font-semibold" : "text-red-500 font-semibold"
+            }
+          >
+            {text as React.ReactNode}
+          </span>
+        );
+      },
     });
 
     return columnsArray;
@@ -368,13 +438,22 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
       skeletonSampleRecord ??
       null;
 
-    if (!sampleRecord) {
-      return lastColumnsRef.current;
-    }
-
-    const weeklyKeys = Object.keys(sampleRecord).filter((key) =>
-      /^ach_\d+_\d+$/.test(key),
+    const weeklyKeysRaw = Object.keys(sampleRecord).filter((key) =>
+      /^ach_\d+_\d+(?:_\d+)?$/.test(key),
     );
+
+    // Group keys by their month and relative week to prevent duplicate columns
+    const weeklyKeysMap = new Map<string, string>();
+    weeklyKeysRaw.forEach((key) => {
+      const parts = key.split("_");
+      const monthAndWeek = `${parts[1]}_${parts[2]}`;
+      // Prefer the version with 3 numbers (ach_M_W_Y)
+      if (!weeklyKeysMap.has(monthAndWeek) || parts.length === 4) {
+        weeklyKeysMap.set(monthAndWeek, key);
+      }
+    });
+    const weeklyKeys = Array.from(weeklyKeysMap.values());
+
     const monthlyKeys = Object.keys(sampleRecord).filter((key) =>
       /^ach_fm_\d+$/.test(key),
     );
@@ -540,18 +619,41 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
         }),
         children: [
           ...relatedWeeks.map((weekKey) => {
-            const weekNum = weekKey.split("_")[2];
+            const parts = weekKey.split("_");
+            const mNum = parseInt(parts[1], 10);
+            const wNum = parseInt(parts[2], 10);
+
+            // Look for actual week of the year (the 3rd number, index 3).
+            // If the current weekKey doesn't have it, we search other records in data to see if there is ach_M_W_XX.
+            let actualWeekNumFromKey = parts[3];
+            if (!actualWeekNumFromKey && data) {
+              const pattern = new RegExp(`^ach_${mNum}_${wNum}_(\\d+)$`);
+              for (const row of data) {
+                const foundKey = Object.keys(row).find((k) => pattern.test(k));
+                if (foundKey) {
+                  const match = foundKey.match(pattern);
+                  if (match) {
+                    actualWeekNumFromKey = match[1];
+                    break;
+                  }
+                }
+              }
+            }
+
+            // Set column title dynamically based on showActualWeeks state
+            const columnTitle = showActualWeeks && actualWeekNumFromKey
+              ? `W${actualWeekNumFromKey}`
+              : `W${wNum}`;
+
             return {
-              title: `W${weekNum}`,
+              title: columnTitle,
               dataIndex: weekKey,
               align: "center",
               key: weekKey,
               onHeaderCell: () => ({
-                // className: "!bg-[#F9EFEA] !p-3",
                 className: "!bg-blue-pacific !p-3",
               }),
               onCell: () => ({
-                // className: "!bg-[#F9EFEA] !p-3",
                 className: "!bg-blue-pacific !p-3",
               }),
               compare: true,
@@ -728,7 +830,7 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
     ];
     lastColumnsRef.current = computedColumns;
     return computedColumns;
-  }, [data, skeletonSampleRecord]);
+  }, [data, skeletonSampleRecord, showActualWeeks]);
 
   const fetchWeeklyDetail = useCallback(
     async (weekKey: string, record: Record<string, unknown>) => {
@@ -841,6 +943,107 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
     },
     [getWeeklyMonth, menuId],
   );
+
+  const getActualWeekNum = (monthNum: number, relativeWeekNum: number): string | null => {
+    const pattern = new RegExp(`^ach_${monthNum}_${relativeWeekNum}_(\\d+)$`);
+    
+    // 1. Search in main data
+    if (data && Array.isArray(data)) {
+      for (const row of data) {
+        if (row && typeof row === "object") {
+          const foundKey = Object.keys(row).find((k) => pattern.test(k));
+          if (foundKey) {
+            const match = foundKey.match(pattern);
+            if (match) return match[1];
+          }
+        }
+      }
+    }
+    
+    // 2. Search in realisasiModalData
+    if (realisasiModalData && realisasiModalData.data) {
+      const beforeRows = Array.isArray(realisasiModalData.data.before) ? realisasiModalData.data.before : [];
+      const afterRows = Array.isArray(realisasiModalData.data.after) ? realisasiModalData.data.after : [];
+      const rows = [...beforeRows, ...afterRows];
+      for (const row of rows) {
+        if (row && typeof row === "object") {
+          const foundKey = Object.keys(row).find((k) => pattern.test(k));
+          if (foundKey) {
+            const match = foundKey.match(pattern);
+            if (match) return match[1];
+          }
+        }
+      }
+    }
+    
+    return null;
+  };
+
+  const getApiTypeCode = (kpiName: string): string => {
+    if (!kpiName) return "";
+    const norm = kpiName.toLowerCase();
+    if (norm.includes("1-5%")) return "p15";
+    if (norm.includes(">5%")) return "p5";
+    if (norm.includes("latency") && norm.includes("internet")) return "latency_internet";
+    if (norm.includes("latency")) return "latency";
+    if (norm.includes("jitter") && norm.includes("internet")) return "jitter_internet";
+    if (norm.includes("jitter")) return "jitter";
+    if (norm.includes("packetloss") && norm.includes("internet")) return "packetloss_internet";
+    if (norm.includes("packetloss")) return "packetloss";
+    if (norm.includes("mttr") && norm.includes("major")) return "mttr_major";
+    if (norm.includes("mttr") && norm.includes("minor")) return "mttr_minor";
+    if (norm.includes("mttr") && norm.includes("critical")) return "mttr_critical";
+    return kpiName;
+  };
+
+  const fetchSiteDetailWeek = async (
+    record: any,
+    monthNum: number,
+    relativeWeekNum: number,
+    isAfterTable: boolean
+  ) => {
+    setSiteDetailModalLoading(true);
+    setSiteDetailModalVisible(true);
+    setSiteDetailModalData(null);
+
+    const actualWeek = getActualWeekNum(monthNum, relativeWeekNum) || relativeWeekNum;
+    const yearParam = record?.year || new Date().getFullYear();
+    const kpiName = record?.parameter || record?.mini_parameter || "";
+    const typeParam = getApiTypeCode(kpiName);
+    const statusParam = isAfterTable ? "after" : "before";
+    const regionParam = record?.region_tsel || "";
+
+    setSiteDetailParams({
+      year: yearParam,
+      week: actualWeek,
+      type: typeParam,
+      status: statusParam,
+      region: regionParam,
+    });
+
+    try {
+      const response = await getDetailsiteNotclearWeek({
+        query: {
+          year: yearParam,
+          week: actualWeek,
+          type: typeParam,
+          status: statusParam,
+          region: regionParam,
+        }
+      }).unwrap();
+
+      if (response && typeof response === "object" && "data" in response) {
+        setSiteDetailModalData((response as any).data || []);
+      } else {
+        setSiteDetailModalData([]);
+      }
+    } catch (error) {
+      console.error("Error fetching site details for week:", error);
+      setSiteDetailModalData([]);
+    } finally {
+      setSiteDetailModalLoading(false);
+    }
+  };
 
   const fetchWitelData = useCallback(
     async (record) => {
@@ -1251,9 +1454,28 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                   }}
                   align={child.align}
                   fixed={child.fixed}
-                  render={(text, record) => {
+                  render={(rawText, record) => {
                     if (isSkeletonRow(record)) {
                       return renderSkeletonCell();
+                    }
+
+                    let text = rawText;
+                    if (child.dataIndex && (text === undefined || text === null || text === "")) {
+                      const match = (child.dataIndex as string).match(/^ach_(\d+)_(\d+)(?:_\d+)?$/);
+                      if (match) {
+                        const mNum = match[1];
+                        const wNum = match[2];
+                        const standardKey = `ach_${mNum}_${wNum}`;
+                        if (record[standardKey] !== undefined) {
+                          text = record[standardKey];
+                        } else {
+                          const pattern = new RegExp(`^ach_${mNum}_${wNum}_\\d+$`);
+                          const foundKey = Object.keys(record).find((k) => pattern.test(k));
+                          if (foundKey) {
+                            text = record[foundKey];
+                          }
+                        }
+                      }
                     }
 
                     const isLastTwo =
@@ -1380,7 +1602,7 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                       }
 
                       // Check if this is a weekly column (ach_1_1, ach_1_2, etc.)
-                      const isWeeklyColumn = /^ach_\d+_\d+$/.test(
+                      const isWeeklyColumn = /^ach_\d+_\d+(?:_\d+)?$/.test(
                         child.dataIndex,
                       );
 
@@ -1670,6 +1892,7 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                   columns={generateRealisasiColumns(
                     realisasiDetail?.monthNum || 2,
                     realisasiDetail?.kpi,
+                    false,
                   ).map((column: any) => ({
                     ...column,
                     render: () => renderSkeletonCell(),
@@ -1690,6 +1913,7 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                   columns={generateRealisasiColumns(
                     realisasiDetail?.monthNum || 2,
                     realisasiDetail?.kpi,
+                    true,
                   ).map((column: any) => ({
                     ...column,
                     render: () => renderSkeletonCell(),
@@ -1720,6 +1944,7 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                     columns={generateRealisasiColumns(
                       realisasiDetail?.monthNum || 2,
                       realisasiDetail?.kpi,
+                      false,
                     )}
                     rowKey={(_, index) => index as number}
                   />
@@ -1746,6 +1971,7 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                     columns={generateRealisasiColumns(
                       realisasiDetail?.monthNum || 2,
                       realisasiDetail?.kpi,
+                      true,
                     )}
                     rowKey={(_, index) => index as number}
                   />
@@ -1760,6 +1986,97 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
         ) : (
           <div className="text-center py-4">Tidak ada data</div>
         )}
+      </Modal>
+
+      {/* Modal untuk Detail Site Not Clear per Minggu */}
+      <Modal
+        title={`Detail Site Not Clear - Week ${siteDetailParams?.week} (${siteDetailParams?.status?.toUpperCase()})`}
+        open={siteDetailModalVisible}
+        onCancel={() => setSiteDetailModalVisible(false)}
+        width={1200}
+        centered
+        footer={null}
+      >
+        <Table
+          dataSource={siteDetailModalData || []}
+          loading={siteDetailModalLoading}
+          size="small"
+          pagination={{ pageSize: 10, showSizeChanger: true }}
+          bordered
+          scroll={{ x: "max-content" }}
+          columns={[
+            {
+              title: "No.",
+              key: "no",
+              render: (_, __, index) => index + 1,
+              width: 50,
+            },
+            {
+              title: "Site ID",
+              dataIndex: "site_id",
+              key: "site_id",
+            },
+            {
+              title: "Region",
+              dataIndex: "region",
+              key: "region",
+            },
+            {
+              title: "Area",
+              dataIndex: "area",
+              key: "area",
+            },
+            {
+              title: "Year",
+              dataIndex: "year",
+              key: "year",
+            },
+            {
+              title: "Week",
+              dataIndex: "week",
+              key: "week",
+            },
+            {
+              title: "Value",
+              dataIndex: "value",
+              key: "value",
+              render: (val) => typeof val === "number" ? val.toFixed(4) : val,
+            },
+            {
+              title: "Group RCA",
+              dataIndex: "group_rca",
+              key: "group_rca",
+            },
+            {
+              title: "Detail RCA",
+              dataIndex: "detail_rca",
+              key: "detail_rca",
+              width: 300,
+              render: (text) => (
+                <div className="whitespace-pre-line text-xs max-w-xs">{text}</div>
+              ),
+            },
+            {
+              title: "Update Progress",
+              dataIndex: "update_progress",
+              key: "update_progress",
+              render: (val) => val ?? "-",
+            },
+            {
+              title: "User Update",
+              dataIndex: "user_update",
+              key: "user_update",
+              render: (val) => val ?? "-",
+            },
+            {
+              title: "Last Update",
+              dataIndex: "last_update",
+              key: "last_update",
+              render: (val) => val ?? "-",
+            },
+          ]}
+          rowKey={(record) => `${record.site_id}-${record.week}-${record.year}`}
+        />
       </Modal>
     </div>
   );

@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import dayjs from "dayjs";
+import { fetchWithRetry } from "../utils/fetch";
 
 const getBenchmarkKpi = (kpiName: string) => {
   const norm = kpiName.toLowerCase();
@@ -110,9 +111,7 @@ export const useMobileExperience = () => {
 
   // Load static references
   useEffect(() => {
-    const token = localStorage.getItem("access_token");
-    const headers = token ? { Authorization: `Bearer ${token}` } : undefined;
-    const fetchWithAuth = (url: string) => fetch(url, { headers });
+    const fetchWithAuth = (url: string) => fetchWithRetry(url);
 
     fetchWithAuth("/onx/geojson/treg_region_pairing.json")
       .then((res) => res.json())
@@ -202,7 +201,7 @@ export const useMobileExperience = () => {
         urlParams.append("yearweek", time);
       }
 
-      fetch(
+      fetchWithRetry(
         `/onx-api/api/v2/quality-experience/map/${apiLevel}/${apiGranularity}?${urlParams.toString()}`,
       )
         .then((res) => res.json())
@@ -239,7 +238,7 @@ export const useMobileExperience = () => {
       const fetchWeek = (week: number | string | null) =>
         week == null
           ? Promise.resolve([] as any[])
-          : fetch(buildUrl(week))
+          : fetchWithRetry(buildUrl(week))
               .then((res) => res.json())
               .then((resData) =>
                 resData.statusCode === 200 && resData.data ? resData.data : []
@@ -308,7 +307,7 @@ export const useMobileExperience = () => {
         }
       }
 
-      fetch(
+      fetchWithRetry(
         `/onx-api/api/v2/quality-experience/chart/${apiLevel}/${apiGranularity}?${params.toString()}`,
       )
         .then((res) => res.json())
@@ -333,7 +332,7 @@ export const useMobileExperience = () => {
         level: level === "national" ? "region" : level,
       });
 
-      fetch(`/onx-api/api/v2/f-onx-benchmark-mobile?${params.toString()}`)
+      fetchWithRetry(`/onx-api/api/v2/f-onx-benchmark-mobile?${params.toString()}`)
         .then((res) => res.json())
         .then((resData) => {
           if (resData.statusCode === 200 && resData.data) {
@@ -352,7 +351,7 @@ export const useMobileExperience = () => {
         granularity: granularity,
       });
 
-      fetch(`/onx-api/api/v2/quality-experience/city-lose-flag?${flagParams.toString()}`)
+      fetchWithRetry(`/onx-api/api/v2/quality-experience/city-lose-flag?${flagParams.toString()}`)
         .then((res) => res.json())
         .then((resData) => {
           if (resData.statusCode === 200 && resData.data) {

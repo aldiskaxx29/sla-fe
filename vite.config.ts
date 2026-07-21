@@ -17,7 +17,6 @@ export default defineConfig({
         target: "http://10.60.174.187:8089",
         changeOrigin: true,
         secure: false,
-        rewrite: (path) => path.replace(/^\/api/, ""),
       },
       "/qosmo": {
         target: "https://qosmo.telkom.co.id",

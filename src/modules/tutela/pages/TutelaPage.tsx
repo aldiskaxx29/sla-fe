@@ -65,22 +65,7 @@ interface ChartData {
   excellentConsistentQuality?: OperatorData[];
 }
 
-const fetchWithRetry = async (url: string, retries = 3, delay = 1000): Promise<Response> => {
-  const token = localStorage.getItem("access_token");
-  const headers = token ? { Authorization: `Bearer ${token}` } : undefined;
-
-  for (let i = 0; i <= retries; i++) {
-    try {
-      const res = await fetch(url, { headers });
-      if (res.ok) return res;
-      throw new Error(`HTTP error! status: ${res.status}`);
-    } catch (err) {
-      if (i === retries) throw err;
-      await new Promise((resolve) => setTimeout(resolve, delay * Math.pow(1.5, i)));
-    }
-  }
-  throw new Error("Fetch failed after retries");
-};
+import { fetchWithRetry } from "../utils/fetch";
 
 const TutelaPage = () => {
   // General Filter States
