@@ -1008,7 +1008,7 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
 
     const actualWeek = getActualWeekNum(monthNum, relativeWeekNum) || relativeWeekNum;
     const yearParam = record?.year || new Date().getFullYear();
-    const kpiName = record?.parameter || record?.mini_parameter || "";
+    const kpiName = realisasiDetail?.kpi || record?.parameter || record?.mini_parameter || "";
     const typeParam = getApiTypeCode(kpiName);
     const statusParam = isAfterTable ? "after" : "before";
     const regionParam = record?.region_tsel || "";
