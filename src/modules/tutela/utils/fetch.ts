@@ -8,7 +8,9 @@ export const fetchWithRetry = async (
   delay = 1000,
   timeoutMs = 20000
 ): Promise<Response> => {
-  const token = localStorage.getItem("access_token");
+  const token =
+    localStorage.getItem("access_token") ||
+    import.meta.env.VITE_DAILY_MONITORING_TOKEN;
   const authHeaders = token ? { Authorization: `Bearer ${token}` } : {};
 
   const mergedHeaders = {

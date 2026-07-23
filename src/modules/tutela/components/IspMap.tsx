@@ -163,7 +163,8 @@ export const IspMap: React.FC<IspMapProps> = ({
     const map = mapRef.current;
 
     const isCityBoundaries = level === "city" || mapType === "benchmark";
-    const geojsonPath = isCityBoundaries ? "/onx/geojson/city2.json" : "/onx/geojson/region.json";
+    const apiPrefix = import.meta.env.DEV ? "/qosmo/api" : "/api";
+    const geojsonPath = isCityBoundaries ? `${apiPrefix}/geojson/city` : `${apiPrefix}/geojson/region`;
 
     // Remove existing layers/source before re-adding
     ["boundaries-fill", "boundaries-border"].forEach((id) => {
@@ -174,7 +175,9 @@ export const IspMap: React.FC<IspMapProps> = ({
 
     let cancelled = false;
 
-    const token = localStorage.getItem("access_token");
+    const token =
+      localStorage.getItem("access_token") ||
+      import.meta.env.VITE_DAILY_MONITORING_TOKEN;
     fetch(geojsonPath, {
       headers: token ? { Authorization: `Bearer ${token}` } : undefined,
     })

@@ -110,9 +110,10 @@ export const useIspProvider = () => {
 
   // Load static references
   useEffect(() => {
+    const apiPrefix = import.meta.env.DEV ? "/qosmo/api" : "/api";
     const fetchWithAuth = (url: string) => fetchWithRetry(url);
 
-    fetchWithAuth("/onx/geojson/treg_region_pairing.json")
+    fetchWithAuth(`${apiPrefix}/geojson/treg-region-pairing`)
       .then((res) => res.json())
       .then((data) => {
         const uniqueRegions = Array.from(
@@ -122,11 +123,11 @@ export const useIspProvider = () => {
       })
       .catch((err) => console.error("Failed to load regions:", err));
 
-    fetchWithAuth("/onx/geojson/treg_city_pairing.json")
+    fetchWithAuth(`${apiPrefix}/geojson/treg-city-pairing`)
       .then((res) => res.json())
       .then((data) => {
         const uniqueCities = Array.from(
-          new Set<string>(data.map((item: any) => item.kabupaten)),
+          new Set<string>(data.map((item: any) => item.kabupaten || item.city)),
         ).sort();
         setCities(uniqueCities);
         setTotalCityCount(uniqueCities.length);

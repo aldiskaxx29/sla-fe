@@ -86,7 +86,9 @@ const TutelaPage = () => {
 
   // Load static resources & default lists on mount
   useEffect(() => {
-    fetchWithRetry("/onx/geojson/treg_region_pairing.json")
+    const apiPrefix = import.meta.env.DEV ? "/qosmo/api" : "/api";
+
+    fetchWithRetry(`${apiPrefix}/geojson/treg-region-pairing`)
       .then((res) => res.json())
       .then((data) => {
         const uniqueRegions = Array.from(new Set<string>(data.map((item: any) => item.new_region))).sort();
@@ -94,10 +96,10 @@ const TutelaPage = () => {
       })
       .catch((err) => console.error("Failed to load regions:", err));
 
-    fetchWithRetry("/onx/geojson/treg_city_pairing.json")
+    fetchWithRetry(`${apiPrefix}/geojson/treg-city-pairing`)
       .then((res) => res.json())
       .then((data) => {
-        const uniqueCities = Array.from(new Set<string>(data.map((item: any) => item.city))).sort();
+        const uniqueCities = Array.from(new Set<string>(data.map((item: any) => item.kabupaten || item.city))).sort();
         setCities(uniqueCities);
       })
       .catch((err) => console.error("Failed to load cities:", err));

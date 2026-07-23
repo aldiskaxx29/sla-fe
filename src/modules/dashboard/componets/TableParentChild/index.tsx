@@ -89,6 +89,10 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
   const [siteDetailModalData, setSiteDetailModalData] = useState<any[] | null>(
     null,
   );
+  const [siteDetailPagination, setSiteDetailPagination] = useState({
+    current: 1,
+    pageSize: 10,
+  });
   const [siteDetailParams, setSiteDetailParams] = useState<{
     year: number;
     week: number | string;
@@ -1002,6 +1006,7 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
     relativeWeekNum: number,
     isAfterTable: boolean
   ) => {
+    setSiteDetailPagination({ current: 1, pageSize: 10 });
     setSiteDetailModalLoading(true);
     setSiteDetailModalVisible(true);
     setSiteDetailModalData(null);
@@ -1996,20 +2001,37 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
         width={1200}
         centered
         footer={null}
+        styles={{
+          body: {
+            maxHeight: "75vh",
+            overflowY: "auto",
+          },
+        }}
       >
         <Table
           dataSource={siteDetailModalData || []}
           loading={siteDetailModalLoading}
           size="small"
-          pagination={{ pageSize: 10, showSizeChanger: true }}
+          pagination={{
+            current: siteDetailPagination.current,
+            pageSize: siteDetailPagination.pageSize,
+            showSizeChanger: true,
+            pageSizeOptions: ["10", "20", "50", "100"],
+            onChange: (page, pageSize) =>
+              setSiteDetailPagination({ current: page, pageSize }),
+            showTotal: (total, range) =>
+              `${range[0]}-${range[1]} dari ${total} data`,
+          }}
           bordered
-          scroll={{ x: "max-content" }}
+          scroll={{ x: "max-content", y: 400 }}
           columns={[
             {
               title: "No.",
               key: "no",
-              render: (_, __, index) => index + 1,
-              width: 50,
+              render: (_, __, index) =>
+                (siteDetailPagination.current - 1) * siteDetailPagination.pageSize + index + 1,
+              width: 60,
+              align: "center",
             },
             {
               title: "Site ID",

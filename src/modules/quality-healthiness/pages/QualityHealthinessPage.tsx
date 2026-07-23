@@ -435,12 +435,18 @@ const QualityHealthinessMenu = () => {
     useState<GeoJSON.FeatureCollection | null>(null);
 
   useEffect(() => {
-    fetch("/geojson/region.json")
+    const apiPrefix = import.meta.env.DEV ? "/qosmo/api" : "/api";
+    const token =
+      localStorage.getItem("access_token") ||
+      import.meta.env.VITE_DAILY_MONITORING_TOKEN;
+    fetch(`${apiPrefix}/geojson/region`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    })
       .then((res) => res.json())
       .then((geojson) => {
         setGeojsonRegion(geojson);
       })
-      .catch((err) => console.error("Failed to load region.json:", err));
+      .catch((err) => console.error("Failed to load region geojson:", err));
   }, []);
 
   const packetLossRows: TableRow[] = [
