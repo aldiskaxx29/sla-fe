@@ -5,6 +5,7 @@ import { AppRouteGuard } from "@/app/components";
 
 const TutelaLayout = lazy(() => import("@/modules/tutela/pages/TutelaLayout"));
 const Tutela = lazy(() => import("@/modules/tutela/pages/TutelaPage"));
+const CityPerformance = lazy(() => import("@/modules/tutela/pages/CityPerformancePage"));
 const MobileExperience = lazy(() => import("@/modules/tutela/pages/MobileExperiencePage"));
 const IspProvider = lazy(() => import("@/modules/tutela/pages/IspProviderPage"));
 
@@ -21,6 +22,10 @@ const useTutelaRouter = (): RouteObject[] => {
         {
           index: true,
           element: <Tutela />,
+        },
+        {
+          path: "city-performance",
+          element: <CityPerformance />,
         },
         {
           path: "mobile-experience",

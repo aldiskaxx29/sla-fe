@@ -13,6 +13,11 @@ export default defineConfig({
   },
   server: {
     proxy: {
+      "/api/onx-dashboard": {
+        target: "https://qosmo.telkom.co.id",
+        changeOrigin: true,
+        secure: true,
+      },
       "/api": {
         target: "http://10.60.174.187:8089",
         changeOrigin: true,

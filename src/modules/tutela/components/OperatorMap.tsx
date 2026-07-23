@@ -46,6 +46,29 @@ const getBBox = (geojson: any): [number, number, number, number] => {
   return [minLng, minLat, maxLng, maxLat];
 };
 
+const getFeatureLocName = (properties: any, isCityBoundaries: boolean): string => {
+  if (!properties) return "";
+  if (isCityBoundaries) {
+    return (
+      properties.KABUPATEN ||
+      properties.kabupaten ||
+      properties.Kabupaten ||
+      properties.city ||
+      properties.CITY ||
+      properties.City ||
+      ""
+    );
+  }
+  return (
+    properties.REGION ||
+    properties.region ||
+    properties.Region ||
+    properties.new_region ||
+    properties.NEW_REGION ||
+    ""
+  );
+};
+
 const buildFillColor = (
   mapType: "experience" | "benchmark",
   level: string,
@@ -54,11 +77,13 @@ const buildFillColor = (
   selectedBenchmarks: string[]
 ): any => {
   const isCityBoundaries = level === "city" || mapType === "benchmark";
-  const propKey = isCityBoundaries ? "KABUPATEN" : "REGION";
+  const propGetter = isCityBoundaries
+    ? ["coalesce", ["get", "KABUPATEN"], ["get", "kabupaten"], ["get", "Kabupaten"], ["get", "city"], ["get", "CITY"], ["get", "City"], ""]
+    : ["coalesce", ["get", "REGION"], ["get", "region"], ["get", "Region"], ["get", "new_region"], ["get", "NEW_REGION"], ""];
 
   if (mapType === "experience") {
     if (Object.keys(mapWinnerColors).length === 0) return "#cbd5e1";
-    const expr: any[] = ["match", ["downcase", ["get", propKey]]];
+    const expr: any[] = ["match", ["downcase", propGetter]];
     Object.entries(mapWinnerColors).forEach(([name, color]) => {
       expr.push(name.toLowerCase(), color);
     });
@@ -66,7 +91,7 @@ const buildFillColor = (
     return expr;
   } else {
     if (mapDataList.length === 0) return "#e2e8f0";
-    const expr: any[] = ["match", ["downcase", ["get", propKey]]];
+    const expr: any[] = ["match", ["downcase", propGetter]];
     const seen = new Set<string>();
     mapDataList.forEach((row) => {
       if (row.location && row.benchmark) {
@@ -81,6 +106,28 @@ const buildFillColor = (
     expr.push("#e2e8f0");
     return expr;
   }
+};
+
+const geojsonCache = new Map<string, Promise<any>>();
+
+const getGeoJSONData = (url: string, token?: string): Promise<any> => {
+  if (geojsonCache.has(url)) {
+    return geojsonCache.get(url)!;
+  }
+  const promise = fetch(url, {
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+  })
+    .then((r) => {
+      if (!r.ok) throw new Error(`HTTP error! status: ${r.status}`);
+      return r.json();
+    })
+    .catch((err) => {
+      geojsonCache.delete(url);
+      throw err;
+    });
+
+  geojsonCache.set(url, promise);
+  return promise;
 };
 
 export const OperatorMap: React.FC<OperatorMapProps> = ({
@@ -175,22 +222,22 @@ export const OperatorMap: React.FC<OperatorMapProps> = ({
     const token =
       localStorage.getItem("access_token") ||
       import.meta.env.VITE_DAILY_MONITORING_TOKEN;
-    fetch(geojsonPath, {
-      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-    })
-      .then((r) => r.json())
+
+    getGeoJSONData(geojsonPath, token)
       .then((data) => {
         if (cancelled || !mapRef.current) return;
+
+        if (!data || !Array.isArray(data.features)) {
+          console.warn("GeoJSON response invalid or missing features:", data);
+          return;
+        }
 
         let features = data.features as any[];
 
         if (location) {
           features = features.filter((f) => {
-            const fRegion = f.properties.REGION?.toLowerCase() || "";
-            const fKab = f.properties.KABUPATEN?.toLowerCase() || "";
-            return level === "region"
-              ? fRegion === location.toLowerCase()
-              : fKab === location.toLowerCase();
+            const locName = getFeatureLocName(f.properties, isCityBoundaries);
+            return locName.toLowerCase() === location.toLowerCase();
           });
           if (features.length > 0) {
             const [w, s, e, n] = getBBox({ type: "FeatureCollection", features });
@@ -231,12 +278,10 @@ export const OperatorMap: React.FC<OperatorMapProps> = ({
         });
 
         // Click popup handler
-        const propName = isCityBoundaries ? "KABUPATEN" : "REGION";
-
         map.on("click", "boundaries-fill", (e) => {
           const feats = e.features;
           if (!feats || feats.length === 0) return;
-          const locName = feats[0].properties?.[propName];
+          const locName = getFeatureLocName(feats[0].properties, isCityBoundaries);
           if (!locName) return;
 
           const rows = mapDataListRef.current.filter(

@@ -138,7 +138,7 @@ export const useMobileExperience = () => {
     fetchWithAuth("/onx-api/api/v-list-weeks")
       .then((res) => res.json())
       .then((data) => {
-        const weeks = data.map((w: any) => String(w.yearweek));
+        const weeks = data.map((w: any) => String(w.yearweek)).sort((a: string, b: string) => b.localeCompare(a));
         setWeeksList(weeks);
       })
       .catch((err) => console.error("Failed to load weeks list:", err));

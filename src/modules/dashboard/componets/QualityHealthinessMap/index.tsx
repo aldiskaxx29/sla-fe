@@ -139,7 +139,7 @@ const Index: React.FC<MapMapProps> = ({ filter, data, geojson }) => {
 
   // Map Region Layer
   useEffect(() => {
-    if (!isMapLoaded || !mapRef.current || !geojson.region) return;
+    if (!isMapLoaded || !mapRef.current || !geojson.region || !Array.isArray(geojson.region.features)) return;
 
     const map = mapRef.current;
 

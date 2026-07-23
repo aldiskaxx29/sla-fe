@@ -442,9 +442,17 @@ const QualityHealthinessMenu = () => {
     fetch(`${apiPrefix}/geojson/region`, {
       headers: token ? { Authorization: `Bearer ${token}` } : undefined,
     })
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        return res.json();
+      })
       .then((geojson) => {
-        setGeojsonRegion(geojson);
+        if (geojson && Array.isArray(geojson.features)) {
+          setGeojsonRegion(geojson);
+        } else {
+          console.warn("Invalid region GeoJSON data:", geojson);
+          setGeojsonRegion(null);
+        }
       })
       .catch((err) => console.error("Failed to load region geojson:", err));
   }, []);

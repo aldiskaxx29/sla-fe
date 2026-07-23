@@ -138,7 +138,7 @@ const index: React.FC<MapMapProps> = ({ filter, data, geojson }) => {
   }, [isMapLoaded]);
 
   useEffect(() => {
-    if (!isMapLoaded || filter.level !== "region" || !geojson.region) return;
+    if (!isMapLoaded || filter.level !== "region" || !geojson.region || !Array.isArray(geojson.region.features)) return;
 
     const regionData = geojson.region.features.find(
       (f) =>
@@ -166,7 +166,7 @@ const index: React.FC<MapMapProps> = ({ filter, data, geojson }) => {
 
   // Map Region Layer
   useEffect(() => {
-    if (!isMapLoaded || !mapRef.current || !geojson.region) return;
+    if (!isMapLoaded || !mapRef.current || !geojson.region || !Array.isArray(geojson.region.features)) return;
 
     const map = mapRef.current;
 

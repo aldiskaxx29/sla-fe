@@ -1,6 +1,6 @@
 // Antd
 import { Button, Image, Layout, Spin, Drawer } from "antd";
-import { MenuOutlined, CloseOutlined } from "@ant-design/icons";
+import { MenuOutlined, CloseOutlined, DownOutlined } from "@ant-design/icons";
 import "./index.css";
 
 // React
@@ -54,8 +54,7 @@ const AppLayoutDefault = () => {
     navigate(menu);
   };
 
-  const [open1, setOpen1] = useState(false);
-  const [open2, setOpen2] = useState(false);
+  const [openDropdownKey, setOpenDropdownKey] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const containerRef = useRef(null);
@@ -138,44 +137,57 @@ const AppLayoutDefault = () => {
   );
 
   const renderDropdownMenu = (menu: MenuConfigItem) => {
-    const isOpen = menu.key === "sla" ? open2 : open1;
-    const setOpen = menu.key === "sla" ? setOpen2 : setOpen1;
+    const isOpen = openDropdownKey === menu.key;
 
     return (
       <div
         key={menu.key}
         ref={containerRef}
-        onMouseEnter={() => setOpen(true)}
-        onMouseLeave={() => setOpen(false)}
-        className={`relative inline-block px-4 py-2 rounded-full cursor-pointer ${
+        onMouseEnter={() => setOpenDropdownKey(menu.key)}
+        onMouseLeave={() => setOpenDropdownKey(null)}
+        className={`relative inline-block px-4 py-2 rounded-full cursor-pointer transition-colors ${
           isActiveMenu(menu)
             ? "!bg-[#A6AEC1] text-white"
             : "!bg-[#576278] text-[#C6C6C6]"
         }`}
       >
-        {menu.label}
+        <div className="flex items-center gap-1.5 font-medium text-sm">
+          <span>{menu.label}</span>
+          <DownOutlined
+            className={`text-[10px] transition-transform duration-200 ${
+              isOpen ? "rotate-180" : ""
+            }`}
+          />
+        </div>
         {isOpen && (
           <div
-            className={`absolute left-0 top-full -mt-2 bg-[#576278] border rounded shadow ${
-              menu.key === "sla" ? "z-100 w-[300px]" : "z-10 w-full"
+            className={`absolute left-0 top-full -mt-1 bg-[#576278] border border-gray-600 rounded-xl shadow-xl overflow-hidden py-1 ${
+              menu.key === "sla" ? "z-100 w-[300px]" : "z-100 w-[200px]"
             }`}
           >
-            {menu.options?.map((option) => (
-              <p
-                key={option.value}
-                className={`px-4 py-2 hover:bg-gray-500 cursor-pointer ${
-                  location.pathname?.includes(option.value)
-                    ? "!bg-[#A6AEC1] text-white"
-                    : "!bg-[#576278] text-[#C6C6C6]"
-                }`}
-                onClick={() => {
-                  handleMenuSelect(option.value);
-                  setOpen(false);
-                }}
-              >
-                {option.label}
-              </p>
-            ))}
+            {menu.options?.map((option) => {
+              const optionActive =
+                option.value === "onx"
+                  ? location.pathname === "/onx" || location.pathname === "/onx/"
+                  : location.pathname?.includes(option.value);
+
+              return (
+                <p
+                  key={option.value}
+                  className={`px-4 py-2 hover:bg-gray-600 cursor-pointer text-sm font-medium transition-colors ${
+                    optionActive
+                      ? "!bg-[#A6AEC1] text-white"
+                      : "!bg-[#576278] text-[#C6C6C6]"
+                  }`}
+                  onClick={() => {
+                    handleMenuSelect(option.value);
+                    setOpenDropdownKey(null);
+                  }}
+                >
+                  {option.label}
+                </p>
+              );
+            })}
           </div>
         )}
       </div>
@@ -194,7 +206,10 @@ const AppLayoutDefault = () => {
           </div>
           <div className="space-y-1.5 pl-2">
             {menu.options?.map((option) => {
-              const optionActive = location.pathname?.includes(option.value);
+              const optionActive =
+                option.value === "onx"
+                  ? location.pathname === "/onx" || location.pathname === "/onx/"
+                  : location.pathname?.includes(option.value);
               return (
                 <div
                   key={option.value}

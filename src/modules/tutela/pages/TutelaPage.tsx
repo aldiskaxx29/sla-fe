@@ -81,7 +81,7 @@ const TutelaPage = () => {
   const [defaultTimes, setDefaultTimes] = useState<Record<string, string>>({});
 
   // Loading & Data States
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState<ChartData | null>(null);
 
   // Load static resources & default lists on mount
@@ -104,49 +104,47 @@ const TutelaPage = () => {
       })
       .catch((err) => console.error("Failed to load cities:", err));
 
-    fetchWithRetry("/onx-api/api/v-list-weeks")
-      .then((res) => res.json())
-      .then((data) => {
-        const weeks = data.map((w: any) => String(w.yearweek));
-        setWeeksList(weeks);
-        // Fallback: if time hasn't been set by defaults yet, set it to the latest week
-        setTime((prevTime) => {
-          if (!prevTime && weeks.length > 0) {
-            return weeks[0];
-          }
-          return prevTime;
-        });
-      })
-      .catch((err) => console.error("Failed to load weeks list:", err));
+    Promise.all([
+      fetchWithRetry("/onx-api/api/v-list-weeks").then((res) => res.json()).catch(() => []),
+      fetchWithRetry("/onx-api/api/v2/v-onx-last-period-time").then((res) => res.json()).catch(() => null),
+    ]).then(([weeksData, periodData]) => {
+      let sortedWeeks: string[] = [];
+      if (Array.isArray(weeksData) && weeksData.length > 0) {
+        sortedWeeks = weeksData
+          .map((w: any) => String(w.yearweek))
+          .sort((a: string, b: string) => b.localeCompare(a));
+        setWeeksList(sortedWeeks);
+      }
 
-    fetchWithRetry("/onx-api/api/v2/v-onx-last-period-time")
-      .then((res) => res.json())
-      .then((resData) => {
-        if (resData.statusCode === 200 && resData.data) {
-          const defaults: Record<string, string> = {};
-          resData.data.forEach((item: any) => {
-            if (item.isMobile) {
-              defaults[item.granularity] = item.time;
-            }
-          });
-          setDefaultTimes(defaults);
-          if (defaults["7 days"]) {
-            setTime(defaults["7 days"]);
+      const defaults: Record<string, string> = {};
+      if (periodData && periodData.statusCode === 200 && Array.isArray(periodData.data)) {
+        periodData.data.forEach((item: any) => {
+          if (item.isMobile) {
+            defaults[item.granularity] = item.time;
           }
-        }
-      })
-      .catch((err) => console.error("Failed to load time defaults:", err));
+        });
+        setDefaultTimes(defaults);
+      }
+
+      const initialTime = defaults["7 days"] || (sortedWeeks.length > 0 ? sortedWeeks[0] : "");
+      if (initialTime) {
+        setTime(initialTime);
+      } else {
+        setLoading(false);
+      }
+    });
   }, []);
 
   // Update time when granularity changes
   useEffect(() => {
+    if (!weeksList.length && !Object.keys(defaultTimes).length) return;
+
     if (defaultTimes[granularity]) {
       setTime(defaultTimes[granularity]);
     } else if (weeksList.length > 0) {
-      // Fallback: if there is no default time for this granularity, use the latest week
       setTime(weeksList[0]);
     }
-  }, [granularity, defaultTimes, weeksList]);
+  }, [granularity]);
 
   // Fetch Dashboard / Sub Metric Data
   useEffect(() => {

@@ -51,6 +51,11 @@ export const NETWORK_OPTIONS: MenuOption[] = [
   { label: "Quality Healthiness", value: "network/quality-healthiness" },
 ];
 
+export const ONX_OPTIONS: MenuOption[] = [
+  { label: "Dashboard", value: "onx" },
+  { label: "City Performance", value: "onx/city-performance" },
+];
+
 export const MENU_CONFIG: MenuConfigItem[] = [
   {
     key: "monday",
@@ -126,16 +131,16 @@ export const MENU_CONFIG: MenuConfigItem[] = [
   },
   {
     key: "onx",
-    label: "Onx",
-    path: "onx",
-    type: "button",
-    activePaths: ["onx"],
+    label: "ONX",
+    type: "dropdown",
+    activePaths: ["onx", "onx/city-performance"],
     allowedRoles: [
       ...ALL_MAIN_MENU_ROLES,
       USER_ROLES.VICE_PRESIDENT,
       USER_ROLES.TSEL,
       USER_ROLES.GUEST,
     ],
+    options: ONX_OPTIONS,
   },
   {
     key: "telkom-akses",
