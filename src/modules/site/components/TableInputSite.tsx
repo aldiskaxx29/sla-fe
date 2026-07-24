@@ -879,8 +879,17 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
         dataSource={filteredTableData}
         bordered
         className="rounded-xl"
-        scroll={{ x: "max-content" }}
-        pagination={pagination}
+        pagination={
+          pagination
+            ? {
+                ...pagination,
+                showSizeChanger: true,
+                pageSizeOptions: ["10", "20", "50", "100"],
+                showTotal: (total, range) =>
+                  `${range[0]}-${range[1]} of ${total} items`,
+              }
+            : false
+        }
         rowKey={(record) =>
           String(
             (record as Record<string, unknown>).__tableKey ??

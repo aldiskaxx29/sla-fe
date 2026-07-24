@@ -28,8 +28,6 @@ interface RealisasiResponse {
   };
 }
 
-let identIndex = 1;
-
 const TableParentChild: React.FC<TableParentChildProps> = ({
   data,
   loadingMainData,
@@ -42,12 +40,14 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
   );
   const [detailParameter, setDetailParameter] = useState("");
   const [dataSource, setDataSource] = useState<Record<string, unknown>[]>([]);
-  const [injectedData, setInjectedData] = useState<Record<string, unknown>>({});
-  const [injectedChildData, setInjectedChildData] = useState<
-    Record<string, unknown>
+  const [injectedDataMap, setInjectedDataMap] = useState<
+    Record<string | number, Record<string, unknown>>
   >({});
-  const [injectedGrandChildData, setInjectedGrandChildData] = useState<
-    Record<string, unknown>
+  const [injectedChildDataMap, setInjectedChildDataMap] = useState<
+    Record<string | number, Record<string, unknown>>
+  >({});
+  const [injectedGrandChildDataMap, setInjectedGrandChildDataMap] = useState<
+    Record<string | number, Record<string, unknown>>
   >({});
   const {
     getWitel,
@@ -169,29 +169,44 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
   }, [loadingMainData]);
 
   const dataMapping = useMemo(() => {
-    const mappingData2 = dataSource.map((data, indexParent) => {
-      if (
-        data.coreIndex == injectedData?.coreIndex &&
-        data.parameter == injectedData?.parameter
-      ) {
-        const mappingChildren = injectedData.children.map(
-          (childData, index) => {
-            let childrenMapped = [];
+    return dataSource.map((data, indexParent) => {
+      const mainKey =
+        (data.identIndex as string | number) ??
+        `param_${indexParent}_${data.parameter || data.coreIndex}`;
 
-            if (
-              injectedChildData.identIndex === childData.identIndex &&
-              Array.isArray(injectedChildData.children)
-            ) {
-              childrenMapped = injectedChildData.children.map(
-                (grandChild, gcIndex) => {
-                  let grandChildrenMapped = [];
+      const mainInject =
+        injectedDataMap[mainKey] ||
+        Object.values(injectedDataMap).find(
+          (inj: any) =>
+            inj?.coreIndex == data.coreIndex &&
+            inj?.parameter == data.parameter,
+        );
+
+      let mappingChildren: any[] = [];
+
+      if (mainInject && Array.isArray(mainInject.children)) {
+        mappingChildren = mainInject.children.map(
+          (childData: any, index: number) => {
+            const childKey = childData.identIndex;
+            const childInject = injectedChildDataMap[childKey];
+
+            let childrenMapped: any[] = [];
+
+            if (childInject && Array.isArray(childInject.children)) {
+              childrenMapped = childInject.children.map(
+                (grandChild: any, gcIndex: number) => {
+                  const grandChildKey = grandChild.identIndex;
+                  const grandChildInject =
+                    injectedGrandChildDataMap[grandChildKey];
+
+                  let grandChildrenMapped: any[] = [];
+
                   if (
-                    injectedGrandChildData.identIndex ===
-                      grandChild.identIndex &&
-                    Array.isArray(injectedGrandChildData.children)
+                    grandChildInject &&
+                    Array.isArray(grandChildInject.children)
                   ) {
-                    grandChildrenMapped = injectedGrandChildData.children.map(
-                      (ggChild) => ({
+                    grandChildrenMapped = grandChildInject.children.map(
+                      (ggChild: any) => ({
                         ...ggChild,
                         index: gcIndex,
                         indexParent: index,
@@ -220,26 +235,22 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
             };
           },
         );
-
-        return {
-          ...data,
-          index: indexParent,
-          indexParent,
-          identIndex: data.identIndex || identIndex++,
-          children: mappingChildren,
-        };
       }
 
       return {
         ...data,
-        indexParent,
         index: indexParent,
-        identIndex: data.identIndex || identIndex++,
+        indexParent,
+        identIndex: mainKey,
+        children: mappingChildren,
       };
     });
-
-    return mappingData2;
-  }, [dataSource, injectedData, injectedChildData]);
+  }, [
+    dataSource,
+    injectedDataMap,
+    injectedChildDataMap,
+    injectedGrandChildDataMap,
+  ]);
 
   const hasMeaningfulValue = (value: unknown) =>
     !(value === null || value === undefined || value === "" || value === "-");
@@ -1051,19 +1062,19 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
   };
 
   const fetchWitelData = useCallback(
-    async (record) => {
+    async (record: any) => {
       setLoadingRowKey(record.identIndex);
       setLoading(true);
       try {
         let res;
-        const mini_parameter = record.parameter.toLocaleLowerCase();
+        const mini_parameter = record.parameter?.toLocaleLowerCase() || "";
         const { month, year } = resolveMonthYearFromRecord(record);
         if (record.main_parent) {
           res = await getCNP({
             query: {
               type: menuId,
               filter,
-              parameter: record.parameter.toLocaleLowerCase(),
+              parameter: record.parameter?.toLocaleLowerCase(),
               sort: "asc",
               treg,
             },
@@ -1071,7 +1082,11 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
         } else if (record.parent) {
           res = await getWitel({
             query: {
-              parameter: detailParameter
+              parameter: (
+                detailParameter ||
+                record.mini_parameter ||
+                record.parameter
+              )
                 ?.replace(/%20/g, " ")
                 .toLocaleLowerCase(),
               region: record.parameter,
@@ -1086,46 +1101,68 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
         }
 
         if (record.main_parent) {
-          const findData = dataMapping.find(
-            (data) =>
-              data.coreIndex == record.coreIndex &&
-              data.parameter == record.parameter,
-          );
-          const newData = res.data?.map((data) => ({
+          const mainKey =
+            record.identIndex ||
+            `param_${record.indexParent ?? 0}_${record.parameter || record.coreIndex}`;
+          const findData =
+            dataMapping.find(
+              (data) =>
+                data.coreIndex == record.coreIndex &&
+                data.parameter == record.parameter,
+            ) || record;
+          const newData = res.data?.map((data: any, idx: number) => ({
             ...data,
             mini_parameter,
-            identIndex: data.identIndex || identIndex++,
+            identIndex:
+              data.identIndex ||
+              `${mainKey}_reg_${idx}_${data.parameter || data.region || idx}`,
           }));
           const injectData = { ...findData, children: newData };
-          setInjectedData(injectData);
-        } else if (record.parent) {
-          const findData = dataMapping[record.indexParent];
-          const newData = res.data?.map((data) => ({
-            ...data,
-            mini_parameter: findData.parameter,
-            identIndex: data.identIndex || identIndex++,
+          setInjectedDataMap((prev) => ({
+            ...prev,
+            [mainKey]: injectData,
           }));
-          const childDataInject = findData?.children[record.index];
+        } else if (record.parent) {
+          const regionKey = record.identIndex;
+          const findData = dataMapping[record.indexParent];
+          const newData = res.data?.map((data: any, idx: number) => ({
+            ...data,
+            mini_parameter: findData?.parameter,
+            identIndex:
+              data.identIndex ||
+              `${regionKey}_witel_${idx}_${data.parameter || data.witel || data.region || idx}`,
+          }));
+          const childDataInject = findData?.children?.[record.index] || record;
           const injectData = {
             ...childDataInject,
             children: newData,
           };
-          setInjectedChildData(injectData);
+          setInjectedChildDataMap((prev) => ({
+            ...prev,
+            [regionKey]: injectData,
+          }));
         } else {
+          const grandChildKey = record.identIndex;
           const findData = dataMapping[record.mainIndexParent];
-          const childData = findData?.children[record.indexParent];
-          const grandChildDataInject = childData?.children[record.index];
-          const newData = res.data?.map((data) => ({
+          const childData = findData?.children?.[record.indexParent];
+          const grandChildDataInject =
+            childData?.children?.[record.index] || record;
+          const newData = res.data?.map((data: any, idx: number) => ({
             ...data,
-            mini_parameter: findData.parameter,
-            identIndex: data.identIndex || identIndex++,
+            mini_parameter: findData?.parameter,
+            identIndex:
+              data.identIndex ||
+              `${grandChildKey}_l4_${idx}_${data.parameter || data.witel || data.region || idx}`,
             is_level_4: true,
           }));
           const injectData = {
             ...grandChildDataInject,
             children: newData,
           };
-          setInjectedGrandChildData(injectData);
+          setInjectedGrandChildDataMap((prev) => ({
+            ...prev,
+            [grandChildKey]: injectData,
+          }));
         }
         return true;
       } catch (error) {
@@ -1140,7 +1177,7 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
   );
 
   const handleExpandCollaps = useCallback(
-    async (record) => {
+    async (record: any) => {
       if (record.parameter?.toLowerCase()?.includes("core"))
         setDetailParameter(record.parameter);
 
@@ -1152,28 +1189,17 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
 
       if (record.parent || record.main_parent || isLevel3Mttrq) {
         const key = record.identIndex;
-        setExpandedRowKeys((prevKeys) => {
-          const isExpanded = prevKeys.includes(key);
-          if (isExpanded) {
-            return prevKeys.filter((k) => k !== key);
-          } else {
-            return [...prevKeys, key];
-          }
-        });
+        const isExpanded = expandedRowKey.includes(key);
 
-        const isExpandedNow = expandedRowKey.includes(key);
-
-        if (!isExpandedNow) {
-          const success = await fetchWitelData(record);
-          setTimeout(async () => {
-            setDataSource(dataMapping);
-            if (!success) await fetchWitelData(record);
-            setDataSource(dataMapping);
-          }, 500);
+        if (isExpanded) {
+          setExpandedRowKeys((prevKeys) => prevKeys.filter((k) => k !== key));
+        } else {
+          setExpandedRowKeys((prevKeys) => [...prevKeys, key]);
+          await fetchWitelData(record);
         }
       }
     },
-    [dataMapping, expandedRowKey, fetchWitelData],
+    [expandedRowKey, fetchWitelData],
   );
 
   const columnPop = useMemo(() => {

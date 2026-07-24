@@ -24,9 +24,13 @@ const TableParentChildCNOP: React.FC<TableParentChildCNOPProps> = ({
 }) => {
   const [loading, setLoading] = useState(false);
   const [detailParameter, setDetailParameter] = useState("");
-  const [dataSource, setDataSource] = useState([]);
-  const [injectedData, setInjectedData] = useState({});
-  const [injectedChildData, setInjectedChildData] = useState({});
+  const [dataSource, setDataSource] = useState<any[]>([]);
+  const [injectedDataMap, setInjectedDataMap] = useState<
+    Record<string | number, Record<string, unknown>>
+  >({});
+  const [injectedChildDataMap, setInjectedChildDataMap] = useState<
+    Record<string | number, Record<string, unknown>>
+  >({});
   const { getWitel, getCNP, getModalDetail } = useDashboard();
   const { menuId } = useParams();
   const [expandedRowKey, setExpandedRowKeys] = useState<number[] | string[]>(
@@ -39,23 +43,34 @@ const TableParentChildCNOP: React.FC<TableParentChildCNOPProps> = ({
   }, [data]);
 
   const dataMapping = useMemo(() => {
-    const mappingData2 = dataSource.map((data, indexParent) => {
-      if (
-        data.coreIndex == injectedData?.coreIndex &&
-        data.parameter == injectedData?.parameter
-      ) {
-        const mappingChildren = injectedData.children.map(
-          (childData, index) => {
-            let childrenMapped = [];
+    return dataSource.map((data, indexParent) => {
+      const mainKey =
+        (data.identIndex as string | number) ??
+        `param_${indexParent}_${data.parameter || data.coreIndex}`;
 
-            if (
-              injectedChildData.identIndex === childData.identIndex &&
-              Array.isArray(injectedChildData.children)
-            ) {
-              childrenMapped = injectedChildData.children.map((grandChild) => ({
+      const mainInject =
+        injectedDataMap[mainKey] ||
+        Object.values(injectedDataMap).find(
+          (inj: any) =>
+            inj?.coreIndex == data.coreIndex &&
+            inj?.parameter == data.parameter,
+        );
+
+      let mappingChildren: any[] = [];
+
+      if (mainInject && Array.isArray(mainInject.children)) {
+        mappingChildren = mainInject.children.map(
+          (childData: any, index: number) => {
+            const childKey = childData.identIndex;
+            const childInject = injectedChildDataMap[childKey];
+
+            let childrenMapped: any[] = [];
+
+            if (childInject && Array.isArray(childInject.children)) {
+              childrenMapped = childInject.children.map((grandChild: any) => ({
                 ...grandChild,
                 index,
-                indexParent,
+                indexParent: index,
               }));
             }
 
@@ -67,26 +82,17 @@ const TableParentChildCNOP: React.FC<TableParentChildCNOPProps> = ({
             };
           }
         );
-
-        return {
-          ...data,
-          index: indexParent,
-          indexParent,
-          identIndex: data.identIndex || identIndex++,
-          children: mappingChildren,
-        };
       }
 
       return {
         ...data,
-        indexParent,
         index: indexParent,
-        identIndex: data.identIndex || identIndex++,
+        indexParent,
+        identIndex: mainKey,
+        children: mappingChildren,
       };
     });
-
-    return mappingData2;
-  }, [dataSource, injectedData, injectedChildData]);
+  }, [dataSource, injectedDataMap, injectedChildDataMap]);
 
   const columns = useMemo(() => {
     if (!data) return [];
@@ -303,32 +309,46 @@ const TableParentChildCNOP: React.FC<TableParentChildCNOPProps> = ({
         }
 
         if (record.main_parent) {
-          const findData = dataMapping.find(
-            (data) =>
-              data.coreIndex == record.coreIndex &&
-              data.parameter == record.parameter
-          );
-          const newData = res.data?.map((data) => ({
+          const mainKey =
+            record.identIndex ||
+            `param_${record.indexParent ?? 0}_${record.parameter || record.coreIndex}`;
+          const findData =
+            dataMapping.find(
+              (data) =>
+                data.coreIndex == record.coreIndex &&
+                data.parameter == record.parameter
+            ) || record;
+          const newData = res.data?.map((data: any, idx: number) => ({
             ...data,
             mini_parameter,
-            identIndex: data.identIndex || identIndex++,
+            identIndex:
+              data.identIndex ||
+              `${mainKey}_reg_${idx}_${data.parameter || data.region || idx}`,
           }));
           const injectData = { ...findData, children: newData };
-          setInjectedData(injectData);
-        } else {
-          const findData = dataMapping[record.indexParent];
-
-          const newData = res.data?.map((data) => ({
-            ...data,
-            mini_parameter: findData.parameter,
-            identIndex: data.identIndex || identIndex++,
+          setInjectedDataMap((prev) => ({
+            ...prev,
+            [mainKey]: injectData,
           }));
-
+        } else {
+          const regionKey = record.identIndex;
+          const findData = dataMapping[record.indexParent];
+          const newData = res.data?.map((data: any, idx: number) => ({
+            ...data,
+            mini_parameter: findData?.parameter,
+            identIndex:
+              data.identIndex ||
+              `${regionKey}_witel_${idx}_${data.parameter || data.witel || data.region || idx}`,
+          }));
+          const childDataInject = findData?.children?.[record.index] || record;
           const injectData = {
-            ...findData.children[record.index],
+            ...childDataInject,
             children: newData,
           };
-          setInjectedChildData(injectData);
+          setInjectedChildDataMap((prev) => ({
+            ...prev,
+            [regionKey]: injectData,
+          }));
         }
         return res;
       } catch (error) {
@@ -341,33 +361,22 @@ const TableParentChildCNOP: React.FC<TableParentChildCNOPProps> = ({
   );
 
   const handleExpandCollaps = useCallback(
-    async (record) => {
-      if (record.parameter.toLowerCase().includes("core"))
+    async (record: any) => {
+      if (record.parameter?.toLowerCase()?.includes("core"))
         setDetailParameter(record.parameter);
       if (record.parent || record.main_parent) {
         const key = record.identIndex;
-        setExpandedRowKeys((prevKeys) => {
-          const isExpanded = prevKeys.includes(key);
-          if (isExpanded) {
-            return prevKeys.filter((k) => k !== key);
-          } else {
-            return [...prevKeys, key];
-          }
-        });
+        const isExpanded = expandedRowKey.includes(key);
 
-        const isExpandedNow = expandedRowKey.includes(key);
-
-        if (!isExpandedNow) {
-          const success = await fetchWitelData(record);
-          setTimeout(async () => {
-            setDataSource(dataMapping);
-            if (!success) await fetchWitelData(record);
-            setDataSource(dataMapping);
-          }, 500);
+        if (isExpanded) {
+          setExpandedRowKeys((prevKeys) => prevKeys.filter((k) => k !== key));
+        } else {
+          setExpandedRowKeys((prevKeys) => [...prevKeys, key]);
+          await fetchWitelData(record);
         }
       }
     },
-    [dataMapping, expandedRowKey, fetchWitelData]
+    [expandedRowKey, fetchWitelData]
   );
 
   return (
