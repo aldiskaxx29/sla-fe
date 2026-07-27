@@ -1106,14 +1106,12 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
             },
           }).unwrap();
         } else if (isLevel3Mttrq) {
-          const findData = dataMapping[record.mainIndexParent];
-          const childData = findData?.children?.[record.indexParent];
           res = await getWitel({
             query: {
-              parameter: record.parameter
+              parameter: record.mini_parameter
                 ?.replace(/%20/g, " ")
                 .toLocaleLowerCase(),
-              region: childData?.parameter || "",
+              region: record.parameter || "",
               level: "witel",
               filter,
               type: menuId,
