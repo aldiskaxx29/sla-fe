@@ -1069,6 +1069,13 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
         let res;
         const mini_parameter = record.parameter?.toLocaleLowerCase() || "";
         const { month, year } = resolveMonthYearFromRecord(record);
+
+        const isMttrq =
+          record.mini_parameter?.toLowerCase()?.includes("mttrq") ||
+          record.parameter?.toLowerCase()?.includes("mttrq");
+        const isLevel3Mttrq =
+          !record.main_parent && !record.parent && !record.is_level_4 && isMttrq;
+
         if (record.main_parent) {
           res = await getCNP({
             query: {
@@ -1090,6 +1097,23 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                 ?.replace(/%20/g, " ")
                 .toLocaleLowerCase(),
               region: record.parameter,
+              level: "witel",
+              filter,
+              type: menuId,
+              treg,
+              month,
+              year,
+            },
+          }).unwrap();
+        } else if (isLevel3Mttrq) {
+          const findData = dataMapping[record.mainIndexParent];
+          const childData = findData?.children?.[record.indexParent];
+          res = await getWitel({
+            query: {
+              parameter: record.parameter
+                ?.replace(/%20/g, " ")
+                .toLocaleLowerCase(),
+              region: childData?.parameter || "",
               level: "witel",
               filter,
               type: menuId,
