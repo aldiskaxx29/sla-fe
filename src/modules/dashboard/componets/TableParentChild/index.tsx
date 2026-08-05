@@ -2043,7 +2043,21 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
 
       {/* Modal untuk Detail Site Not Clear per Minggu */}
       <Modal
-        title={`Detail Site Not Clear - Week ${siteDetailParams?.week} (${siteDetailParams?.status?.toUpperCase()})`}
+        title={
+          <div className="flex items-center gap-2 pb-2">
+            <span className="font-bold text-[#0E2133] text-lg">Detail Site Not Clear</span>
+            {siteDetailParams?.week && (
+              <span className="px-2.5 py-0.5 bg-[#E6F4FF] text-[#0958D9] text-xs font-semibold rounded-full">
+                Week {siteDetailParams.week}
+              </span>
+            )}
+            {siteDetailParams?.status && (
+              <span className="px-2.5 py-0.5 bg-[#FFF1F0] text-[#CF1322] text-xs font-semibold rounded-full uppercase">
+                {siteDetailParams.status}
+              </span>
+            )}
+          </div>
+        }
         open={siteDetailModalVisible}
         onCancel={() => setSiteDetailModalVisible(false)}
         width={1200}
@@ -2071,7 +2085,7 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
               `${range[0]}-${range[1]} dari ${total} data`,
           }}
           bordered
-          scroll={{ x: "max-content", y: 400 }}
+          scroll={{ x: 1600, y: 400 }}
           columns={[
             {
               title: "No.",
@@ -2080,48 +2094,75 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                 (siteDetailPagination.current - 1) * siteDetailPagination.pageSize + index + 1,
               width: 60,
               align: "center",
+              onHeaderCell: () => ({
+                className: "!bg-blue-pacific !py-1.5 !px-4 whitespace-nowrap",
+              }),
             },
             {
               title: "Site ID",
               dataIndex: "site_id",
               key: "site_id",
+              onHeaderCell: () => ({
+                className: "!bg-blue-pacific !py-1.5 !px-4 whitespace-nowrap",
+              }),
             },
             {
               title: "Region",
               dataIndex: "region",
               key: "region",
+              onHeaderCell: () => ({
+                className: "!bg-blue-pacific !py-1.5 !px-4 whitespace-nowrap",
+              }),
             },
             {
               title: "Area",
               dataIndex: "area",
               key: "area",
+              onHeaderCell: () => ({
+                className: "!bg-blue-pacific !py-1.5 !px-4 whitespace-nowrap",
+              }),
             },
             {
               title: "Year",
               dataIndex: "year",
               key: "year",
+              onHeaderCell: () => ({
+                className: "!bg-blue-pacific !py-1.5 !px-4 whitespace-nowrap",
+              }),
             },
             {
               title: "Week",
               dataIndex: "week",
               key: "week",
+              onHeaderCell: () => ({
+                className: "!bg-blue-pacific !py-1.5 !px-4 whitespace-nowrap",
+              }),
             },
             {
               title: "Value",
               dataIndex: "value",
               key: "value",
+              onHeaderCell: () => ({
+                className: "!bg-blue-pacific !py-1.5 !px-4 whitespace-nowrap",
+              }),
               render: (val) => typeof val === "number" ? val.toFixed(4) : val,
             },
             {
               title: "Group RCA",
               dataIndex: "group_rca",
               key: "group_rca",
+              onHeaderCell: () => ({
+                className: "!bg-blue-pacific !py-1.5 !px-4 whitespace-nowrap",
+              }),
             },
             {
               title: "Detail RCA",
               dataIndex: "detail_rca",
               key: "detail_rca",
               width: 300,
+              onHeaderCell: () => ({
+                className: "!bg-blue-pacific !py-1.5 !px-4 whitespace-nowrap",
+              }),
               render: (text) => (
                 <div className="whitespace-pre-line text-xs max-w-xs">{text}</div>
               ),
@@ -2130,18 +2171,27 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
               title: "Update Progress",
               dataIndex: "update_progress",
               key: "update_progress",
+              onHeaderCell: () => ({
+                className: "!bg-blue-pacific !py-1.5 !px-4 whitespace-nowrap",
+              }),
               render: (val) => val ?? "-",
             },
             {
               title: "User Update",
               dataIndex: "user_update",
               key: "user_update",
+              onHeaderCell: () => ({
+                className: "!bg-blue-pacific !py-1.5 !px-4 whitespace-nowrap",
+              }),
               render: (val) => val ?? "-",
             },
             {
               title: "Last Update",
               dataIndex: "last_update",
               key: "last_update",
+              onHeaderCell: () => ({
+                className: "!bg-blue-pacific !py-1.5 !px-4 whitespace-nowrap",
+              }),
               render: (val) => val ?? "-",
             },
           ]}

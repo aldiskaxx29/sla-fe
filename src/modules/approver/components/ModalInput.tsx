@@ -7,6 +7,7 @@ import {
   Select,
   Checkbox,
   CheckboxProps,
+  Image,
 } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import TextArea from "antd/es/input/TextArea";
@@ -250,8 +251,8 @@ const ModalInput = ({ open, onCancel, onSave, dataModal }) => {
               onRemove={() => setPreview("")}
             >
               {preview ? (
-                <div style={{ marginTop: 16 }}>
-                  <img
+                <div style={{ marginTop: 16 }} onClick={(e) => e.stopPropagation()}>
+                  <Image
                     src={preview}
                     alt="evidence preview"
                     style={{

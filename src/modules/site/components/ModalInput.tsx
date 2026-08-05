@@ -9,7 +9,8 @@ import {
   CheckboxProps,
   DatePicker,
   Row,
-  Col
+  Col,
+  Image
 } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import TextArea from "antd/es/input/TextArea";
@@ -585,8 +586,8 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week, year }
               onRemove={() => setPreview("")}
             >
               {preview ? (
-                <div style={{ marginTop: 16 }}>
-                  <img
+                <div style={{ marginTop: 16 }} onClick={(e) => e.stopPropagation()}>
+                  <Image
                     src={preview}
                     alt="evidence preview"
                     style={{
