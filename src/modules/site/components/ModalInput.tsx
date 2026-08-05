@@ -356,7 +356,7 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week, year }
     >
       <div className="px-2 pb-1">
         <p className="text-lg font-semibold text-center w-full my-3 text-[#0E2133]">
-          Upsdate Site Exlcude
+          Update Site Exlcude
         </p>
         <Form form={form} layout="vertical">
           <Form.Item name="id" className="hidden">
