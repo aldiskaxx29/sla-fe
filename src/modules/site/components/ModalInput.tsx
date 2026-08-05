@@ -225,8 +225,9 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week, year }
 
   useEffect(() => {
     if (open && dataModal) {
-      getDetailData(dataModal);
+      setPreview("");
       setFileList([]);
+      getDetailData(dataModal);
     } else if (!open) {
       form.resetFields();
     }
@@ -609,15 +610,10 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week, year }
                     <Button
                       size="small"
                       onClick={() => {
-                        setPreview("");
-                        setFileList([]);
-                        form.setFieldsValue({ evidence: null });
-                        setTimeout(() => {
-                          const uploadInput = document.querySelector('.site-input-modal input[type="file"]') as HTMLInputElement;
-                          if (uploadInput) {
-                            uploadInput.click();
-                          }
-                        }, 50);
+                        const uploadInput = document.querySelector('.site-input-modal input[type="file"]') as HTMLInputElement;
+                        if (uploadInput) {
+                          uploadInput.click();
+                        }
                       }}
                     >
                       Edit
@@ -641,7 +637,6 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week, year }
           <div className="sticky bottom-0 z-10 -mx-2 mt-6 flex justify-end gap-2 border-t border-[#E5E7EB] bg-white px-2 pt-4 pb-2">
             <Button
               onClick={() => {
-                setPreview("");
                 onCancel();
               }}
             >
