@@ -575,7 +575,6 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week, year }
           <Form.Item
             label="Evidence"
             name="evidence"
-            // rules={[{ required: true, message: "Masukkan Evidance" }]}
           >
             <Upload.Dragger
               name="evidence"
@@ -583,34 +582,61 @@ const ModalInput = ({ open, parameter, onCancel, onSave, dataModal, week, year }
               style={{ padding: "10px" }}
               fileList={fileList}
               onChange={handleChange}
-              onRemove={() => setPreview("")}
+              onRemove={() => {
+                setPreview("");
+                setFileList([]);
+                form.setFieldsValue({ evidence: null });
+              }}
             >
               {preview ? (
-                <div style={{ marginTop: 16 }} onClick={(e) => e.stopPropagation()}>
+                <div 
+                  className="flex flex-col items-center gap-2 p-2" 
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <span className="text-xs text-gray-500 font-medium">Evidence Saat Ini:</span>
                   <Image
                     src={preview}
                     alt="evidence preview"
                     style={{
                       display: "block",
-                      maxWidth: "200px",
-                      marginTop: 8,
+                      maxWidth: "180px",
+                      maxHeight: "180px",
+                      objectFit: "contain",
+                      borderRadius: "4px",
                     }}
                   />
+                  <div className="flex gap-2 mt-2">
+                    <Button
+                      size="small"
+                      onClick={() => {
+                        setPreview("");
+                        setFileList([]);
+                        form.setFieldsValue({ evidence: null });
+                        setTimeout(() => {
+                          const uploadInput = document.querySelector('.site-input-modal input[type="file"]') as HTMLInputElement;
+                          if (uploadInput) {
+                            uploadInput.click();
+                          }
+                        }, 50);
+                      }}
+                    >
+                      Edit
+                    </Button>
+                    {preview && !preview.startsWith("blob:") && (
+                      <Button size="small" onClick={handleIconDownload}>
+                        Download
+                      </Button>
+                    )}
+                  </div>
                 </div>
               ) : (
                 <div className="ant-upload-drag-icon">
                   <UploadOutlined />
-                  <span>Upload File</span>
+                  <span>Upload File Baru / Seret File Ke Sini</span>
                 </div>
               )}
             </Upload.Dragger>
           </Form.Item>
-
-          {preview && (
-            <Button className="mt-3" onClick={handleIconDownload}>
-              Download Evidance
-            </Button>
-          )}
 
           <div className="sticky bottom-0 z-10 -mx-2 mt-6 flex justify-end gap-2 border-t border-[#E5E7EB] bg-white px-2 pt-4 pb-2">
             <Button
