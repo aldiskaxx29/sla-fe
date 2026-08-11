@@ -28,6 +28,246 @@ interface RealisasiResponse {
   };
 }
 
+const isJawaRegion = (regionName: string): boolean => {
+  if (!regionName) return false;
+  const norm = regionName.toUpperCase();
+  return (
+    norm.includes("JABOTABEK") ||
+    norm.includes("JAWA") ||
+    norm.includes("WEST JAVA") ||
+    norm.includes("CENTRAL JAVA") ||
+    norm.includes("EAST JAVA")
+  );
+};
+
+const getMonthNumber = (label: string): number | null => {
+  if (!label) return null;
+  const l = label.toLowerCase();
+  if (l.startsWith("jan")) return 1;
+  if (l.startsWith("feb")) return 2;
+  if (l.startsWith("mar")) return 3;
+  if (l.startsWith("apr")) return 4;
+  if (l.startsWith("mei") || l.startsWith("may")) return 5;
+  if (l.startsWith("jun")) return 6;
+  if (l.startsWith("jul")) return 7;
+  if (l.startsWith("agu") || l.startsWith("aug")) return 8;
+  if (l.startsWith("sep")) return 9;
+  if (l.startsWith("okt") || l.startsWith("oct")) return 10;
+  if (l.startsWith("nov")) return 11;
+  if (l.startsWith("des") || l.startsWith("dec")) return 12;
+  return null;
+};
+
+const transformWisaRow = (row: any) => {
+  if (!row) return row;
+  
+  const getRowLabel = (r: any) => {
+    if (r.witel && r.witel !== "ALL") return r.witel;
+    if (r.region && r.region !== "ALL") return r.region;
+    return r.parameter_label || r.parameter;
+  };
+  const parameter = getRowLabel(row);
+  const mini_parameter = row.parameter_key || row.mini_parameter;
+  
+  const normalized: any = {
+    ...row,
+    parameter,
+    mini_parameter,
+    target: row.target,
+    satuan: row.satuan,
+    weight: row.weight,
+    score_before_rekon: row.score_before_rekon,
+    score_after_rekon: row.score_after_rekon,
+  };
+
+  const mapMonth = (monthData: any) => {
+    if (!monthData) return;
+    const mNum = getMonthNumber(monthData.label);
+    if (!mNum) return;
+
+    normalized[`ach_fm_${mNum}`] = monthData.achievement;
+    normalized[`realisasi_fm_before_${mNum}`] = monthData.before;
+    normalized[`realisasi_fm_after_${mNum}`] = monthData.after;
+    normalized[`score_fm_${mNum}`] = monthData.score;
+    
+    if (Array.isArray(monthData.weekly)) {
+      monthData.weekly.forEach((w: any) => {
+        normalized[`ach_${mNum}_${w.week_month}`] = w.value;
+        normalized[`ach_${mNum}_${w.week_month}_${w.week_year}`] = w.value;
+      });
+    }
+  };
+
+  mapMonth(row.prev_month);
+  mapMonth(row.curr_month);
+
+  return normalized;
+};
+
+const aggregateRows = (rows: any[], label: string, parameterKey: string) => {
+  const result: any = {
+    parameter: label,
+    region: label,
+    mini_parameter: parameterKey,
+    satuan: rows[0]?.satuan || "%",
+    target: rows[0]?.target || "0",
+    weight: rows[0]?.weight || "0%",
+    tahun: rows[0]?.tahun || 2026,
+    score_before_rekon: 0,
+    score_after_rekon: 0,
+    identIndex: `wilayah_${label}_${parameterKey}`,
+  };
+
+  let totalScoreBefore = 0;
+  let totalScoreAfter = 0;
+  rows.forEach((r) => {
+    totalScoreBefore += Number(r.score_before_rekon || 0);
+    totalScoreAfter += Number(r.score_after_rekon || 0);
+  });
+  result.score_before_rekon = totalScoreBefore;
+  result.score_after_rekon = totalScoreAfter;
+
+  const aggregateMonthData = (monthKey: "prev_month" | "curr_month") => {
+    const validRows = rows.filter((r) => r[monthKey]);
+    if (validRows.length === 0) return undefined;
+
+    const first = validRows[0][monthKey];
+    const beforeValues = validRows.map((r) => Number(r[monthKey].before || 0));
+    const afterValues = validRows.map((r) => Number(r[monthKey].after || 0));
+    const achValues = validRows.map((r) => Number(r[monthKey].achievement || 0));
+    const scoreValues = validRows.map((r) =>
+      r[monthKey].score !== null && r[monthKey].score !== undefined
+        ? Number(r[monthKey].score)
+        : null
+    );
+
+    const sum = (arr: number[]) => arr.reduce((a, b) => a + b, 0);
+    const avg = (arr: number[]) => (arr.length ? sum(arr) / arr.length : 0);
+
+    const isPercent = result.satuan === "%";
+
+    const aggregatedWeekly: any[] = [];
+    const firstWeekly = first.weekly || [];
+    firstWeekly.forEach((w: any, wIdx: number) => {
+      const wValues = validRows.map((r) => {
+        const val = r[monthKey].weekly?.[wIdx]?.value;
+        return val !== undefined && val !== null ? Number(val) : 0;
+      });
+      aggregatedWeekly.push({
+        week_month: w.week_month,
+        week_year: w.week_year,
+        value: (isPercent ? avg(wValues) : sum(wValues)).toFixed(2),
+      });
+    });
+
+    const scores = scoreValues.filter((v): v is number => v !== null);
+
+    return {
+      label: first.label,
+      before: sum(beforeValues).toString(),
+      after: sum(afterValues).toString(),
+      achievement: (isPercent ? avg(achValues) : sum(achValues)).toFixed(2),
+      score: scores.length ? avg(scores).toFixed(2) : null,
+      weekly: aggregatedWeekly,
+    };
+  };
+
+  result.prev_month = aggregateMonthData("prev_month");
+  result.curr_month = aggregateMonthData("curr_month");
+
+  return transformWisaRow(result);
+};
+
+const processRegionResponse = (data: any, parameterKey: string) => {
+  if (!data) return [];
+
+  const isMttrq = parameterKey.toLowerCase().includes("mttrq");
+
+  // If MTTRQ: expect dictionary object with 'jawa' and 'non_jawa' properties
+  if (isMttrq && !Array.isArray(data)) {
+    const result: any[] = [];
+    const rawJawa = Array.isArray(data.jawa) ? data.jawa : [];
+    const rawNonJawa = Array.isArray(data.non_jawa) ? data.non_jawa : [];
+
+    const jawaRegions = rawJawa.map((item: any) => {
+      const transformed = transformWisaRow(item);
+      transformed.main_parent = false;
+      transformed.parent = true;
+      transformed.region_tsel = transformed.region;
+      return transformed;
+    });
+
+    const nonJawaRegions = rawNonJawa.map((item: any) => {
+      const transformed = transformWisaRow(item);
+      transformed.main_parent = false;
+      transformed.parent = true;
+      transformed.region_tsel = transformed.region;
+      return transformed;
+    });
+
+    if (jawaRegions.length > 0) {
+      const jawaRow = aggregateRows(jawaRegions, "JAWA", parameterKey);
+      jawaRow.main_parent = false;
+      jawaRow.parent = false;
+      jawaRow.children = jawaRegions.map((r, idx) => ({
+        ...r,
+        identIndex: `${jawaRow.identIndex}_reg_${idx}_${r.region}`,
+      }));
+      result.push(jawaRow);
+    }
+    if (nonJawaRegions.length > 0) {
+      const nonJawaRow = aggregateRows(nonJawaRegions, "NON JAWA", parameterKey);
+      nonJawaRow.main_parent = false;
+      nonJawaRow.parent = false;
+      nonJawaRow.children = nonJawaRegions.map((r, idx) => ({
+        ...r,
+        identIndex: `${nonJawaRow.identIndex}_reg_${idx}_${r.region}`,
+      }));
+      result.push(nonJawaRow);
+    }
+    return result;
+  }
+
+  // Non-MTTRQ or fallback: expect array of region items
+  const arrayData = Array.isArray(data) ? data : (Array.isArray(data.data) ? data.data : []);
+  return arrayData.map((item: any) => {
+    const transformed = transformWisaRow(item);
+    transformed.main_parent = false;
+    transformed.parent = true;
+    transformed.region_tsel = transformed.region;
+    return transformed;
+  });
+};
+
+const getRecordLevel = (record: any) => {
+  if (record.main_parent) return 'nation';
+  
+  const isMttrq =
+    record.mini_parameter?.toLowerCase()?.includes("mttrq") ||
+    record.parameter?.toLowerCase()?.includes("mttrq");
+
+  const isWitel =
+    record.is_level_4 ||
+    record.level === "witel" ||
+    (record.witel && record.witel !== "ALL");
+  
+  if (isMttrq) {
+    const regionName = record.region || record.parameter;
+    if (regionName === "JAWA" || regionName === "NON JAWA") {
+      return 'mttrq_wilayah';
+    }
+    if (isWitel) {
+      return 'witel';
+    }
+    return 'mttrq_region';
+  } else {
+    if (isWitel || record.parent === false) {
+      return 'witel';
+    }
+    return 'region';
+  }
+};
+
 const TableParentChild: React.FC<TableParentChildProps> = ({
   data,
   loadingMainData,
@@ -997,17 +1237,17 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
   const getApiTypeCode = (kpiName: string): string => {
     if (!kpiName) return "";
     const norm = kpiName.toLowerCase();
-    if (norm.includes("1-5%")) return "p15";
-    if (norm.includes(">5%")) return "p5";
-    if (norm.includes("latency") && norm.includes("internet")) return "latency_internet";
+    if (norm.includes("1-5%")) return "packetloss_15";
+    if (norm.includes(">5%")) return "packetloss_5";
+    if (norm.includes("latency") && norm.includes("internet")) return "latency_core_internet";
     if (norm.includes("latency")) return "latency";
-    if (norm.includes("jitter") && norm.includes("internet")) return "jitter_internet";
+    if (norm.includes("jitter") && norm.includes("internet")) return "jitter_core_internet";
     if (norm.includes("jitter")) return "jitter";
-    if (norm.includes("packetloss") && norm.includes("internet")) return "packetloss_internet";
-    if (norm.includes("packetloss")) return "packetloss";
-    if (norm.includes("mttr") && norm.includes("major")) return "mttr_major";
-    if (norm.includes("mttr") && norm.includes("minor")) return "mttr_minor";
-    if (norm.includes("mttr") && norm.includes("critical")) return "mttr_critical";
+    if (norm.includes("packetloss") && norm.includes("internet")) return "packetloss_core_internet";
+    if (norm.includes("packetloss")) return "packetloss_5";
+    if (norm.includes("mttr") && norm.includes("major")) return "mttrq_major";
+    if (norm.includes("mttr") && norm.includes("minor")) return "mttrq_minor";
+    if (norm.includes("mttr") && norm.includes("critical")) return "mttrq_critical";
     return kpiName;
   };
 
@@ -1063,97 +1303,89 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
 
   const fetchWitelData = useCallback(
     async (record: any) => {
+      const level = getRecordLevel(record);
+      if (level === 'mttrq_wilayah') {
+        return true;
+      }
+      
       setLoadingRowKey(record.identIndex);
       setLoading(true);
       try {
         let res;
-        const mini_parameter = record.parameter?.toLocaleLowerCase() || "";
+        const mini_parameter = record.parameter_key || record.mini_parameter || getApiTypeCode(record.parameter || detailParameter);
         const { month, year } = resolveMonthYearFromRecord(record);
 
-        const isMttrq =
-          record.mini_parameter?.toLowerCase()?.includes("mttrq") ||
-          record.parameter?.toLowerCase()?.includes("mttrq");
-        const isLevel3Mttrq =
-          !record.main_parent && !record.parent && !record.is_level_4 && isMttrq;
-
-        if (record.main_parent) {
+        if (level === 'nation') {
           res = await getCNP({
             query: {
-              type: menuId,
-              filter,
-              parameter: record.parameter?.toLocaleLowerCase(),
-              sort: "asc",
+              tahun: year,
+              parameter_key: mini_parameter,
               treg,
             },
           }).unwrap();
-        } else if (record.parent) {
+        } else if (level === 'region') {
           res = await getWitel({
             query: {
-              parameter: (
-                detailParameter ||
-                record.mini_parameter ||
-                record.parameter
-              )
-                ?.replace(/%20/g, " ")
-                .toLocaleLowerCase(),
-              region: record.parameter,
-              level: "witel",
-              filter,
-              type: menuId,
+              tahun: year,
+              parameter_key: mini_parameter,
+              region: record.region || record.parameter,
               treg,
-              month,
-              year,
             },
           }).unwrap();
-        } else if (isLevel3Mttrq) {
+        } else if (level === 'mttrq_region') {
           res = await getWitel({
             query: {
-              parameter: record.mini_parameter
-                ?.replace(/%20/g, " ")
-                .toLocaleLowerCase(),
-              region: record.parameter || "",
-              level: "witel",
-              filter,
-              type: menuId,
+              tahun: year,
+              parameter_key: mini_parameter,
+              region: record.region || record.parameter,
+              wilayah: isJawaRegion(record.region || record.parameter) ? "JAWA" : "NON JAWA",
               treg,
-              month,
-              year,
             },
           }).unwrap();
         }
 
-        if (record.main_parent) {
-          const mainKey =
-            record.identIndex ||
-            `param_${record.indexParent ?? 0}_${record.parameter || record.coreIndex}`;
-          const findData =
-            dataMapping.find(
-              (data) =>
-                data.coreIndex == record.coreIndex &&
-                data.parameter == record.parameter,
-            ) || record;
-          const newData = res.data?.map((data: any, idx: number) => ({
+        if (level === 'nation') {
+          const mainKey = record.identIndex;
+          const findData = dataSource.find((d) => d.identIndex === mainKey) || record;
+          
+          const processed = processRegionResponse(res.data, mini_parameter);
+
+          // Inject jawa/non_jawa children into injectedChildDataMap so dataMapping can find them
+          processed.forEach((item: any) => {
+            if (item.children && (item.region === "JAWA" || item.region === "NON JAWA")) {
+              setInjectedChildDataMap((prev) => ({
+                ...prev,
+                [item.identIndex]: item,
+              }));
+            }
+          });
+
+          const newData = processed?.map((data: any, idx: number) => ({
             ...data,
-            mini_parameter,
             identIndex:
               data.identIndex ||
-              `${mainKey}_reg_${idx}_${data.parameter || data.region || idx}`,
+              `${mainKey}_reg_${idx}_${data.region || idx}`,
           }));
           const injectData = { ...findData, children: newData };
           setInjectedDataMap((prev) => ({
             ...prev,
             [mainKey]: injectData,
           }));
-        } else if (record.parent) {
+        } else if (level === 'region') {
           const regionKey = record.identIndex;
           const findData = dataMapping[record.indexParent];
-          const newData = res.data?.map((data: any, idx: number) => ({
-            ...data,
-            mini_parameter: findData?.parameter,
-            identIndex:
-              data.identIndex ||
-              `${regionKey}_witel_${idx}_${data.parameter || data.witel || data.region || idx}`,
-          }));
+          
+          const newData = res.data?.map((data: any, idx: number) => {
+            const transformed = transformWisaRow(data);
+            return {
+              ...transformed,
+              identIndex:
+                data.identIndex ||
+                `${regionKey}_witel_${idx}_${data.witel || idx}`,
+              is_level_4: true,
+            };
+          });
+          
           const childDataInject = findData?.children?.[record.index] || record;
           const injectData = {
             ...childDataInject,
@@ -1163,20 +1395,23 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
             ...prev,
             [regionKey]: injectData,
           }));
-        } else {
+        } else if (level === 'mttrq_region') {
           const grandChildKey = record.identIndex;
           const findData = dataMapping[record.mainIndexParent];
           const childData = findData?.children?.[record.indexParent];
           const grandChildDataInject =
             childData?.children?.[record.index] || record;
-          const newData = res.data?.map((data: any, idx: number) => ({
-            ...data,
-            mini_parameter: findData?.parameter,
-            identIndex:
-              data.identIndex ||
-              `${grandChildKey}_l4_${idx}_${data.parameter || data.witel || data.region || idx}`,
-            is_level_4: true,
-          }));
+          
+          const newData = res.data?.map((data: any, idx: number) => {
+            const transformed = transformWisaRow(data);
+            return {
+              ...transformed,
+              identIndex:
+                data.identIndex ||
+                `${grandChildKey}_l4_${idx}_${data.witel || idx}`,
+              is_level_4: true,
+            };
+          });
           const injectData = {
             ...grandChildDataInject,
             children: newData,
@@ -1188,14 +1423,14 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
         }
         return true;
       } catch (error) {
-        console.log(error);
+        console.log("Error in fetchWitelData:", error);
         return false;
       } finally {
         setLoadingRowKey(null);
         setLoading(false);
       }
     },
-    [dataMapping, detailParameter, filter, getCNP, getWitel, menuId, treg],
+    [dataMapping, dataSource, detailParameter, getCNP, getWitel, setInjectedChildDataMap, treg],
   );
 
   const handleExpandCollaps = useCallback(
@@ -1203,13 +1438,8 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
       if (record.parameter?.toLowerCase()?.includes("core"))
         setDetailParameter(record.parameter);
 
-      const isMttrq =
-        record.mini_parameter?.toLowerCase()?.includes("mttrq") ||
-        record.parameter?.toLowerCase()?.includes("mttrq");
-      const isLevel3Mttrq =
-        !record.main_parent && !record.parent && !record.is_level_4 && isMttrq;
-
-      if (record.parent || record.main_parent || isLevel3Mttrq) {
+      const level = getRecordLevel(record);
+      if (level === 'nation' || level === 'mttrq_wilayah' || level === 'mttrq_region' || level === 'region') {
         const key = record.identIndex;
         const isExpanded = expandedRowKey.includes(key);
 
@@ -1781,57 +2011,64 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                 const isBelowTarget = Number(text) < Number(record.target);
                 if (col.dataIndex == "parameter") {
                   const isExpanded = expandedRowKey.includes(record.identIndex);
-                  const isLevel3MttrqRow =
-                    !record.main_parent &&
-                    !record.parent &&
-                    !record.is_level_4 &&
-                    Boolean(
+                  const recordLevel = getRecordLevel(record);
+                  const canExpand = recordLevel !== 'witel';
+
+                  let levelClass = "ml-0";
+                  if (recordLevel === 'region' || recordLevel === 'mttrq_wilayah') {
+                    levelClass = "ml-4 !text-[13px]";
+                  } else if (recordLevel === 'mttrq_region') {
+                    levelClass = "ml-8 !text-xs";
+                  } else if (recordLevel === 'witel') {
+                    const isMttrq =
                       record.mini_parameter?.toLowerCase()?.includes("mttrq") ||
-                      record.parameter?.toLowerCase()?.includes("mttrq"),
-                    );
-                  return (
-                    <div
-                      className="cursor-pointer text-primary-500"
-                      role="button"
-                      tabIndex={0}
-                      onClick={() => handleExpandCollaps(record)}
-                    >
-                      <div
-                        className={`flex gap-2 items-center ${
-                          record.main_parent
-                            ? "ml-0"
-                            : record.parent
-                              ? "ml-2 !text-[13px]"
-                              : record.is_level_4
-                                ? "ml-8 !text-xs"
-                                : "ml-4 !text-xs"
+                      record.parameter?.toLowerCase()?.includes("mttrq");
+                    levelClass = isMttrq ? "ml-12 !text-[11px]" : "ml-8 !text-xs";
+                  } else if (recordLevel === 'nation') {
+                    levelClass = "ml-0";
+                  }
+
+                  const content = (
+                    <div className={`flex gap-2 items-center ${levelClass}`}>
+                      <Image
+                        className={`${
+                          canExpand ? "block" : "hidden"
+                        } transform transition-transform duration-150 ${
+                          isExpanded ? "rotate-90" : "rotate-0"
                         }`}
+                        width={10}
+                        src={arrowDropdown}
+                        preview={false}
+                      />
+                      <p
+                        className={
+                          text === "WEIGHTED ACHIEVEMENT NATION" ||
+                          text === "SERVICE CREDIT NATION"
+                            ? "text-white p-2 bg-[#04d1de] rounded-md text-[15px] font-bold"
+                            : ""
+                        }
                       >
-                        <Image
-                          className={`${
-                            record.main_parent ||
-                            record.parent ||
-                            isLevel3MttrqRow
-                              ? "block"
-                              : "hidden"
-                          } transform transition-transform duration-150 ${
-                            isExpanded ? "rotate-90" : "rotate-0"
-                          }`}
-                          width={10}
-                          src={arrowDropdown}
-                          preview={false}
-                        />
-                        <p
-                          className={
-                            text === "WEIGHTED ACHIEVEMENT NATION" ||
-                            text === "SERVICE CREDIT NATION"
-                              ? "text-white p-2 bg-[#04d1de] rounded-md text-[15px] font-bold"
-                              : ""
-                          }
-                        >
-                          {text}
-                        </p>
+                        {text}
+                      </p>
+                    </div>
+                  );
+
+                  if (canExpand) {
+                    return (
+                      <div
+                        className="cursor-pointer text-primary-500"
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => handleExpandCollaps(record)}
+                      >
+                        {content}
                       </div>
+                    );
+                  }
+
+                  return (
+                    <div className="text-gray-700 font-medium">
+                      {content}
                     </div>
                   );
                 }

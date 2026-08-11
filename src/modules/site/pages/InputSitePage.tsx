@@ -17,6 +17,7 @@ const SitePage = () => {
   const [month, setMonth] = useState(String(dayjs().month() + 1));
   const [year, setYear] = useState(dayjs(new Date()).year());
   const [exclude, setExclude] = useState("all");
+  const [evidence, setEvidence] = useState("all");
   const [prev, setPrev] = useState("corrective");
   const [loading, setLoading] = useState(false);
   const [parameter, setParameter] = useState("packetloss ran to core");
@@ -63,8 +64,8 @@ const SitePage = () => {
   }, [isMttrqParameter, selectedWeeks, week]);
   const effectiveMonth = month;
   const tableKey = useMemo(
-    () => `${parameter}-${year}-${effectiveMonth}-${effectiveWeek}-${prev}-${exclude}`,
-    [parameter, year, effectiveMonth, effectiveWeek, prev, exclude],
+    () => `${parameter}-${year}-${effectiveMonth}-${effectiveWeek}-${prev}-${exclude}-${evidence}`,
+    [parameter, year, effectiveMonth, effectiveWeek, prev, exclude, evidence],
   );
 
   const fetchSite = useCallback(async () => {
@@ -78,6 +79,7 @@ const SitePage = () => {
         query: {
           prev,
           exclude,
+          evidence,
           parameter,
           year,
           month: effectiveMonth,
@@ -99,6 +101,7 @@ const SitePage = () => {
     }
   }, [
     exclude,
+    evidence,
     parameter,
     effectiveMonth,
     effectiveWeek,
@@ -114,6 +117,7 @@ const SitePage = () => {
     fetchSite();
   }, [
     exclude,
+    evidence,
     parameter,
     year,
     month,
@@ -129,7 +133,7 @@ const SitePage = () => {
       ...current,
       current: 1,
     }));
-  }, [exclude, parameter, year, month, prev, week]);
+  }, [exclude, evidence, parameter, year, month, prev, week]);
 
   useEffect(() => {
     return () => {
@@ -147,6 +151,12 @@ const SitePage = () => {
     { label: "All", value: "all" },
     { label: "Exclude", value: "2" },
     { label: "Non Exclude", value: "1" },
+  ];
+
+  const optEvidence = [
+    { label: "All", value: "all" },
+    { label: "Sudah Ada Evidence", value: "with" },
+    { label: "Belum Ada Evidence", value: "without" },
   ];
 
   const optParameters = [
@@ -201,6 +211,7 @@ const SitePage = () => {
       const result = await downloadTemplate({
         query: {
           exclude,
+          evidence,
           parameter,
           year,
           month: effectiveMonth,
@@ -230,6 +241,7 @@ const SitePage = () => {
     }
   }, [
     exclude,
+    evidence,
     effectiveMonth,
     effectiveWeek,
     parameter,
@@ -287,6 +299,13 @@ const SitePage = () => {
             options={optExclude}
             value={exclude}
             onChange={(value) => setExclude(value)}
+          />
+          <AppDropdown
+            title="Evidence"
+            placeholder="All"
+            options={optEvidence}
+            value={evidence}
+            onChange={(value) => setEvidence(value)}
           />
           <AppDropdown
             title="Parameter"

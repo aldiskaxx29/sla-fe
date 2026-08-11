@@ -6,14 +6,27 @@ const buildPath = (base, level) => {
   return `${base}/${cleanLevel}`;
 };
 
+const getAreaValue = (treg: string) => {
+  if (!treg || treg === "all") return "ALL";
+  const match = treg.match(/treg(\d+)/i);
+  if (match) {
+    return `AREA ${match[1]}`;
+  }
+  return treg.toUpperCase();
+};
+
 export const dashboardApi = emptySplitApi.injectEndpoints({
   endpoints: (builder) => ({
     SCApi_fethcData: builder.query({
       query: (payload) => {
+        const area = getAreaValue(payload?.query?.treg);
         return {
           method: "GET",
-          url: "dashboard/monthly/nation",
-          params: payload?.query,
+          url: "achievement-wisa/not-comply/nation",
+          params: {
+            tahun: payload?.query?.tahun ?? new Date().getFullYear(),
+            area: area,
+          },
         };
       },
       transformResponse: (response: unknown) => {
@@ -35,10 +48,15 @@ export const dashboardApi = emptySplitApi.injectEndpoints({
     }),
     CNPApi_fetchData: builder.query({
       query: (payload) => {
+        const area = getAreaValue(payload?.query?.treg);
         return {
           method: "GET",
-          url: "dashboard/region/monthly/msa/cnop",
-          params: payload?.query,
+          url: "achievement-wisa/not-comply/region",
+          params: {
+            tahun: payload?.query?.tahun ?? new Date().getFullYear(),
+            parameter_key: payload?.query?.parameter_key ?? payload?.query?.parameter,
+            area: area,
+          },
         };
       },
       transformResponse: (response: unknown) => {
@@ -120,10 +138,20 @@ export const dashboardApi = emptySplitApi.injectEndpoints({
     }),
     witel_data: builder.query({
       query: (payload) => {
+        const area = getAreaValue(payload?.query?.treg);
+        const params: any = {
+          tahun: payload?.query?.tahun ?? new Date().getFullYear(),
+          parameter_key: payload?.query?.parameter_key ?? payload?.query?.parameter,
+          region: payload?.query?.region,
+          area: area,
+        };
+        if (payload?.query?.wilayah) {
+          params.wilayah = payload.query.wilayah;
+        }
         return {
           method: "GET",
-          url: "dashboard/witel/monthly/detail",
-          params: payload?.query,
+          url: "achievement-wisa/not-comply/witel",
+          params,
         };
       },
       transformResponse: (response: unknown) => {

@@ -600,12 +600,14 @@ const Prediction = ()=>{
                     </div>
                 </div>
             </div>
-            <DailyTracking 
-              start={getStartEnd(new Date(MAX_DATE)).start} 
-              end={getStartEnd(new Date(MAX_DATE)).end}
-              setPOP={setPOP}
-              setTITLEPOP={setTITLEPOP}
-            />
+            {maxDateReady && (
+                <DailyTracking 
+                  start={getStartEnd(new Date(MAX_DATE)).start} 
+                  end={getStartEnd(new Date(MAX_DATE)).end}
+                  setPOP={setPOP}
+                  setTITLEPOP={setTITLEPOP}
+                />
+            )}
     </div>);
 }
 

@@ -121,82 +121,65 @@ const MSAmenu = ({
   const { getComply, dataComply } = useDashboard();
 
   const normalizeMsaRows = (rows: Record<string, unknown>[]) => {
-    const dashIfEmpty = (value: unknown) =>
-      value === "" || value === null || value === undefined ? "-" : value;
-
-    const hasExplicitMonthlyKeys = (row: Record<string, unknown>) =>
-      Object.keys(row).some((key) => {
-        const match = key.match(/^ach_fm_(\d+)$/);
-        return Boolean(match && Number(match[1]) > 2);
-      });
-
-    const pickFirstValue = (row: Record<string, unknown>, keys: string[]) => {
-      for (const key of keys) {
-        const value = row[key];
-        if (value !== undefined && value !== null && value !== "") {
-          return value;
-        }
-      }
-      return "-";
+    const getMonthNumber = (label: string): number | null => {
+      if (!label) return null;
+      const l = label.toLowerCase();
+      if (l.startsWith("jan")) return 1;
+      if (l.startsWith("feb")) return 2;
+      if (l.startsWith("mar")) return 3;
+      if (l.startsWith("apr")) return 4;
+      if (l.startsWith("mei") || l.startsWith("may")) return 5;
+      if (l.startsWith("jun")) return 6;
+      if (l.startsWith("jul")) return 7;
+      if (l.startsWith("agu") || l.startsWith("aug")) return 8;
+      if (l.startsWith("sep")) return 9;
+      if (l.startsWith("okt") || l.startsWith("oct")) return 10;
+      if (l.startsWith("nov")) return 11;
+      if (l.startsWith("des") || l.startsWith("dec")) return 12;
+      return null;
     };
 
-    return rows.map((row) => {
-      const normalized: Record<string, unknown> = {
+    return rows.map((row: any) => {
+      const getRowLabel = (r: any) => {
+        if (r.witel && r.witel !== "ALL") return r.witel;
+        if (r.region && r.region !== "ALL") return r.region;
+        return r.parameter_label || r.parameter;
+      };
+      const parameter = getRowLabel(row);
+      const mini_parameter = row.parameter_key || row.mini_parameter;
+
+      const normalized: any = {
         ...row,
+        parameter,
+        mini_parameter,
+        target: row.target,
+        satuan: row.satuan,
+        weight: row.weight,
+        score_before_rekon: row.score_before_rekon,
+        score_after_rekon: row.score_after_rekon,
+        main_parent: true,
       };
 
-      if (!hasExplicitMonthlyKeys(row)) {
-        normalized.ach_fm_1 = dashIfEmpty(
-          pickFirstValue(row, ["ach_fm_prev", "ach_fm_prev_2"]),
-        );
-        normalized.ach_fm_2 = dashIfEmpty(
-          pickFirstValue(row, ["ach_fm_curr", "ach_fm_prev_1"]),
-        );
+      const mapMonth = (monthData: any) => {
+        if (!monthData) return;
+        const mNum = getMonthNumber(monthData.label);
+        if (!mNum) return;
 
-        normalized.realisasi_fm_before_1 = dashIfEmpty(
-          pickFirstValue(row, [
-            "realisasi_fm_before_prev",
-            "realisasi_fm_before_prev_2",
-          ]),
-        );
-        normalized.realisasi_fm_after_1 = dashIfEmpty(
-          pickFirstValue(row, [
-            "realisasi_fm_after_prev",
-            "realisasi_fm_after_prev_2",
-          ]),
-        );
-        normalized.realisasi_fm_1 = dashIfEmpty(
-          pickFirstValue(row, ["realisasi_fm_prev", "realisasi_fm_prev_2"]),
-        );
-        normalized.score_fm_1 = dashIfEmpty(
-          pickFirstValue(row, ["score_fm_prev", "score_fm_prev_2"]),
-        );
+        normalized[`ach_fm_${mNum}`] = monthData.achievement;
+        normalized[`realisasi_fm_before_${mNum}`] = monthData.before;
+        normalized[`realisasi_fm_after_${mNum}`] = monthData.after;
+        normalized[`score_fm_${mNum}`] = monthData.score;
 
-        normalized.realisasi_fm_before_2 = dashIfEmpty(
-          pickFirstValue(row, [
-            "realisasi_fm_before_curr",
-            "realisasi_fm_before_prev_1",
-          ]),
-        );
-        normalized.realisasi_fm_after_2 = dashIfEmpty(
-          pickFirstValue(row, [
-            "realisasi_fm_after_curr",
-            "realisasi_fm_after_prev_1",
-          ]),
-        );
-        normalized.realisasi_fm_2 = dashIfEmpty(
-          pickFirstValue(row, ["realisasi_fm_curr", "realisasi_fm_prev_1"]),
-        );
-        normalized.score_fm_2 = dashIfEmpty(
-          pickFirstValue(row, ["score_fm_curr", "score_fm_prev_1"]),
-        );
-      }
+        if (Array.isArray(monthData.weekly)) {
+          monthData.weekly.forEach((w: any) => {
+            normalized[`ach_${mNum}_${w.week_month}`] = w.value;
+            normalized[`ach_${mNum}_${w.week_month}_${w.week_year}`] = w.value;
+          });
+        }
+      };
 
-      for (let week = 1; week <= 4; week += 1) {
-        const sourceKey = `ach_w${week}`;
-        normalized[`ach_1_${week}`] = dashIfEmpty(row[sourceKey]);
-        normalized[`ach_2_${week}`] = dashIfEmpty(row[sourceKey]);
-      }
+      mapMonth(row.prev_month);
+      mapMonth(row.curr_month);
 
       return normalized;
     });
