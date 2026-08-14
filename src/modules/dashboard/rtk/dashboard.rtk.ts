@@ -19,13 +19,13 @@ export const dashboardApi = emptySplitApi.injectEndpoints({
   endpoints: (builder) => ({
     SCApi_fethcData: builder.query({
       query: (payload) => {
-        const area = getAreaValue(payload?.query?.treg);
         return {
           method: "GET",
-          url: "achievement-wisa/not-comply/nation",
+          url: "dashboard/monthly/nation",
           params: {
-            tahun: payload?.query?.tahun ?? new Date().getFullYear(),
-            area: area,
+            type: payload?.query?.type ?? "msa",
+            filter: payload?.query?.filter ?? "",
+            treg: payload?.query?.treg ?? "",
           },
         };
       },
