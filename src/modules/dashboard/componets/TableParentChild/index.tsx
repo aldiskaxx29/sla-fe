@@ -191,15 +191,21 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
             const childInject = injectedChildDataMap[childKey];
 
             let childrenMapped: any[] = [];
+            const rawGrandChildren =
+              childInject && Array.isArray(childInject.children)
+                ? childInject.children
+                : Array.isArray(childData.children)
+                  ? childData.children
+                  : [];
 
-            if (childInject && Array.isArray(childInject.children)) {
-              childrenMapped = childInject.children.map(
+            if (rawGrandChildren.length > 0) {
+              childrenMapped = rawGrandChildren.map(
                 (grandChild: any, gcIndex: number) => {
                   const grandChildKey = grandChild.identIndex;
                   const grandChildInject =
                     injectedGrandChildDataMap[grandChildKey];
 
-                  let grandChildrenMapped: any[] = [];
+                  let grandChildrenMapped: any[] = grandChild.children || [];
 
                   if (
                     grandChildInject &&
@@ -310,11 +316,7 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
       title: string;
       dataIndex?: string;
       key: string;
-      render: (
-        text: unknown,
-        record?: any,
-        index?: number,
-      ) => React.ReactNode;
+      render: (text: unknown, record?: any, index?: number) => React.ReactNode;
       width?: number;
     }> = [
       {
@@ -348,14 +350,20 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
         key: `ach_${monthNum}_${i}`,
         render: (text: unknown, record?: any) => {
           let cellValue = text;
-          if (cellValue === undefined || cellValue === null || cellValue === "") {
+          if (
+            cellValue === undefined ||
+            cellValue === null ||
+            cellValue === ""
+          ) {
             const standardKey = `ach_${monthNum}_${i}`;
             if (record && typeof record === "object") {
               if (record[standardKey] !== undefined) {
                 cellValue = record[standardKey];
               } else {
                 const pattern = new RegExp(`^ach_${monthNum}_${i}_\\d+$`);
-                const foundKey = Object.keys(record).find((k) => pattern.test(k));
+                const foundKey = Object.keys(record).find((k) =>
+                  pattern.test(k),
+                );
                 if (foundKey) {
                   cellValue = record[foundKey];
                 }
@@ -363,7 +371,11 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
             }
           }
 
-          if (cellValue === null || cellValue === undefined || cellValue === "") {
+          if (
+            cellValue === null ||
+            cellValue === undefined ||
+            cellValue === ""
+          ) {
             return "-";
           }
 
@@ -374,7 +386,9 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
             return (
               <span
                 className="cursor-pointer font-semibold text-blue-500 hover:underline"
-                onClick={() => fetchSiteDetailWeek(record, monthNum, i, isAfterTable)}
+                onClick={() =>
+                  fetchSiteDetailWeek(record, monthNum, i, isAfterTable)
+                }
               >
                 {cellValue as React.ReactNode}
               </span>
@@ -390,7 +404,9 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
               className={`${
                 isGood ? "text-green-500" : "text-red-500"
               } font-semibold cursor-pointer hover:underline`}
-              onClick={() => fetchSiteDetailWeek(record, monthNum, i, isAfterTable)}
+              onClick={() =>
+                fetchSiteDetailWeek(record, monthNum, i, isAfterTable)
+              }
             >
               {cellValue as React.ReactNode}
             </span>
@@ -432,7 +448,9 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
         return (
           <span
             className={
-              isGood ? "text-green-500 font-semibold" : "text-red-500 font-semibold"
+              isGood
+                ? "text-green-500 font-semibold"
+                : "text-red-500 font-semibold"
             }
           >
             {text as React.ReactNode}
@@ -469,9 +487,13 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
     });
     const weeklyKeys = Array.from(weeklyKeysMap.values());
 
-    const monthlyKeys = Object.keys(sampleRecord).filter((key) =>
-      /^ach_fm_\d+$/.test(key),
-    );
+    const monthlyKeys = Object.keys(sampleRecord)
+      .filter((key) => /^ach_fm_\d+$/.test(key))
+      .sort((a, b) => {
+        const numA = parseInt(a.replace("ach_fm_", ""), 10);
+        const numB = parseInt(b.replace("ach_fm_", ""), 10);
+        return numA - numB;
+      });
 
     const activeMonthlyKeys = monthlyKeys.filter((monthKey) => {
       const monthNum = parseInt(monthKey.replace("ach_fm_", ""));
@@ -656,9 +678,10 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
             }
 
             // Set column title dynamically based on showActualWeeks state
-            const columnTitle = showActualWeeks && actualWeekNumFromKey
-              ? `W${actualWeekNumFromKey}`
-              : `W${wNum}`;
+            const columnTitle =
+              showActualWeeks && actualWeekNumFromKey
+                ? `W${actualWeekNumFromKey}`
+                : `W${wNum}`;
 
             return {
               title: columnTitle,
@@ -959,9 +982,12 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
     [getWeeklyMonth, menuId],
   );
 
-  const getActualWeekNum = (monthNum: number, relativeWeekNum: number): string | null => {
+  const getActualWeekNum = (
+    monthNum: number,
+    relativeWeekNum: number,
+  ): string | null => {
     const pattern = new RegExp(`^ach_${monthNum}_${relativeWeekNum}_(\\d+)$`);
-    
+
     // 1. Search in main data
     if (data && Array.isArray(data)) {
       for (const row of data) {
@@ -974,11 +1000,15 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
         }
       }
     }
-    
+
     // 2. Search in realisasiModalData
     if (realisasiModalData && realisasiModalData.data) {
-      const beforeRows = Array.isArray(realisasiModalData.data.before) ? realisasiModalData.data.before : [];
-      const afterRows = Array.isArray(realisasiModalData.data.after) ? realisasiModalData.data.after : [];
+      const beforeRows = Array.isArray(realisasiModalData.data.before)
+        ? realisasiModalData.data.before
+        : [];
+      const afterRows = Array.isArray(realisasiModalData.data.after)
+        ? realisasiModalData.data.after
+        : [];
       const rows = [...beforeRows, ...afterRows];
       for (const row of rows) {
         if (row && typeof row === "object") {
@@ -990,7 +1020,7 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
         }
       }
     }
-    
+
     return null;
   };
 
@@ -999,15 +1029,19 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
     const norm = kpiName.toLowerCase();
     if (norm.includes("1-5%")) return "p15";
     if (norm.includes(">5%")) return "p5";
-    if (norm.includes("latency") && norm.includes("internet")) return "latency_internet";
+    if (norm.includes("latency") && norm.includes("internet"))
+      return "latency_internet";
     if (norm.includes("latency")) return "latency";
-    if (norm.includes("jitter") && norm.includes("internet")) return "jitter_internet";
+    if (norm.includes("jitter") && norm.includes("internet"))
+      return "jitter_internet";
     if (norm.includes("jitter")) return "jitter";
-    if (norm.includes("packetloss") && norm.includes("internet")) return "packetloss_internet";
+    if (norm.includes("packetloss") && norm.includes("internet"))
+      return "packetloss_internet";
     if (norm.includes("packetloss")) return "packetloss";
     if (norm.includes("mttr") && norm.includes("major")) return "mttr_major";
     if (norm.includes("mttr") && norm.includes("minor")) return "mttr_minor";
-    if (norm.includes("mttr") && norm.includes("critical")) return "mttr_critical";
+    if (norm.includes("mttr") && norm.includes("critical"))
+      return "mttr_critical";
     return kpiName;
   };
 
@@ -1015,16 +1049,18 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
     record: any,
     monthNum: number,
     relativeWeekNum: number,
-    isAfterTable: boolean
+    isAfterTable: boolean,
   ) => {
     setSiteDetailPagination({ current: 1, pageSize: 10 });
     setSiteDetailModalLoading(true);
     setSiteDetailModalVisible(true);
     setSiteDetailModalData(null);
 
-    const actualWeek = getActualWeekNum(monthNum, relativeWeekNum) || relativeWeekNum;
+    const actualWeek =
+      getActualWeekNum(monthNum, relativeWeekNum) || relativeWeekNum;
     const yearParam = record?.year || new Date().getFullYear();
-    const kpiName = realisasiDetail?.kpi || record?.parameter || record?.mini_parameter || "";
+    const kpiName =
+      realisasiDetail?.kpi || record?.parameter || record?.mini_parameter || "";
     const typeParam = getApiTypeCode(kpiName);
     const statusParam = isAfterTable ? "after" : "before";
     const regionParam = record?.region_tsel || "";
@@ -1045,7 +1081,7 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
           type: typeParam,
           status: statusParam,
           region: regionParam,
-        }
+        },
       }).unwrap();
 
       if (response && typeof response === "object" && "data" in response) {
@@ -1074,7 +1110,10 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
           record.mini_parameter?.toLowerCase()?.includes("mttrq") ||
           record.parameter?.toLowerCase()?.includes("mttrq");
         const isLevel3Mttrq =
-          !record.main_parent && !record.parent && !record.is_level_4 && isMttrq;
+          !record.main_parent &&
+          !record.parent &&
+          !record.is_level_4 &&
+          isMttrq;
 
         if (record.main_parent) {
           res = await getCNP({
@@ -1087,6 +1126,19 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
             },
           }).unwrap();
         } else if (record.parent) {
+          const isMttrRow =
+            record.mini_parameter?.toLowerCase()?.includes("mttrq") ||
+            record.parameter?.toLowerCase()?.includes("mttrq") ||
+            (detailParameter &&
+              detailParameter.toLowerCase().includes("mttrq"));
+          const isJvmRow =
+            record.parameter?.toLowerCase()?.trim() === "jawa" ||
+            record.parameter?.toLowerCase()?.trim() === "non jawa" ||
+            record.parameter?.toLowerCase()?.trim() === "jvm";
+
+          if (isMttrRow && isJvmRow) {
+            return true;
+          }
           res = await getWitel({
             query: {
               parameter: (
@@ -1097,6 +1149,7 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                 ?.replace(/%20/g, " ")
                 .toLocaleLowerCase(),
               region: record.parameter,
+              wilayah: record.wilayah,
               level: "witel",
               filter,
               type: menuId,
@@ -1111,7 +1164,8 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
               parameter: record.mini_parameter
                 ?.replace(/%20/g, " ")
                 .toLocaleLowerCase(),
-              region: record.parameter || "",
+              region: childData?.parameter || "",
+              kpi: record.mini_parameter,
               level: "witel",
               filter,
               type: menuId,
@@ -1146,23 +1200,51 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
           }));
         } else if (record.parent) {
           const regionKey = record.identIndex;
-          const findData = dataMapping[record.indexParent];
+          const isMttr =
+            record.mini_parameter?.toLowerCase()?.includes("mttrq") ||
+            record.parameter?.toLowerCase()?.includes("mttrq") ||
+            (detailParameter &&
+              detailParameter.toLowerCase().includes("mttrq"));
+
+          let childDataInject: any;
+          let mini_parameter: string = "";
+
+          if (isMttr) {
+            const mttrRow = dataMapping[record.mainIndexParent];
+            const wilayahRow = mttrRow?.children?.[record.indexParent];
+            childDataInject = wilayahRow?.children?.[record.index] || record;
+            mini_parameter = mttrRow?.parameter || "";
+          } else {
+            const findData = dataMapping[record.indexParent];
+            childDataInject = findData?.children?.[record.index] || record;
+            mini_parameter = findData?.parameter || "";
+          }
+
           const newData = res.data?.map((data: any, idx: number) => ({
             ...data,
-            mini_parameter: findData?.parameter,
+            mini_parameter,
+            is_level_4: true,
             identIndex:
               data.identIndex ||
               `${regionKey}_witel_${idx}_${data.parameter || data.witel || data.region || idx}`,
           }));
-          const childDataInject = findData?.children?.[record.index] || record;
+
           const injectData = {
             ...childDataInject,
             children: newData,
           };
-          setInjectedChildDataMap((prev) => ({
-            ...prev,
-            [regionKey]: injectData,
-          }));
+
+          if (isMttr) {
+            setInjectedGrandChildDataMap((prev) => ({
+              ...prev,
+              [regionKey]: injectData,
+            }));
+          } else {
+            setInjectedChildDataMap((prev) => ({
+              ...prev,
+              [regionKey]: injectData,
+            }));
+          }
         } else {
           const grandChildKey = record.identIndex;
           const findData = dataMapping[record.mainIndexParent];
@@ -1513,8 +1595,13 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                     }
 
                     let text = rawText;
-                    if (child.dataIndex && (text === undefined || text === null || text === "")) {
-                      const match = (child.dataIndex as string).match(/^ach_(\d+)_(\d+)(?:_\d+)?$/);
+                    if (
+                      child.dataIndex &&
+                      (text === undefined || text === null || text === "")
+                    ) {
+                      const match = (child.dataIndex as string).match(
+                        /^ach_(\d+)_(\d+)(?:_\d+)?$/,
+                      );
                       if (match) {
                         const mNum = match[1];
                         const wNum = match[2];
@@ -1522,8 +1609,12 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                         if (record[standardKey] !== undefined) {
                           text = record[standardKey];
                         } else {
-                          const pattern = new RegExp(`^ach_${mNum}_${wNum}_\\d+$`);
-                          const foundKey = Object.keys(record).find((k) => pattern.test(k));
+                          const pattern = new RegExp(
+                            `^ach_${mNum}_${wNum}_\\d+$`,
+                          );
+                          const foundKey = Object.keys(record).find((k) =>
+                            pattern.test(k),
+                          );
                           if (foundKey) {
                             text = record[foundKey];
                           }
@@ -1781,14 +1872,83 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                 const isBelowTarget = Number(text) < Number(record.target);
                 if (col.dataIndex == "parameter") {
                   const isExpanded = expandedRowKey.includes(record.identIndex);
-                  const isLevel3MttrqRow =
-                    !record.main_parent &&
-                    !record.parent &&
-                    !record.is_level_4 &&
-                    Boolean(
-                      record.mini_parameter?.toLowerCase()?.includes("mttrq") ||
-                      record.parameter?.toLowerCase()?.includes("mttrq"),
+                  const isMttr = Boolean(
+                    record.mini_parameter?.toLowerCase()?.includes("mttrq") ||
+                    record.parameter?.toLowerCase()?.includes("mttrq") ||
+                    (detailParameter &&
+                      detailParameter.toLowerCase().includes("mttrq")),
+                  );
+
+                  const isMttrWilayah =
+                    isMttr &&
+                    record.parent &&
+                    (record.parameter?.toLowerCase()?.trim() === "jawa" ||
+                      record.parameter?.toLowerCase()?.trim() === "non jawa" ||
+                      record.parameter?.toLowerCase()?.trim() === "jvm");
+
+                  const isMttrRegion =
+                    isMttr &&
+                    record.parent &&
+                    !(
+                      record.parameter?.toLowerCase()?.trim() === "jawa" ||
+                      record.parameter?.toLowerCase()?.trim() === "non jawa" ||
+                      record.parameter?.toLowerCase()?.trim() === "jvm"
                     );
+
+                  const isWeightedOrService =
+                    record.parameter?.toLowerCase()?.includes("service") ||
+                    record.parameter?.toLowerCase()?.includes("weighted");
+
+                  const innerContent = (
+                    <div
+                      className={`flex gap-2 items-center ${
+                        record.main_parent
+                          ? "ml-0"
+                          : isMttrWilayah
+                            ? "ml-4 !text-[13px]"
+                            : isMttrRegion
+                              ? "ml-8 !text-xs"
+                              : record.is_level_4
+                                ? isMttr
+                                  ? "ml-12 !text-xs"
+                                  : "ml-8 !text-xs"
+                                : "ml-4 !text-xs"
+                      }`}
+                    >
+                      <Image
+                        className={`${
+                          (record.main_parent ||
+                            record.parent ||
+                            isLevel3MttrqRow) &&
+                          !isWeightedOrService
+                            ? "block"
+                            : "hidden"
+                        } transform transition-transform duration-150 ${
+                          isExpanded ? "rotate-90" : "rotate-0"
+                        }`}
+                        width={10}
+                        src={arrowDropdown}
+                        preview={false}
+                      />
+                      <p
+                        className={
+                          text === "WEIGHTED ACHIEVEMENT NATION" ||
+                          text === "SERVICE CREDIT NATION"
+                            ? "text-white p-2 bg-[#04d1de] rounded-md text-[15px] font-bold"
+                            : ""
+                        }
+                      >
+                        {text}
+                      </p>
+                    </div>
+                  );
+
+                  if (isWeightedOrService) {
+                    return (
+                      <div className="text-primary-500">{innerContent}</div>
+                    );
+                  }
+
                   return (
                     <div
                       className="cursor-pointer text-primary-500"
@@ -1796,42 +1956,7 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                       tabIndex={0}
                       onClick={() => handleExpandCollaps(record)}
                     >
-                      <div
-                        className={`flex gap-2 items-center ${
-                          record.main_parent
-                            ? "ml-0"
-                            : record.parent
-                              ? "ml-2 !text-[13px]"
-                              : record.is_level_4
-                                ? "ml-8 !text-xs"
-                                : "ml-4 !text-xs"
-                        }`}
-                      >
-                        <Image
-                          className={`${
-                            record.main_parent ||
-                            record.parent ||
-                            isLevel3MttrqRow
-                              ? "block"
-                              : "hidden"
-                          } transform transition-transform duration-150 ${
-                            isExpanded ? "rotate-90" : "rotate-0"
-                          }`}
-                          width={10}
-                          src={arrowDropdown}
-                          preview={false}
-                        />
-                        <p
-                          className={
-                            text === "WEIGHTED ACHIEVEMENT NATION" ||
-                            text === "SERVICE CREDIT NATION"
-                              ? "text-white p-2 bg-[#04d1de] rounded-md text-[15px] font-bold"
-                              : ""
-                          }
-                        >
-                          {text}
-                        </p>
-                      </div>
+                      {innerContent}
                     </div>
                   );
                 }
@@ -2045,7 +2170,9 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
       <Modal
         title={
           <div className="flex items-center gap-2 pb-2">
-            <span className="font-bold text-[#0E2133] text-lg">Detail Site Not Clear</span>
+            <span className="font-bold text-[#0E2133] text-lg">
+              Detail Site Not Clear
+            </span>
             {siteDetailParams?.week && (
               <span className="px-2.5 py-0.5 bg-[#E6F4FF] text-[#0958D9] text-xs font-semibold rounded-full">
                 Week {siteDetailParams.week}
@@ -2091,7 +2218,10 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
               title: "No.",
               key: "no",
               render: (_, __, index) =>
-                (siteDetailPagination.current - 1) * siteDetailPagination.pageSize + index + 1,
+                (siteDetailPagination.current - 1) *
+                  siteDetailPagination.pageSize +
+                index +
+                1,
               width: 60,
               align: "center",
               onHeaderCell: () => ({
@@ -2145,7 +2275,7 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
               onHeaderCell: () => ({
                 className: "!bg-blue-pacific !py-1.5 !px-4 whitespace-nowrap",
               }),
-              render: (val) => typeof val === "number" ? val.toFixed(4) : val,
+              render: (val) => (typeof val === "number" ? val.toFixed(4) : val),
             },
             {
               title: "Group RCA",
@@ -2164,7 +2294,9 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                 className: "!bg-blue-pacific !py-1.5 !px-4 whitespace-nowrap",
               }),
               render: (text) => (
-                <div className="whitespace-pre-line text-xs max-w-xs">{text}</div>
+                <div className="whitespace-pre-line text-xs max-w-xs">
+                  {text}
+                </div>
               ),
             },
             {
