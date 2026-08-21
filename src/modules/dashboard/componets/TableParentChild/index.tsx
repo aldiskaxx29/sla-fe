@@ -2012,7 +2012,10 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                 if (col.dataIndex == "parameter") {
                   const isExpanded = expandedRowKey.includes(record.identIndex);
                   const recordLevel = getRecordLevel(record);
-                  const canExpand = recordLevel !== 'witel';
+                  const canExpand =
+                    recordLevel !== "witel" &&
+                    text !== "WEIGHTED ACHIEVEMENT NATION" &&
+                    text !== "SERVICE CREDIT NATION";
 
                   let levelClass = "ml-0";
                   if (recordLevel === 'region' || recordLevel === 'mttrq_wilayah') {
