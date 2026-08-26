@@ -50,6 +50,8 @@ function Dashboard() {
   const [type, setType] = useState("msa");
   const [trendData, setTrendData] = useState<Record<string, any>>({});
   const [trendReady, setTrendReady] = useState(false);
+  const [slaMode, setSlaMode] = useState<"monthly" | "weekly">("monthly");
+  const [weeklyKpi, setWeeklyKpi] = useState("packetloss 1-5% ran to core");
 
   const effectiveTreg = treg === "all" ? "" : treg;
 
@@ -100,20 +102,32 @@ function Dashboard() {
   const fetchHistory = useCallback(async (): Promise<void> => {
     setLoading(true);
     try {
-      await getHistoryData({
-        query: {
-          type: menuId,
-          kpi: historyType,
-          filter: filter,
-          treg: effectiveTreg,
-        },
-      }).unwrap();
+      if (slaMode === "weekly" && isMsaRoute) {
+        await getHistoryData({
+          query: {
+            type: "cnop",
+            kpi: weeklyKpi,
+            filter: "",
+            treg: effectiveTreg,
+            rekon: "before",
+          },
+        }).unwrap();
+      } else {
+        await getHistoryData({
+          query: {
+            type: menuId,
+            kpi: historyType,
+            filter: filter,
+            treg: effectiveTreg,
+          },
+        }).unwrap();
+      }
     } catch (err) {
       toast.error("Gagal memuat data history");
     } finally {
       setLoading(false);
     }
-  }, [effectiveTreg, menuId, historyType, filter]);
+  }, [effectiveTreg, menuId, historyType, filter, slaMode, isMsaRoute, weeklyKpi]);
 
   /**
    * @description Fetch customer list
@@ -176,6 +190,8 @@ function Dashboard() {
       if (selectedMenu) {
         setMenu(selectedMenu);
         setType(selectedMenu.key);
+        setSlaMode("monthly");
+        setWeeklyKpi("packetloss 1-5% ran to core");
       }
     }
   }, [menuId]);
@@ -188,7 +204,7 @@ function Dashboard() {
   useEffect(() => {
     if (!isDashboardMenu) return;
     fetchHistory();
-  }, [fetchHistory, historyType, isDashboardMenu]);
+  }, [fetchHistory, historyType, isDashboardMenu, slaMode, weeklyKpi]);
 
   useEffect(() => {
     if (!isDashboardMenu) return;
@@ -221,6 +237,10 @@ function Dashboard() {
           level={level}
           filter={filter}
           setLevel={setLevel}
+          slaMode={slaMode}
+          setSlaMode={setSlaMode}
+          weeklyKpi={weeklyKpi}
+          setWeeklyKpi={setWeeklyKpi}
         />
       )}
 
