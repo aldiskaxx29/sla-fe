@@ -1895,6 +1895,12 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
                       record.parameter?.toLowerCase()?.trim() === "jvm"
                     );
 
+                  const isLevel3MttrqRow =
+                    !record.main_parent &&
+                    !record.parent &&
+                    !record.is_level_4 &&
+                    isMttr;
+
                   const isWeightedOrService =
                     record.parameter?.toLowerCase()?.includes("service") ||
                     record.parameter?.toLowerCase()?.includes("weighted");
