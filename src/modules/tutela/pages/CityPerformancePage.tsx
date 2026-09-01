@@ -222,6 +222,16 @@ const CityPerformancePage: React.FC = () => {
         );
       }
 
+      const activeYw =
+        ywRes?.active_yearweek ??
+        ywRes?.active_year_week ??
+        ywRes?.activeYearWeek ??
+        ywRes?.activeYearweek;
+
+      if (activeYw && !ywList.includes(String(activeYw))) {
+        ywList = [String(activeYw), ...ywList];
+      }
+
       if (ywList.length === 0) {
         ywList = extractWeeks(null);
       } else {
@@ -229,7 +239,9 @@ const CityPerformancePage: React.FC = () => {
       }
       setYearweeks(ywList);
 
-      if (ywList.length > 0) {
+      if (activeYw) {
+        setSelectedYearWeek(String(activeYw));
+      } else if (ywList.length > 0) {
         setSelectedYearWeek(ywList[0]);
       }
 
