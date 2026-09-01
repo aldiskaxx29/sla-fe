@@ -66,6 +66,7 @@ interface ChartData {
 }
 
 import { fetchWithRetry } from "../utils/fetch";
+import { extractWeeks, extractPeriodDefaults, formatWeekLabel } from "../utils/weeks";
 
 const TutelaPage = () => {
   // General Filter States
@@ -105,30 +106,28 @@ const TutelaPage = () => {
       .catch((err) => console.error("Failed to load cities:", err));
 
     Promise.all([
-      fetchWithRetry("/onx-api/api/v-list-weeks").then((res) => res.json()).catch(() => []),
-      fetchWithRetry("/onx-api/api/v2/v-onx-last-period-time").then((res) => res.json()).catch(() => null),
+      fetchWithRetry("/onx-api/api/v-list-weeks")
+        .then((res) => res.json())
+        .catch(() => null),
+      fetchWithRetry("/onx-api/api/v2/v-onx-last-period-time")
+        .then((res) => res.json())
+        .catch(() => null),
     ]).then(([weeksData, periodData]) => {
-      let sortedWeeks: string[] = [];
-      if (Array.isArray(weeksData) && weeksData.length > 0) {
-        sortedWeeks = weeksData
-          .map((w: any) => String(w.yearweek))
-          .sort((a: string, b: string) => b.localeCompare(a));
-        setWeeksList(sortedWeeks);
-      }
+      const sortedWeeks = extractWeeks(weeksData);
+      setWeeksList(sortedWeeks);
 
-      const defaults: Record<string, string> = {};
-      if (periodData && periodData.statusCode === 200 && Array.isArray(periodData.data)) {
-        periodData.data.forEach((item: any) => {
-          if (item.isMobile) {
-            defaults[item.granularity] = item.time;
-          }
-        });
-        setDefaultTimes(defaults);
-      }
+      const defaults = extractPeriodDefaults(periodData);
+      setDefaultTimes(defaults);
 
-      const initialTime = defaults["7 days"] || (sortedWeeks.length > 0 ? sortedWeeks[0] : "");
+      const initialTime =
+        defaults["7 days"] ||
+        defaults["7days"] ||
+        (sortedWeeks.length > 0 ? sortedWeeks[0] : "");
+
       if (initialTime) {
         setTime(initialTime);
+      } else if (sortedWeeks.length > 0) {
+        setTime(sortedWeeks[0]);
       } else {
         setLoading(false);
       }
@@ -137,14 +136,25 @@ const TutelaPage = () => {
 
   // Update time when granularity changes
   useEffect(() => {
-    if (!weeksList.length && !Object.keys(defaultTimes).length) return;
-
-    if (defaultTimes[granularity]) {
-      setTime(defaultTimes[granularity]);
-    } else if (weeksList.length > 0) {
-      setTime(weeksList[0]);
+    if (granularity === "daily") {
+      const dailyTime = defaultTimes["daily"] || defaultTimes["Daily"];
+      if (dailyTime && dayjs(dailyTime).isValid()) {
+        setTime(dailyTime);
+      } else if (!time || !dayjs(time).isValid() || time.length === 6) {
+        setTime(dayjs().format("YYYY-MM-DD"));
+      }
+    } else {
+      const granKey = granularity.replace(" ", "");
+      const defTime = defaultTimes[granularity] || defaultTimes[granKey];
+      if (defTime && weeksList.includes(defTime)) {
+        setTime(defTime);
+      } else if (time && weeksList.includes(time)) {
+        // Keep currently selected valid week
+      } else if (weeksList.length > 0) {
+        setTime(weeksList[0]);
+      }
     }
-  }, [granularity]);
+  }, [granularity, defaultTimes, weeksList]);
 
   // Fetch Dashboard / Sub Metric Data
   useEffect(() => {
@@ -257,7 +267,7 @@ const TutelaPage = () => {
           <label className="text-xxs font-bold text-slate-400 uppercase tracking-wider">Time</label>
           {granularity === "daily" ? (
             <DatePicker
-              value={time ? dayjs(time) : null}
+              value={time && dayjs(time).isValid() ? dayjs(time) : dayjs()}
               onChange={(date) => setTime(date ? date.format("YYYY-MM-DD") : "")}
               format="YYYY-MM-DD"
               allowClear={false}
@@ -266,10 +276,13 @@ const TutelaPage = () => {
           ) : (
             <Select
               placeholder="Select week"
-              value={time || undefined}
+              value={time && weeksList.includes(time) ? time : (weeksList[0] || undefined)}
               onChange={(val) => setTime(val)}
               className="w-full"
-              options={weeksList.map((w) => ({ label: `W${w.slice(4)} - ${w.slice(0, 4)}`, value: w }))}
+              options={weeksList.map((w) => ({
+                label: formatWeekLabel(w),
+                value: String(w),
+              }))}
             />
           )}
         </div>

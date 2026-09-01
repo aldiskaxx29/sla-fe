@@ -9,6 +9,7 @@ import {
 } from "@ant-design/icons";
 import ReactECharts from "echarts-for-react";
 import { fetchWithRetry } from "../utils/fetch";
+import { extractWeeks, formatWeekLabel } from "../utils/weeks";
 
 interface TrendItemObject {
   yearweek?: string | number;
@@ -212,17 +213,24 @@ const CityPerformancePage: React.FC = () => {
 
       let ywList: string[] = [];
       if (ywRes?.status && Array.isArray(ywRes.data)) {
-        ywList = ywRes.data;
+        ywList = ywRes.data.map(String);
       } else if (Array.isArray(ywRes)) {
-        ywList = ywRes;
+        ywList = ywRes.map((item: any) =>
+          typeof item === "string" || typeof item === "number"
+            ? String(item)
+            : String(item?.yearweek ?? item?.yearWeek ?? item)
+        );
+      }
+
+      if (ywList.length === 0) {
+        ywList = extractWeeks(null);
+      } else {
+        ywList = Array.from(new Set(ywList)).sort((a, b) => b.localeCompare(a));
       }
       setYearweeks(ywList);
 
       if (ywList.length > 0) {
-        const defaultYw = ywList.includes("202628")
-          ? "202628"
-          : ywList[ywList.length - 1];
-        setSelectedYearWeek(defaultYw);
+        setSelectedYearWeek(ywList[0]);
       }
 
       let regList: RegionOption[] = [];
@@ -343,14 +351,14 @@ const CityPerformancePage: React.FC = () => {
                 Year Week
               </label>
               <Select
-                value={selectedYearWeek}
+                value={selectedYearWeek || undefined}
                 onChange={(val) => setSelectedYearWeek(val)}
                 loading={loadingFilters}
                 className="w-36"
                 placeholder="Select Week"
                 options={yearweeks.map((yw) => ({
-                  value: yw,
-                  label: `Week ${yw.slice(4)} (${yw.slice(0, 4)})`,
+                  value: String(yw),
+                  label: formatWeekLabel(yw),
                 }))}
               />
             </div>

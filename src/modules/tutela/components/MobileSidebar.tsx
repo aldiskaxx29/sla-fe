@@ -2,6 +2,7 @@ import React from "react";
 import { Select, DatePicker } from "antd";
 import { CompassOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
+import { formatWeekLabel } from "../utils/weeks";
 
 interface MobileSidebarProps {
   activeSubTab: string;
@@ -311,7 +312,7 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({
           </label>
           {granularity === "daily" ? (
             <DatePicker
-              value={time ? dayjs(time) : null}
+              value={time && dayjs(time).isValid() ? dayjs(time) : dayjs()}
               onChange={(date) =>
                 setTime(date ? date.format("YYYY-MM-DD") : "")
               }
@@ -322,12 +323,12 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({
           ) : (
             <Select
               placeholder="Select week"
-              value={time || undefined}
+              value={time && weeksList.includes(time) ? time : (weeksList[0] || undefined)}
               onChange={(val) => setTime(val)}
               className="w-full"
               options={weeksList.map((w) => ({
-                label: `W${w.slice(4)} - ${w.slice(0, 4)}`,
-                value: w,
+                label: formatWeekLabel(w),
+                value: String(w),
               }))}
             />
           )}
@@ -340,7 +341,7 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({
             </label>
             {granularity === "daily" ? (
               <DatePicker
-                value={timeRangeStart ? dayjs(timeRangeStart) : null}
+                value={timeRangeStart && dayjs(timeRangeStart).isValid() ? dayjs(timeRangeStart) : dayjs().subtract(7, "day")}
                 onChange={(date) =>
                   setTimeRangeStart(date ? date.format("YYYY-MM-DD") : "")
                 }
@@ -351,12 +352,12 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({
             ) : (
               <Select
                 placeholder="Start week"
-                value={timeRangeStart || undefined}
+                value={timeRangeStart && weeksList.includes(timeRangeStart) ? timeRangeStart : (weeksList[Math.min(4, Math.max(0, weeksList.length - 1))] || undefined)}
                 onChange={(val) => setTimeRangeStart(val)}
                 className="w-full"
                 options={weeksList.map((w) => ({
-                  label: `W${w.slice(4)} - ${w.slice(0, 4)}`,
-                  value: w,
+                  label: formatWeekLabel(w),
+                  value: String(w),
                 }))}
               />
             )}
@@ -367,7 +368,7 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({
             </label>
             {granularity === "daily" ? (
               <DatePicker
-                value={timeRangeEnd ? dayjs(timeRangeEnd) : null}
+                value={timeRangeEnd && dayjs(timeRangeEnd).isValid() ? dayjs(timeRangeEnd) : dayjs()}
                 onChange={(date) =>
                   setTimeRangeEnd(date ? date.format("YYYY-MM-DD") : "")
                 }
@@ -378,12 +379,12 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({
             ) : (
               <Select
                 placeholder="End week"
-                value={timeRangeEnd || undefined}
+                value={timeRangeEnd && weeksList.includes(timeRangeEnd) ? timeRangeEnd : (weeksList[0] || undefined)}
                 onChange={(val) => setTimeRangeEnd(val)}
                 className="w-full"
                 options={weeksList.map((w) => ({
-                  label: `W${w.slice(4)} - ${w.slice(0, 4)}`,
-                  value: w,
+                  label: formatWeekLabel(w),
+                  value: String(w),
                 }))}
               />
             )}

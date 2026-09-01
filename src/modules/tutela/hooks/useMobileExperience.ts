@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import dayjs from "dayjs";
 import { fetchWithRetry } from "../utils/fetch";
+import { extractWeeks, extractPeriodDefaults, getPriorWeek } from "../utils/weeks";
 
 const getBenchmarkKpi = (kpiName: string) => {
   const norm = kpiName.toLowerCase();
@@ -135,56 +136,53 @@ export const useMobileExperience = () => {
       })
       .catch((err) => console.error("Failed to load cities:", err));
 
-    fetchWithAuth("/onx-api/api/v-list-weeks")
-      .then((res) => res.json())
-      .then((data) => {
-        const weeks = data.map((w: any) => String(w.yearweek)).sort((a: string, b: string) => b.localeCompare(a));
-        setWeeksList(weeks);
-      })
-      .catch((err) => console.error("Failed to load weeks list:", err));
+    Promise.all([
+      fetchWithAuth("/onx-api/api/v-list-weeks")
+        .then((res) => res.json())
+        .catch(() => null),
+      fetchWithAuth("/onx-api/api/v2/v-onx-last-period-time")
+        .then((res) => res.json())
+        .catch(() => null),
+    ]).then(([weeksData, periodData]) => {
+      const sortedWeeks = extractWeeks(weeksData);
+      setWeeksList(sortedWeeks);
 
-    fetchWithAuth("/onx-api/api/v2/v-onx-last-period-time")
-      .then((res) => res.json())
-      .then((resData) => {
-        if (resData.statusCode === 200 && resData.data) {
-          const defaults: Record<string, string> = {};
-          resData.data.forEach((item: any) => {
-            if (item.isMobile) {
-              defaults[item.granularity] = item.time;
-            }
-          });
-          setDefaultTimes(defaults);
-          const pickGran = defaults["7 days"]
-            ? "7 days"
-            : defaults["30 days"]
-            ? "30 days"
-            : null;
-          if (pickGran) {
-            if (pickGran !== granularity) setGranularity(pickGran as any);
-            setTime(defaults[pickGran]);
-            setTimeRangeEnd(defaults[pickGran]);
-            setTimeRangeStart(String(Number(defaults[pickGran]) - 4));
-          }
-        }
-      })
-      .catch((err) => console.error("Failed to load time defaults:", err));
+      const defaults = extractPeriodDefaults(periodData);
+      setDefaultTimes(defaults);
+
+      const pickGran = defaults["7 days"]
+        ? "7 days"
+        : defaults["30 days"]
+        ? "30 days"
+        : "7 days";
+
+      const selectedTime = defaults[pickGran] || sortedWeeks[0] || "";
+      if (selectedTime) {
+        setTime(selectedTime);
+        setTimeRangeEnd(selectedTime);
+        setTimeRangeStart(getPriorWeek(sortedWeeks, selectedTime, 4));
+      }
+    });
   }, []);
 
   useEffect(() => {
-    if (defaultTimes[granularity]) {
-      setTime(defaultTimes[granularity]);
-      setTimeRangeEnd(defaultTimes[granularity]);
-      if (granularity === "daily") {
-        setTimeRangeStart(
-          dayjs(defaultTimes[granularity])
-            .subtract(7, "day")
-            .format("YYYY-MM-DD"),
-        );
-      } else {
-        setTimeRangeStart(String(Number(defaultTimes[granularity]) - 4));
+    if (granularity === "daily") {
+      const dailyTime = defaultTimes["daily"] || defaultTimes["Daily"] || dayjs().format("YYYY-MM-DD");
+      setTime(dailyTime);
+      setTimeRangeEnd(dailyTime);
+      setTimeRangeStart(
+        dayjs(dailyTime).subtract(7, "day").format("YYYY-MM-DD")
+      );
+    } else {
+      const granKey = granularity.replace(" ", "");
+      const defTime = defaultTimes[granularity] || defaultTimes[granKey] || weeksList[0] || "";
+      if (defTime) {
+        setTime(defTime);
+        setTimeRangeEnd(defTime);
+        setTimeRangeStart(getPriorWeek(weeksList, defTime, 4));
       }
     }
-  }, [granularity, defaultTimes]);
+  }, [granularity, defaultTimes, weeksList]);
 
   // Fetch Map Data
   useEffect(() => {

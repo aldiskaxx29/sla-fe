@@ -1,3 +1,5 @@
+import { resolveOnxUrl } from "./weeks";
+
 /**
  * Fetch helper with automatic retry and timeout
  */
@@ -8,6 +10,7 @@ export const fetchWithRetry = async (
   delay = 1000,
   timeoutMs = 20000
 ): Promise<Response> => {
+  const finalUrl = resolveOnxUrl(url);
   const token =
     localStorage.getItem("access_token") ||
     import.meta.env.VITE_DAILY_MONITORING_TOKEN;
@@ -23,7 +26,7 @@ export const fetchWithRetry = async (
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
     try {
-      const res = await fetch(url, {
+      const res = await fetch(finalUrl, {
         ...options,
         headers: mergedHeaders,
         signal: controller.signal,
@@ -35,7 +38,7 @@ export const fetchWithRetry = async (
       clearTimeout(timeoutId);
       const isAbort = err.name === "AbortError";
       console.warn(
-        `Attempt ${i + 1} failed for ${url}. Error: ${
+        `Attempt ${i + 1} failed for ${finalUrl}. Error: ${
           isAbort ? "Timeout after " + timeoutMs + "ms" : err.message
         }`
       );
