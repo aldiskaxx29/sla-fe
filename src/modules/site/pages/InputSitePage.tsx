@@ -19,6 +19,7 @@ const SitePage = () => {
   const [exclude, setExclude] = useState("all");
   const [evidence, setEvidence] = useState("all");
   const [prev, setPrev] = useState("corrective");
+  const [evidence, setEvidence] = useState("all");
   const [loading, setLoading] = useState(false);
   const [parameter, setParameter] = useState("packetloss ran to core");
   const [regionFilters, setRegionFilters] = useState<Key[]>([]);
@@ -60,12 +61,15 @@ const SitePage = () => {
   const effectiveWeek = useMemo(() => {
     if (isMttrqParameter) return "";
     if (week) return week;
-    return selectedWeeks.find((item) => item !== "all") ?? selectedWeeks[0] ?? "";
+    return (
+      selectedWeeks.find((item) => item !== "all") ?? selectedWeeks[0] ?? ""
+    );
   }, [isMttrqParameter, selectedWeeks, week]);
   const effectiveMonth = month;
   const tableKey = useMemo(
-    () => `${parameter}-${year}-${effectiveMonth}-${effectiveWeek}-${prev}-${exclude}-${evidence}`,
-    [parameter, year, effectiveMonth, effectiveWeek, prev, exclude, evidence],
+    () =>
+      `${parameter}-${year}-${effectiveMonth}-${effectiveWeek}-${prev}-${exclude}`,
+    [parameter, year, effectiveMonth, effectiveWeek, prev, exclude],
   );
 
   const fetchSite = useCallback(async () => {
@@ -133,7 +137,7 @@ const SitePage = () => {
       ...current,
       current: 1,
     }));
-  }, [exclude, evidence, parameter, year, month, prev, week]);
+  }, [exclude, parameter, year, month, prev, week, evidence]);
 
   useEffect(() => {
     return () => {

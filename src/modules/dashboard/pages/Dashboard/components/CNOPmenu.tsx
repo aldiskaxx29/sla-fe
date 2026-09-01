@@ -122,10 +122,10 @@ const CNOPmenu = ({
               <Image src={warningIcon} alt="icon" width={36} preview={false} />
               <div className="ml-2 ">
                 <p className="text-sm text-primary-1 font-bold">
-                  {dataComply && dataComply[1].parameter}
+                  {dataComply?.[1]?.parameter || "Not Comply"}
                 </p>
                 <p className="text-base text-[#4B465C] medium">
-                  {dataComply && dataComply[1].jumlah} Parameter
+                  {dataComply?.[1]?.jumlah ?? 0} Parameter
                 </p>
                 {/* <p className="text-base text-[#4B465C] medium">100%</p> */}
               </div>
@@ -134,10 +134,10 @@ const CNOPmenu = ({
               <Image src={warningIcon} alt="icon" width={36} preview={false} />
               <div className="ml-2">
                 <p className="text-sm text-primary-1 font-bold">
-                  {dataComply && dataComply[2].parameter}
+                  {dataComply?.[2]?.parameter || "Comply"}
                 </p>
                 <p className="text-base text-[#4B465C] medium">
-                  {dataComply && dataComply[2].jumlah} Parameter
+                  {dataComply?.[2]?.jumlah ?? 0} Parameter
                 </p>
               </div>
             </div>

@@ -20,7 +20,7 @@ const TableHistory: React.FC<TableHistoryProps> = ({
   treg,
   loadingMainData = false,
 }) => {
-  const [dataSource, setDataSource] = useState(data);
+  const [dataSource, setDataSource] = useState(Array.isArray(data) ? data : []);
   const [loading, setLoading] = useState(false);
   const [injectedData, setInjectedData] = useState([]);
   const { getHistoryData } = useDashboard();
@@ -30,8 +30,9 @@ const TableHistory: React.FC<TableHistoryProps> = ({
     []
   );
   const dataSourceWithKeys = useMemo(() => {
+    const list = Array.isArray(dataSource) ? dataSource : [];
     return (
-      dataSource?.map((item, index) => ({
+      list.map((item, index) => ({
         ...item,
         key: item.key || item.id || `row-${index}`,
       })) || []
@@ -47,7 +48,8 @@ const TableHistory: React.FC<TableHistoryProps> = ({
   );
 
   const dataMapping = useMemo(() => {
-    const mappingData2 = dataSource.map((data, indexParent) => {
+    const list = Array.isArray(dataSource) ? dataSource : [];
+    const mappingData2 = list.map((data, indexParent) => {
       if (
         data.coreIndex == injectedData?.coreIndex &&
         data.parameter == injectedData?.parameter
@@ -307,7 +309,7 @@ const TableHistory: React.FC<TableHistoryProps> = ({
   );
 
   useEffect(() => {
-    setDataSource(data);
+    setDataSource(Array.isArray(data) ? data : []);
     setInjectedData([]);
     setInjectedChildData({});
     setExpandedRowKeys([]);

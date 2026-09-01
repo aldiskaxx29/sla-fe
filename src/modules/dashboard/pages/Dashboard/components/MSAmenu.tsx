@@ -1,5 +1,5 @@
 import { Button, Image, Skeleton } from "antd";
-import { Component, useEffect, useState } from "react";
+import { Component, useEffect, useMemo, useState } from "react";
 import * as XLSX from "xlsx";
 
 import warningIcon from "@/assets/warning.svg";
@@ -74,6 +74,7 @@ const MSAmenu = ({
   setWeeklyKpi,
 }) => {
   const [exportLoading, setExportLoading] = useState(false);
+  const [exportWeeklyLoading, setExportWeeklyLoading] = useState(false);
   const [showActualWeeks, setShowActualWeeks] = useState(false);
 
   const weeklyKpiOptions = [
@@ -284,6 +285,137 @@ const MSAmenu = ({
     }
   };
 
+  const handleDownloadWeeklyCsv = async () => {
+    try {
+      setExportWeeklyLoading(true);
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+
+      if (!historyRows || historyRows.length === 0) {
+        toast.warning("Tidak ada data untuk di-export");
+        return;
+      }
+
+      const getMonthFromWeek = (w: number): number => {
+        if (w <= 4) return 1;
+        if (w <= 8) return 2;
+        if (w <= 13) return 3;
+        if (w <= 17) return 4;
+        if (w <= 21) return 5;
+        if (w <= 26) return 6;
+        if (w <= 30) return 7;
+        if (w <= 35) return 8;
+        if (w <= 39) return 9;
+        if (w <= 43) return 10;
+        if (w <= 48) return 11;
+        return 12;
+      };
+
+      const weekMap = new Map<string, { key: string; weekNum: number; monthNum: number }>();
+      historyRows.forEach((row: any) => {
+        if (!row || typeof row !== "object") return;
+        Object.keys(row).forEach((k) => {
+          const matchRealMonth = k.match(/^real_week_(\d+)_month_(\d+)$/i);
+          if (matchRealMonth) {
+            const weekNum = parseInt(matchRealMonth[1], 10);
+            const monthNum = parseInt(matchRealMonth[2], 10);
+            if (!weekMap.has(k)) {
+              weekMap.set(k, { key: k, weekNum, monthNum });
+            }
+            return;
+          }
+
+          const matchWeekMonth = k.match(/^(?:ach_)?week_(\d+)_month_(\d+)$/i);
+          if (matchWeekMonth) {
+            const weekNum = parseInt(matchWeekMonth[1], 10);
+            const monthNum = parseInt(matchWeekMonth[2], 10);
+            if (!weekMap.has(k)) {
+              weekMap.set(k, { key: k, weekNum, monthNum });
+            }
+            return;
+          }
+
+          const matchReal = k.match(/^real_week_(\d+)$/i);
+          if (matchReal) {
+            const weekNum = parseInt(matchReal[1], 10);
+            const monthNum = getMonthFromWeek(weekNum);
+            if (!weekMap.has(k)) {
+              weekMap.set(k, { key: k, weekNum, monthNum });
+            }
+            return;
+          }
+        });
+      });
+
+      const parsedWeeks = Array.from(weekMap.values()).sort(
+        (a, b) => a.weekNum - b.weekNum
+      );
+
+      const quarterMap: Record<string, number[]> = {
+        Q1: [1, 2, 3],
+        Q2: [4, 5, 6],
+        Q3: [7, 8, 9],
+        Q4: [10, 11, 12],
+      };
+
+      const monthNames: Record<number, string> = {
+        1: "Januari",
+        2: "Februari",
+        3: "Maret",
+        4: "April",
+        5: "Mei",
+        6: "Juni",
+        7: "Juli",
+        8: "Agustus",
+        9: "September",
+        10: "Oktober",
+        11: "November",
+        12: "Desember",
+      };
+
+      const exportData = historyRows.map((row: any, index: number) => {
+        const rowData: Record<string, any> = {
+          No: index + 1,
+          Region: row.region_tsel ?? "-",
+        };
+
+        for (const [q, months] of Object.entries(quarterMap)) {
+          const targetKey = `target_${q.toLowerCase()}`;
+          const hasTarget = historyRows.some(
+            (r: any) => r[targetKey] !== undefined && r[targetKey] !== null && r[targetKey] !== ""
+          );
+          const quarterWeeks = parsedWeeks.filter((wk) => months.includes(wk.monthNum));
+
+          if (hasTarget || quarterWeeks.length > 0) {
+            rowData[`Target ${q}`] = row[targetKey] ?? "-";
+
+            months.forEach((m) => {
+              const weeksInMonth = quarterWeeks.filter((wk) => wk.monthNum === m);
+              weeksInMonth.forEach((wk) => {
+                const colTitle = `${monthNames[m]} W${wk.weekNum}`;
+                rowData[colTitle] = row[wk.key] ?? "-";
+              });
+            });
+          }
+        }
+
+        return rowData;
+      });
+
+      const worksheet = XLSX.utils.json_to_sheet(exportData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Weekly_SLA");
+
+      const sanitizedKpi = (weeklyKpi || "kpi").replace(/[^a-zA-Z0-9_-]/g, "_");
+      XLSX.writeFile(workbook, `Weekly_SLA_${sanitizedKpi}_Report.csv`, { bookType: "csv" });
+      toast.success("Berhasil men-download data CSV");
+    } catch (error) {
+      console.error("Failed to export Weekly SLA CSV:", error);
+      toast.error("Gagal men-download data CSV");
+    } finally {
+      setExportWeeklyLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchComply();
   }, []);
@@ -291,6 +423,17 @@ const MSAmenu = ({
   const msaRows = Array.isArray(dataSC?.data)
     ? normalizeMsaRows(dataSC.data)
     : [];
+
+  const historyRows = useMemo(() => {
+    if (Array.isArray(dataHistoryData)) return dataHistoryData;
+    if (Array.isArray(dataHistoryData?.data)) return dataHistoryData.data;
+    if (Array.isArray(dataHistoryData?.rows)) return dataHistoryData.rows;
+    return [];
+  }, [dataHistoryData]);
+
+  const isHistoryDataLoading =
+    isLoadingHistoryData ||
+    (!dataHistoryData && historyRows.length === 0);
 
   return (
     <div>
@@ -319,10 +462,10 @@ const MSAmenu = ({
               <Image src={warningIcon} alt="icon" width={40} preview={false} />
               <div className="ml-2 ">
                 <p className="text-sm text-primary-1 font-bold">
-                  {dataComply && dataComply[1].parameter}
+                  {dataComply?.[1]?.parameter || "Not Comply"}
                 </p>
                 <p className="text-base text-[#4B465C] medium">
-                  {dataComply && dataComply[1].jumlah} Parameter
+                  {dataComply?.[1]?.jumlah ?? 0} Parameter
                 </p>
               </div>
             </div>
@@ -568,17 +711,27 @@ const MSAmenu = ({
             </div>
 
             {slaMode === "weekly" && (
-              <div className="w-[280px]">
-                <AppDropdown
-                  title="Filter KPI"
-                  placeholder="Select KPI"
-                  options={weeklyKpiOptions.map((option) => ({
-                    label: formatWeeklyKpiLabel(option),
-                    value: option,
-                  }))}
-                  onChange={(value) => setWeeklyKpi(value)}
-                  value={weeklyKpi}
-                />
+              <div className="flex items-center gap-4">
+                <div className="w-[280px]">
+                  <AppDropdown
+                    title="Filter KPI"
+                    placeholder="Select KPI"
+                    options={weeklyKpiOptions.map((option) => ({
+                      label: formatWeeklyKpiLabel(option),
+                      value: option,
+                    }))}
+                    onChange={(value) => setWeeklyKpi(value)}
+                    value={weeklyKpi}
+                  />
+                </div>
+                <Button
+                  onClick={handleDownloadWeeklyCsv}
+                  loading={exportWeeklyLoading}
+                  className="!h-11 !px-4 py-2.5 !border-0 !rounded-full !bg-[#EDFFFD] flex items-center gap-2"
+                >
+                  <p className="text-brand-secondary font-medium">Export CSV</p>
+                  <Image src={xlxsIcon} alt="icon" width={16} preview={false} />
+                </Button>
               </div>
             )}
           </div>
@@ -586,24 +739,15 @@ const MSAmenu = ({
           <div className="w-auto overflow-x-auto">
             {slaMode === "weekly" ? (
               <TableHistoryWeekly
-                dataSource={dataHistoryData?.data ?? []}
-                loadingMainData={
-                  isLoadingHistoryData ||
-                  !dataHistoryData ||
-                  (Array.isArray(dataHistoryData?.data) &&
-                    dataHistoryData.data.length === 0)
-                }
+                dataSource={historyRows}
+                weeklyKpi={weeklyKpi}
+                loadingMainData={isHistoryDataLoading}
               />
             ) : (
               <TableHistory
-                dataSource={dataHistoryData?.data ?? []}
+                dataSource={historyRows}
                 treg={treg}
-                loadingMainData={
-                  isLoadingHistoryData ||
-                  !dataHistoryData ||
-                  (Array.isArray(dataHistoryData?.data) &&
-                    dataHistoryData.data.length === 0)
-                }
+                loadingMainData={isHistoryDataLoading}
               />
             )}
           </div>
