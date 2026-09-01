@@ -357,17 +357,6 @@ export const dashboardApi = emptySplitApi.injectEndpoints({
     }),
     witel_data: builder.query({
       query: (payload) => {
-<<<<<<< HEAD
-        const area = getAreaValue(payload?.query?.treg);
-        const params: any = {
-          tahun: payload?.query?.tahun ?? new Date().getFullYear(),
-          parameter_key: payload?.query?.parameter_key ?? payload?.query?.parameter,
-          region: payload?.query?.region,
-          area: area,
-        };
-        if (payload?.query?.wilayah) {
-          params.wilayah = payload.query.wilayah;
-=======
         if (payload?.query?.type === "msa") {
           const isMttr = mapParameterToKey(payload?.query?.parameter || payload?.query?.kpi).includes("mttrq");
           
@@ -413,12 +402,11 @@ export const dashboardApi = emptySplitApi.injectEndpoints({
               area: mapTregToArea(payload?.query?.treg),
             },
           };
->>>>>>> b754cc7fe55999cf10b7128737354ce923d17537
         }
         return {
           method: "GET",
-          url: "achievement-wisa/not-comply/witel",
-          params,
+          url: "dashboard/witel/monthly/detail",
+          params: payload?.query,
         };
       },
       transformResponse: (response: any, meta: any, arg: any) => {

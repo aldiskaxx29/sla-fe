@@ -12,6 +12,7 @@ import {
 } from "../rtk/site.rtk";
 import { toast } from "react-toastify";
 
+// Site Page
 const SitePage = () => {
   const [week, setWeek] = useState("");
   const [month, setMonth] = useState(String(dayjs().month() + 1));
@@ -19,7 +20,6 @@ const SitePage = () => {
   const [exclude, setExclude] = useState("all");
   const [evidence, setEvidence] = useState("all");
   const [prev, setPrev] = useState("corrective");
-  const [evidence, setEvidence] = useState("all");
   const [loading, setLoading] = useState(false);
   const [parameter, setParameter] = useState("packetloss ran to core");
   const [regionFilters, setRegionFilters] = useState<Key[]>([]);

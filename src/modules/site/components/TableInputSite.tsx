@@ -76,7 +76,9 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
     first.every((value, index) => value === second[index]);
 
   const getColumnFilterValue = (dataIndex: string) =>
-    columnFilters[dataIndex] ?? [];
+    columnFilters[dataIndex] && columnFilters[dataIndex].length > 0
+      ? columnFilters[dataIndex]
+      : null;
 
   const setColumnFilterValue = (dataIndex: string, values: Key[]) => {
     setColumnFilters((current) => {
@@ -297,7 +299,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
         ],
         filterSearch: true,
         filterMultiple: true,
-        filteredValue: regionFilters,
+        filteredValue: regionFilters?.length ? regionFilters : null,
         onFilter: (value, record) =>
           Boolean((record as { __skeleton?: boolean }).__skeleton) ||
           record.region_tsel === value,
@@ -452,7 +454,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
         ],
         filterSearch: true,
         filterMultiple: true,
-        filteredValue: rcaFilters,
+        filteredValue: rcaFilters?.length ? rcaFilters : null,
         onFilter: (value, record) =>
           Boolean((record as { __skeleton?: boolean }).__skeleton) ||
           normalizeRcaFilterValue(record.RCA) === normalizeRcaFilterValue(value),
@@ -955,6 +957,13 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
                   })}
                   fixed={child.fixed}
                   render={child.render ?? renderTableValue}
+                  filteredValue={
+                    child.filteredValue !== undefined
+                      ? child.filteredValue
+                      : child.search
+                        ? getColumnFilterValue(child.dataIndex)
+                        : null
+                  }
                   {...(child.search
                     ? getColumnSearchProps(child.dataIndex)
                     : {})}
@@ -975,7 +984,13 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
               fixed={column.fixed}
               align={column.align}
               filters={column.filters}
-              filteredValue={column.filteredValue}
+              filteredValue={
+                column.filteredValue !== undefined
+                  ? column.filteredValue
+                  : column.search
+                    ? getColumnFilterValue(column.dataIndex)
+                    : null
+              }
               filterSearch={column.filterSearch}
               filterMultiple={column.filterMultiple}
               onFilter={column.onFilter}
