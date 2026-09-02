@@ -12,9 +12,6 @@ import {
 } from "../rtk/site.rtk";
 import { toast } from "react-toastify";
 
-<<<<<<< HEAD
-// Site Page
-=======
 const DEFAULT_SEARCHABLE = [
   "id",
   "status_packetloss_5",
@@ -49,7 +46,6 @@ const DEFAULT_SEARCHABLE = [
   "area",
 ];
 
->>>>>>> 260d482 (update rekonsiliasi)
 const SitePage = () => {
   const [week, setWeek] = useState("");
   const [month, setMonth] = useState(String(dayjs().month() + 1));
@@ -178,6 +174,7 @@ const SitePage = () => {
     fetchSite();
   }, [fetchSite, trigger]);
 
+  useEffect(() => {
     setPagination((current) => {
       if (current.current === 1) return current;
       return {
