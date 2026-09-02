@@ -143,7 +143,22 @@ const baseQueryWithReauth: BaseQueryFn<
       Authorization: `Bearer ${localStorage.getItem("access_token")}`,
     },
     paramsSerializer: (params) => {
-      return new URLSearchParams(params).toString().replace(/\+/g, "%20");
+      const searchParams = new URLSearchParams();
+      Object.entries(params || {}).forEach(([key, value]) => {
+        if (value === undefined || value === null || value === "") return;
+        if (Array.isArray(value)) {
+          value.forEach((v) => {
+            if (key.endsWith("[]")) {
+              searchParams.append(key, String(v));
+            } else {
+              searchParams.append(`${key}[]`, String(v));
+            }
+          });
+        } else {
+          searchParams.append(key, String(value));
+        }
+      });
+      return searchParams.toString().replace(/\+/g, "%20");
     },
   })(resolvedArgs, api, extraOptions);
 
