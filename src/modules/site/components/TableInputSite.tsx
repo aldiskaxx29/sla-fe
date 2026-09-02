@@ -884,7 +884,10 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
         pagination={
           pagination
             ? {
-                ...pagination,
+                current: pagination.current || 1,
+                pageSize: pagination.pageSize || 10,
+                defaultPageSize: 10,
+                total: pagination.total || 0,
                 showSizeChanger: true,
                 pageSizeOptions: ["10", "20", "50", "100"],
                 showTotal: (total, range) =>
@@ -923,10 +926,12 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
             !isSameFilter(nextRcaFilters, rcaFilters) ||
             JSON.stringify(nextColumnFilters) !== JSON.stringify(columnFilters);
 
-          setPagination({
+          setPagination((prev: any) => ({
+            ...prev,
             ...pag,
-            current: filterChanged ? 1 : pag.current,
-          });
+            current: filterChanged ? 1 : (pag.current ?? 1),
+            pageSize: pag.pageSize ?? prev?.pageSize ?? 10,
+          }));
           setRegionFilters(nextRegionFilters);
           setRcaFilters(nextRcaFilters);
           setColumnFilters(nextColumnFilters);

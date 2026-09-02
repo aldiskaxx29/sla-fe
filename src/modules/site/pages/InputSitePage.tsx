@@ -1,6 +1,6 @@
 import AppDropdown from "@/app/components/AppDropdown";
 import xlxsIcon from "@/assets/file-spreadsheet.svg";
-import { Button, Image, Upload } from "antd";
+import { Button, Image, Input, Upload } from "antd";
 import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Key } from "react";
@@ -12,7 +12,44 @@ import {
 } from "../rtk/site.rtk";
 import { toast } from "react-toastify";
 
+<<<<<<< HEAD
 // Site Page
+=======
+const DEFAULT_SEARCHABLE = [
+  "id",
+  "status_packetloss_5",
+  "status_packetloss_15",
+  "value",
+  "week",
+  "status_site",
+  "site_id",
+  "ticket_id",
+  "region_tsel",
+  "district",
+  "distribution_pl",
+  "grouping_rca",
+  "evidence",
+  "packetloss_status",
+  "RCA",
+  "detail_rca",
+  "ticket",
+  "note",
+  "grouping_rca_packetloss_cnq_1",
+  "grouping_rca_packetloss_cnq_2",
+  "last_update_packetloss_cnq",
+  "user_update_packetloss_cnq",
+  "grouping_rca_packetloss_regional_1",
+  "grouping_rca_packetloss_regional_2",
+  "last_update_packetloss_regional",
+  "user_update_packetloss_regional",
+  "rca_packetloss",
+  "update_progress_packetloss",
+  "status_saat_ini",
+  "status_packetloss",
+  "area",
+];
+
+>>>>>>> 260d482 (update rekonsiliasi)
 const SitePage = () => {
   const [week, setWeek] = useState("");
   const [month, setMonth] = useState(String(dayjs().month() + 1));
@@ -25,6 +62,7 @@ const SitePage = () => {
   const [regionFilters, setRegionFilters] = useState<Key[]>([]);
   const { getSite } = useSite();
   const [trigger, setTrigger] = useState(0);
+  const [search, setSearch] = useState("");
   const [siteResponse, setSiteResponse] = useState<Record<string, any> | null>(
     null,
   );
@@ -34,6 +72,7 @@ const SitePage = () => {
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 10,
+    total: 0,
   });
   const mttrqParameters = ["mttrq critical", "mttrq major", "mttrq minor"];
   const isMttrqParameter = mttrqParameters.includes(parameter);
@@ -76,7 +115,6 @@ const SitePage = () => {
     activeSiteRequestRef.current?.abort?.();
     const requestSeq = requestSeqRef.current + 1;
     requestSeqRef.current = requestSeq;
-    setSiteResponse(null);
     setLoading(true);
     try {
       const request = getSite({
@@ -89,12 +127,28 @@ const SitePage = () => {
           month: effectiveMonth,
           _t: Date.now(),
           ...(!isMttrqParameter && { week: effectiveWeek }),
+          page: pagination.current,
+          per_page: pagination.pageSize,
+          ...(search && search.trim() ? { search: search.trim() } : {}),
+          searchable: DEFAULT_SEARCHABLE,
         },
       });
       activeSiteRequestRef.current = request;
       const result = (await request.unwrap()) as Record<string, any>;
       if (requestSeqRef.current === requestSeq) {
         setSiteResponse(result);
+        const newTotal =
+          result?.meta?.total ??
+          result?.total ??
+          (Array.isArray(result?.data) ? result.data.length : 0);
+
+        setPagination((prevPag) => {
+          if (prevPag.total === newTotal) return prevPag;
+          return {
+            ...prevPag,
+            total: newTotal,
+          };
+        });
       }
     } catch (error) {
       console.error("Failed to fetch site data:", error);
@@ -112,6 +166,9 @@ const SitePage = () => {
     year,
     prev,
     isMttrqParameter,
+    pagination.current,
+    pagination.pageSize,
+    search,
     getSite,
   ]);
 
@@ -119,25 +176,16 @@ const SitePage = () => {
     if (!month || !year) return;
     if (!isMttrqParameter && !effectiveWeek) return;
     fetchSite();
-  }, [
-    exclude,
-    evidence,
-    parameter,
-    year,
-    month,
-    trigger,
-    prev,
-    isMttrqParameter,
-    effectiveWeek,
-    fetchSite,
-  ]);
+  }, [fetchSite, trigger]);
 
-  useEffect(() => {
-    setPagination((current) => ({
-      ...current,
-      current: 1,
-    }));
-  }, [exclude, parameter, year, month, prev, week, evidence]);
+    setPagination((current) => {
+      if (current.current === 1) return current;
+      return {
+        ...current,
+        current: 1,
+      };
+    });
+  }, [exclude, evidence, parameter, year, month, prev, week, search]);
 
   useEffect(() => {
     return () => {
@@ -341,6 +389,26 @@ const SitePage = () => {
               onChange={(value) => setWeek(value)}
             />
           )}
+          <div className="flex flex-col justify-end">
+            <Input.Search
+              placeholder="Search site..."
+              allowClear
+              value={search}
+              onChange={(e) => {
+                const val = e.target.value;
+                setSearch(val);
+                if (!val) {
+                  setPagination((current) => ({ ...current, current: 1 }));
+                }
+              }}
+              onSearch={(val) => {
+                setSearch(val);
+                setPagination((current) => ({ ...current, current: 1 }));
+              }}
+              className="!w-56"
+              style={{ height: 44 }}
+            />
+          </div>
           <Button
             onClick={() => {
               handleDownload();
