@@ -1,6 +1,6 @@
 import AppDropdown from "@/app/components/AppDropdown";
 import xlxsIcon from "@/assets/file-spreadsheet.svg";
-import { Button, Image, Input, Upload } from "antd";
+import { Button, Image, Input } from "antd";
 import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Key } from "react";
@@ -11,6 +11,7 @@ import {
   useUpload_templateMutation,
 } from "../rtk/site.rtk";
 import { toast } from "react-toastify";
+import { ModalConfirmImport } from "../components/ModalConfirmImport";
 
 const DEFAULT_SEARCHABLE = [
   "id",
@@ -295,10 +296,9 @@ const SitePage = () => {
     downloadTemplate,
   ]);
   const [uploadTemplate, { isLoading }] = useUpload_templateMutation();
+  const [isModalImportOpen, setIsModalImportOpen] = useState(false);
 
-  const handleUpload = async (options) => {
-    const { file, onSuccess, onError } = options;
-
+  const handleConfirmUpload = async (file: File) => {
     const formData = new FormData();
     formData.append("file", file);
 
@@ -314,12 +314,10 @@ const SitePage = () => {
         body: formData,
       }).unwrap();
 
-      onSuccess?.("Ok");
       toast.success(`${file.name} file uploaded successfully`);
       setTrigger((value) => value + 1);
+      setIsModalImportOpen(false);
     } catch (error) {
-      // Signal to Antd that the upload failed
-      onError?.(new Error("Upload failed"));
       console.error("Failed to upload file:", error);
       toast.error(`${file.name} file upload failed.`);
     }
@@ -414,17 +412,13 @@ const SitePage = () => {
             </p>
             <Image src={xlxsIcon} alt="icon" width={16} preview={false} />
           </Button>
-          <Upload customRequest={handleUpload} showUploadList={false}>
-            <Button
-              className="!h-11 !px-3 py-2.5 !border-0 !rounded-full !bg-[#EDFFFD]"
-              loading={isLoading}
-            >
-              <p className="text-brand-secondary font-medium">
-                {isLoading ? "Uploading..." : "Import Excel"}
-              </p>
-              <Image src={xlxsIcon} alt="icon" width={16} preview={false} />
-            </Button>
-          </Upload>
+          <Button
+            onClick={() => setIsModalImportOpen(true)}
+            className="!h-11 !px-3 py-2.5 !border-0 !rounded-full !bg-[#EDFFFD]"
+          >
+            <p className="text-brand-secondary font-medium">Import Excel</p>
+            <Image src={xlxsIcon} alt="icon" width={16} preview={false} />
+          </Button>
         </div>
       </div>
       <div className="w-full overflow-x-auto">
@@ -443,6 +437,21 @@ const SitePage = () => {
           setRegionFilters={setRegionFilters}
         />
       </div>
+
+      <ModalConfirmImport
+        open={isModalImportOpen}
+        onCancel={() => setIsModalImportOpen(false)}
+        onConfirm={handleConfirmUpload}
+        isLoading={isLoading}
+        parameter={parameter}
+        month={month}
+        week={effectiveWeek}
+        year={year}
+        prev={prev}
+        exclude={exclude}
+        evidence={evidence}
+        isMttrqParameter={isMttrqParameter}
+      />
     </div>
   );
 };
