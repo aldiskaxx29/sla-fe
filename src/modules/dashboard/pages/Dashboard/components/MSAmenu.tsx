@@ -7,6 +7,7 @@ import checkIcon from "@/assets/check.svg";
 import xlxsIcon from "@/assets/file-spreadsheet.svg";
 import ChartMSA from "@/modules/dashboard/componets/ChartMSA";
 import { TableHistory } from "@/modules/dashboard/componets/TableHistory";
+import { TableHistoryWeekly } from "@/modules/dashboard/componets/TableHistoryWeekly";
 import { TableParentChild } from "@/modules/dashboard/componets/TableParentChild";
 import AppDropdown from "@/app/components/AppDropdown";
 import { useDashboard } from "@/modules/dashboard/hooks/dashboard.hooks";
@@ -67,9 +68,38 @@ const MSAmenu = ({
   handlefilter,
   filter,
   treg,
+  slaMode,
+  setSlaMode,
+  weeklyKpi,
+  setWeeklyKpi,
 }) => {
   const [exportLoading, setExportLoading] = useState(false);
   const [showActualWeeks, setShowActualWeeks] = useState(false);
+
+  const weeklyKpiOptions = [
+    "packetloss 1-5% ran to core",
+    "packetloss >5% ran to core",
+    "latency",
+    "jitter",
+    "packetloss_internet",
+    "latency_internet",
+    "jitter_internet",
+    "mttrq_major",
+    "mttrq_minor",
+    "mttrq_critical",
+  ];
+
+  const formatWeeklyKpiLabel = (option: string) => {
+    if (option === "packetloss 1-5% ran to core") return "PL 1-5% RAN to Core";
+    if (option === "packetloss >5% ran to core") return "PL >5% RAN to Core";
+    if (option === "packetloss_internet") return "PL Core to Internet";
+    if (option === "latency_internet") return "Latency Core to Internet";
+    if (option === "jitter_internet") return "Jitter Core to Internet";
+    if (option === "mttrq_major") return "MTTRQ Major";
+    if (option === "mttrq_minor") return "MTTRQ Minor";
+    if (option === "mttrq_critical") return "MTTRQ Critical";
+    return option.charAt(0).toUpperCase() + option.slice(1);
+  };
 
   const dataWithIndex = (dataSource) => {
     return dataSource?.map((item, index) => {
@@ -528,20 +558,71 @@ const MSAmenu = ({
           </div>
         </div>
         <div className="mt-6">
-          <div className="bg-[#EDEDED] py-2 px-4 rounded-full mb-3 w-fit">
-            <p className="text-base font-semibold">MONTHLY DATA SLA</p>
+          <div className="flex justify-between items-end mb-3">
+            <div className="inline-flex rounded-full border border-[#DBDBDB] bg-[#EDEDED] p-1 items-center">
+              <button
+                type="button"
+                className={`px-4 py-1.5 text-base font-semibold rounded-full transition-all cursor-pointer ${
+                  slaMode === "monthly"
+                    ? "bg-[#5195d4] text-white shadow-sm"
+                    : "text-gray-500 hover:text-gray-900"
+                }`}
+                onClick={() => setSlaMode("monthly")}
+              >
+                MONTHLY DATA SLA
+              </button>
+              <button
+                type="button"
+                className={`px-4 py-1.5 text-base font-semibold rounded-full transition-all cursor-pointer ${
+                  slaMode === "weekly"
+                    ? "bg-[#5195d4] text-white shadow-sm"
+                    : "text-gray-500 hover:text-gray-900"
+                }`}
+                onClick={() => setSlaMode("weekly")}
+              >
+                WEEKLY DATA SLA
+              </button>
+            </div>
+
+            {slaMode === "weekly" && (
+              <div className="w-[280px]">
+                <AppDropdown
+                  title="Filter KPI"
+                  placeholder="Select KPI"
+                  options={weeklyKpiOptions.map((option) => ({
+                    label: formatWeeklyKpiLabel(option),
+                    value: option,
+                  }))}
+                  onChange={(value) => setWeeklyKpi(value)}
+                  value={weeklyKpi}
+                />
+              </div>
+            )}
           </div>
+
           <div className="w-auto overflow-x-auto">
-            <TableHistory
-              dataSource={dataHistoryData?.data ?? []}
-              treg={treg}
-              loadingMainData={
-                isLoadingHistoryData ||
-                !dataHistoryData ||
-                (Array.isArray(dataHistoryData?.data) &&
-                  dataHistoryData.data.length === 0)
-              }
-            />
+            {slaMode === "weekly" ? (
+              <TableHistoryWeekly
+                dataSource={dataHistoryData?.data ?? []}
+                loadingMainData={
+                  isLoadingHistoryData ||
+                  !dataHistoryData ||
+                  (Array.isArray(dataHistoryData?.data) &&
+                    dataHistoryData.data.length === 0)
+                }
+              />
+            ) : (
+              <TableHistory
+                dataSource={dataHistoryData?.data ?? []}
+                treg={treg}
+                loadingMainData={
+                  isLoadingHistoryData ||
+                  !dataHistoryData ||
+                  (Array.isArray(dataHistoryData?.data) &&
+                    dataHistoryData.data.length === 0)
+                }
+              />
+            )}
           </div>
         </div>
       </div>
