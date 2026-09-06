@@ -60,15 +60,22 @@ const TableHistoryWeekly: React.FC<TableHistoryWeeklyProps> = ({
       return baseColumns;
     }
 
-    // Find all real_week_X keys in the first record
+    // Weekly keys from API: "real_week_{week}_month_{month}".
+    // Legacy keys without the month suffix are still supported.
     const sample = data[0];
-    const weeklyKeys = Object.keys(sample)
-      .filter((k) => /^real_week_(\d+)$/.test(k))
-      .sort((a, b) => {
-        const numA = Number(a.split("_")[2]);
-        const numB = Number(b.split("_")[2]);
-        return numA - numB;
+    const weeklyKeys: Array<{ key: string; week: number; quarter: number }> = [];
+    Object.keys(sample).forEach((k) => {
+      const match = k.match(/^real_week_(\d+)(?:_month_(\d+))?$/);
+      if (!match) return;
+      const week = Number(match[1]);
+      const month = match[2] ? Number(match[2]) : null;
+      weeklyKeys.push({
+        key: k,
+        week,
+        quarter: month ? Math.ceil(month / 3) : Math.ceil(week / 13),
       });
+    });
+    weeklyKeys.sort((a, b) => a.week - b.week);
 
     const quarterMap: Record<string, number> = {
       Q1: 1,
@@ -86,11 +93,7 @@ const TableHistoryWeekly: React.FC<TableHistoryWeeklyProps> = ({
     };
 
     for (const [q, qNum] of Object.entries(quarterMap)) {
-      // Math.ceil(w / 13) === qNum determines the quarter of the week
-      const weeksInQuarter = weeklyKeys.filter((k) => {
-        const w = Number(k.split("_")[2]);
-        return Math.ceil(w / 13) === qNum;
-      });
+      const weeksInQuarter = weeklyKeys.filter((item) => item.quarter === qNum);
 
       const hasTarget = `target_${q.toLowerCase()}` in sample;
       const hasWeeks = weeksInQuarter.length > 0;
@@ -114,12 +117,11 @@ const TableHistoryWeekly: React.FC<TableHistoryWeeklyProps> = ({
         });
 
         // Add Week columns under the quarter
-        weeksInQuarter.forEach((k) => {
-          const wNum = k.split("_")[2];
+        weeksInQuarter.forEach(({ key: weekKey, week: wNum }) => {
           dynamic.push({
             title: `W${wNum}`,
-            dataIndex: k,
-            key: k,
+            dataIndex: weekKey,
+            key: weekKey,
             align: "center" as const,
             onHeaderCell: () => ({ className: "!bg-blue-pacific !p-2" }),
             render: (text: any, record: any) => {

@@ -309,6 +309,15 @@ const MSAmenu = ({
     ? normalizeMsaRows(dataSC.data)
     : [];
 
+  // Response history bisa datang sebagai array polos atau terbungkus { data: [...] }.
+  const historyRows: Record<string, any>[] = Array.isArray(dataHistoryData)
+    ? dataHistoryData
+    : Array.isArray(dataHistoryData?.data)
+      ? dataHistoryData.data
+      : Array.isArray(dataHistoryData?.data?.data)
+        ? dataHistoryData.data.data
+        : [];
+
   return (
     <div>
       <div className="bg-white border border-[#DBDBDB] rounded-xl p-4 mx-6 ">
@@ -603,23 +612,21 @@ const MSAmenu = ({
           <div className="w-auto overflow-x-auto">
             {slaMode === "weekly" ? (
               <TableHistoryWeekly
-                dataSource={dataHistoryData?.data ?? []}
+                dataSource={historyRows}
                 loadingMainData={
                   isLoadingHistoryData ||
                   !dataHistoryData ||
-                  (Array.isArray(dataHistoryData?.data) &&
-                    dataHistoryData.data.length === 0)
+                  historyRows.length === 0
                 }
               />
             ) : (
               <TableHistory
-                dataSource={dataHistoryData?.data ?? []}
+                dataSource={historyRows}
                 treg={treg}
                 loadingMainData={
                   isLoadingHistoryData ||
                   !dataHistoryData ||
-                  (Array.isArray(dataHistoryData?.data) &&
-                    dataHistoryData.data.length === 0)
+                  historyRows.length === 0
                 }
               />
             )}
