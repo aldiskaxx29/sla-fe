@@ -1,6 +1,5 @@
 import { Button, Image, Skeleton } from "antd";
 import { Component, useEffect, useState } from "react";
-import * as XLSX from "xlsx";
 
 import warningIcon from "@/assets/warning.svg";
 import checkIcon from "@/assets/check.svg";
@@ -12,6 +11,17 @@ import { TableParentChild } from "@/modules/dashboard/componets/TableParentChild
 import AppDropdown from "@/app/components/AppDropdown";
 import { useDashboard } from "@/modules/dashboard/hooks/dashboard.hooks";
 import { toast } from "react-toastify";
+
+// Export XLS tabel WISA Not Comply dilayani service PQM report (port 3000),
+// terpisah dari VITE_APP_BASE_URL. Di dev diproxy lewat /pqm-api (vite.config.ts).
+const PQM_API_BASE_URL = import.meta.env.VITE_PQM_API_BASE_URL || "/pqm-api";
+const PQM_REPORT_DOWNLOAD_URL = `${PQM_API_BASE_URL}/api/pqm-report/download`;
+
+const parseFilenameFromDisposition = (disposition: string | null) => {
+  if (!disposition) return null;
+  const match = disposition.match(/filename\*?=(?:UTF-8'')?"?([^";]+)"?/i);
+  return match ? decodeURIComponent(match[1].trim()) : null;
+};
 
 class TableFallbackBoundary extends Component<
   { children: React.ReactNode },
@@ -283,19 +293,33 @@ const MSAmenu = ({
   const handleDownloadMsa = async () => {
     try {
       setExportLoading(true);
-      await new Promise((resolve) => requestAnimationFrame(resolve));
 
-      const workbook = XLSX.utils.book_new();
-      const worksheet = XLSX.utils.json_to_sheet(
-        dataWithIndex(msaRows).map((row) => ({
-          ...row,
-        })),
-      );
+      const response = await fetch(PQM_REPORT_DOWNLOAD_URL, {
+        method: "GET",
+      });
 
-      XLSX.utils.book_append_sheet(workbook, worksheet, "MSA");
-      XLSX.writeFile(workbook, "MSA_Report.xlsx");
+      if (!response.ok) {
+        throw new Error(`Request gagal dengan status ${response.status}`);
+      }
+
+      const blob = await response.blob();
+      const fallbackName = `Report_PQM_${new Date().toISOString().slice(0, 10)}.xlsx`;
+      const filename =
+        parseFilenameFromDisposition(
+          response.headers.get("content-disposition"),
+        ) || fallbackName;
+
+      const objectUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = objectUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(objectUrl);
     } catch (error) {
-      console.error("Failed to export MSA XLS:", error);
+      console.error("Failed to download PQM report:", error);
+      toast.error("Gagal mengunduh laporan PQM");
     } finally {
       setExportLoading(false);
     }
