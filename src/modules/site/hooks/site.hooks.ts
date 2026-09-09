@@ -1,5 +1,6 @@
 import {
   useLazySite_fetchDataQuery,
+  useLazyYearweek_fetchDataQuery,
   useLazyReport_site_fetchDataQuery,
   useLazyDetail_site_fetchDataQuery,
   useLazyClear_data_fetchDataQuery,
@@ -9,6 +10,8 @@ import {
 const useSite = () => {
   const [getSite, { isLoading: isLoadingSite, data: dataSite }] =
     useLazySite_fetchDataQuery();
+  const [getYearWeek, { isLoading: isLoadingYearWeek, data: dataYearWeek }] =
+    useLazyYearweek_fetchDataQuery();
   const [
     getReportSite,
     { isLoading: isLoadingReportSite, data: dataReportSite },
@@ -37,6 +40,9 @@ const useSite = () => {
     getSite,
     dataSite,
     isLoadingSite,
+    getYearWeek,
+    dataYearWeek,
+    isLoadingYearWeek,
     getReportSite,
     dataReportSite,
     isLoadingReportSite,

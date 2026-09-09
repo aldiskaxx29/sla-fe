@@ -1,13 +1,49 @@
 import { emptySplitApi } from "@/app/redux/app.rtx";
 
+// `filter` dikirim sebagai filter[field][]=value (bisa berulang), sedangkan
+// fetchBaseQuery hanya bisa membuat key unik lewat `params`. Jadi query string
+// endpoint ini dirakit sendiri.
+const buildRekonsiliasiQuery = (query?: Record<string, unknown>) => {
+  const { filter, ...rest } = query ?? {};
+  const searchParams = new URLSearchParams();
+
+  Object.entries(rest).forEach(([key, value]) => {
+    if (value === undefined || value === null || value === "") return;
+    searchParams.append(key, Array.isArray(value) ? value.join(",") : String(value));
+  });
+
+  Object.entries((filter ?? {}) as Record<string, string[]>).forEach(
+    ([field, values]) => {
+      (values ?? []).forEach((value) => {
+        if (value === undefined || value === null || value === "") return;
+        searchParams.append(`filter[${field}][]`, String(value));
+      });
+    },
+  );
+
+  const queryString = searchParams.toString();
+  return queryString ? `?${queryString}` : "";
+};
+
 export const siteApi = emptySplitApi.injectEndpoints({
   endpoints: (builder) => ({
     site_fetchData: builder.query({
       query: (payload) => {
         return {
           method: "GET",
-          url: "dashboard/rekonsiliasi",
-          params: payload?.query,
+          url: `dashboard/rekonsiliasi${buildRekonsiliasiQuery(payload?.query)}`,
+        };
+      },
+      transformResponse: (response: unknown) => {
+        return response;
+      },
+      keepUnusedDataFor: 0,
+    }),
+    yearweek_fetchData: builder.query({
+      query: () => {
+        return {
+          method: "GET",
+          url: "dashboard/rekonsiliasi/yearweek",
         };
       },
       transformResponse: (response: unknown) => {
@@ -147,6 +183,7 @@ export const siteApi = emptySplitApi.injectEndpoints({
 
 export const {
   useLazySite_fetchDataQuery,
+  useLazyYearweek_fetchDataQuery,
   useLazyReport_site_fetchDataQuery,
   useLazyDetail_site_fetchDataQuery,
   useLazyClear_data_fetchDataQuery,

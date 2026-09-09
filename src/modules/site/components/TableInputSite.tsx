@@ -19,6 +19,43 @@ import type { Key } from "react";
 
 const { Column, ColumnGroup } = Table;
 
+const RCA_FILTER_FALLBACK = [
+  "Technical Unknown",
+  "Technical TSEL",
+  "Cap End Site Need Order",
+  "Temperature TSEL",
+  "Cap End Site Order",
+  "Technical TIF",
+  "Routing TSEL",
+  "Routing TIF",
+  "Cap Intermediate / Hub",
+  "QE Redaman",
+  "Power TSEL",
+  "Hardware / Software Capability",
+  "Gamas SKKL",
+  "Gamas Repetitive",
+  "Gamas FO Darat / SKSO",
+  "Cap OLT",
+  "Warranty Redeploy",
+  "Obstacle",
+  "Force Majeur",
+  "ISR Segel Balmon",
+  "ISR Interference Internal",
+  "ISR Interference External",
+  "Cap 3rd Party",
+];
+
+type ColumnSearch = { field: string; value: string } | null;
+
+// Kolom yang difilter lewat filter[field][] di backend. Kolom lain memakai
+// kotak search bebas (search + searchable).
+const CHECKBOX_FILTER_FIELDS = [
+  "region_tsel",
+  "status_saat_ini",
+  "distribution_pl",
+  "grouping_rca",
+];
+
 interface TableHistoryProps {
   dataSource: Record<string, unknown>[];
   isLoading?: boolean;
@@ -30,8 +67,14 @@ interface TableHistoryProps {
   setTrigger: React.Dispatch<React.SetStateAction<number>>;
   pagination;
   setPagination: React.Dispatch<any>;
-  regionFilters: Key[];
-  setRegionFilters: React.Dispatch<React.SetStateAction<Key[]>>;
+  columnFilters: Record<string, string[]>;
+  setColumnFilters: React.Dispatch<
+    React.SetStateAction<Record<string, string[]>>
+  >;
+  columnSearch: ColumnSearch;
+  setColumnSearch: React.Dispatch<React.SetStateAction<ColumnSearch>>;
+  filterOptions?: Record<string, string[]>;
+  setSearch: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const TableInputSite: React.FC<TableHistoryProps> = ({
@@ -45,13 +88,15 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
   setTrigger,
   pagination,
   setPagination,
-  regionFilters,
-  setRegionFilters,
+  columnFilters,
+  setColumnFilters,
+  columnSearch,
+  setColumnSearch,
+  filterOptions,
+  setSearch,
 }) => {
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
-  const [rcaFilters, setRcaFilters] = useState<Key[]>([]);
-  const [columnFilters, setColumnFilters] = useState<Record<string, Key[]>>({});
   const searchInput = useRef<InputRef>(null);
 
   const formatTableValue = (value: unknown): string | number => {
@@ -59,37 +104,57 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
       return "-";
     }
 
+    // Sebagian baris menyimpan string "undefined"/"null" dari data lama.
+    if (typeof value === "string") {
+      const normalized = value.trim().toLowerCase();
+      if (!normalized || normalized === "undefined" || normalized === "null") {
+        return "-";
+      }
+    }
+
     return typeof value === "number" ? value : String(value);
   };
 
   const renderTableValue = (value: unknown) => formatTableValue(value);
 
-  const normalizeRcaFilterValue = (value: unknown) =>
-    String(value ?? "")
-      .trim()
-      .toLowerCase()
-      .replace(/\s+/g, " ")
-      .replace("majeur", "major");
+  // Semua penyaringan dikerjakan di server: checkbox lewat filter[field][],
+  // kotak search per kolom lewat search + searchable.
+  const getCheckboxFilterValue = (field: string): Key[] =>
+    columnFilters[field] ?? [];
 
-  const isSameFilter = (first: Key[], second: Key[]) =>
-    first.length === second.length &&
-    first.every((value, index) => value === second[index]);
+  const getColumnSearchValue = (dataIndex: string): Key[] =>
+    columnSearch?.field === dataIndex ? [columnSearch.value] : [];
 
-  const getColumnFilterValue = (dataIndex: string) =>
-    columnFilters[dataIndex] ?? [];
+  const setColumnSearchValue = (dataIndex: string, values: Key[]) => {
+    const value = values.length ? String(values[0]) : "";
+    setSearch("");
+    setColumnSearch(value ? { field: dataIndex, value } : null);
+  };
 
-  const setColumnFilterValue = (dataIndex: string, values: Key[]) => {
-    setColumnFilters((current) => {
-      if (values.length === 0) {
-        const { [dataIndex]: _removed, ...rest } = current;
-        return rest;
-      }
+  // Opsi filter diambil dari `options` pada response, fallback ke daftar statis.
+  const buildFilters = (
+    optionKey: string,
+    fallback: string[],
+    mergeFallback = false,
+  ) => {
+    const fromResponse = filterOptions?.[optionKey] ?? [];
+    const source = mergeFallback
+      ? [...fallback, ...fromResponse]
+      : fromResponse.length
+        ? fromResponse
+        : fallback;
+    const seen = new Set<string>();
 
-      return {
-        ...current,
-        [dataIndex]: values,
-      };
-    });
+    return source
+      .map((item) => String(item ?? "").trim())
+      .filter((item) => {
+        if (!item || item.toLowerCase() === "undefined") return false;
+        const key = item.toLowerCase();
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      })
+      .map((item) => ({ text: item, value: item }));
   };
 
   const handleSearch = (
@@ -100,7 +165,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
-    setColumnFilterValue(dataIndex, selectedKeys as Key[]);
+    setColumnSearchValue(dataIndex, selectedKeys as Key[]);
   };
 
   const handleReset = (
@@ -111,7 +176,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
   ) => {
     clearFilters();
     setSearchText("");
-    setColumnFilterValue(dataIndex, []);
+    setColumnSearchValue(dataIndex, []);
     confirm();
   };
 
@@ -128,7 +193,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
   };
 
   const getColumnSearchProps = (dataIndex) => ({
-    filteredValue: getColumnFilterValue(dataIndex),
+    filteredValue: getColumnSearchValue(dataIndex),
     filterDropdown: ({
       setSelectedKeys,
       selectedKeys,
@@ -191,12 +256,6 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
     filterIcon: (filtered: boolean) => (
       <SearchOutlined style={{ color: filtered ? "#1677ff" : undefined }} />
     ),
-    onFilter: (value, record) =>
-      Boolean((record as { __skeleton?: boolean }).__skeleton) ||
-      record[dataIndex]
-        ?.toString()
-        .toLowerCase()
-        .includes((value as string).toLowerCase()),
     filterDropdownProps: {
       onOpenChange(open) {
         if (open) {
@@ -281,26 +340,23 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
         title: "Region",
         dataIndex: "region_tsel",
         key: "region_tsel",
-        filters: [
-          { text: "SUMBAGUT", value: "SUMBAGUT" },
-          { text: "SUMBAGTENG", value: "SUMBAGTENG" },
-          { text: "SUMBAGSEL", value: "SUMBAGSEL" },
-          { text: "JABOTABEK INNER", value: "JABOTABEK INNER" },
-          { text: "JABOTABEK OUTER", value: "JABOTABEK OUTER" },
-          { text: "JAWA BARAT", value: "JAWA BARAT" },
-          { text: "JAWA TENGAH", value: "JAWA TENGAH" },
-          { text: "JAWA TIMUR", value: "JAWA TIMUR" },
-          { text: "BALI NUSRA", value: "BALI NUSRA" },
-          { text: "KALIMANTAN", value: "KALIMANTAN" },
-          { text: "SULAWESI", value: "SULAWESI" },
-          { text: "PUMA", value: "PUMA" },
-        ],
+        filters: buildFilters("region_tsel", [
+          "SUMBAGUT",
+          "SUMBAGTENG",
+          "SUMBAGSEL",
+          "JABOTABEK INNER",
+          "JABOTABEK OUTER",
+          "JAWA BARAT",
+          "JAWA TENGAH",
+          "JAWA TIMUR",
+          "BALI NUSRA",
+          "KALIMANTAN",
+          "SULAWESI",
+          "PUMA",
+        ]),
         filterSearch: true,
         filterMultiple: true,
-        filteredValue: regionFilters,
-        onFilter: (value, record) =>
-          Boolean((record as { __skeleton?: boolean }).__skeleton) ||
-          record.region_tsel === value,
+        filteredValue: getCheckboxFilterValue("region_tsel"),
       },
       { title: "Area", dataIndex: "area", key: "area", search: true },
       {
@@ -323,18 +379,14 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
               dataIndex: "status_saat_ini",
               key: "status_saat_ini",
               align: "center",
-              filters: [
-                { text: "CLEAR", value: "CLEAR" },
-                { text: "CONSECUTIVE", value: "CONSECUTIVE" },
-                { text: "NOT CLEAR", value: "NOT CLEAR" },
-              ],
+              filters: buildFilters("status_saat_ini", [
+                "CLEAR",
+                "CONSECUTIVE",
+                "NOT CLEAR",
+              ]),
               filterSearch: true,
               filterMultiple: true,
-              filteredValue: getColumnFilterValue("status_saat_ini"),
-              onFilter: (value, record) =>
-                Boolean((record as { __skeleton?: boolean }).__skeleton) ||
-                String(record.status_saat_ini ?? "").trim() ===
-                  String(value ?? "").trim(),
+              filteredValue: getCheckboxFilterValue("status_saat_ini"),
             },
           ]
         : []),
@@ -356,17 +408,10 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
               title: "DIST PL",
               dataIndex: "distribution_pl",
               key: "distribution_pl",
-              filters: [
-                { text: "1-5%", value: "1-5%" },
-                { text: ">5%", value: ">5%" },
-              ],
+              filters: buildFilters("distribution_pl", ["1-5%", ">5%"]),
               filterSearch: true,
               filterMultiple: true,
-              filteredValue: getColumnFilterValue("distribution_pl"),
-              onFilter: (value, record) =>
-                Boolean((record as { __skeleton?: boolean }).__skeleton) ||
-                String(record.distribution_pl ?? "").trim() ===
-                  String(value ?? "").trim(),
+              filteredValue: getCheckboxFilterValue("distribution_pl"),
             },
           ]
         : []),
@@ -414,48 +459,14 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
       // },
       {
         title: "Group RCA",
-        dataIndex: "RCA",
-        key: "RCA",
-        filters: [
-          { text: "Technical Unknown", value: "Technical Unknown" },
-          { text: "Technical TSEL", value: "Technical TSEL" },
-          { text: "Cap End Site Need Order", value: "Cap End Site Need Order" },
-          { text: "Temperature TSEL", value: "Temperature TSEL" },
-          { text: "Cap End Site Order", value: "Cap End Site Order" },
-          { text: "Technical TIF", value: "Technical TIF" },
-          { text: "Routing TSEL", value: "Routing TSEL" },
-          { text: "Routing TIF", value: "Routing TIF" },
-          { text: "Cap Intermediate / Hub", value: "Cap Intermediate / Hub" },
-          { text: "QE Redaman", value: "QE Redaman" },
-          { text: "Power TSEL", value: "Power TSEL" },
-          {
-            text: "Hardware / Software Capability",
-            value: "Hardware / Software Capability",
-          },
-          { text: "Gamas SKKL", value: "Gamas SKKL" },
-          { text: "Gamas Repetitive", value: "Gamas Repetitive" },
-          { text: "Gamas FO Darat / SKSO", value: "Gamas FO Darat / SKSO" },
-          { text: "Cap OLT", value: "Cap OLT" },
-          { text: "Warranty Redeploy", value: "Warranty Redeploy" },
-          { text: "Obstacle", value: "Obstacle" },
-          { text: "Force Majeur", value: "Force Majeur" },
-          { text: "ISR Segel Balmon", value: "ISR Segel Balmon" },
-          {
-            text: "ISR Interference Internal",
-            value: "ISR Interference Internal",
-          },
-          {
-            text: "ISR Interference External",
-            value: "ISR Interference External",
-          },
-          { text: "Cap 3rd Party", value: "Cap 3rd Party" },
-        ],
+        // Field yang ditampilkan sengaja sama dengan field yang difilter
+        // (filter[grouping_rca][]) supaya isi kolom dan hasil filter cocok.
+        dataIndex: "grouping_rca",
+        key: "grouping_rca",
+        filters: buildFilters("grouping_rca", RCA_FILTER_FALLBACK),
         filterSearch: true,
         filterMultiple: true,
-        filteredValue: rcaFilters,
-        onFilter: (value, record) =>
-          Boolean((record as { __skeleton?: boolean }).__skeleton) ||
-          normalizeRcaFilterValue(record.RCA) === normalizeRcaFilterValue(value),
+        filteredValue: getCheckboxFilterValue("grouping_rca"),
       },
       {
         title: "Detail RCA",
@@ -499,7 +510,14 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
         align: "center",
       },
     ],
-    [columnFilters, dynamicKey, dynamicTitle, parameter, rcaFilters, regionFilters],
+    [
+      columnFilters,
+      columnSearch,
+      filterOptions,
+      dynamicKey,
+      dynamicTitle,
+      parameter,
+    ],
   );
 
   const columns2 = useMemo(
@@ -545,18 +563,14 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
               dataIndex: "status_saat_ini",
               key: "status_saat_ini",
               align: "center",
-              filters: [
-                { text: "CLEAR", value: "CLEAR" },
-                { text: "CONSECUTIVE", value: "CONSECUTIVE" },
-                { text: "NOT CLEAR", value: "NOT CLEAR" },
-              ],
+              filters: buildFilters("status_saat_ini", [
+                "CLEAR",
+                "CONSECUTIVE",
+                "NOT CLEAR",
+              ]),
               filterSearch: true,
               filterMultiple: true,
-              filteredValue: getColumnFilterValue("status_saat_ini"),
-              onFilter: (value, record) =>
-                Boolean((record as { __skeleton?: boolean }).__skeleton) ||
-                String(record.status_saat_ini ?? "").trim() ===
-                  String(value ?? "").trim(),
+              filteredValue: getCheckboxFilterValue("status_saat_ini"),
             },
           ]
         : []),
@@ -637,7 +651,7 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
         align: "center",
       },
     ],
-    [columnFilters, parameter],
+    [columnFilters, columnSearch, filterOptions, parameter],
   );
 
   const { saveSite, getSite } = useSite();
@@ -818,65 +832,12 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
       )}`,
     }));
   }, [isLoading, skeletonRows, tableData, tableKey]);
-  const filteredTableData = useMemo(() => {
-    if (isLoading) return resolvedTableData;
-
-    const activeFilters: Record<string, Key[]> = {
-      ...columnFilters,
-      ...(regionFilters.length ? { region_tsel: regionFilters } : {}),
-      ...(rcaFilters.length ? { RCA: rcaFilters } : {}),
-    };
-    const filterEntries = Object.entries(activeFilters).filter(
-      ([, values]) => values.length > 0,
-    );
-
-    if (filterEntries.length === 0) return resolvedTableData;
-
-    return resolvedTableData.filter((record) => {
-      if (isSkeletonRow(record)) return true;
-
-      return filterEntries.every(([dataIndex, values]) => {
-        const recordValue = record[dataIndex];
-
-        if (dataIndex === "RCA") {
-          return values.some(
-            (value) =>
-              normalizeRcaFilterValue(recordValue) ===
-              normalizeRcaFilterValue(value),
-          );
-        }
-
-        if (
-          ["region_tsel", "status_saat_ini", "distribution_pl"].includes(
-            dataIndex,
-          )
-        ) {
-          return values.some(
-            (value) =>
-              String(recordValue ?? "").trim() === String(value ?? "").trim(),
-          );
-        }
-
-        return values.some((value) =>
-          String(recordValue ?? "")
-            .toLowerCase()
-            .includes(String(value ?? "").toLowerCase()),
-        );
-      });
-    });
-  }, [
-    columnFilters,
-    isLoading,
-    rcaFilters,
-    regionFilters,
-    resolvedTableData,
-  ]);
 
   return (
     <div key={tableKey} className="mt-8 min-w-max">
       <Table
         key={tableKey}
-        dataSource={filteredTableData}
+        dataSource={resolvedTableData}
         bordered
         className="rounded-xl"
         pagination={
@@ -911,28 +872,50 @@ const TableInputSite: React.FC<TableHistoryProps> = ({
           )
         }
         onChange={(pag, filters) => {
-          const nextRegionFilters = (filters.region_tsel ?? []) as Key[];
-          const nextRcaFilters = (filters.RCA ?? []) as Key[];
-          const nextColumnFilters = Object.fromEntries(
-            Object.entries(filters)
-              .filter(([key]) => key !== "region_tsel" && key !== "RCA")
-              .map(([key, value]) => [key, (value ?? []) as Key[]])
-              .filter(([, value]) => value.length > 0),
+          // Kolom checkbox boleh aktif bersamaan (filter[field][]), sedangkan
+          // kotak search per kolom hanya satu karena berbagi param `search`.
+          const nextColumnFilters: Record<string, string[]> = {};
+          const searchEntries: (readonly [string, string[]])[] = [];
+
+          Object.entries(filters).forEach(([key, value]) => {
+            const values = (value ?? []).map(String);
+            if (!values.length) return;
+            if (CHECKBOX_FILTER_FIELDS.includes(key)) {
+              nextColumnFilters[key] = values;
+              return;
+            }
+            searchEntries.push([key, values] as const);
+          });
+
+          const changedSearch = searchEntries.find(
+            ([key, values]) =>
+              key !== columnSearch?.field || values[0] !== columnSearch?.value,
           );
-          const filterChanged =
-            !isSameFilter(nextRegionFilters, regionFilters) ||
-            !isSameFilter(nextRcaFilters, rcaFilters) ||
+          const nextColumnSearch: ColumnSearch = changedSearch
+            ? { field: changedSearch[0], value: changedSearch[1][0] }
+            : searchEntries.length
+              ? columnSearch
+              : null;
+
+          const filtersChanged =
             JSON.stringify(nextColumnFilters) !== JSON.stringify(columnFilters);
+          const searchChanged =
+            nextColumnSearch?.field !== columnSearch?.field ||
+            nextColumnSearch?.value !== columnSearch?.value;
 
           setPagination((prev: any) => ({
             ...prev,
             ...pag,
-            current: filterChanged ? 1 : (pag.current ?? 1),
+            current:
+              filtersChanged || searchChanged ? 1 : (pag.current ?? 1),
             pageSize: pag.pageSize ?? prev?.pageSize ?? 10,
           }));
-          setRegionFilters(nextRegionFilters);
-          setRcaFilters(nextRcaFilters);
-          setColumnFilters(nextColumnFilters);
+
+          if (filtersChanged) setColumnFilters(nextColumnFilters);
+          if (searchChanged) {
+            setSearch("");
+            setColumnSearch(nextColumnSearch);
+          }
         }}
       >
         {columns.map((column, columnIndex) =>

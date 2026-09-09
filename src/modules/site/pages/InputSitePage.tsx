@@ -3,7 +3,6 @@ import xlxsIcon from "@/assets/file-spreadsheet.svg";
 import { Button, Image, Input } from "antd";
 import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { Key } from "react";
 import { TableInputSite } from "../components/TableInputSite";
 import { useSite } from "../hooks/site.hooks";
 import {
@@ -47,21 +46,64 @@ const DEFAULT_SEARCHABLE = [
   "area",
 ];
 
+// Dipakai kalau /dashboard/rekonsiliasi/yearweek gagal dimuat.
+const FALLBACK_FILTER_WEEKS = [
+  { month: "1", value: ["all", "1", "2", "3", "4"] },
+  { month: "2", value: ["all", "5", "6", "7", "8"] },
+  { month: "3", value: ["all", "9", "10", "11", "12", "13"] },
+  { month: "4", value: ["all", "14", "15", "16", "17"] },
+  { month: "5", value: ["all", "18", "19", "20", "21"] },
+  { month: "6", value: ["all", "22", "23", "24", "25", "26"] },
+  { month: "7", value: ["all", "27", "28", "29", "30"] },
+  { month: "8", value: ["all", "31", "32", "33", "34"] },
+  { month: "9", value: ["all", "35", "36", "37", "38", "39"] },
+  { month: "10", value: ["all", "40", "41", "42", "43"] },
+  { month: "11", value: ["all", "44", "45", "46", "47"] },
+  { month: "12", value: ["all", "48", "49", "50", "51", "52"] },
+];
+
 const SitePage = () => {
   const [week, setWeek] = useState("");
   const [month, setMonth] = useState(String(dayjs().month() + 1));
-  const [year, setYear] = useState(dayjs(new Date()).year());
+  const [year, setYear] = useState(String(dayjs(new Date()).year()));
   const [exclude, setExclude] = useState("all");
   const [evidence, setEvidence] = useState("all");
   const [prev, setPrev] = useState("corrective");
   const [loading, setLoading] = useState(false);
   const [parameter, setParameter] = useState("packetloss ran to core");
-  const [regionFilters, setRegionFilters] = useState<Key[]>([]);
-  const { getSite } = useSite();
+  // Filter checkbox dikirim sebagai filter[field][]=value, jadi beberapa kolom
+  // bisa aktif sekaligus.
+  const [columnFilters, setColumnFilters] = useState<Record<string, string[]>>(
+    {},
+  );
+  // Kotak search per kolom memakai search + searchable (pencarian LIKE),
+  // dan hanya satu yang bisa aktif karena backend cuma punya satu `search`.
+  const [columnSearch, setColumnSearch] = useState<{
+    field: string;
+    value: string;
+  } | null>(null);
+  const { getSite, getYearWeek } = useSite();
+  // Daftar tahun, bulan, dan minggu diambil dari BE.
+  const [yearWeek, setYearWeek] = useState<Record<string, unknown> | null>(
+    null,
+  );
+  // Data tabel baru diambil setelah periode aktif dari BE diketahui, supaya
+  // tidak ada request dengan bulan/minggu default yang langsung ditimpa.
+  const [isPeriodReady, setIsPeriodReady] = useState(false);
   const [trigger, setTrigger] = useState(0);
   const [search, setSearch] = useState("");
   const [siteResponse, setSiteResponse] = useState<Record<string, any> | null>(
     null,
+  );
+  // Opsi filter kolom disimpan dari response terakhir tanpa filter aktif,
+  // supaya daftar pilihannya tidak ikut menyusut saat filter sedang dipakai.
+  const [filterOptions, setFilterOptions] = useState<
+    Record<string, string[]> | undefined
+  >(undefined);
+  // Dibaca lewat ref supaya `expandFilterValues` tetap stabil — kalau ikut
+  // dependensi fetchSite, setiap response memicu fetch baru tanpa henti.
+  const filterOptionsRef = useRef<Record<string, string[]> | undefined>(
+    undefined,
   );
   const activeSiteRequestRef = useRef<{ abort?: () => void } | null>(null);
   const requestSeqRef = useRef(0);
@@ -74,24 +116,19 @@ const SitePage = () => {
   const mttrqParameters = ["mttrq critical", "mttrq major", "mttrq minor"];
   const isMttrqParameter = mttrqParameters.includes(parameter);
 
-  const filterWeeks = [
-    { month: "1", value: ["all", "1", "2", "3", "4"] },
-    { month: "2", value: ["all", "5", "6", "7", "8"] },
-    { month: "3", value: ["all", "9", "10", "11", "12", "13"] },
-    { month: "4", value: ["all", "14", "15", "16", "17"] },
-    { month: "5", value: ["all", "18", "19", "20", "21"] },
-    { month: "6", value: ["all", "22", "23", "24", "25", "26"] },
-    { month: "7", value: ["all", "27", "28", "29", "30"] },
-    { month: "8", value: ["all", "31", "32", "33", "34"] },
-    { month: "9", value: ["all", "35", "36", "37", "38", "39"] },
-    { month: "10", value: ["all", "40", "41", "42", "43"] },
-    { month: "11", value: ["all", "44", "45", "46", "47"] },
-    { month: "12", value: ["all", "48", "49", "50", "51", "52"] },
-  ];
+  const filterWeeks = useMemo<{ month: string; value: string[] }[]>(() => {
+    const fromApi = yearWeek?.filterWeeks;
+    if (!Array.isArray(fromApi) || !fromApi.length) return FALLBACK_FILTER_WEEKS;
+
+    return fromApi.map((item: Record<string, unknown>) => ({
+      month: String(item?.month ?? ""),
+      value: Array.isArray(item?.value) ? item.value.map(String) : [],
+    }));
+  }, [yearWeek]);
 
   const selectedWeeks = useMemo(
     () => filterWeeks.find((item) => item.month === month)?.value ?? [],
-    [month],
+    [filterWeeks, month],
   );
 
   const effectiveWeek = useMemo(() => {
@@ -105,11 +142,56 @@ const SitePage = () => {
     [parameter, year, effectiveMonth, effectiveWeek, prev, exclude, evidence],
   );
 
+  const normalizeFilterValue = (value: string) =>
+    value.trim().toLowerCase().replace(/\s+/g, " ");
+
+  const expandFilterValues = useCallback(
+    (field: string, values: string[]) => {
+      const options = filterOptionsRef.current?.[field] ?? [];
+      const expanded = new Set<string>();
+
+      values.forEach((value) => {
+        expanded.add(value);
+        options.forEach((option) => {
+          if (normalizeFilterValue(option) === normalizeFilterValue(value)) {
+            expanded.add(option);
+          }
+        });
+      });
+
+      return Array.from(expanded);
+    },
+    [],
+  );
+
+  // Saat ada filter aktif, `options` dari response ikut menyempit — jadi daftar
+  // pilihan hanya diperbarui dari response tanpa filter.
+  const hasActiveFilter =
+    Boolean(columnSearch) ||
+    Boolean(search.trim()) ||
+    Object.values(columnFilters).some((values) => values.length > 0);
+
   const fetchSite = useCallback(async () => {
     activeSiteRequestRef.current?.abort?.();
     const requestSeq = requestSeqRef.current + 1;
     requestSeqRef.current = requestSeq;
     setLoading(true);
+
+    // Search per kolom mempersempit `searchable` ke field kolom itu,
+    // search bar mencari ke seluruh field.
+    const activeSearch = columnSearch ? columnSearch.value.trim() : search.trim();
+    const activeSearchable = columnSearch
+      ? [columnSearch.field]
+      : DEFAULT_SEARCHABLE;
+    // Dropdown menampilkan satu entri per nilai, tapi backend menyimpan beda
+    // kapitalisasi ("Technical TSEL" vs "Technical Tsel"). Semua varian dari
+    // `options` ikut dikirim supaya tidak ada baris yang terlewat.
+    const activeFilters = Object.fromEntries(
+      Object.entries(columnFilters)
+        .filter(([, values]) => values.length > 0)
+        .map(([field, values]) => [field, expandFilterValues(field, values)]),
+    );
+
     try {
       const request = getSite({
         query: {
@@ -123,27 +205,38 @@ const SitePage = () => {
           ...(!isMttrqParameter && { week: effectiveWeek }),
           page: pagination.current,
           per_page: pagination.pageSize,
-          ...(search && search.trim() ? { search: search.trim() } : {}),
-          searchable: DEFAULT_SEARCHABLE,
+          ...(activeSearch ? { search: activeSearch } : {}),
+          searchable: activeSearchable,
+          filter: activeFilters,
         },
       });
       activeSiteRequestRef.current = request;
       const result = (await request.unwrap()) as Record<string, any>;
-      if (requestSeqRef.current === requestSeq) {
-        setSiteResponse(result);
-        const newTotal =
-          result?.meta?.total ??
-          result?.total ??
-          (Array.isArray(result?.data) ? result.data.length : 0);
+      if (requestSeqRef.current !== requestSeq) return;
 
-        setPagination((prevPag) => {
-          if (prevPag.total === newTotal) return prevPag;
-          return {
-            ...prevPag,
-            total: newTotal,
-          };
-        });
+      setSiteResponse(result);
+      if (!hasActiveFilter && result?.options) {
+        const nextOptions = result.options as Record<string, string[]>;
+        filterOptionsRef.current = nextOptions;
+        // Response selalu membawa objek baru, jadi state hanya diganti kalau
+        // isinya memang berubah.
+        setFilterOptions((current) =>
+          JSON.stringify(current) === JSON.stringify(nextOptions)
+            ? current
+            : nextOptions,
+        );
       }
+
+      const rows = Array.isArray(result?.data) ? result.data : [];
+      const newTotal = result?.meta?.total ?? result?.total ?? rows.length;
+
+      setPagination((prevPag) => {
+        if (prevPag.total === newTotal) return prevPag;
+        return {
+          ...prevPag,
+          total: newTotal,
+        };
+      });
     } catch (error) {
       console.error("Failed to fetch site data:", error);
     } finally {
@@ -163,14 +256,50 @@ const SitePage = () => {
     pagination.current,
     pagination.pageSize,
     search,
+    columnSearch,
+    columnFilters,
+    hasActiveFilter,
+    expandFilterValues,
     getSite,
   ]);
 
   useEffect(() => {
+    let cancelled = false;
+
+    const fetchYearWeek = async () => {
+      try {
+        const result = (await getYearWeek(
+          {},
+        ).unwrap()) as Record<string, unknown>;
+        if (cancelled) return;
+
+        setYearWeek(result);
+
+        // Periode aktif dari BE dipakai sebagai nilai awal filter.
+        const activeYear = String(result?.active_yearweek ?? "").slice(0, 4);
+        if (activeYear) setYear(activeYear);
+        if (result?.active_month) setMonth(String(result.active_month));
+        if (result?.active_week) setWeek(String(result.active_week));
+      } catch (error) {
+        console.error("Failed to fetch year week:", error);
+      } finally {
+        if (!cancelled) setIsPeriodReady(true);
+      }
+    };
+
+    fetchYearWeek();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [getYearWeek]);
+
+  useEffect(() => {
+    if (!isPeriodReady) return;
     if (!month || !year) return;
     if (!isMttrqParameter && !effectiveWeek) return;
     fetchSite();
-  }, [fetchSite, trigger]);
+  }, [fetchSite, trigger, isPeriodReady]);
 
   useEffect(() => {
     setPagination((current) => {
@@ -180,7 +309,28 @@ const SitePage = () => {
         current: 1,
       };
     });
-  }, [exclude, evidence, parameter, year, month, prev, week, search]);
+  }, [
+    exclude,
+    evidence,
+    parameter,
+    year,
+    month,
+    prev,
+    week,
+    search,
+    columnSearch,
+    columnFilters,
+  ]);
+
+  // Kolom tiap parameter berbeda, jadi filter kolom direset saat parameter ganti.
+  useEffect(() => {
+    setColumnFilters((current) =>
+      Object.keys(current).length ? {} : current,
+    );
+    setColumnSearch((current) => (current ? null : current));
+    filterOptionsRef.current = undefined;
+    setFilterOptions(undefined);
+  }, [parameter]);
 
   useEffect(() => {
     return () => {
@@ -216,28 +366,41 @@ const SitePage = () => {
     { label: "Mttrq Minor", value: "mttrq minor" },
   ];
 
-  const optYear = [
-    { label: "2025", value: "2025" },
-    { label: "2026", value: "2026" },
-    { label: "2027", value: "2027" },
-    { label: "2028", value: "2028" },
-    { label: "2029", value: "2029" },
-    { label: "2030", value: "2030" },
-  ];
+  // Tahun diambil dari daftar yearweek (mis. "202636" -> "2026").
+  const optYear = useMemo(() => {
+    const years = Array.from(
+      new Set(
+        (Array.isArray(yearWeek?.data) ? yearWeek.data : [])
+          .map((item: unknown) => String(item ?? "").slice(0, 4))
+          .filter(Boolean),
+      ),
+    ).sort() as string[];
 
-  const optMonths = Array.from({ length: 12 }, (_, i) => ({
-    label: dayjs().month(i).format("MMMM"),
-    value: String(i + 1),
-  }));
+    if (!years.length) return [{ label: year, value: year }];
 
-  const optWeeks = useMemo(() => {
-    return filterWeeks
-      .find((item) => item.month === month)
-      ?.value.map((item) => ({
-        label: `Week ${item}`,
+    return years.map((item) => ({ label: item, value: item }));
+  }, [yearWeek, year]);
+
+  // Bulan mengikuti daftar bulan yang dikirim BE lewat filterWeeks.
+  const optMonths = useMemo(
+    () =>
+      filterWeeks.map((item) => ({
+        label: dayjs()
+          .month(Number(item.month) - 1)
+          .format("MMMM"),
+        value: item.month,
+      })),
+    [filterWeeks],
+  );
+
+  const optWeeks = useMemo(
+    () =>
+      selectedWeeks.map((item) => ({
+        label: item === "all" ? "Week All" : `Week ${item}`,
         value: item,
-      }));
-  }, [month]);
+      })),
+    [selectedWeeks],
+  );
 
   useEffect(() => {
     if (isMttrqParameter) return;
@@ -389,12 +552,14 @@ const SitePage = () => {
               onChange={(e) => {
                 const val = e.target.value;
                 setSearch(val);
+                if (val) setColumnSearch(null);
                 if (!val) {
                   setPagination((current) => ({ ...current, current: 1 }));
                 }
               }}
               onSearch={(val) => {
                 setSearch(val);
+                if (val) setColumnSearch(null);
                 setPagination((current) => ({ ...current, current: 1 }));
               }}
               className="!w-56"
@@ -433,8 +598,12 @@ const SitePage = () => {
           setTrigger={setTrigger}
           pagination={pagination}
           setPagination={setPagination}
-          regionFilters={regionFilters}
-          setRegionFilters={setRegionFilters}
+          columnFilters={columnFilters}
+          setColumnFilters={setColumnFilters}
+          columnSearch={columnSearch}
+          setColumnSearch={setColumnSearch}
+          filterOptions={filterOptions}
+          setSearch={setSearch}
         />
       </div>
 
