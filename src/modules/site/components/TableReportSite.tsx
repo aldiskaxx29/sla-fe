@@ -1,6 +1,6 @@
 // Antd
 import { Checkbox, Image, Skeleton, Table } from "antd";
-import ModalInput from "./ModalInput";
+import ModalInput from "@/app/components/organism/popup/RekonsiliasiEditModal";
 import { useMemo, useState } from "react";
 import { EditOutlined } from "@ant-design/icons";
 import ModalClear from "./ModalClear";

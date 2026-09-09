@@ -6,6 +6,7 @@ import { Provider } from "react-redux";
 import { store } from "./plugins/redux";
 import { AppEntryPoint } from "./app/ui/index.ts";
 import { ToastContainer } from "react-toastify";
+import { AppQueryProvider } from "./plugins/react-query";
 import "mapbox-gl/dist/mapbox-gl.css";
 
 createRoot(document.getElementById("root")!).render(
@@ -14,7 +15,9 @@ createRoot(document.getElementById("root")!).render(
     <BrowserRouter>
       {/* Redux, Persist, and Router */}
       <Provider store={store}>
-        <AppEntryPoint />
+        <AppQueryProvider>
+          <AppEntryPoint />
+        </AppQueryProvider>
       </Provider>
       <ToastContainer />
     </BrowserRouter>

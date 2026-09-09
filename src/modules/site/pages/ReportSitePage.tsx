@@ -17,7 +17,7 @@ const SitePage = () => {
   const [month, setMonth] = useState(String(new Date().getMonth() + 1));
   const [year, setYear] = useState(String(new Date().getFullYear()));
   const [parameter, setParameter] = useState("packetloss ran to core");
-  const { dataReportSite, getReportSite, isLoadingSite } = useSite();
+  const { dataReportSite, getReportSite } = useSite();
 
   const [downloadRecon] = useLazyDownload_excel_evidenceQuery();
 
@@ -252,7 +252,7 @@ const SitePage = () => {
             week={week}
             month={month}
             year={year}
-            isLoadingData={loading || isLoadingSite || !dataReportSite}
+            isLoadingData={loading || !dataReportSite}
           />
         )}
       </div>

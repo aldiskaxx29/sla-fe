@@ -3,10 +3,11 @@ import { useRoutes } from "react-router-dom";
 
 import { AppLayoutEmpty, AppLayoutAuth, AppLayoutDefault } from "@/app/layout";
 import { useAppRouter } from "@/app/router/app.router";
+import { useRekonsiliasiRouter } from "@/app/router/rekonsiliasi.router";
 import { useAuthRouter } from "@/modules/auth/router/auth.router";
 import { useDashboardRouter } from "@/modules/dashboard/router/dashboard.router";
 import { useSiteRouter } from "@/modules/site/router/site.router";
-import { useMondayRouter } from "@/modules/monday/router/monday.router";
+import { useMondayRouter } from "@/app/router/monday.router";
 import { useDailyMonitoringRouter } from "@/modules/daily-monitoring/router/dailyMonitoring.router";
 // import { useQualityHealthinessRouter } from "@/modules/quality-healthiness/router/quality-healthiness.router";
 import { useOneRouter } from "@/modules/one/router/one.router";
@@ -29,6 +30,7 @@ const useRouter = () => {
   const auth = useAuthRouter();
   const dashboard = useDashboardRouter();
   const site = useSiteRouter();
+  const rekonsiliasi = useRekonsiliasiRouter();
   const monday = useMondayRouter();
   const dailyMonitoring = useDailyMonitoringRouter();
   // const qualityHealthiness = useQualityHealthinessRouter();
@@ -83,6 +85,7 @@ const useRouter = () => {
             ...dashboard,
             // ...qualityHealthiness,
             ...site,
+            ...rekonsiliasi,
             ...monday,
             ...dailyMonitoring,
             ...one,

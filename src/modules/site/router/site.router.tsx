@@ -8,7 +8,6 @@ import { RouteObject } from "react-router-dom";
 import { AppRouteGuard } from "@/app/components";
 
 // UI
-const InputSite = lazy(() => import("@/modules/site/pages/InputSitePage"));
 const ReportSite = lazy(() => import("@/modules/site/pages/ReportSitePage"));
 const ReportSupportNeeded = lazy(
   () => import("@/modules/site/pages/ReportSupportNeededPage")
@@ -19,14 +18,6 @@ const ReportSupportBreakdown = lazy(
 
 const useSiteRouter = (): RouteObject[] => {
   return [
-    {
-      path: "input-site",
-      element: (
-        <AppRouteGuard>
-          <InputSite />
-        </AppRouteGuard>
-      ),
-    },
     {
       path: "report-site",
       element: (

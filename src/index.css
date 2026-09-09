@@ -5,6 +5,9 @@
   --color-blue-pacific: #cbeffb;
   --color-brand-secondary: #0E2133;
   --color-secondary: #64748b;
+  /* Dipakai komponen hasil porting dari qosmo-new (panel monday). */
+  --color-navy: #213c52;
+  --color-highlight: #007bff;
 }
 
 :root {
@@ -24,6 +27,9 @@ body,
   width: 100%;
   height: 100%;
   margin: 0;
+  /* Seluruh scroll aplikasi terjadi di dalam Content (lihat AppLayoutDefault),
+     jadi dokumen tidak boleh bisa digeser ke samping. */
+  overflow-x: hidden;
 }
 
 @font-family {
