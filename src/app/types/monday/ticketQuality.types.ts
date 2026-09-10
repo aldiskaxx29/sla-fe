@@ -1,11 +1,44 @@
 export type StatusType = "Achievement" | "MsaNotAch" | "NotAchievement";
 
+export type SlaDetailColumn = {
+  key: string;
+  label: string;
+  align?: "left" | "center" | "right";
+};
+
+export type SlaDetailRow = Record<string, string | number | null>;
+
+/** Rincian lanjutan saat satu baris di popup diklik. */
+export type SlaDetailDrilldown = {
+  kind: "site" | "mttr-ticket" | "core-transit";
+  /** Parameter `level` untuk endpoint site detail. */
+  level?: "packetloss" | "latency" | "jitter";
+  /** Parameter `distribution_pl` untuk kartu PL access. */
+  distributionPl?: string;
+  /** Kolom pada baris yang berisi nama region. */
+  regionKey: string;
+};
+
+/** Isi popup detail saat kartu SLA diklik. */
+export type SlaCardDetail = {
+  title: string;
+  subtitle?: string;
+  columns: SlaDetailColumn[];
+  rows: SlaDetailRow[];
+  /** Kolom penanda baris bermasalah, dipakai untuk pewarnaan. */
+  statusKey?: string;
+  drilldown?: SlaDetailDrilldown;
+};
+
 export type MetricSubCard = {
   id: string;
   name: string;
   status: "success" | "warning" | "danger";
   beforeValue: string;
   currentValue: string;
+  /** Default "(Before)" / "(Current)"; sebagian kartu memakai Target vs Ach. */
+  beforeLabel?: string;
+  currentLabel?: string;
   trend?: {
     direction: "up" | "down";
     value: string | number;
@@ -13,6 +46,8 @@ export type MetricSubCard = {
   };
   nestedData?: {
     total?: number;
+    /** Default "T"; mis. "Target" untuk PL access, "EBR" untuk core. */
+    totalLabel?: string;
     regNotClear?: number;
     worstReg?: string;
   };
@@ -22,6 +57,8 @@ export type MetricSubCard = {
     ach: number;
   }[];
   worstText?: string;
+  /** Rincian per region/EBR yang tampil di popup saat kartu diklik. */
+  detail?: SlaCardDetail;
 };
 
 export type SLAMetricCard = {
@@ -64,24 +101,4 @@ export type RegionPerformanceInfo = {
     wowTrend: "up" | "down";
     wowColor: "green" | "red";
   };
-};
-
-export type BenchmarkValue = {
-  trophy: {
-    type: "gold" | "silver" | "bronze" | "green_check";
-    value: number;
-    trend: "up" | "down";
-  };
-  warning: {
-    value: number;
-    trend: "up" | "down";
-  };
-};
-
-export type BenchmarkRow = {
-  id: string;
-  area: string;
-  latency: BenchmarkValue;
-  packetLoss: BenchmarkValue;
-  jitter: BenchmarkValue;
 };

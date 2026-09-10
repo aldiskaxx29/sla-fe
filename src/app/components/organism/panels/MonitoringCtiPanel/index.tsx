@@ -5,16 +5,37 @@ import {
   flexRender,
   type ColumnDef,
 } from "@tanstack/react-table";
-import { LuCalendar, LuSearch } from "react-icons/lu";
+import { LuCalendar, LuMaximize2, LuSearch } from "react-icons/lu";
 import { useDebouncedSearch } from "@/app/hooks/custom/pacer";
-import { useCtiMonitoringQuery } from "@/app/hooks/query/monday/ticketQuality";
+import { useCtiMonitoringQuery } from "@/app/hooks/query/monday/trendQuality";
+import { useCtiMonitoringQuery as useAwsMonitoringQuery } from "@/app/hooks/query/monday/ticketQuality";
 import type { CtiRow } from "@/app/types/monday/ticketQuality.types";
+import type { CtiVerifier } from "@/app/types/monday/trendQuality.types";
+import {
+  CtiDetailModal,
+  type CtiDetailTarget,
+} from "@/app/components/organism/panels/MonitoringCtiPanel/CtiDetailModal";
 
 export function MonitoringCtiPanel() {
   const [activeTab, setActiveTab] = useState<"CTI" | "AWS">("CTI");
-  const { data: ctiData = [] } = useCtiMonitoringQuery(activeTab);
+
+  // Tab CTI sudah memakai data asli; tab AWS di server lama bentuknya beda
+  // (kolom per host, bukan BDS/BTC/PNK) jadi masih memakai data contoh.
+  const { data: realCtiData = [], isPending, isError } =
+    useCtiMonitoringQuery(activeTab === "CTI");
+  const { data: awsData = [] } = useAwsMonitoringQuery("AWS");
+  const ctiData = activeTab === "CTI" ? realCtiData : awsData;
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebouncedSearch(search);
+
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [detailTarget, setDetailTarget] = useState<CtiDetailTarget | null>(null);
+
+  /** Klik nilai latency langsung membuka popup pada detail transit itu. */
+  const openTransitDetail = (peTransit: string, verifier: CtiVerifier) => {
+    setDetailTarget({ transit: peTransit, verifier });
+    setDetailOpen(true);
+  };
 
   const filteredData = useMemo(() => {
     if (!debouncedSearch) return ctiData;
@@ -49,8 +70,20 @@ export function MonitoringCtiPanel() {
             id: "bdsLatency",
             header: "Latency",
             accessorFn: (row) => row.bds.latency,
-            cell: ({ getValue }) => (
-              <span className="font-extrabold text-emerald-500">{getValue<number>()}</span>
+            cell: ({ row, getValue }) => (
+              <button
+                type="button"
+                onClick={() =>
+                  openTransitDetail(row.original.peTransit, "BDS")
+                }
+                className={`cursor-pointer font-extrabold transition-colors hover:underline ${
+                  row.original.bds.latency > row.original.bds.baseline
+                    ? "text-red-500"
+                    : "text-emerald-500"
+                }`}
+              >
+                {getValue<number>()}
+              </button>
             ),
           },
         ],
@@ -71,8 +104,20 @@ export function MonitoringCtiPanel() {
             id: "btcLatency",
             header: "Latency",
             accessorFn: (row) => row.btc.latency,
-            cell: ({ getValue }) => (
-              <span className="font-extrabold text-emerald-500">{getValue<number>()}</span>
+            cell: ({ row, getValue }) => (
+              <button
+                type="button"
+                onClick={() =>
+                  openTransitDetail(row.original.peTransit, "BTC")
+                }
+                className={`cursor-pointer font-extrabold transition-colors hover:underline ${
+                  row.original.btc.latency > row.original.btc.baseline
+                    ? "text-red-500"
+                    : "text-emerald-500"
+                }`}
+              >
+                {getValue<number>()}
+              </button>
             ),
           },
         ],
@@ -93,8 +138,20 @@ export function MonitoringCtiPanel() {
             id: "pinkLatency",
             header: "Latency",
             accessorFn: (row) => row.pink.latency,
-            cell: ({ getValue }) => (
-              <span className="font-extrabold text-emerald-500">{getValue<number>()}</span>
+            cell: ({ row, getValue }) => (
+              <button
+                type="button"
+                onClick={() =>
+                  openTransitDetail(row.original.peTransit, "PNK")
+                }
+                className={`cursor-pointer font-extrabold transition-colors hover:underline ${
+                  row.original.pink.latency > row.original.pink.baseline
+                    ? "text-red-500"
+                    : "text-emerald-500"
+                }`}
+              >
+                {getValue<number>()}
+              </button>
             ),
           },
         ],
@@ -120,6 +177,18 @@ export function MonitoringCtiPanel() {
         </div>
 
         <div className="flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={() => {
+              setDetailTarget(null);
+              setDetailOpen(true);
+            }}
+            aria-label="Lihat semua PE transit"
+            title="Lihat semua PE transit"
+            className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition-colors hover:bg-slate-50 hover:text-[#213c52]"
+          >
+            <LuMaximize2 size={12} />
+          </button>
           <button
             onClick={() => setActiveTab("CTI")}
             className={`rounded-lg px-2.5 py-0.5 text-[10px] font-extrabold transition-all cursor-pointer ${
@@ -154,7 +223,8 @@ export function MonitoringCtiPanel() {
         <LuSearch className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" size={12} />
       </div>
 
-      <div className="mt-2 flex-1 overflow-x-auto">
+      {/* Tinggi dikunci ~5 baris (header 2 x 24px + 5 x 22px); sisanya discroll. */}
+      <div className="mt-2 max-h-[160px] overflow-auto">
         <table className="w-full min-w-[500px] table-fixed border-collapse text-left text-[10px]">
           <colgroup>
             <col style={{ width: "30px" }} />
@@ -167,13 +237,17 @@ export function MonitoringCtiPanel() {
             <col style={{ width: "55px" }} />
           </colgroup>
           <thead>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id} className="border-b border-slate-200 bg-slate-50/50">
+            {table.getHeaderGroups().map((headerGroup, groupIndex) => (
+              <tr key={headerGroup.id} className="border-b border-slate-200">
                 {headerGroup.headers.map((header) => (
                   <th
                     key={header.id}
                     colSpan={header.colSpan}
-                    className="border border-slate-200 px-1 py-1 text-center text-[9px] font-extrabold text-[#213c52]"
+                    // inset shadow: garis header tetap terlihat saat body
+                    // discroll (border tabel `collapse` tidak ikut sticky)
+                    className={`sticky z-10 h-6 border border-slate-200 bg-[#F8FAFC] px-1 py-1 text-center text-[9px] font-extrabold text-[#213c52] shadow-[inset_0_-1px_0_#E2E8F0] ${
+                      groupIndex === 0 ? "top-0" : "top-6"
+                    }`}
                   >
                     {header.isPlaceholder
                       ? null
@@ -199,9 +273,35 @@ export function MonitoringCtiPanel() {
                 ))}
               </tr>
             ))}
+
+            {!table.getRowModel().rows.length && (
+              <tr>
+                <td
+                  colSpan={8}
+                  className="px-2 py-8 text-center text-[10px] font-semibold text-slate-500"
+                >
+                  {isError
+                    ? "Gagal memuat data Monitoring CTI."
+                    : isPending && activeTab === "CTI"
+                      ? "Memuat data Monitoring CTI..."
+                      : "Data tidak ditemukan."}
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
+
+      <CtiDetailModal
+        open={detailOpen}
+        rows={ctiData}
+        target={detailTarget}
+        onSelectTarget={setDetailTarget}
+        onClose={() => {
+          setDetailOpen(false);
+          setDetailTarget(null);
+        }}
+      />
     </div>
   );
 }
