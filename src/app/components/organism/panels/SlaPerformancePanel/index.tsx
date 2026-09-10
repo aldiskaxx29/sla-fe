@@ -1,15 +1,16 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { LuCheck, LuX } from "react-icons/lu";
 import { FaExclamationTriangle } from "react-icons/fa";
 import { SelectMenu } from "@/app/components/molecules/SelectMenu";
 import { NotchedCard } from "@/app/components/molecules/NotchedCard";
 import {
-  formatYearWeekLabel,
-  getRecentYearWeeks,
   useLatestPacketLossWeekQuery,
   useSlaPerformanceQuery,
 } from "@/app/hooks/query/monday/slaPerformance";
-import type { SlaRekon } from "@/app/types/monday/slaPerformance.types";
+import type {
+  SlaPeriod,
+  SlaRekon,
+} from "@/app/types/monday/slaPerformance.types";
 import type {
   MetricSubCard,
   SlaCardDetail,
@@ -52,27 +53,18 @@ const flexByWeight = (weight: number) => ({
 });
 
 export function SlaPerformancePanel() {
-  const [selectedWeek, setSelectedWeek] = useState<string | null>(null);
+  const [period, setPeriod] = useState<SlaPeriod>("week");
   const [rekon, setRekon] = useState<SlaRekon>("before");
   const [activeDetail, setActiveDetail] = useState<SlaCardDetail | null>(null);
 
+  // Periode di-anchor ke minggu terakhir yang datanya ada di server.
   const { data: latestWeek } = useLatestPacketLossWeekQuery();
-  const week = selectedWeek ?? latestWeek ?? null;
 
   const {
     data: metrics = [],
     isPending,
     isError,
-  } = useSlaPerformanceQuery(week, rekon);
-
-  const weekOptions = useMemo(
-    () =>
-      getRecentYearWeeks().map((yearWeek) => ({
-        label: formatYearWeekLabel(yearWeek),
-        value: yearWeek,
-      })),
-    [],
-  );
+  } = useSlaPerformanceQuery(latestWeek ?? null, rekon, period);
 
   return (
     <NotchedCard title="SLA Performance">
@@ -101,10 +93,12 @@ export function SlaPerformancePanel() {
         <div className="bg-white rounded-lg border border-slate-200 p-2 shadow-2xs mt-1">
           <div className="grid grid-cols-2 gap-2">
             <SelectMenu
-              value={week ?? ""}
-              onChange={setSelectedWeek}
-              placeholder="Select Week"
-              options={weekOptions}
+              value={period}
+              onChange={(value) => setPeriod(value as SlaPeriod)}
+              options={[
+                { label: "Week", value: "week" },
+                { label: "Month", value: "month" },
+              ]}
               size="sm"
               variant="gray"
               className="w-full [&>div]:w-full [&_button]:w-full text-[10px] font-semibold"

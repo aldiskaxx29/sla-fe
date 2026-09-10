@@ -19,6 +19,8 @@ import {
 
 // Types
 import type {
+  AccessPlTotal,
+  SlaPeriod,
   SlaRekon,
   SlaPerformanceSources,
 } from "@/app/types/monday/slaPerformance.types";
@@ -31,7 +33,6 @@ dayjs.extend(isLeapYear);
 dayjs.extend(isoWeek);
 dayjs.extend(isoWeeksInYear);
 
-const WEEK_OPTION_COUNT = 8;
 /** Data minggu berjalan biasanya belum ada, jadi mundur beberapa minggu. */
 const LATEST_WEEK_LOOKBACK = 4;
 
@@ -39,7 +40,7 @@ const toYearWeek = (date: dayjs.Dayjs) =>
   `${date.isoWeekYear()}${String(date.isoWeek()).padStart(2, "0")}`;
 
 /** Daftar yearweek terbaru lebih dulu, mis. ["202637", "202636", ...]. */
-export const getRecentYearWeeks = (count = WEEK_OPTION_COUNT) =>
+const getRecentYearWeeks = (count: number) =>
   Array.from({ length: count }, (_, index) =>
     toYearWeek(dayjs().subtract(index, "week")),
   );
@@ -53,11 +54,55 @@ export const shiftYearWeek = (yearWeek: string, weeks: number) => {
   return toYearWeek(dayjs().year(year).isoWeek(week).add(weeks, "week"));
 };
 
-export const formatYearWeekLabel = (yearWeek: string) =>
-  `Week ${Number(yearWeek.slice(4))}`;
-
 export const formatYearWeekShort = (yearWeek: string) =>
   `W${Number(yearWeek.slice(4))}`;
+
+const MONTH_LABELS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "Mei",
+  "Jun",
+  "Jul",
+  "Agu",
+  "Sep",
+  "Okt",
+  "Nov",
+  "Des",
+];
+
+/** Minggu ISO yang hari Senin-nya jatuh di bulan tersebut. */
+const getYearWeeksOfMonth = (date: dayjs.Dayjs) => {
+  const weeks: string[] = [];
+  let cursor = date.startOf("month").startOf("isoWeek");
+
+  // Minggu pertama bisa dimulai di bulan sebelumnya, jadi dilewati.
+  if (cursor.month() !== date.month()) cursor = cursor.add(1, "week");
+
+  while (cursor.month() === date.month() && cursor.year() === date.year()) {
+    weeks.push(toYearWeek(cursor));
+    cursor = cursor.add(1, "week");
+  }
+
+  return weeks;
+};
+
+const sumAccessPl = (totals: AccessPlTotal[][]): AccessPlTotal[] => {
+  const sums: Record<string, number> = {};
+
+  totals.flat().forEach((row) => {
+    const key = String(row.distribution_pl ?? "");
+    if (!key) return;
+
+    sums[key] = (sums[key] ?? 0) + (Number(row.total) || 0);
+  });
+
+  return Object.entries(sums).map(([distribution_pl, total]) => ({
+    distribution_pl,
+    total,
+  }));
+};
 
 /**
  * Snapshot JSON di server lama tidak menerima parameter minggu; hanya jumlah
@@ -84,14 +129,28 @@ export const useLatestPacketLossWeekQuery = () =>
 export const useSlaPerformanceQuery = (
   yearWeek: string | null,
   rekon: SlaRekon,
+  period: SlaPeriod = "week",
 ) =>
   useQuery<SLAMetricCard[]>({
-    queryKey: mondayMonitoringKeys.slaPerformance(yearWeek ?? "", rekon),
+    queryKey: [
+      ...mondayMonitoringKeys.slaPerformance(yearWeek ?? "", rekon),
+      period,
+    ],
     enabled: Boolean(yearWeek),
     staleTime: 5 * 60 * 1000,
     queryFn: async ({ signal }) => {
       const currentWeek = yearWeek as string;
       const previousWeek = shiftYearWeek(currentWeek, -1);
+
+      // Periode bulanan: jumlah site PL access diakumulasi per bulan, memakai
+      // bulan tempat minggu terakhir berada dan bulan sebelumnya.
+      const anchor = dayjs()
+        .year(Number(currentWeek.slice(0, 4)))
+        .isoWeek(Number(currentWeek.slice(4)));
+      const currentMonthWeeks = getYearWeeksOfMonth(anchor);
+      const previousMonthWeeks = getYearWeeksOfMonth(
+        anchor.startOf("month").subtract(1, "month"),
+      );
 
       const [
         packetLoss5,
@@ -113,16 +172,28 @@ export const useSlaPerformanceQuery = (
         getMsaAccessSla(rekon, "packetloss15", signal),
         getCnopAccessSla(rekon, "latency", signal),
         getCnopAccessSla(rekon, "jitter", signal),
-        getMttrRegionSla(rekon, "regionMajor", signal),
-        getMttrRegionSla(rekon, "regionMinor", signal),
-        getMttrRegionSla(rekon, "regionCritical", signal),
+        getMttrRegionSla(rekon, "regionMajor", period, signal),
+        getMttrRegionSla(rekon, "regionMinor", period, signal),
+        getMttrRegionSla(rekon, "regionCritical", period, signal),
         getCoreSla("packetloss", signal),
         getCoreSla("jitter", signal),
         getCoreSla("latency_bds", signal),
         getCoreSla("latency_btc", signal),
         getCoreSla("latency_pnk", signal),
-        getAccessPacketLossTotals(currentWeek, signal),
-        getAccessPacketLossTotals(previousWeek, signal),
+        period === "month"
+          ? Promise.all(
+              currentMonthWeeks.map((week) =>
+                getAccessPacketLossTotals(week, signal),
+              ),
+            ).then(sumAccessPl)
+          : getAccessPacketLossTotals(currentWeek, signal),
+        period === "month"
+          ? Promise.all(
+              previousMonthWeeks.map((week) =>
+                getAccessPacketLossTotals(week, signal),
+              ),
+            ).then(sumAccessPl)
+          : getAccessPacketLossTotals(previousWeek, signal),
       ]);
 
       const sources: SlaPerformanceSources = {
@@ -142,8 +213,14 @@ export const useSlaPerformanceQuery = (
         ],
         plCurrentWeek,
         plPreviousWeek,
-        currentWeekLabel: formatYearWeekShort(currentWeek),
-        previousWeekLabel: formatYearWeekShort(previousWeek),
+        currentWeekLabel:
+          period === "month"
+            ? MONTH_LABELS[anchor.month()]
+            : formatYearWeekShort(currentWeek),
+        previousWeekLabel:
+          period === "month"
+            ? MONTH_LABELS[anchor.subtract(1, "month").month()]
+            : formatYearWeekShort(previousWeek),
       };
 
       return buildSlaPerformanceCards(sources);

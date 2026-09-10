@@ -60,6 +60,9 @@ export interface CoreSlaRow {
 
 export type SlaRekon = "before" | "after";
 
+/** Periode tampilan, sama seperti dropdown Week/Month di monday lama. */
+export type SlaPeriod = "week" | "month";
+
 export interface SlaPerformanceSources {
   packetLoss5: MsaAccessRow[];
   packetLoss15: MsaAccessRow[];

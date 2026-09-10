@@ -11,6 +11,7 @@ import type {
   MttrRegionRow,
   MttrTicketRow,
   SiteDetailRow,
+  SlaPeriod,
 } from "@/app/types/monday/slaPerformance.types";
 import type {
   BaselineRegionRaw,
@@ -98,10 +99,15 @@ export const getCnopAccessSla = (
 export const getMttrRegionSla = (
   rekon: "before" | "after",
   file: "regionMajor" | "regionMinor" | "regionCritical",
+  period: SlaPeriod = "week",
   signal?: AbortSignal,
 ) =>
   getMondayMonitoringFile<MttrRegionRow[]>(
-    slaAssetPath(rekon, `mttr/${file}.json`),
+    // Periode bulanan (month to date) hanya tersedia untuk major & minor, dan
+    // hanya pada folder weekToDate (tidak punya varian after rekon).
+    period === "month" && file !== "regionCritical"
+      ? `assets/sla/weekToDate/${file}.json`
+      : slaAssetPath(rekon, `mttr/${file}.json`),
     signal,
   );
 
