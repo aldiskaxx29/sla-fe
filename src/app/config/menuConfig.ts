@@ -52,11 +52,11 @@ export const NETWORK_OPTIONS: MenuOption[] = [
   { label: "Quality Healthiness", value: "network/quality-healthiness" },
 ];
 
-// export const FBB_OPTIONS: MenuOption[] = [
-//   { label: "ONX", value: "fbb/onx" },
-//   { label: "OOKLA", value: "fbb/ookla" },
-//   { label: "SLA", value: "fbb/sla" },
-// ];
+export const FBB_OPTIONS: MenuOption[] = [
+  { label: "ONX", value: "fbb/onx" },
+  { label: "OOKLA", value: "fbb/ookla" },
+  { label: "SLA", value: "fbb/sla" },
+];
 
 export const ONX_OPTIONS: MenuOption[] = [
   { label: "Dashboard", value: "onx" },
@@ -100,14 +100,14 @@ export const MENU_CONFIG: MenuConfigItem[] = [
     allowedRoles: ALL_MAIN_MENU_ROLES,
     options: NETWORK_OPTIONS,
   },
-  // {
-  //   key: "fbb",
-  //   label: "FBB",
-  //   type: "dropdown",
-  //   activePaths: ["fbb"],
-  //   allowedRoles: ALL_MAIN_MENU_ROLES,
-  //   options: FBB_OPTIONS,
-  // },
+  {
+    key: "fbb",
+    label: "FBB",
+    type: "dropdown",
+    activePaths: ["fbb"],
+    allowedRoles: ALL_MAIN_MENU_ROLES,
+    options: FBB_OPTIONS,
+  },
   {
     key: "input-site",
     label: "Reconsiliation",
