@@ -12,13 +12,15 @@ import AppDropdown from "@/app/components/AppDropdown";
 import { useDashboard } from "@/modules/dashboard/hooks/dashboard.hooks";
 import { toast } from "react-toastify";
 
-// Export XLS tabel WISA Not Comply dilayani service PQM report yang berdiri
-// sendiri di port 3000 dan tidak mengirim header CORS, jadi diakses lewat
-// proxy: `/pqm-api` (vite.config.ts saat dev, web server saat production).
-// Kalau di production tidak ada proxy, isi VITE_PQM_API_BASE_URL dengan URL
-// absolutnya — unduhan otomatis jatuh ke mode tab browser.
+// Export XLS tabel WISA Not Comply dilayani service PQM report. Di production
+// service-nya sudah ada di qosmo pada path /pqm-reoprt (ejaan sesuai server),
+// jadi satu origin dengan aplikasi; saat dev dilewatkan proxy /pqm-api
+// (vite.config.ts) supaya tidak kena CORS.
 const PQM_API_BASE_URL =
-  import.meta.env.VITE_PQM_API_BASE_URL?.replace(/\/+$/, "") || "/pqm-api";
+  import.meta.env.VITE_PQM_API_BASE_URL?.replace(/\/+$/, "") ||
+  (import.meta.env.DEV
+    ? "/pqm-api"
+    : "https://qosmo.telkom.co.id/pqm-reoprt");
 const PQM_REPORT_DOWNLOAD_URL = `${PQM_API_BASE_URL}/api/pqm-report/download`;
 
 const parseFilenameFromDisposition = (disposition: string | null) => {
@@ -27,6 +29,22 @@ const parseFilenameFromDisposition = (disposition: string | null) => {
   const match = disposition.match(/filename\*?=(?:UTF-8'')?"?([^";]+)"?/i);
   return match ? decodeURIComponent(match[1].trim()) : null;
 };
+
+const isAbsolutePqmUrl = /^https?:\/\//i.test(PQM_REPORT_DOWNLOAD_URL);
+
+/** File xlsx; kalau server balas HTML/kosong berarti proxy-nya belum ada. */
+const isSpreadsheetResponse = (contentType: string | null, size: number) =>
+  size > 0 && /spreadsheet|officedocument|excel|octet-stream/i.test(contentType ?? "");
+
+/**
+ * Halaman https tidak boleh mengunduh dari URL http (diblokir browser sebagai
+ * insecure download), jadi jalur cadangannya pun tidak akan berhasil.
+ */
+const isMixedContentDownload = () =>
+  isAbsolutePqmUrl &&
+  typeof window !== "undefined" &&
+  window.location.protocol === "https:" &&
+  PQM_REPORT_DOWNLOAD_URL.startsWith("http:");
 
 /** Cadangan saat fetch diblokir CORS: biarkan browser yang mengunduh. */
 const downloadViaBrowser = () => {
@@ -323,6 +341,16 @@ const MSAmenu = ({
       }
 
       const blob = await response.blob();
+      const contentType = response.headers.get("content-type") || blob.type;
+
+      // Tanpa proxy, request ke path relatif dijawab index.html (atau kosong)
+      // dengan status 200 — jangan disimpan sebagai .xlsx.
+      if (!isSpreadsheetResponse(contentType, blob.size)) {
+        throw new Error(
+          `Respons bukan file XLSX (${contentType || "tanpa content-type"}, ${blob.size} byte)`,
+        );
+      }
+
       const fallbackName = `Report_PQM_${new Date().toISOString().slice(0, 10)}.xlsx`;
       const filename =
         parseFilenameFromDisposition(
@@ -338,11 +366,22 @@ const MSAmenu = ({
       link.remove();
       window.URL.revokeObjectURL(objectUrl);
     } catch (error) {
-      // Umumnya karena proxy tidak tersedia sehingga request kena CORS —
-      // file tetap bisa diunduh lewat navigasi browser.
-      console.warn("Fetch Report PQM gagal, beralih ke unduhan browser:", error);
-      downloadViaBrowser();
-      toast.info("Unduhan Report PQM dilanjutkan lewat tab browser.");
+      console.error("Gagal mengunduh Report PQM:", error);
+
+      // Navigasi browser hanya menolong kalau URL-nya absolut ke service PQM
+      // dan protokolnya tidak dicampur; selain itu beri tahu masalahnya.
+      if (isAbsolutePqmUrl && !isMixedContentDownload()) {
+        downloadViaBrowser();
+        toast.info("Unduhan Report PQM dilanjutkan lewat tab browser.");
+      } else if (isMixedContentDownload()) {
+        toast.error(
+          "Report PQM tidak bisa diunduh: halaman https tidak boleh mengambil file dari alamat http.",
+        );
+      } else {
+        toast.error(
+          `Gagal mengunduh Report PQM. Pastikan ${PQM_API_BASE_URL} diteruskan web server ke service PQM.`,
+        );
+      }
     } finally {
       setExportLoading(false);
     }

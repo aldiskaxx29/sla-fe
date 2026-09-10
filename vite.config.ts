@@ -35,15 +35,14 @@ export default defineConfig({
         secure: false,
         rewrite: (path) => path.replace(/^\/daily-monitoring-api/, ""),
       },
-      // PQM report (export XLS tabel WISA Not Comply) — service terpisah di
-      // port 3000 dan tidak mengirim header CORS, jadi harus lewat proxy.
-      // Di production sediakan path yang sama di web server, atau set
-      // VITE_PQM_API_BASE_URL ke URL absolutnya.
+      // PQM report (export XLS tabel WISA Not Comply). Di production sudah
+      // dilayani qosmo pada path /pqm-reoprt (ejaan memang begitu di server),
+      // jadi dev cukup diproxy ke sana supaya tidak kena CORS.
       "/pqm-api": {
-        target: "http://10.60.174.187:3000",
+        target: "https://qosmo.telkom.co.id",
         changeOrigin: true,
-        secure: false,
-        rewrite: (path) => path.replace(/^\/pqm-api/, ""),
+        secure: true,
+        rewrite: (path) => path.replace(/^\/pqm-api/, "/pqm-reoprt"),
       },
       // ONX (Tutela) dashboard API — endpoints are auth-free (cookie-only upstream,
       // called here without credentials). See src/modules/onx.
