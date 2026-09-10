@@ -21,6 +21,7 @@ import { useProfileRouter } from "@/modules/profile/router/profile.router";
 import { useAccessPredictionRouter } from "@/modules/vaccess/router/prediction.router";
 import { useResumeRCARouter } from "@/modules/vaccess/router/resumerca.router";
 import { useTutelaRouter } from "@/modules/tutela/router/tutela.router";
+import { useFbbRouter } from "@/modules/fbb/router/fbb.router";
 
 const AuthConfirm = lazy(() => import("@/modules/auth/pages/ConfirmPage"));
 
@@ -43,6 +44,7 @@ const useRouter = () => {
   const acessprediction = useAccessPredictionRouter();
   const resumerca = useResumeRCARouter();
   const tutela = useTutelaRouter();
+  const fbb = useFbbRouter();
 
   const routes = useRoutes([
     ...app,
@@ -80,6 +82,7 @@ const useRouter = () => {
           element: <AppLayoutDefault />,
           children: [
             ...tutela,
+            ...fbb,
             ...dashboard,
             // ...qualityHealthiness,
             ...site,
