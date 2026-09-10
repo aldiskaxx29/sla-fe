@@ -35,6 +35,16 @@ export default defineConfig({
         secure: false,
         rewrite: (path) => path.replace(/^\/daily-monitoring-api/, ""),
       },
+      // PQM report (export XLS tabel WISA Not Comply) — service terpisah di
+      // port 3000 dan tidak mengirim header CORS, jadi harus lewat proxy.
+      // Di production sediakan path yang sama di web server, atau set
+      // VITE_PQM_API_BASE_URL ke URL absolutnya.
+      "/pqm-api": {
+        target: "http://10.60.174.187:3000",
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/pqm-api/, ""),
+      },
       // ONX (Tutela) dashboard API — endpoints are auth-free (cookie-only upstream,
       // called here without credentials). See src/modules/onx.
       "/onx-api": {
