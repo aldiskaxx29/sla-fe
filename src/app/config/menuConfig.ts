@@ -17,7 +17,8 @@ const ALL_MAIN_MENU_ROLES = [
   USER_ROLES.MITRA,
 ];
 
-const normalizeRole = (role?: string | null) => role?.trim().toLowerCase() ?? "";
+const normalizeRole = (role?: string | null) =>
+  role?.trim().toLowerCase() ?? "";
 
 export type MenuType = "button" | "dropdown" | "external";
 
@@ -51,11 +52,11 @@ export const NETWORK_OPTIONS: MenuOption[] = [
   { label: "Quality Healthiness", value: "network/quality-healthiness" },
 ];
 
-export const FBB_OPTIONS: MenuOption[] = [
-  { label: "ONX", value: "fbb/onx" },
-  { label: "OOKLA", value: "fbb/ookla" },
-  { label: "SLA", value: "fbb/sla" },
-];
+// export const FBB_OPTIONS: MenuOption[] = [
+//   { label: "ONX", value: "fbb/onx" },
+//   { label: "OOKLA", value: "fbb/ookla" },
+//   { label: "SLA", value: "fbb/sla" },
+// ];
 
 export const ONX_OPTIONS: MenuOption[] = [
   { label: "Dashboard", value: "onx" },
@@ -99,14 +100,14 @@ export const MENU_CONFIG: MenuConfigItem[] = [
     allowedRoles: ALL_MAIN_MENU_ROLES,
     options: NETWORK_OPTIONS,
   },
-  {
-    key: "fbb",
-    label: "FBB",
-    type: "dropdown",
-    activePaths: ["fbb"],
-    allowedRoles: ALL_MAIN_MENU_ROLES,
-    options: FBB_OPTIONS,
-  },
+  // {
+  //   key: "fbb",
+  //   label: "FBB",
+  //   type: "dropdown",
+  //   activePaths: ["fbb"],
+  //   allowedRoles: ALL_MAIN_MENU_ROLES,
+  //   options: FBB_OPTIONS,
+  // },
   {
     key: "input-site",
     label: "Reconsiliation",
@@ -187,12 +188,12 @@ export const ADMIN_MENU_CONFIG: MenuConfigItem[] = [
 
 export const getVisibleMenus = (
   currentLevel?: string | null,
-  menuConfig: MenuConfigItem[] = MENU_CONFIG
+  menuConfig: MenuConfigItem[] = MENU_CONFIG,
 ) => {
   const normalizedLevel = normalizeRole(currentLevel);
 
   return menuConfig.filter((menu) =>
-    menu.allowedRoles.some((role) => normalizeRole(role) === normalizedLevel)
+    menu.allowedRoles.some((role) => normalizeRole(role) === normalizedLevel),
   );
 };
 
@@ -211,14 +212,18 @@ const getPathCandidates = (pathname: string) => {
     ? normalizedPath.slice("dashboard/".length)
     : "";
 
-  return [normalizedPath, ...(withoutDashboardPrefix ? [withoutDashboardPrefix] : [])];
+  return [
+    normalizedPath,
+    ...(withoutDashboardPrefix ? [withoutDashboardPrefix] : []),
+  ];
 };
 
 /** Cocok kalau path sama persis atau merupakan turunannya, bukan sekadar substring. */
 const matchesPath = (candidate: string, path: string) => {
   const normalizedTarget = path.replace(/^\/+/, "").replace(/\/+$/, "");
   return (
-    candidate === normalizedTarget || candidate.startsWith(`${normalizedTarget}/`)
+    candidate === normalizedTarget ||
+    candidate.startsWith(`${normalizedTarget}/`)
   );
 };
 
@@ -227,7 +232,7 @@ export const isMenuActive = (menu: MenuConfigItem, pathname: string) => {
   const paths = [...(menu.path ? [menu.path] : []), ...menu.activePaths];
 
   return candidates.some((candidate) =>
-    paths.some((path) => matchesPath(candidate, path))
+    paths.some((path) => matchesPath(candidate, path)),
   );
 };
 
@@ -238,17 +243,17 @@ export const isMenuActive = (menu: MenuConfigItem, pathname: string) => {
 export const isMenuOptionActive = (
   menu: MenuConfigItem,
   option: MenuOption,
-  pathname: string
+  pathname: string,
 ) => {
   const candidates = getPathCandidates(pathname);
   const matched = (menu.options ?? []).filter((menuOption) =>
-    candidates.some((candidate) => matchesPath(candidate, menuOption.value))
+    candidates.some((candidate) => matchesPath(candidate, menuOption.value)),
   );
 
   if (!matched.length) return false;
 
   const mostSpecific = matched.reduce((longest, current) =>
-    current.value.length > longest.value.length ? current : longest
+    current.value.length > longest.value.length ? current : longest,
   );
 
   return mostSpecific.value === option.value;
@@ -256,7 +261,7 @@ export const isMenuOptionActive = (
 
 export const getMenuByPath = (
   pathname: string,
-  menuConfig: MenuConfigItem[] = [...MENU_CONFIG, ...ADMIN_MENU_CONFIG]
+  menuConfig: MenuConfigItem[] = [...MENU_CONFIG, ...ADMIN_MENU_CONFIG],
 ) => {
   const pathCandidates = getPathCandidates(pathname);
 
@@ -270,7 +275,7 @@ export const getMenuByPath = (
     ];
 
     return pathCandidates.some((candidate) =>
-      paths.some((path) => matchesPath(candidate, path))
+      paths.some((path) => matchesPath(candidate, path)),
     );
   });
 };

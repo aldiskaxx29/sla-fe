@@ -12,16 +12,10 @@ import AppDropdown from "@/app/components/AppDropdown";
 import { useDashboard } from "@/modules/dashboard/hooks/dashboard.hooks";
 import { toast } from "react-toastify";
 
-// Export XLS tabel WISA Not Comply dilayani service PQM report (port 3000),
-// terpisah dari VITE_APP_BASE_URL. Di dev diproxy lewat /pqm-api (vite.config.ts).
-const PQM_API_BASE_URL = import.meta.env.VITE_PQM_API_BASE_URL || "/pqm-api";
-const PQM_REPORT_DOWNLOAD_URL = `${PQM_API_BASE_URL}/api/pqm-report/download`;
-
-const parseFilenameFromDisposition = (disposition: string | null) => {
-  if (!disposition) return null;
-  const match = disposition.match(/filename\*?=(?:UTF-8'')?"?([^";]+)"?/i);
-  return match ? decodeURIComponent(match[1].trim()) : null;
-};
+// Export XLS tabel WISA Not Comply dilayani service PQM report yang berdiri
+// sendiri di port 3000, terpisah dari VITE_APP_BASE_URL.
+const PQM_REPORT_DOWNLOAD_URL =
+  "http://10.60.174.187:3000/api/pqm-report/download";
 
 class TableFallbackBoundary extends Component<
   { children: React.ReactNode },
@@ -83,7 +77,6 @@ const MSAmenu = ({
   weeklyKpi,
   setWeeklyKpi,
 }) => {
-  const [exportLoading, setExportLoading] = useState(false);
   const [showActualWeeks, setShowActualWeeks] = useState(false);
 
   const weeklyKpiOptions = [
@@ -290,39 +283,15 @@ const MSAmenu = ({
     }
   };
 
-  const handleDownloadMsa = async () => {
-    try {
-      setExportLoading(true);
-
-      const response = await fetch(PQM_REPORT_DOWNLOAD_URL, {
-        method: "GET",
-      });
-
-      if (!response.ok) {
-        throw new Error(`Request gagal dengan status ${response.status}`);
-      }
-
-      const blob = await response.blob();
-      const fallbackName = `Report_PQM_${new Date().toISOString().slice(0, 10)}.xlsx`;
-      const filename =
-        parseFilenameFromDisposition(
-          response.headers.get("content-disposition"),
-        ) || fallbackName;
-
-      const objectUrl = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = objectUrl;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(objectUrl);
-    } catch (error) {
-      console.error("Failed to download PQM report:", error);
-      toast.error("Gagal mengunduh laporan PQM");
-    } finally {
-      setExportLoading(false);
-    }
+  const handleDownloadMsa = () => {
+    // Service PQM tidak mengirim header CORS, jadi file diambil lewat navigasi
+    // biasa (bukan fetch). Nama file mengikuti Content-Disposition dari server.
+    const link = document.createElement("a");
+    link.href = PQM_REPORT_DOWNLOAD_URL;
+    link.rel = "noopener";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
   };
 
   useEffect(() => {
@@ -431,7 +400,6 @@ const MSAmenu = ({
             </div>
             <Button
               onClick={handleDownloadMsa}
-              loading={exportLoading}
               className="!h-11 !px-3 py-2.5 !border-0 !rounded-full !bg-[#EDFFFD]"
             >
               <p className="text-brand-secondary font-medium">Export as XLS</p>
