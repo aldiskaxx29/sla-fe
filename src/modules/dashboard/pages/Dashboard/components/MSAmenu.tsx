@@ -16,12 +16,35 @@ import { toast } from "react-toastify";
 // service-nya sudah ada di qosmo pada path /pqm-reoprt (ejaan sesuai server),
 // jadi satu origin dengan aplikasi; saat dev dilewatkan proxy /pqm-api
 // (vite.config.ts) supaya tidak kena CORS.
-const PQM_API_BASE_URL =
-  import.meta.env.VITE_PQM_API_BASE_URL?.replace(/\/+$/, "") ||
-  (import.meta.env.DEV
-    ? "/pqm-api"
-    : "https://qosmo.telkom.co.id/pqm-reoprt");
-const PQM_REPORT_DOWNLOAD_URL = `${PQM_API_BASE_URL}/api/pqm-report/download`;
+const PQM_PRODUCTION_BASE_URL = "https://qosmo.telkom.co.id/pqm-reoprt";
+const PQM_DOWNLOAD_PATH = "/api/pqm-report/download";
+
+const configuredPqmBaseUrl = import.meta.env.VITE_PQM_API_BASE_URL?.replace(
+  /\/+$/,
+  "",
+);
+
+const isAbsoluteUrl = (value?: string) => /^https?:\/\//i.test(value ?? "");
+
+/**
+ * Basis relatif seperti `/pqm-api` hanya berarti saat dev (ada proxy vite). Di
+ * production path itu tidak diteruskan ke mana-mana, jadi diabaikan dan
+ * langsung memakai URL service-nya — kecuali env memang diisi URL absolut.
+ */
+const PQM_API_BASE_URL = import.meta.env.DEV
+  ? configuredPqmBaseUrl || "/pqm-api"
+  : isAbsoluteUrl(configuredPqmBaseUrl)
+    ? (configuredPqmBaseUrl as string)
+    : PQM_PRODUCTION_BASE_URL;
+
+/** Basis production tetap jadi cadangan kalau basis utama gagal. */
+const PQM_DOWNLOAD_URLS = Array.from(
+  new Set(
+    [PQM_API_BASE_URL, PQM_PRODUCTION_BASE_URL].map(
+      (base) => `${base}${PQM_DOWNLOAD_PATH}`,
+    ),
+  ),
+);
 
 const parseFilenameFromDisposition = (disposition: string | null) => {
   if (!disposition) return null;
@@ -30,30 +53,20 @@ const parseFilenameFromDisposition = (disposition: string | null) => {
   return match ? decodeURIComponent(match[1].trim()) : null;
 };
 
-const isAbsolutePqmUrl = /^https?:\/\//i.test(PQM_REPORT_DOWNLOAD_URL);
-
-/** File xlsx; kalau server balas HTML/kosong berarti proxy-nya belum ada. */
+/** File xlsx; kalau server balas HTML/kosong berarti path-nya salah sasaran. */
 const isSpreadsheetResponse = (contentType: string | null, size: number) =>
-  size > 0 && /spreadsheet|officedocument|excel|octet-stream/i.test(contentType ?? "");
+  size > 0 &&
+  /spreadsheet|officedocument|excel|octet-stream/i.test(contentType ?? "");
 
-/**
- * Halaman https tidak boleh mengunduh dari URL http (diblokir browser sebagai
- * insecure download), jadi jalur cadangannya pun tidak akan berhasil.
- */
-const isMixedContentDownload = () =>
-  isAbsolutePqmUrl &&
-  typeof window !== "undefined" &&
-  window.location.protocol === "https:" &&
-  PQM_REPORT_DOWNLOAD_URL.startsWith("http:");
-
-/** Cadangan saat fetch diblokir CORS: biarkan browser yang mengunduh. */
+/** Cadangan terakhir: biarkan browser yang mengunduh lewat tab baru. */
 const downloadViaBrowser = () => {
-  const popup = window.open(PQM_REPORT_DOWNLOAD_URL, "_blank", "noopener");
+  const url = `${PQM_PRODUCTION_BASE_URL}${PQM_DOWNLOAD_PATH}`;
+  const popup = window.open(url, "_blank", "noopener");
   if (popup) return;
 
   // Popup diblokir: anchor tersembunyi, dilepas setelah navigasinya jalan.
   const link = document.createElement("a");
-  link.href = PQM_REPORT_DOWNLOAD_URL;
+  link.href = url;
   link.target = "_blank";
   link.rel = "noopener";
   document.body.appendChild(link);
@@ -329,59 +342,56 @@ const MSAmenu = ({
   };
 
   const handleDownloadMsa = async () => {
-    // Server butuh ~10 detik menyiapkan file, jadi tombolnya dikunci selama
-    // proses berjalan.
+    // Server butuh ~8 detik menyiapkan file, jadi tombolnya dikunci dulu.
     setExportLoading(true);
 
     try {
-      const response = await fetch(PQM_REPORT_DOWNLOAD_URL);
+      let lastError: unknown = null;
 
-      if (!response.ok) {
-        throw new Error(`Request gagal dengan status ${response.status}`);
+      for (const url of PQM_DOWNLOAD_URLS) {
+        try {
+          const response = await fetch(url);
+
+          if (!response.ok) {
+            throw new Error(`Request gagal dengan status ${response.status}`);
+          }
+
+          const blob = await response.blob();
+          const contentType = response.headers.get("content-type") || blob.type;
+
+          if (!isSpreadsheetResponse(contentType, blob.size)) {
+            throw new Error(
+              `Respons bukan file XLSX (${contentType || "tanpa content-type"}, ${blob.size} byte)`,
+            );
+          }
+
+          const fallbackName = `Report_PQM_${new Date().toISOString().slice(0, 10)}.xlsx`;
+          const filename =
+            parseFilenameFromDisposition(
+              response.headers.get("content-disposition"),
+            ) || fallbackName;
+
+          const objectUrl = window.URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = objectUrl;
+          link.download = filename;
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          window.URL.revokeObjectURL(objectUrl);
+
+          return;
+        } catch (error) {
+          console.warn(`Unduh Report PQM gagal lewat ${url}:`, error);
+          lastError = error;
+        }
       }
 
-      const blob = await response.blob();
-      const contentType = response.headers.get("content-type") || blob.type;
-
-      // Tanpa proxy, request ke path relatif dijawab index.html (atau kosong)
-      // dengan status 200 — jangan disimpan sebagai .xlsx.
-      if (!isSpreadsheetResponse(contentType, blob.size)) {
-        throw new Error(
-          `Respons bukan file XLSX (${contentType || "tanpa content-type"}, ${blob.size} byte)`,
-        );
-      }
-
-      const fallbackName = `Report_PQM_${new Date().toISOString().slice(0, 10)}.xlsx`;
-      const filename =
-        parseFilenameFromDisposition(
-          response.headers.get("content-disposition"),
-        ) || fallbackName;
-
-      const objectUrl = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = objectUrl;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(objectUrl);
+      throw lastError ?? new Error("Report PQM tidak bisa diunduh");
     } catch (error) {
       console.error("Gagal mengunduh Report PQM:", error);
-
-      // Navigasi browser hanya menolong kalau URL-nya absolut ke service PQM
-      // dan protokolnya tidak dicampur; selain itu beri tahu masalahnya.
-      if (isAbsolutePqmUrl && !isMixedContentDownload()) {
-        downloadViaBrowser();
-        toast.info("Unduhan Report PQM dilanjutkan lewat tab browser.");
-      } else if (isMixedContentDownload()) {
-        toast.error(
-          "Report PQM tidak bisa diunduh: halaman https tidak boleh mengambil file dari alamat http.",
-        );
-      } else {
-        toast.error(
-          `Gagal mengunduh Report PQM. Pastikan ${PQM_API_BASE_URL} diteruskan web server ke service PQM.`,
-        );
-      }
+      downloadViaBrowser();
+      toast.info("Unduhan Report PQM dilanjutkan lewat tab browser.");
     } finally {
       setExportLoading(false);
     }
