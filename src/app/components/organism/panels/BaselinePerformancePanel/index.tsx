@@ -1,10 +1,19 @@
-import { useState, useRef, useEffect } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Map, { Layer, Source, type LayerProps, type MapRef } from "react-map-gl/mapbox";
 import "mapbox-gl/dist/mapbox-gl.css";
-import { LuInfo, LuPlus, LuMinus } from "react-icons/lu";
+import { LuArrowDown, LuArrowUp, LuInfo, LuPlus, LuMinus } from "react-icons/lu";
 import { SelectMenu } from "@/app/components/molecules/SelectMenu";
 import { useThrottledEvent } from "@/app/hooks/custom/pacer";
-import { useRegionPerformanceQuery } from "@/app/hooks/query/monday/ticketQuality";
+import {
+  BASELINE_CRITICAL_THRESHOLD,
+  BASELINE_WARNING_THRESHOLD,
+  useBaselinePerformanceQuery,
+} from "@/app/hooks/query/monday/baselinePerformance";
+import type {
+  BaselineRegionRow,
+  BaselineStatus,
+} from "@/app/types/monday/baseline.types";
+import { BaselineTrendModal } from "@/app/components/organism/panels/BaselinePerformancePanel/BaselineTrendModal";
 
 // sla-fe memakai nama VITE_MAPBOX_TOKEN; nama dari qosmo-new tetap didukung.
 const MAPBOX_TOKEN =
@@ -22,41 +31,93 @@ const INDONESIA_BOUNDS: [[number, number], [number, number]] = [
   [145.0, 10.0],
 ];
 
-const regionFillLayer: LayerProps = {
-  id: "region-performance-fill-ticket",
-  type: "fill",
-  paint: {
-    "fill-color": [
-      "match",
-      ["get", "REGION"],
-      "SUMBAGSEL",
-      "#DC3545",
-      "SUMBAGTENG",
-      "#DC3545",
-      "SUMBAGUT",
-      "#28A745",
-      "INNER JABOTABEK",
-      "#28A745",
-      "OUTER JABOTABEK",
-      "#28A745",
-      "JABAR",
-      "#28A745",
-      "JATENG-DIY",
-      "#28A745",
-      "JATIM",
-      "#28A745",
-      "BALI NUSRA",
-      "#FFC107",
-      "KALIMANTAN",
-      "#DC3545",
-      "SULAWESI",
-      "#DC3545",
-      "MALUKU DAN PAPUA",
-      "#28A745",
-      "rgba(0,0,0,0)",
-    ],
-    "fill-opacity": 0.4,
-  },
+/** Nama region di geojson tidak sama persis dengan nama di data baseline. */
+const GEOJSON_TO_BASELINE_REGION: Record<string, string> = {
+  SUMBAGUT: "SUMBAGUT",
+  SUMBAGTENG: "SUMBAGTENG",
+  SUMBAGSEL: "SUMBAGSEL",
+  "INNER JABOTABEK": "JABOTABEK INNER",
+  "OUTER JABOTABEK": "JABOTABEK OUTER",
+  JABAR: "JAWA BARAT",
+  "JATENG-DIY": "JAWA TENGAH",
+  JATIM: "JAWA TIMUR",
+  "BALI NUSRA": "BALI NUSRA",
+  KALIMANTAN: "KALIMANTAN",
+  SULAWESI: "SULAWESI",
+  "MALUKU DAN PAPUA": "PUMA",
+};
+
+const STATUS_COLOR: Record<BaselineStatus, string> = {
+  critical: "#DC3545",
+  warning: "#FFC107",
+  good: "#28A745",
+};
+
+const STATUS_LABEL: Record<BaselineStatus, string> = {
+  critical: "Critical",
+  warning: "Warning",
+  good: "Good",
+};
+
+const PERFORMANCE_FILTERS = [
+  { label: "All Performance", value: "all" },
+  { label: "Critical", value: "critical" },
+  { label: "Warning", value: "warning" },
+  { label: "Good", value: "good" },
+];
+
+/**
+ * WoW dari API adalah selisih jumlah site not clear terhadap minggu lalu, jadi
+ * angka negatif berarti membaik.
+ */
+function WowBadge({ value }: { value: number }) {
+  const improving = value <= 0;
+
+  return (
+    <span
+      className={`flex shrink-0 items-center gap-0.5 font-extrabold ${
+        improving ? "text-emerald-500" : "text-red-500"
+      }`}
+      title="Perubahan dibanding minggu lalu"
+    >
+      {improving ? <LuArrowDown size={8} /> : <LuArrowUp size={8} />}
+      {Math.abs(value)}% WoW
+    </span>
+  );
+}
+
+/** Warna tiap region di peta diambil dari status baseline-nya. */
+const buildRegionFillLayer = (
+  regions: BaselineRegionRow[],
+  filter: string,
+): LayerProps => {
+  // Catatan: `Map` di file ini adalah komponen react-map-gl, jadi lookup-nya
+  // memakai objek biasa.
+  const byRegion: Record<string, BaselineRegionRow> = {};
+  regions.forEach((row) => {
+    byRegion[row.region.toUpperCase()] = row;
+  });
+
+  const matchPairs: string[] = [];
+
+  Object.entries(GEOJSON_TO_BASELINE_REGION).forEach(([geoName, dataName]) => {
+    const row = byRegion[dataName];
+    if (!row) return;
+    if (filter !== "all" && row.status !== filter) return;
+
+    matchPairs.push(geoName, STATUS_COLOR[row.status]);
+  });
+
+  return {
+    id: "region-performance-fill-ticket",
+    type: "fill",
+    paint: {
+      "fill-color": matchPairs.length
+        ? ["match", ["get", "REGION"], ...matchPairs, "rgba(0,0,0,0)"]
+        : "rgba(0,0,0,0)",
+      "fill-opacity": 0.45,
+    },
+  };
 };
 
 const regionBorderLayer: LayerProps = {
@@ -69,9 +130,35 @@ const regionBorderLayer: LayerProps = {
 };
 
 export function BaselinePerformancePanel() {
-  const [performanceFilter, setPerformanceFilter] = useState("All Performance");
-  const { data: regions = [] } = useRegionPerformanceQuery(performanceFilter);
+  const [performanceFilter, setPerformanceFilter] = useState("all");
   const [viewTab, setViewTab] = useState<"map" | "detail">("map");
+  const [trendRegion, setTrendRegion] = useState<BaselineRegionRow | null>(null);
+
+  const { data, isPending, isError } = useBaselinePerformanceQuery();
+  const regions = useMemo(() => data?.regions ?? [], [data]);
+  const nation = data?.nation ?? null;
+
+  const filteredRegions = useMemo(
+    () =>
+      performanceFilter === "all"
+        ? regions
+        : regions.filter((row) => row.status === performanceFilter),
+    [regions, performanceFilter],
+  );
+
+  const fillLayer = useMemo(
+    () => buildRegionFillLayer(regions, performanceFilter),
+    [regions, performanceFilter],
+  );
+
+  /** Kartu di atas peta menyorot region dengan not clear terparah. */
+  const highlightRegions = useMemo(
+    () =>
+      [...filteredRegions]
+        .sort((a, b) => b.worstPersen - a.worstPersen)
+        .slice(0, 3),
+    [filteredRegions],
+  );
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapRef | null>(null);
@@ -94,6 +181,63 @@ export function BaselinePerformancePanel() {
       window.removeEventListener("resize", handleResize);
     };
   }, [handleResize]);
+
+  /** Enam kolom "Site Not Clear": latency, %, WoW, packetloss, %, WoW. */
+  const renderNotClearCells = (row: BaselineRegionRow, onDark = false) => {
+    const cells = [
+      { key: "lat", value: row.latency, kind: "count" as const, divider: true },
+      { key: "latp", value: row.latPersen, kind: "percent" as const },
+      { key: "latw", value: row.latWow, kind: "wow" as const },
+      { key: "pl", value: row.packetlos, kind: "count" as const, divider: true },
+      { key: "plp", value: row.pacPersen, kind: "percent" as const },
+      { key: "plw", value: row.pacWow, kind: "wow" as const },
+    ];
+
+    return cells.map((cell) => {
+      const critical =
+        cell.kind === "percent" && cell.value >= BASELINE_CRITICAL_THRESHOLD;
+      const warning =
+        cell.kind === "percent" &&
+        !critical &&
+        cell.value >= BASELINE_WARNING_THRESHOLD;
+      const improving = cell.kind === "wow" && cell.value <= 0;
+
+      const tone = onDark
+        ? critical
+          ? "text-red-300"
+          : warning
+            ? "text-amber-300"
+            : cell.kind === "wow"
+              ? improving
+                ? "text-emerald-300"
+                : "text-red-300"
+              : "text-white"
+        : critical
+          ? "text-red-500"
+          : warning
+            ? "text-amber-600"
+            : cell.kind === "wow"
+              ? improving
+                ? "text-emerald-600"
+                : "text-red-500"
+              : "text-[#213c52]";
+
+      return (
+        <td
+          key={cell.key}
+          className={`px-1.5 py-1.5 text-center text-[10px] font-bold tabular-nums ${tone} ${
+            cell.divider ? "border-l border-slate-100" : ""
+          }`}
+        >
+          {cell.kind === "count"
+            ? cell.value.toLocaleString("id-ID")
+            : cell.kind === "percent"
+              ? `${cell.value}%`
+              : `${cell.value > 0 ? "+" : ""}${cell.value}%`}
+        </td>
+      );
+    });
+  };
 
   const zoomIn = () => mapRef.current?.zoomIn();
   const zoomOut = () => mapRef.current?.zoomOut();
@@ -121,12 +265,7 @@ export function BaselinePerformancePanel() {
           <SelectMenu
             value={performanceFilter}
             onChange={setPerformanceFilter}
-            options={[
-              { label: "All Performance", value: "All Performance" },
-              { label: "Critical", value: "Critical" },
-              { label: "Warning", value: "Warning" },
-              { label: "Good", value: "Good" },
-            ]}
+            options={PERFORMANCE_FILTERS}
             size="xs"
             className="text-[10px] font-semibold"
           />
@@ -182,7 +321,7 @@ export function BaselinePerformancePanel() {
                   type="geojson"
                   data={REGION_GEOJSON_URL}
                 >
-                  <Layer {...regionFillLayer} />
+                  <Layer {...fillLayer} />
                   <Layer {...regionBorderLayer} />
                 </Source>
               </Map>
@@ -198,40 +337,47 @@ export function BaselinePerformancePanel() {
             )}
 
             <div className="absolute top-3 left-3 right-3 flex justify-between gap-2 z-10 pointer-events-none">
-              {regions.map((region) => (
-                <div
-                  key={region.id}
-                  className="pointer-events-auto flex-1 max-w-[140px] rounded-xl border border-slate-100 bg-white/95 p-1.5 shadow-md backdrop-blur-xs transition-transform hover:scale-102"
+              {highlightRegions.map((region) => (
+                <button
+                  key={region.region}
+                  type="button"
+                  onClick={() => setTrendRegion(region)}
+                  title={`Lihat tren ${region.region}`}
+                  className="pointer-events-auto flex-1 max-w-[150px] cursor-pointer rounded-xl border border-slate-100 bg-white/95 p-1.5 text-left shadow-md backdrop-blur-xs transition-transform hover:scale-102"
                 >
-                  <header className="flex items-center justify-between border-b border-slate-100 pb-0.5">
-                    <span className="text-[8px] font-extrabold text-[#213c52]">
-                      {region.name}
+                  <header className="flex items-center justify-between gap-1 border-b border-slate-100 pb-0.5">
+                    <span className="truncate text-[8px] font-extrabold text-[#213c52]">
+                      {region.region}
                     </span>
-                    <span className="rounded bg-red-50 px-1 py-0.5 text-[7px] font-extrabold text-red-500 uppercase tracking-wider">
-                      {region.status}
+                    <span
+                      className={`rounded px-1 py-0.5 text-[7px] font-extrabold uppercase tracking-wider ${
+                        region.status === "critical"
+                          ? "bg-red-50 text-red-500"
+                          : region.status === "warning"
+                            ? "bg-amber-50 text-amber-600"
+                            : "bg-emerald-50 text-emerald-600"
+                      }`}
+                    >
+                      {STATUS_LABEL[region.status]}
                     </span>
                   </header>
                   <div className="mt-1 flex flex-col gap-0.5 text-[8px] font-semibold text-slate-500">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between gap-1">
                       <span>Latency :</span>
                       <span className="font-extrabold text-slate-800">
-                        {region.latency.value} ({region.latency.percentage})
+                        {region.latency} ({region.latPersen}%)
                       </span>
-                      <span className="flex items-center text-emerald-500 font-extrabold">
-                        ↓ {region.latency.wowValue} WoW
-                      </span>
+                      <WowBadge value={region.latWow} />
                     </div>
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between gap-1">
                       <span>PL :</span>
                       <span className="font-extrabold text-slate-800">
-                        {region.packetLoss.value} ({region.packetLoss.percentage})
+                        {region.packetlos} ({region.pacPersen}%)
                       </span>
-                      <span className="flex items-center text-red-500 font-extrabold">
-                        ↑ {region.packetLoss.wowValue} WoW
-                      </span>
+                      <WowBadge value={region.pacWow} />
                     </div>
                   </div>
-                </div>
+                </button>
               ))}
             </div>
 
@@ -268,11 +414,141 @@ export function BaselinePerformancePanel() {
             )}
           </div>
         ) : (
-          <div className="p-4 text-xs font-semibold text-slate-500 text-center flex h-full items-center justify-center">
-            No detail data available.
+          <div className="flex h-full min-h-0 flex-col bg-white animate-fadeIn">
+            <div className="flex min-h-0 flex-1 overflow-auto">
+              <table className="w-full min-w-[520px] border-collapse text-left">
+                <thead>
+                  <tr>
+                    <th
+                      rowSpan={2}
+                      className="sticky top-0 z-10 w-8 bg-white px-2 py-1.5 text-center text-[9px] font-bold uppercase tracking-wide text-slate-400 shadow-[inset_0_-1px_0_#E2E8F0]"
+                    >
+                      No
+                    </th>
+                    <th
+                      rowSpan={2}
+                      className="sticky top-0 z-10 bg-white px-2 py-1.5 text-[9px] font-bold uppercase tracking-wide text-slate-400 shadow-[inset_0_-1px_0_#E2E8F0]"
+                    >
+                      Region
+                    </th>
+                    <th
+                      rowSpan={2}
+                      className="sticky top-0 z-10 w-16 bg-white px-2 py-1.5 text-right text-[9px] font-bold uppercase tracking-wide text-slate-400 shadow-[inset_0_-1px_0_#E2E8F0]"
+                    >
+                      Total Site
+                    </th>
+                    <th
+                      colSpan={6}
+                      className="sticky top-0 z-10 border-l border-slate-100 bg-white px-2 py-1.5 text-center text-[9px] font-bold uppercase tracking-wide text-slate-400 shadow-[inset_0_-1px_0_#E2E8F0]"
+                    >
+                      Site Not Clear
+                    </th>
+                  </tr>
+                  <tr>
+                    {[
+                      { key: "lat", label: "Latency", tone: "text-sky-600" },
+                      { key: "latp", label: "(%)", tone: "text-sky-600" },
+                      { key: "latw", label: "WoW", tone: "text-sky-600" },
+                      { key: "pl", label: "Packetloss", tone: "text-amber-600" },
+                      { key: "plp", label: "(%)", tone: "text-amber-600" },
+                      { key: "plw", label: "WoW", tone: "text-amber-600" },
+                    ].map((column, index) => (
+                      <th
+                        key={column.key}
+                        className={`sticky top-[27px] z-10 bg-white px-1.5 py-1.5 text-center text-[9px] font-bold uppercase tracking-wide shadow-[inset_0_-1px_0_#E2E8F0] ${column.tone} ${
+                          index === 0 || index === 3
+                            ? "border-l border-slate-100"
+                            : ""
+                        }`}
+                      >
+                        {column.label}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {filteredRegions.map((row, index) => (
+                    <tr
+                      key={row.region}
+                      className="border-b border-slate-50 transition-colors last:border-b-0 hover:bg-slate-50/60"
+                    >
+                      <td className="px-2 py-1.5 text-center text-[10px] font-semibold text-slate-400">
+                        {index + 1}
+                      </td>
+                      <td className="px-2 py-1.5">
+                        <button
+                          type="button"
+                          onClick={() => setTrendRegion(row)}
+                          title={`Lihat tren ${row.region}`}
+                          className="flex cursor-pointer items-center gap-1.5 text-[10px] font-extrabold text-[#213c52] transition-colors hover:text-indigo-500 hover:underline"
+                        >
+                          <span
+                            className="h-1.5 w-1.5 shrink-0 rounded-full"
+                            style={{ backgroundColor: STATUS_COLOR[row.status] }}
+                          />
+                          {row.region}
+                        </button>
+                      </td>
+                      <td className="px-2 py-1.5 text-right text-[10px] font-semibold tabular-nums text-slate-500">
+                        {row.total.toLocaleString("id-ID")}
+                      </td>
+                      {renderNotClearCells(row)}
+                    </tr>
+                  ))}
+
+                  {!filteredRegions.length && (
+                    <tr>
+                      <td
+                        colSpan={9}
+                        className="px-2 py-10 text-center text-[10px] font-semibold text-slate-400"
+                      >
+                        {isError
+                          ? "Gagal memuat Baseline Performance."
+                          : isPending
+                            ? "Memuat data baseline..."
+                            : "Tidak ada region pada filter ini."}
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+
+                {nation && (
+                  <tfoot>
+                    <tr className="bg-[#213c52] text-white">
+                      <td className="px-2 py-1.5" />
+                      <td className="px-2 py-1.5">
+                        <button
+                          type="button"
+                          onClick={() => setTrendRegion(nation)}
+                          title={`Lihat tren ${nation.region}`}
+                          className="cursor-pointer text-[10px] font-extrabold text-white transition-colors hover:text-sky-300 hover:underline"
+                        >
+                          {nation.region}
+                        </button>
+                      </td>
+                      <td className="px-2 py-1.5 text-right text-[10px] font-extrabold tabular-nums">
+                        {nation.total.toLocaleString("id-ID")}
+                      </td>
+                      {renderNotClearCells(nation, true)}
+                    </tr>
+                  </tfoot>
+                )}
+              </table>
+            </div>
+
+            <p className="border-t border-slate-100 px-3 py-1.5 text-[9px] font-semibold text-slate-400">
+              Merah = site not clear ≥ {BASELINE_CRITICAL_THRESHOLD}%, kuning ≥{" "}
+              {BASELINE_WARNING_THRESHOLD}%. WoW dibanding minggu lalu.
+            </p>
           </div>
         )}
       </div>
+
+      <BaselineTrendModal
+        region={trendRegion}
+        onClose={() => setTrendRegion(null)}
+      />
     </div>
   );
 }

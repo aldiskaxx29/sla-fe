@@ -13,6 +13,10 @@ import type {
   SiteDetailRow,
 } from "@/app/types/monday/slaPerformance.types";
 import type {
+  BaselineRegionRaw,
+  BaselineTrendResponse,
+} from "@/app/types/monday/baseline.types";
+import type {
   CtiRawRow,
   CtiTransitDetailResponse,
   CtiTransitDetailRow,
@@ -242,3 +246,17 @@ const RPJ_FILE: Record<RpjMetric, string> = {
 
 export const getRpjBenchmark = (metric: RpjMetric, signal?: AbortSignal) =>
   getMondayMonitoringFile<MagistaRow[]>(RPJ_FILE[metric], signal);
+
+/** Baseline Performance: site not clear latency & packet loss per region. */
+export const getBaselinePerformance = (signal?: AbortSignal) =>
+  getMondayMonitoringFile<BaselineRegionRaw[]>(
+    "assets/data/basedOnBaseline.json",
+    signal,
+  );
+
+/** Tren mingguan baseline per region, dipakai popup saat region diklik. */
+export const getBaselineTrend = (signal?: AbortSignal) =>
+  getMondayMonitoringFile<BaselineTrendResponse>(
+    "assets/data/chartBasedOnBaseline.json",
+    signal,
+  );

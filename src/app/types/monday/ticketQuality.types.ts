@@ -82,23 +82,3 @@ export type CtiRow = {
     latency: number;
   };
 };
-
-export type RegionPerformanceInfo = {
-  id: string;
-  name: string;
-  status: "Not Ach" | "Ach" | "Warning";
-  latency: {
-    value: number;
-    percentage: string;
-    wowValue: string;
-    wowTrend: "up" | "down";
-    wowColor: "green" | "red";
-  };
-  packetLoss: {
-    value: number;
-    percentage: string;
-    wowValue: string;
-    wowTrend: "up" | "down";
-    wowColor: "green" | "red";
-  };
-};

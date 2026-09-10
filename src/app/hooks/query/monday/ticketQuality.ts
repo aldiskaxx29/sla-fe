@@ -1,8 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import type {
-  CtiRow,
-  RegionPerformanceInfo,
-} from "@/app/types/monday/ticketQuality.types";
+import type { CtiRow } from "@/app/types/monday/ticketQuality.types";
 
 const mockCtiData: CtiRow[] = [
   {
@@ -81,82 +78,6 @@ const mockAwsData: CtiRow[] = [
 ];
 
 
-function getMockRegionPerformance(filter: string): RegionPerformanceInfo[] {
-  if (filter === "Critical") {
-    return [
-      {
-        id: "kalimantan",
-        name: "Kalimantan",
-        status: "Not Ach",
-        latency: { value: 520, percentage: "9%", wowValue: "12%", wowTrend: "up", wowColor: "red" },
-        packetLoss: { value: 2.115, percentage: "28%", wowValue: "31%", wowTrend: "up", wowColor: "red" },
-      },
-      {
-        id: "sulawesi",
-        name: "Sulawesi",
-        status: "Not Ach",
-        latency: { value: 480, percentage: "8%", wowValue: "15%", wowTrend: "down", wowColor: "green" },
-        packetLoss: { value: 1.845, percentage: "25%", wowValue: "18%", wowTrend: "up", wowColor: "red" },
-      },
-    ];
-  }
-
-  if (filter === "Warning") {
-    return [
-      {
-        id: "sumbagsel",
-        name: "Sumbagsel",
-        status: "Warning",
-        latency: { value: 395, percentage: "5%", wowValue: "8%", wowTrend: "down", wowColor: "green" },
-        packetLoss: { value: 0.942, percentage: "15%", wowValue: "10%", wowTrend: "down", wowColor: "green" },
-      },
-    ];
-  }
-
-  if (filter === "Good") {
-    return [
-      {
-        id: "sumbagut",
-        name: "Sumbagut",
-        status: "Ach",
-        latency: { value: 120, percentage: "1.5%", wowValue: "25%", wowTrend: "down", wowColor: "green" },
-        packetLoss: { value: 0.212, percentage: "3%", wowValue: "40%", wowTrend: "down", wowColor: "green" },
-      },
-      {
-        id: "jabar",
-        name: "Jabar",
-        status: "Ach",
-        latency: { value: 95, percentage: "1.1%", wowValue: "30%", wowTrend: "down", wowColor: "green" },
-        packetLoss: { value: 0.105, percentage: "2%", wowValue: "45%", wowTrend: "down", wowColor: "green" },
-      },
-    ];
-  }
-
-  return [
-    {
-      id: "sumbagsel",
-      name: "Sumbagsel",
-      status: "Not Ach",
-      latency: { value: 490, percentage: "7%", wowValue: "17%", wowTrend: "down", wowColor: "green" },
-      packetLoss: { value: 1.534, percentage: "24%", wowValue: "24%", wowTrend: "up", wowColor: "red" },
-    },
-    {
-      id: "kalimantan",
-      name: "Kalimantan",
-      status: "Not Ach",
-      latency: { value: 520, percentage: "9%", wowValue: "12%", wowTrend: "up", wowColor: "red" },
-      packetLoss: { value: 2.115, percentage: "28%", wowValue: "31%", wowTrend: "up", wowColor: "red" },
-    },
-    {
-      id: "sulawesi",
-      name: "Sulawesi",
-      status: "Not Ach",
-      latency: { value: 480, percentage: "8%", wowValue: "15%", wowTrend: "down", wowColor: "green" },
-      packetLoss: { value: 1.845, percentage: "25%", wowValue: "18%", wowTrend: "up", wowColor: "red" },
-    },
-  ];
-}
-
 export function useCtiMonitoringQuery(type: "CTI" | "AWS") {
   return useQuery<CtiRow[]>({
     queryKey: ["ticketQuality", "ctiMonitoring", type],
@@ -165,13 +86,3 @@ export function useCtiMonitoringQuery(type: "CTI" | "AWS") {
     },
   });
 }
-
-export function useRegionPerformanceQuery(filter: string) {
-  return useQuery<RegionPerformanceInfo[]>({
-    queryKey: ["ticketQuality", "regionPerformance", filter],
-    queryFn: async () => {
-      return getMockRegionPerformance(filter);
-    },
-  });
-}
-

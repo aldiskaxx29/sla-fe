@@ -9,6 +9,9 @@ export const mondayMonitoringKeys = {
     [...mondayMonitoringKeys.all, "trend-quality", kind, metric, scope] as const,
   ctiMonitoring: () => [...mondayMonitoringKeys.all, "cti-monitoring"] as const,
   rpjBenchmark: () => [...mondayMonitoringKeys.all, "rpj-benchmark"] as const,
+  baselinePerformance: () =>
+    [...mondayMonitoringKeys.all, "baseline-performance"] as const,
+  baselineTrend: () => [...mondayMonitoringKeys.all, "baseline-trend"] as const,
   ctiTransitDetail: (transit: string, verifier: string, range: string) =>
     [...mondayMonitoringKeys.all, "cti-transit-detail", transit, verifier, range] as const,
   slaDrilldown: (kind: string, region: string, level: string) =>
