@@ -1,6 +1,9 @@
 // Axios
 import axios from "axios";
 
+// Api
+import { apiRequest } from "@/app/api/base-url";
+
 // Types
 import type {
   AccessPlTotal,
@@ -17,6 +20,11 @@ import type {
   BaselineRegionRaw,
   BaselineTrendResponse,
 } from "@/app/types/monday/baseline.types";
+import type {
+  OnxDetailParams,
+  OnxDetailResponse,
+  OnxSummaryResponse,
+} from "@/app/types/monday/onxMonitoring.types";
 import type {
   CtiRawRow,
   CtiTransitDetailResponse,
@@ -266,3 +274,30 @@ export const getBaselineTrend = (signal?: AbortSignal) =>
     "assets/data/chartBasedOnBaseline.json",
     signal,
   );
+
+/**
+ * Monitoring ONX dilayani API qosmo yang baru (bukan PHP lama), jadi memakai
+ * `apiRequest` biasa: dev lewat proxy `/qosmo/api`, production ke host qosmo.
+ */
+export const getOnxSummary = (signal?: AbortSignal) =>
+  apiRequest<OnxSummaryResponse>({
+    method: "GET",
+    url: "monday-monitoring/onx/summary",
+    signal,
+  });
+
+/** Detail per IP. Tanpa `region` server mengirim seluruh region. */
+export const getOnxDetail = (
+  { region, provider, code }: OnxDetailParams,
+  signal?: AbortSignal,
+) =>
+  apiRequest<OnxDetailResponse>({
+    method: "GET",
+    url: "monday-monitoring/onx/detail",
+    params: {
+      ...(region ? { region } : {}),
+      ...(provider ? { provider } : {}),
+      ...(code ? { code } : {}),
+    },
+    signal,
+  });

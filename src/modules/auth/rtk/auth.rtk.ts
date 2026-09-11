@@ -34,31 +34,19 @@ export const isUserAccessPending = (
   user?: Partial<Pick<IAuthAuthenticatedUser, "level" | "level_user">> | null
 ) => !hasValue(user?.level) || !hasValue(user?.level_user);
 
-// export const getPostLoginRedirectPath = (): string => {
-//   try {
-//     const userData = localStorage.getItem("user_data");
-//     if (!userData) return "/msa";
+// /** Halaman pertama setelah login: pemilih dashboard (CNOP, FBB, EBIS, OLO). */
+export const LANDING_PATH = "/landing";
 
-//     const parsedData = JSON.parse(userData);
-//     // return parsedData?.nik === "826229" ? "/monday" : "/msa";
-//     const allowedNik = ["826229", "900116","870006"];
-
-//     return allowedNik.includes(parsedData?.nik)
-//       ? "/monday"
-//       : "/msa";
-//   } catch {
-//     return "/msa";
-//   }
-// };
-
-export const getPostLoginRedirectPath = (): string => {
+/**
+ * Tujuan tombol CNOP di landing: menu pertama yang boleh diakses user. Dulu
+ * ini dipakai langsung sebagai tujuan setelah login.
+ */
+export const getCnopRedirectPath = (): string => {
   try {
     const userData = localStorage.getItem("user_data");
     if (!userData) return "/msa";
 
     const parsedData = JSON.parse(userData);
-    if (isUserAccessPending(parsedData)) return "/confirm";
-
     const visibleMenus = getVisibleMenus(parsedData?.level);
 
     // Detect mobile device (HP)
@@ -83,6 +71,21 @@ export const getPostLoginRedirectPath = (): string => {
     return firstVisibleMenu ? getMenuRedirectPath(firstVisibleMenu) : "/msa";
   } catch {
     return "/msa";
+  }
+};
+
+/** Setelah login user diarahkan ke landing, bukan langsung ke dashboard. */
+export const getPostLoginRedirectPath = (): string => {
+  try {
+    const userData = localStorage.getItem("user_data");
+    if (!userData) return LANDING_PATH;
+
+    const parsedData = JSON.parse(userData);
+    if (isUserAccessPending(parsedData)) return "/confirm";
+
+    return LANDING_PATH;
+  } catch {
+    return LANDING_PATH;
   }
 };
 

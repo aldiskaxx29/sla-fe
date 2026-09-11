@@ -964,6 +964,8 @@ const TableParentChild: React.FC<TableParentChildProps> = ({
         const response = await getWeeklyMonth({
           query: {
             month: monthParam,
+            // Endpoint weekly-month yang baru memakai tahun + bulan langsung.
+            bulan: monthNum,
             year: yearParam,
             kpi: kpiParam,
             type: menuId,

@@ -21,13 +21,15 @@ import profile from "@/assets/profile.svg";
 
 // Router
 import { useLocation, useNavigate } from "react-router-dom";
-import { useLogoutMutation } from "@/modules/auth/rtk/auth.rtk";
+import { LANDING_PATH, useLogoutMutation } from "@/modules/auth/rtk/auth.rtk";
 
 import { toast } from "react-toastify";
 import type { RootState } from "@/plugins/redux";
 import {
   ADMIN_MENU_CONFIG,
   getVisibleMenus,
+  isMenuActive,
+  isMenuOptionActive,
   MENU_CONFIG,
   type MenuConfigItem,
 } from "@/app/config/menuConfig";
@@ -111,7 +113,7 @@ const AppLayoutDefault = () => {
   const visibleAdminMenus = getVisibleMenus(userRole, ADMIN_MENU_CONFIG);
 
   const isActiveMenu = (menu: MenuConfigItem) =>
-    menu.activePaths.some((path) => location.pathname.includes(path));
+    isMenuActive(menu, location.pathname);
 
   const renderMenuButton = (menu: MenuConfigItem) => (
     <Button
@@ -166,10 +168,11 @@ const AppLayoutDefault = () => {
             }`}
           >
             {menu.options?.map((option) => {
-              const optionActive =
-                option.value === "onx"
-                  ? location.pathname === "/onx" || location.pathname === "/onx/"
-                  : location.pathname?.includes(option.value);
+              const optionActive = isMenuOptionActive(
+                menu,
+                option,
+                location.pathname,
+              );
 
               return (
                 <p
@@ -206,10 +209,11 @@ const AppLayoutDefault = () => {
           </div>
           <div className="space-y-1.5 pl-2">
             {menu.options?.map((option) => {
-              const optionActive =
-                option.value === "onx"
-                  ? location.pathname === "/onx" || location.pathname === "/onx/"
-                  : location.pathname?.includes(option.value);
+              const optionActive = isMenuOptionActive(
+                menu,
+                option,
+                location.pathname,
+              );
               return (
                 <div
                   key={option.value}
@@ -270,7 +274,16 @@ const AppLayoutDefault = () => {
                   onClick={() => setMobileMenuOpen(true)}
                 />
               )}
-              <Image src={qosmo} alt="icon" width={128} preview={false} />
+              {/* Logo mengembalikan user ke pemilih dashboard. */}
+              <button
+                type="button"
+                onClick={() => navigate(LANDING_PATH)}
+                aria-label="Kembali ke landing page"
+                title="Kembali ke landing page"
+                className="flex cursor-pointer items-center border-0 bg-transparent p-0"
+              >
+                <Image src={qosmo} alt="icon" width={128} preview={false} />
+              </button>
             </div>
             <div className="flex items-center gap-2 md:gap-4">
               {visibleMenus.length > 0 && (

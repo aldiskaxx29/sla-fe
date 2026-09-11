@@ -17,7 +17,8 @@ const ALL_MAIN_MENU_ROLES = [
   USER_ROLES.MITRA,
 ];
 
-const normalizeRole = (role?: string | null) => role?.trim().toLowerCase() ?? "";
+const normalizeRole = (role?: string | null) =>
+  role?.trim().toLowerCase() ?? "";
 
 export type MenuType = "button" | "dropdown" | "external";
 
@@ -173,12 +174,12 @@ export const ADMIN_MENU_CONFIG: MenuConfigItem[] = [
 
 export const getVisibleMenus = (
   currentLevel?: string | null,
-  menuConfig: MenuConfigItem[] = MENU_CONFIG
+  menuConfig: MenuConfigItem[] = MENU_CONFIG,
 ) => {
   const normalizedLevel = normalizeRole(currentLevel);
 
   return menuConfig.filter((menu) =>
-    menu.allowedRoles.some((role) => normalizeRole(role) === normalizedLevel)
+    menu.allowedRoles.some((role) => normalizeRole(role) === normalizedLevel),
   );
 };
 
@@ -187,18 +188,68 @@ export const getMenuRedirectPath = (menu: MenuConfigItem) => {
   return `/${menu.options?.[0]?.value ?? "msa"}`;
 };
 
+/**
+ * Kandidat path untuk pencocokan menu. Route dashboard ada yang berbentuk
+ * `dashboard/:menuId/...`, jadi bagian setelah `dashboard/` ikut dijadikan kandidat.
+ */
+const getPathCandidates = (pathname: string) => {
+  const normalizedPath = pathname.replace(/^\/+/, "").replace(/\/+$/, "");
+  const withoutDashboardPrefix = normalizedPath.startsWith("dashboard/")
+    ? normalizedPath.slice("dashboard/".length)
+    : "";
+
+  return [
+    normalizedPath,
+    ...(withoutDashboardPrefix ? [withoutDashboardPrefix] : []),
+  ];
+};
+
+/** Cocok kalau path sama persis atau merupakan turunannya, bukan sekadar substring. */
+const matchesPath = (candidate: string, path: string) => {
+  const normalizedTarget = path.replace(/^\/+/, "").replace(/\/+$/, "");
+  return (
+    candidate === normalizedTarget ||
+    candidate.startsWith(`${normalizedTarget}/`)
+  );
+};
+
+export const isMenuActive = (menu: MenuConfigItem, pathname: string) => {
+  const candidates = getPathCandidates(pathname);
+  const paths = [...(menu.path ? [menu.path] : []), ...menu.activePaths];
+
+  return candidates.some((candidate) =>
+    paths.some((path) => matchesPath(candidate, path)),
+  );
+};
+
+/**
+ * Opsi paling spesifik yang menang, mis. di `/onx/city-performance` yang aktif
+ * "City Performance", bukan "Dashboard" (`onx`).
+ */
+export const isMenuOptionActive = (
+  menu: MenuConfigItem,
+  option: MenuOption,
+  pathname: string,
+) => {
+  const candidates = getPathCandidates(pathname);
+  const matched = (menu.options ?? []).filter((menuOption) =>
+    candidates.some((candidate) => matchesPath(candidate, menuOption.value)),
+  );
+
+  if (!matched.length) return false;
+
+  const mostSpecific = matched.reduce((longest, current) =>
+    current.value.length > longest.value.length ? current : longest,
+  );
+
+  return mostSpecific.value === option.value;
+};
+
 export const getMenuByPath = (
   pathname: string,
-  menuConfig: MenuConfigItem[] = [...MENU_CONFIG, ...ADMIN_MENU_CONFIG]
+  menuConfig: MenuConfigItem[] = [...MENU_CONFIG, ...ADMIN_MENU_CONFIG],
 ) => {
-  const normalizedPath = pathname.replace(/^\/+/, "");
-  const [, dashboardMenuId] = normalizedPath.split("/");
-  const pathCandidates = [
-    normalizedPath,
-    ...(normalizedPath.startsWith("dashboard/") && dashboardMenuId
-      ? [dashboardMenuId]
-      : []),
-  ];
+  const pathCandidates = getPathCandidates(pathname);
 
   return menuConfig.find((menu) => {
     const menuPath = menu.path?.replace(/^\/+/, "");
@@ -210,9 +261,7 @@ export const getMenuByPath = (
     ];
 
     return pathCandidates.some((candidate) =>
-      paths.some(
-        (path) => candidate === path || candidate.startsWith(`${path}/`)
-      )
+      paths.some((path) => matchesPath(candidate, path)),
     );
   });
 };

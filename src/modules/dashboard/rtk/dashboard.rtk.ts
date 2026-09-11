@@ -168,6 +168,41 @@ const mapNewToOldFormat = (data: any, level: "nation" | "region" | "witel"): any
   });
 };
 
+/**
+ * Endpoint weekly-month yang baru mengirim satu baris per region dengan
+ * `weekly[]`. Modal realisasi masih membaca `region_tsel`, `target`,
+ * `ach_<bulan>_<mingguKe>` dan `ach_fm_<bulan>`, jadi dipetakan di sini.
+ */
+const mapWeeklyMonthRows = (rows: any[]) => {
+  if (!Array.isArray(rows)) return [];
+
+  return rows.map((row) => {
+    const bulan = Number(row?.bulan) || 0;
+
+    const mapped: Record<string, unknown> = {
+      ...row,
+      region_tsel: row?.region ?? row?.region_tsel,
+      target: row?.target,
+    };
+
+    if (bulan > 0) {
+      mapped[`ach_fm_${bulan}`] = row?.achievement;
+    }
+
+    if (Array.isArray(row?.weekly)) {
+      row.weekly.forEach((week: any) => {
+        if (bulan <= 0 || week?.week_month === undefined) return;
+
+        mapped[`ach_${bulan}_${week.week_month}`] = week.value;
+        mapped[`ach_${bulan}_${week.week_month}_${week.week_year}`] =
+          week.value;
+      });
+    }
+
+    return mapped;
+  });
+};
+
 export const dashboardApi = emptySplitApi.injectEndpoints({
   endpoints: (builder) => ({
     SCApi_fethcData: builder.query({
@@ -481,13 +516,36 @@ export const dashboardApi = emptySplitApi.injectEndpoints({
     }),
     weeklyMonth: builder.query({
       query: (payload) => {
+        if (payload?.query?.type === "msa") {
+          return {
+            method: "GET",
+            url: "achievement-wisa/not-comply/weekly-month",
+            params: {
+              parameter_key: mapParameterToKey(payload?.query?.kpi),
+              tahun:
+                payload?.query?.year ||
+                payload?.query?.tahun ||
+                new Date().getFullYear(),
+              bulan: payload?.query?.bulan ?? payload?.query?.monthNum,
+            },
+          };
+        }
         return {
           method: "GET",
           url: "weeklyMonth",
           params: payload?.query,
         };
       },
-      transformResponse: (response: unknown) => {
+      transformResponse: (response: any, _meta: any, arg: any) => {
+        if (arg?.query?.type === "msa") {
+          return {
+            ...response,
+            data: {
+              before: mapWeeklyMonthRows(response?.data?.before),
+              after: mapWeeklyMonthRows(response?.data?.after),
+            },
+          };
+        }
         return response;
       },
     }),

@@ -14,6 +14,9 @@ export const mondayMonitoringKeys = {
   baselineTrend: () => [...mondayMonitoringKeys.all, "baseline-trend"] as const,
   ctiTransitDetail: (transit: string, verifier: string, range: string) =>
     [...mondayMonitoringKeys.all, "cti-transit-detail", transit, verifier, range] as const,
+  onxSummary: () => [...mondayMonitoringKeys.all, "onx-summary"] as const,
+  onxDetail: (region: string, provider: string, code: string) =>
+    [...mondayMonitoringKeys.all, "onx-detail", region, provider, code] as const,
   slaDrilldown: (kind: string, region: string, level: string) =>
     [...mondayMonitoringKeys.all, "sla-drilldown", kind, region, level] as const,
 };

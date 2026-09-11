@@ -1,6 +1,5 @@
 import { Button, Image, Skeleton } from "antd";
 import { Component, useEffect, useState } from "react";
-import * as XLSX from "xlsx";
 
 import warningIcon from "@/assets/warning.svg";
 import checkIcon from "@/assets/check.svg";
@@ -12,6 +11,68 @@ import { TableParentChild } from "@/modules/dashboard/componets/TableParentChild
 import AppDropdown from "@/app/components/AppDropdown";
 import { useDashboard } from "@/modules/dashboard/hooks/dashboard.hooks";
 import { toast } from "react-toastify";
+
+// Export XLS tabel WISA Not Comply dilayani service PQM report. Di production
+// service-nya sudah ada di qosmo pada path /pqm-reoprt (ejaan sesuai server),
+// jadi satu origin dengan aplikasi; saat dev dilewatkan proxy /pqm-api
+// (vite.config.ts) supaya tidak kena CORS.
+const PQM_PRODUCTION_BASE_URL = "https://qosmo.telkom.co.id/pqm-reoprt";
+const PQM_DOWNLOAD_PATH = "/api/pqm-report/download";
+
+const configuredPqmBaseUrl = import.meta.env.VITE_PQM_API_BASE_URL?.replace(
+  /\/+$/,
+  "",
+);
+
+const isAbsoluteUrl = (value?: string) => /^https?:\/\//i.test(value ?? "");
+
+/**
+ * Basis relatif seperti `/pqm-api` hanya berarti saat dev (ada proxy vite). Di
+ * production path itu tidak diteruskan ke mana-mana, jadi diabaikan dan
+ * langsung memakai URL service-nya — kecuali env memang diisi URL absolut.
+ */
+const PQM_API_BASE_URL = import.meta.env.DEV
+  ? configuredPqmBaseUrl || "/pqm-api"
+  : isAbsoluteUrl(configuredPqmBaseUrl)
+    ? (configuredPqmBaseUrl as string)
+    : PQM_PRODUCTION_BASE_URL;
+
+/** Basis production tetap jadi cadangan kalau basis utama gagal. */
+const PQM_DOWNLOAD_URLS = Array.from(
+  new Set(
+    [PQM_API_BASE_URL, PQM_PRODUCTION_BASE_URL].map(
+      (base) => `${base}${PQM_DOWNLOAD_PATH}`,
+    ),
+  ),
+);
+
+const parseFilenameFromDisposition = (disposition: string | null) => {
+  if (!disposition) return null;
+
+  const match = disposition.match(/filename\*?=(?:UTF-8'')?"?([^";]+)"?/i);
+  return match ? decodeURIComponent(match[1].trim()) : null;
+};
+
+/** File xlsx; kalau server balas HTML/kosong berarti path-nya salah sasaran. */
+const isSpreadsheetResponse = (contentType: string | null, size: number) =>
+  size > 0 &&
+  /spreadsheet|officedocument|excel|octet-stream/i.test(contentType ?? "");
+
+/** Cadangan terakhir: biarkan browser yang mengunduh lewat tab baru. */
+const downloadViaBrowser = () => {
+  const url = `${PQM_PRODUCTION_BASE_URL}${PQM_DOWNLOAD_PATH}`;
+  const popup = window.open(url, "_blank", "noopener");
+  if (popup) return;
+
+  // Popup diblokir: anchor tersembunyi, dilepas setelah navigasinya jalan.
+  const link = document.createElement("a");
+  link.href = url;
+  link.target = "_blank";
+  link.rel = "noopener";
+  document.body.appendChild(link);
+  link.click();
+  window.setTimeout(() => link.remove(), 0);
+};
 
 class TableFallbackBoundary extends Component<
   { children: React.ReactNode },
@@ -281,21 +342,56 @@ const MSAmenu = ({
   };
 
   const handleDownloadMsa = async () => {
+    // Server butuh ~8 detik menyiapkan file, jadi tombolnya dikunci dulu.
+    setExportLoading(true);
+
     try {
-      setExportLoading(true);
-      await new Promise((resolve) => requestAnimationFrame(resolve));
+      let lastError: unknown = null;
 
-      const workbook = XLSX.utils.book_new();
-      const worksheet = XLSX.utils.json_to_sheet(
-        dataWithIndex(msaRows).map((row) => ({
-          ...row,
-        })),
-      );
+      for (const url of PQM_DOWNLOAD_URLS) {
+        try {
+          const response = await fetch(url);
 
-      XLSX.utils.book_append_sheet(workbook, worksheet, "MSA");
-      XLSX.writeFile(workbook, "MSA_Report.xlsx");
+          if (!response.ok) {
+            throw new Error(`Request gagal dengan status ${response.status}`);
+          }
+
+          const blob = await response.blob();
+          const contentType = response.headers.get("content-type") || blob.type;
+
+          if (!isSpreadsheetResponse(contentType, blob.size)) {
+            throw new Error(
+              `Respons bukan file XLSX (${contentType || "tanpa content-type"}, ${blob.size} byte)`,
+            );
+          }
+
+          const fallbackName = `Report_PQM_${new Date().toISOString().slice(0, 10)}.xlsx`;
+          const filename =
+            parseFilenameFromDisposition(
+              response.headers.get("content-disposition"),
+            ) || fallbackName;
+
+          const objectUrl = window.URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = objectUrl;
+          link.download = filename;
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          window.URL.revokeObjectURL(objectUrl);
+
+          return;
+        } catch (error) {
+          console.warn(`Unduh Report PQM gagal lewat ${url}:`, error);
+          lastError = error;
+        }
+      }
+
+      throw lastError ?? new Error("Report PQM tidak bisa diunduh");
     } catch (error) {
-      console.error("Failed to export MSA XLS:", error);
+      console.error("Gagal mengunduh Report PQM:", error);
+      downloadViaBrowser();
+      toast.info("Unduhan Report PQM dilanjutkan lewat tab browser.");
     } finally {
       setExportLoading(false);
     }

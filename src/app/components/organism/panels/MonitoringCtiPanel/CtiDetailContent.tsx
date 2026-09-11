@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import ReactECharts from "echarts-for-react";
 import type { EChartsOption } from "echarts";
-import { LuChevronLeft, LuChevronRight, LuSearch, LuX } from "react-icons/lu";
+import { LuChevronLeft, LuChevronRight, LuSearch } from "react-icons/lu";
 
 import { useCtiTransitDetailQuery } from "@/app/hooks/query/monday/trendQuality";
 import type { CtiRow } from "@/app/types/monday/ticketQuality.types";
@@ -12,13 +12,11 @@ export interface CtiDetailTarget {
   verifier: CtiVerifier;
 }
 
-interface CtiDetailModalProps {
-  open: boolean;
+interface CtiDetailContentProps {
   rows: CtiRow[];
   /** Terisi kalau popup dibuka langsung ke detail satu transit. */
   target: CtiDetailTarget | null;
   onSelectTarget: (target: CtiDetailTarget | null) => void;
-  onClose: () => void;
 }
 
 const VERIFIERS: { key: "bds" | "btc" | "pink"; label: CtiVerifier }[] = [
@@ -29,13 +27,12 @@ const VERIFIERS: { key: "bds" | "btc" | "pink"; label: CtiVerifier }[] = [
 
 const today = () => new Date().toISOString().slice(0, 10);
 
-export function CtiDetailModal({
-  open,
+/** Isi popup untuk mode CTI: daftar PE transit dan tren per transit. */
+export function CtiDetailContent({
   rows,
   target,
   onSelectTarget,
-  onClose,
-}: CtiDetailModalProps) {
+}: CtiDetailContentProps) {
   const [search, setSearch] = useState("");
   const [startDate, setStartDate] = useState(today);
   const [endDate, setEndDate] = useState(today);
@@ -44,18 +41,17 @@ export function CtiDetailModal({
     target ? { ...target, startDate, endDate } : null,
   );
 
+  // Escape mundur dari drilldown dulu; menutup popup diurus shell-nya.
   useEffect(() => {
-    if (!open) return;
+    if (!target) return;
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") return;
-      if (target) onSelectTarget(null);
-      else onClose();
+      if (event.key === "Escape") onSelectTarget(null);
     };
 
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [open, target, onSelectTarget, onClose]);
+    document.addEventListener("keydown", handleKeyDown, true);
+    return () => document.removeEventListener("keydown", handleKeyDown, true);
+  }, [target, onSelectTarget]);
 
   const filteredRows = useMemo(() => {
     const keyword = search.trim().toLowerCase();
@@ -132,72 +128,49 @@ export function CtiDetailModal({
     [points],
   );
 
-  if (!open) return null;
-
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-sm"
-      role="presentation"
-      onClick={onClose}
-    >
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-label="Monitoring CTI"
-        className="flex max-h-[82vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl"
-        onClick={(event) => event.stopPropagation()}
-      >
-        <header className="flex items-start justify-between gap-4 border-b border-slate-100 px-5 py-4">
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-bold text-slate-400">
-              <button
-                type="button"
-                onClick={() => onSelectTarget(null)}
-                className={`transition-colors ${
-                  target
-                    ? "cursor-pointer hover:text-indigo-500"
-                    : "cursor-default text-[#213c52]"
-                }`}
-              >
-                Monitoring CTI
-              </button>
-              {target && (
-                <>
-                  <LuChevronRight size={11} />
-                  <span className="text-[#213c52]">
-                    {target.transit} · {target.verifier}
-                  </span>
-                </>
-              )}
-            </div>
-            <p className="mt-0.5 text-[11px] font-medium text-slate-500">
-              {target
-                ? "Latency per jam dibanding baseline"
-                : "Seluruh PE transit — klik nilai latency untuk melihat trennya"}
-            </p>
-          </div>
-
-          <div className="flex shrink-0 items-center gap-1">
-            {target && (
-              <button
-                type="button"
-                onClick={() => onSelectTarget(null)}
-                className="flex cursor-pointer items-center gap-1 rounded-full border border-slate-200 px-2.5 py-1 text-[10px] font-bold text-slate-500 transition-colors hover:border-slate-300 hover:text-[#213c52]"
-              >
-                <LuChevronLeft size={11} />
-                Kembali
-              </button>
-            )}
+    <>
+      <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-5 py-3">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-bold text-slate-400">
             <button
               type="button"
-              onClick={onClose}
-              aria-label="Tutup"
-              className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+              onClick={() => onSelectTarget(null)}
+              className={`transition-colors ${
+                target
+                  ? "cursor-pointer hover:text-indigo-500"
+                  : "cursor-default text-[#213c52]"
+              }`}
             >
-              <LuX size={16} />
+              Seluruh PE transit
             </button>
+            {target && (
+              <>
+                <LuChevronRight size={11} />
+                <span className="text-[#213c52]">
+                  {target.transit} · {target.verifier}
+                </span>
+              </>
+            )}
           </div>
-        </header>
+          <p className="mt-0.5 text-[11px] font-medium text-slate-500">
+            {target
+              ? "Latency per jam dibanding baseline"
+              : "Klik nilai latency untuk melihat trennya"}
+          </p>
+        </div>
+
+        {target && (
+          <button
+            type="button"
+            onClick={() => onSelectTarget(null)}
+            className="flex shrink-0 cursor-pointer items-center gap-1 rounded-full border border-slate-200 px-2.5 py-1 text-[10px] font-bold text-slate-500 transition-colors hover:border-slate-300 hover:text-[#213c52]"
+          >
+            <LuChevronLeft size={11} />
+            Kembali
+          </button>
+        )}
+      </div>
 
         {target ? (
           <>
@@ -410,11 +383,10 @@ export function CtiDetailModal({
             <footer className="border-t border-slate-100 bg-slate-50/60 px-5 py-2.5 text-[10px] font-semibold text-slate-500">
               Menampilkan {filteredRows.length} dari {rows.length} PE transit
             </footer>
-          </>
-        )}
-      </div>
-    </div>
+        </>
+      )}
+    </>
   );
 }
 
-export default CtiDetailModal;
+export default CtiDetailContent;

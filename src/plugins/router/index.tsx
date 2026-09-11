@@ -1,13 +1,21 @@
 import { lazy } from "react";
 import { useRoutes } from "react-router-dom";
 
-import { AppLayoutEmpty, AppLayoutAuth, AppLayoutDefault } from "@/app/layout";
+import {
+  AppLayoutEmpty,
+  AppLayoutAuth,
+  AppLayoutDefault,
+  AppLayoutFbb,
+  AppLayoutProfile,
+} from "@/app/layout";
 import { useAppRouter } from "@/app/router/app.router";
 import { useRekonsiliasiRouter } from "@/app/router/rekonsiliasi.router";
 import { useAuthRouter } from "@/modules/auth/router/auth.router";
 import { useDashboardRouter } from "@/modules/dashboard/router/dashboard.router";
 import { useSiteRouter } from "@/modules/site/router/site.router";
 import { useMondayRouter } from "@/app/router/monday.router";
+import { useFbbRouter } from "@/app/router/fbb.router";
+import { useLandingRouter } from "@/app/router/landing.router";
 import { useDailyMonitoringRouter } from "@/modules/daily-monitoring/router/dailyMonitoring.router";
 // import { useQualityHealthinessRouter } from "@/modules/quality-healthiness/router/quality-healthiness.router";
 import { useOneRouter } from "@/modules/one/router/one.router";
@@ -32,6 +40,8 @@ const useRouter = () => {
   const site = useSiteRouter();
   const rekonsiliasi = useRekonsiliasiRouter();
   const monday = useMondayRouter();
+  const fbb = useFbbRouter();
+  const landing = useLandingRouter();
   const dailyMonitoring = useDailyMonitoringRouter();
   // const qualityHealthiness = useQualityHealthinessRouter();
   const elibrary = useELibraryRouter();
@@ -78,6 +88,24 @@ const useRouter = () => {
           ],
         },
         {
+          // Landing dan dashboard "coming soon" tidak memakai header CNOP.
+          path: "",
+          element: <AppLayoutEmpty />,
+          children: [...landing],
+        },
+        {
+          // FBB punya shell sendiri: sidebar menu FBB + header judul halaman.
+          path: "",
+          element: <AppLayoutFbb />,
+          children: [...fbb],
+        },
+        {
+          // Profil tidak butuh menu CNOP, cukup tombol kembali ke landing.
+          path: "",
+          element: <AppLayoutProfile />,
+          children: [...profile],
+        },
+        {
           path: "",
           element: <AppLayoutDefault />,
           children: [
@@ -95,7 +123,6 @@ const useRouter = () => {
             ...dashboardTA,
             ...user,
             ...approver,
-            ...profile,
             ...acessprediction,
             ...resumerca,
           ],
