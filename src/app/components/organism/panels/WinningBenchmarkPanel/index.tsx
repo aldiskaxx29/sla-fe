@@ -62,7 +62,7 @@ export function WinningBenchmarkPanel() {
         return (
           <td
             key={`${metric.key}-${key}`}
-            className={`border-l border-slate-100 px-1.5 py-2 text-center tabular-nums ${
+            className={`border-l border-slate-100 px-1.5 py-1 text-center tabular-nums ${
               isChild ? "text-[10px]" : "text-[11px]"
             }`}
           >
@@ -96,22 +96,20 @@ export function WinningBenchmarkPanel() {
     // menambah tinggi kartu alih-alih memunculkan scroll.
     <div className="flex h-full min-h-0 flex-col rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
       <header className="mb-2">
-        <h2 className="text-xs font-extrabold text-[#213c52]">
+        <h2 className="text-sm font-extrabold text-[#213c52]">
           Winning Benchmark RPJ Customer Experience
         </h2>
       </header>
 
-      {/* `min-h-0` membuat wadah ini boleh lebih pendek dari isinya, jadi saat
-          baris di-expand tabelnya yang discroll — tinggi kartu tidak berubah.
-          `h-full` pada tabel tetap dipakai supaya saat isinya sedikit, sisa
-          ruang dibagi rata ke tiap baris. */}
-      <div className="flex min-h-0 flex-1 overflow-auto">
-        <table className="h-full w-full min-w-[620px] border-collapse text-left">
+      {/* Tinggi dikunci 5 baris (kepala 27px + 24px, baris 30px); selebihnya
+          discroll, termasuk baris anak yang muncul saat area di-expand. */}
+      <div className="flex max-h-[201px] min-h-0 flex-1 overflow-auto">
+        <table className="w-full min-w-[620px] border-collapse text-left">
           <thead>
             <tr>
               <th
                 rowSpan={2}
-                className="sticky top-0 z-10 w-[132px] bg-white px-2 py-2 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400 shadow-[inset_0_-1px_0_#E2E8F0]"
+                className="sticky top-0 z-10 w-[132px] bg-white px-2 py-1.5 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400 shadow-[inset_0_-1px_0_#E2E8F0]"
               >
                 Area
               </th>
@@ -119,7 +117,7 @@ export function WinningBenchmarkPanel() {
                 <th
                   key={metric.key}
                   colSpan={OPERATORS.length}
-                  className="sticky top-0 z-10 border-l border-slate-100 bg-white px-2 py-2 text-center text-[10px] font-bold uppercase tracking-wide text-slate-400 shadow-[inset_0_-1px_0_#E2E8F0]"
+                  className="sticky top-0 z-10 border-l border-slate-100 bg-white px-2 py-1.5 text-center text-[10px] font-bold uppercase tracking-wide text-slate-400 shadow-[inset_0_-1px_0_#E2E8F0]"
                 >
                   {metric.label}
                 </th>
@@ -131,7 +129,7 @@ export function WinningBenchmarkPanel() {
                   <th
                     key={`${metric.key}-${operator.key}`}
                     title={operator.label}
-                    className="sticky top-[33px] z-10 border-l border-slate-100 bg-white px-1 py-1.5 shadow-[inset_0_-1px_0_#E2E8F0]"
+                    className="sticky top-[27px] z-10 border-l border-slate-100 bg-white px-1 py-1 shadow-[inset_0_-1px_0_#E2E8F0]"
                   >
                     <img
                       src={operator.icon}
@@ -151,7 +149,7 @@ export function WinningBenchmarkPanel() {
               return (
                 <Fragment key={row.id}>
                   <tr className="border-b border-slate-100 transition-colors hover:bg-slate-50/40">
-                    <td className="px-2 py-2">
+                    <td className="px-2 py-1">
                       <div className="flex items-center gap-1.5">
                         {row.children.length ? (
                           <button
@@ -183,7 +181,7 @@ export function WinningBenchmarkPanel() {
                         key={child.id}
                         className="border-b border-slate-100 bg-slate-50/40"
                       >
-                        <td className="py-1.5 pl-8 pr-2">
+                        <td className="py-1 pl-8 pr-2">
                           <span className="truncate text-[10px] font-semibold uppercase tracking-wide text-slate-500">
                             {child.label}
                           </span>

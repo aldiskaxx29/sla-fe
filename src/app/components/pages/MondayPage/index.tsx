@@ -9,6 +9,7 @@ import { SelectMenu } from "@/app/components/molecules/SelectMenu";
 
 // Organism
 import { SlaPerformancePanel } from "@/app/components/organism/panels/SlaPerformancePanel";
+import { MonitoringCtiPanel } from "@/app/components/organism/panels/MonitoringCtiPanel";
 import { TrendPerformancePanel } from "@/app/components/organism/panels/TrendPerformancePanel";
 import { BaselinePerformancePanel } from "@/app/components/organism/panels/BaselinePerformancePanel";
 import { WinningBenchmarkPanel } from "@/app/components/organism/panels/WinningBenchmarkPanel";
@@ -70,18 +71,30 @@ const MondayPage = () => {
       rightContent={rightContent}
       className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-12"
     >
-      <div className="col-span-12 flex flex-col lg:col-span-4">
-        <SlaPerformancePanel />
+      {/* Kedua kolom sama tinggi. Kartu dibungkus `shrink-0` supaya `h-full`
+          di dalamnya jatuh ke tinggi isi, bukan tinggi kolom — kecuali kartu
+          Trend yang sengaja dibiarkan memanjang mengisi sisa ruang. */}
+      <div className="col-span-12 flex flex-col gap-4 lg:col-span-8">
+        <div className="shrink-0">
+          <SlaPerformancePanel />
+        </div>
+        <div className="flex min-h-0 flex-1 flex-col">
+          <TrendPerformancePanel />
+        </div>
       </div>
 
       <div className="col-span-12 flex flex-col gap-4 lg:col-span-4">
-        <TrendPerformancePanel />
+        <div className="shrink-0">
+          <MonitoringCtiPanel />
+        </div>
+        <div className="shrink-0">
+          <BaselinePerformancePanel />
+        </div>
+        <div className="shrink-0">
+          <WinningBenchmarkPanel />
+        </div>
       </div>
 
-      <div className="col-span-12 flex flex-col gap-4 lg:col-span-4">
-        <BaselinePerformancePanel />
-        <WinningBenchmarkPanel />
-      </div>
     </MondayTemplate>
   );
 };

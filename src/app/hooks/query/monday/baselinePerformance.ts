@@ -18,15 +18,14 @@ import type {
   BaselineTrendSeries,
 } from "@/app/types/monday/baseline.types";
 
-/** Ambang status mengikuti penandaan merah di monday monitoring lama (>= 20%). */
-export const BASELINE_CRITICAL_THRESHOLD = 20;
-export const BASELINE_WARNING_THRESHOLD = 10;
+/**
+ * Site clear minimal 80%, jadi region dianggap not achieve begitu site not
+ * clear-nya menyentuh 20%. Hanya ada dua status: achieve dan not achieve.
+ */
+export const BASELINE_NOT_ACHIEVE_THRESHOLD = 20;
 
-const toStatus = (worstPersen: number): BaselineStatus => {
-  if (worstPersen >= BASELINE_CRITICAL_THRESHOLD) return "critical";
-  if (worstPersen >= BASELINE_WARNING_THRESHOLD) return "warning";
-  return "good";
-};
+const toStatus = (worstPersen: number): BaselineStatus =>
+  worstPersen >= BASELINE_NOT_ACHIEVE_THRESHOLD ? "not-achieve" : "achieve";
 
 const toRow = (raw: BaselineRegionRaw): BaselineRegionRow => {
   const worstPersen = Math.max(Number(raw.latPersen) || 0, Number(raw.pacPersen) || 0);

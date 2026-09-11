@@ -36,23 +36,28 @@ body,
   font-family: "Poppins" !important;
 }
 
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
+/* Bawaan template Vite. Ditaruh di `@layer base` supaya utility Tailwind
+   (mis. `bg-blue-500` pada tombol tab aktif) tidak kalah oleh aturan ini —
+   CSS tanpa layer selalu menang atas utility yang ada di layer. */
+@layer base {
+  button:hover {
+    border-color: #646cff;
+  }
+  button:focus,
+  button:focus-visible {
+    outline: 4px auto -webkit-focus-ring-color;
+  }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
+  @media (prefers-color-scheme: light) {
+    :root {
+      background-color: #ffffff;
+    }
+    a:hover {
+      color: #747bff;
+    }
+    button {
+      background-color: #f9f9f9;
+    }
   }
 }
 

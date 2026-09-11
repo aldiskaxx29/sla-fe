@@ -147,14 +147,12 @@ export function BaselineTrendModal({ region, onClose }: BaselineTrendModalProps)
               </h2>
               <span
                 className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
-                  region.status === "critical"
+                  region.status === "not-achieve"
                     ? "bg-red-50 text-red-500"
-                    : region.status === "warning"
-                      ? "bg-amber-50 text-amber-600"
-                      : "bg-emerald-50 text-emerald-600"
+                    : "bg-emerald-50 text-emerald-600"
                 }`}
               >
-                {region.status}
+                {region.status === "not-achieve" ? "Not Achieve" : "Achieve"}
               </span>
             </div>
             <p className="mt-0.5 text-[11px] font-medium text-slate-500">

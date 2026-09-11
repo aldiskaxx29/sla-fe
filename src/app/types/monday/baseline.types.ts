@@ -13,7 +13,7 @@ export interface BaselineRegionRaw {
   pacWow: number;
 }
 
-export type BaselineStatus = "critical" | "warning" | "good";
+export type BaselineStatus = "achieve" | "not-achieve";
 
 export interface BaselineRegionRow extends BaselineRegionRaw {
   status: BaselineStatus;
