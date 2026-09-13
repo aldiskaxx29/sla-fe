@@ -25,7 +25,7 @@ export const FBB_ENDPOINTS = {
   yearWeek: "onx-dashboard/yearweek",
   listYearWeek: "fbb/list-yearweek",
   listMetrics: "fbb/list-metrics",
-  listKpi: "fbb/list-kpi",
+  listKpi: "fbb/onx/list-kpi",
   listLevel: "fbb/list-level",
   listIndihomeType: "fbb/list-indihome-type",
   nationMetricsKpi: "fbb/onx/nation-metrics-kpi",
@@ -36,6 +36,7 @@ export const FBB_ENDPOINTS = {
   ooklaMapsRegionStatus: "fbb/ookla/maps-region-status",
   ooklaLoseRegionKabupaten: "fbb/ookla/lose-region-kabupaten",
   mapsRegionStatus: "fbb/onx/maps-region-status",
+  loseRegion: "fbb/onx/lose-region",
   loseRegionKabupaten: "fbb/onx/lose-region-kabupaten",
 } as const;
 
@@ -69,8 +70,13 @@ export const getFbbYearWeekOptions = (signal?: AbortSignal) =>
 export const getFbbMetricsOptions = (signal?: AbortSignal) =>
   getFbbList<FbbMetricsOption>(FBB_ENDPOINTS.listMetrics, signal);
 
-export const getFbbKpiOptions = (signal?: AbortSignal) =>
-  getFbbList<FbbKpiOption>(FBB_ENDPOINTS.listKpi, signal);
+export const getFbbKpiOptions = (metrics?: string, signal?: AbortSignal) =>
+  apiRequest<FbbListResponse<FbbKpiOption>>({
+    method: "GET",
+    url: FBB_ENDPOINTS.listKpi,
+    params: metrics ? { metrics } : {},
+    signal,
+  });
 
 export const getFbbLevelOptions = (signal?: AbortSignal) =>
   getFbbList<FbbLevelOption>(FBB_ENDPOINTS.listLevel, signal);
@@ -103,7 +109,7 @@ export const getFbbNationMetricsKpi = (
       ...(metrics ? { metrics } : {}),
       ...(kpi ? { kpi } : {}),
       page: page ?? 1,
-      per_page: perPage ?? 5,
+      per_page: perPage ?? 10,
     },
     signal,
   });
@@ -127,11 +133,42 @@ export const getFbbMapsRegionStatus = (
 export interface FbbLoseRegionParams extends FbbNationMetricsParams {
   /** Nama region/kabupaten yang sedang dibuka detailnya. */
   areaName?: string;
+  /** Nama region untuk endpoint ONX terbaru. */
+  regionNew?: string;
 }
+
+/** Detail agregat per region beserta deret trend-nya. */
+export const getFbbLoseRegion = (
+  { yearweek, indihomeType, metrics, kpi, page, perPage }: FbbLoseRegionParams,
+  signal?: AbortSignal,
+) =>
+  apiRequest<FbbLoseRegionResponse>({
+    method: "GET",
+    url: FBB_ENDPOINTS.loseRegion,
+    params: {
+      ...(yearweek ? { yearweek } : {}),
+      ...(indihomeType ? { indihome_type: indihomeType } : {}),
+      ...(metrics ? { metrics } : {}),
+      ...(kpi ? { kpi } : {}),
+      page: page ?? 1,
+      per_page: perPage ?? 100,
+    },
+    signal,
+  });
 
 /** Detail per kabupaten beserta deret trend-nya. */
 export const getFbbLoseRegionKabupaten = (
-  { yearweek, level, indihomeType, areaName, kpi, page, perPage }: FbbLoseRegionParams,
+  {
+    yearweek,
+    level,
+    indihomeType,
+    metrics,
+    areaName,
+    regionNew,
+    kpi,
+    page,
+    perPage,
+  }: FbbLoseRegionParams,
   signal?: AbortSignal,
 ) =>
   apiRequest<FbbLoseRegionResponse>({
@@ -141,10 +178,12 @@ export const getFbbLoseRegionKabupaten = (
       ...(yearweek ? { yearweek } : {}),
       ...(level ? { level } : {}),
       ...(indihomeType ? { indihome_type: indihomeType } : {}),
+      ...(metrics ? { metrics } : {}),
       ...(areaName ? { area_name: areaName } : {}),
+      ...(regionNew ? { region_new: regionNew } : {}),
       ...(kpi ? { kpi } : {}),
       page: page ?? 1,
-      per_page: perPage ?? 5,
+      per_page: perPage ?? 100,
     },
     signal,
   });
@@ -257,4 +296,3 @@ export const getFbbOoklaLoseRegionKabupaten = (
     },
     signal,
   });
-

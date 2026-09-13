@@ -7,6 +7,7 @@ import {
   useFbbIndihomeTypeOptionsQuery,
   useFbbKpiOptionsQuery,
   useFbbLoseRegionQuery,
+  useFbbLoseRegionSummaryQuery,
   useFbbMapRegionStatusQuery,
   useFbbMetricsOptionsQuery,
   useFbbNationMetricsQuery,
@@ -24,7 +25,10 @@ import { FbbLoseRegionTable } from "@/app/components/organism/tables/FbbLoseRegi
 import { FbbNationMetricsTable } from "@/app/components/organism/tables/FbbNationMetricsTable";
 
 // Types
-import type { FbbOnxFilterState } from "@/app/types/fbb/onx.types";
+import type {
+  FbbNationMetricRow,
+  FbbOnxFilterState,
+} from "@/app/types/fbb/onx.types";
 
 // Utils
 import { getStoredUserName, toInitials } from "@/app/utils/user.utils";
@@ -32,8 +36,9 @@ import { getStoredUserName, toInitials } from "@/app/utils/user.utils";
 type ViewTab = "maps" | "detail";
 
 /** Baris per halaman bawaan; keduanya bisa diubah lewat select di paginasi. */
-const SUMMARY_PER_PAGE = 5;
-const DETAIL_PER_PAGE = 10;
+const SUMMARY_PER_PAGE = 10;
+const DETAIL_PER_PAGE = 500;
+const DETAIL_REGION_PER_PAGE = 10;
 
 /** Level tidak lagi dipilih user: ringkasan selalu nasional, detail per kabupaten. */
 const SUMMARY_LEVEL = "NATION";
@@ -46,6 +51,9 @@ const DEFAULT_FILTER: FbbOnxFilterState = {
   indihomeType: "INDIHOME ALL",
 };
 
+const isLose = (row: FbbNationMetricRow) =>
+  String(row.status).toLowerCase() === "lose";
+
 /** Halaman benchmark ONX: ringkasan metrics/KPI, peta status region, dan detail kabupaten. */
 const FbbOnxPage = () => {
   const [filter, setFilter] = useState<FbbOnxFilterState>(DEFAULT_FILTER);
@@ -57,6 +65,11 @@ const FbbOnxPage = () => {
   const [view, setView] = useState<ViewTab>("maps");
   /** KPI khusus peta/detail; terpisah dari filter KPI tabel ringkasan. */
   const [viewKpi, setViewKpi] = useState("");
+  const [expandedRegion, setExpandedRegion] = useState("");
+  const [detailRegionPage, setDetailRegionPage] = useState({
+    page: 1,
+    perPage: DETAIL_REGION_PER_PAGE,
+  });
   const [detailPage, setDetailPage] = useState({
     page: 1,
     perPage: DETAIL_PER_PAGE,
@@ -64,10 +77,10 @@ const FbbOnxPage = () => {
 
   const yearWeekOptions = useFbbYearWeekOptionsQuery();
   const metricsOptions = useFbbMetricsOptionsQuery();
-  const kpiOptions = useFbbKpiOptionsQuery();
+  const kpiOptions = useFbbKpiOptionsQuery(filter.metrics);
   const indihomeTypeOptions = useFbbIndihomeTypeOptionsQuery();
 
-  // Minggu terbaru dan KPI pertama dipakai sampai user memilih sendiri.
+  // Minggu terbaru dipakai sampai user memilih sendiri.
   useEffect(() => {
     const latest = yearWeekOptions.data?.[0];
     if (latest && !filter.yearweek) {
@@ -76,9 +89,15 @@ const FbbOnxPage = () => {
   }, [yearWeekOptions.data, filter.yearweek]);
 
   useEffect(() => {
-    const first = kpiOptions.data?.[0];
-    if (first && !viewKpi) setViewKpi(first);
-  }, [kpiOptions.data, viewKpi]);
+    if (!kpiOptions.data) return;
+
+    const hasSummaryKpi =
+      !filter.kpi || kpiOptions.data.includes(filter.kpi);
+
+    if (!hasSummaryKpi) {
+      setFilter((current) => ({ ...current, kpi: "" }));
+    }
+  }, [filter.kpi, kpiOptions.data]);
 
   const summary = useFbbNationMetricsQuery({
     yearweek: filter.yearweek,
@@ -90,13 +109,41 @@ const FbbOnxPage = () => {
     perPage: summaryPage.perPage,
   });
 
+  const summaryRows = useMemo(() => summary.data?.data ?? [], [summary.data]);
+  const loseKpiOptions = useMemo(
+    () => Array.from(new Set(summaryRows.filter(isLose).map((row) => row.kpi))),
+    [summaryRows],
+  );
+  const activeKpi = viewKpi || loseKpiOptions[0] || filter.kpi || "";
+  const activeMetric = useMemo(() => {
+    if (filter.metrics) return filter.metrics;
+
+    return (
+      summaryRows.find((row) => row.kpi === activeKpi)?.metrics ??
+      summaryRows[0]?.metrics ??
+      ""
+    );
+  }, [activeKpi, filter.metrics, summaryRows]);
+
   const mapStatus = useFbbMapRegionStatusQuery(
     {
       yearweek: filter.yearweek,
       indihomeType: filter.indihomeType,
-      kpi: viewKpi,
+      kpi: activeKpi,
     },
-    view === "maps",
+    view === "maps" && Boolean(activeKpi),
+  );
+
+  const detailRegion = useFbbLoseRegionSummaryQuery(
+    {
+      yearweek: filter.yearweek,
+      indihomeType: filter.indihomeType,
+      metrics: activeMetric,
+      kpi: activeKpi,
+      page: detailRegionPage.page,
+      perPage: detailRegionPage.perPage,
+    },
+    view === "detail" && Boolean(activeMetric && activeKpi),
   );
 
   const detail = useFbbLoseRegionQuery(
@@ -104,23 +151,52 @@ const FbbOnxPage = () => {
       yearweek: filter.yearweek,
       level: DETAIL_LEVEL,
       indihomeType: filter.indihomeType,
-      kpi: viewKpi,
+      metrics: activeMetric,
+      regionNew: expandedRegion,
+      kpi: activeKpi,
       page: detailPage.page,
       perPage: detailPage.perPage,
     },
-    view === "detail",
+    view === "detail" && Boolean(activeMetric && activeKpi && expandedRegion),
   );
 
-  const summaryRows = useMemo(() => summary.data?.data ?? [], [summary.data]);
   const mapRows = useMemo(() => mapStatus.data?.data ?? [], [mapStatus.data]);
+  const detailRegionRows = useMemo(
+    () => detailRegion.data?.data ?? [],
+    [detailRegion.data],
+  );
   const detailRows = useMemo(() => detail.data?.data ?? [], [detail.data]);
+  useEffect(() => {
+    if (summary.isFetching) return;
+
+    const firstLoseKpi = loseKpiOptions[0] ?? "";
+    if (!viewKpi || !loseKpiOptions.includes(viewKpi)) {
+      setViewKpi(firstLoseKpi);
+    }
+  }, [loseKpiOptions, summary.isFetching, viewKpi]);
 
   /** Ganti filter selalu mengembalikan paginasi ke halaman pertama. */
   const handleFilterChange = (next: FbbOnxFilterState) => {
     setFilter(next);
+    setExpandedRegion("");
     setSummaryPage((current) => ({ ...current, page: 1 }));
+    setDetailRegionPage((current) => ({ ...current, page: 1 }));
     setDetailPage((current) => ({ ...current, page: 1 }));
   };
+
+  const handleViewKpiChange = (kpi: string) => {
+    setViewKpi(kpi);
+    setExpandedRegion("");
+    setDetailRegionPage((current) => ({ ...current, page: 1 }));
+    setDetailPage((current) => ({ ...current, page: 1 }));
+  };
+
+  const handleToggleRegion = (region: string) => {
+    setExpandedRegion((current) => (current === region ? "" : region));
+    setDetailPage((current) => ({ ...current, page: 1 }));
+  };
+
+  const detailLoading = detailRegion.isFetching;
 
   return (
     <main className="flex flex-1 flex-col p-4">
@@ -146,7 +222,7 @@ const FbbOnxPage = () => {
         >
           <div className="flex items-center justify-between gap-3">
             <span className="text-sm font-medium text-[#020617]">
-              Details Metrics
+              Nation
             </span>
             <button
               type="button"
@@ -183,17 +259,20 @@ const FbbOnxPage = () => {
 
         <section className="flex flex-1 flex-col gap-3 rounded-[19px] border border-[#e2e8f0] bg-white p-4 shadow-[0px_1px_1.75px_0px_rgba(0,0,0,0.05)]">
           <div className="flex shrink-0 flex-wrap items-center justify-between gap-3">
-            <SelectMenu
-              value={viewKpi}
-              options={(kpiOptions.data ?? []).map((kpi) => ({
-                label: kpi,
-                value: kpi,
-              }))}
-              onChange={setViewKpi}
-              placeholder="Select KPI"
-              size="sm"
-              className="[&>div]:w-[150px] [&_button]:h-9 [&_button]:w-[150px] [&_button]:justify-between [&_button]:rounded-full [&_button]:border-[#e2e8f0] [&_button]:bg-white [&_button]:px-4 [&_button]:text-sm [&_button]:font-medium [&_button]:text-[#0a0a0a]"
-            />
+            <div className="flex flex-wrap items-center gap-2">
+              <SelectMenu
+                value={activeKpi}
+                options={loseKpiOptions.map((kpi) => ({
+                  label: kpi,
+                  value: kpi,
+                }))}
+                onChange={handleViewKpiChange}
+                placeholder="Select KPI"
+                size="sm"
+                className="[&>div]:w-[170px] [&_button]:h-9 [&_button]:w-[170px] [&_button]:justify-between [&_button]:rounded-full [&_button]:border-[#e2e8f0] [&_button]:bg-white [&_button]:px-4 [&_button]:text-sm [&_button]:font-medium [&_button]:text-[#0a0a0a] [&_button>span]:truncate"
+              />
+
+            </div>
 
             <div className="flex items-center rounded-[48px] border border-[#e2e8f0] bg-white p-1 shadow-[0px_1px_1.75px_0px_rgba(0,0,0,0.05)]">
               {(
@@ -222,18 +301,29 @@ const FbbOnxPage = () => {
             <div className="h-[520px]">
               <FbbOnxMapPanel
                 rows={mapRows}
-                kpi={viewKpi}
+                kpi={activeKpi}
                 loading={mapStatus.isFetching}
                 error={mapStatus.isError}
               />
             </div>
           ) : (
             <FbbLoseRegionTable
-              rows={detailRows}
-              meta={detail.data?.meta}
-              loading={detail.isFetching}
-              error={detail.isError}
-              onPageChange={(page, perPage) => setDetailPage({ page, perPage })}
+              rows={detailRegionRows}
+              childRows={detailRows}
+              meta={detailRegion.data?.meta}
+              childMeta={detail.data?.meta}
+              loading={detailLoading}
+              childLoading={detail.isFetching}
+              error={detailRegion.isError}
+              childError={detail.isError}
+              expandedRegion={expandedRegion}
+              onToggleRegion={handleToggleRegion}
+              onPageChange={(page, perPage) => {
+                setDetailRegionPage({ page, perPage });
+                setExpandedRegion("");
+                setDetailPage((current) => ({ ...current, page: 1 }));
+              }}
+              onChildPageChange={(page, perPage) => setDetailPage({ page, perPage })}
             />
           )}
         </section>

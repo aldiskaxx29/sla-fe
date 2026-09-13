@@ -52,6 +52,14 @@ const flexByWeight = (weight: number) => ({
   flexBasis: "auto" as const,
 });
 
+const getRegNotClearTextColor = (value?: number) =>
+  value === 0 ? "text-black" : "text-red-500";
+
+const getWorstTextColor = (value: string) => {
+  const regNotClearValue = value.match(/Reg Not Clear\s*:\s*(\d+)/i)?.[1];
+  return regNotClearValue === "0" ? "text-black" : "text-red-500";
+};
+
 export function SlaPerformancePanel() {
   const [period, setPeriod] = useState<SlaPeriod>("week");
   const [rekon, setRekon] = useState<SlaRekon>("before");
@@ -244,7 +252,11 @@ export function SlaPerformancePanel() {
                                     {card.nestedData.totalLabel ?? "T"}:{" "}
                                     {card.nestedData.total} Site
                                   </span>
-                                  <span className="whitespace-nowrap text-red-500">
+                                  <span
+                                    className={`whitespace-nowrap ${getRegNotClearTextColor(
+                                      card.nestedData.regNotClear,
+                                    )}`}
+                                  >
                                     Reg Not Clear: {card.nestedData.regNotClear}
                                   </span>
                                 </div>
@@ -257,7 +269,11 @@ export function SlaPerformancePanel() {
                             )}
 
                           {card.worstText && (
-                            <div className="mt-2 text-center text-[8px] font-extrabold leading-4 text-red-500 border-t border-slate-100 pt-2 shrink-0">
+                            <div
+                              className={`mt-2 text-center text-[8px] font-extrabold leading-4 border-t border-slate-100 pt-2 shrink-0 ${getWorstTextColor(
+                                card.worstText,
+                              )}`}
+                            >
                               {card.worstText}
                             </div>
                           )}
@@ -420,7 +436,11 @@ export function SlaPerformancePanel() {
                           )}
 
                           {card.worstText && (
-                            <div className="mt-2 text-center text-[8px] font-extrabold leading-4 text-red-500 border-t border-slate-100 pt-2 shrink-0">
+                            <div
+                              className={`mt-2 text-center text-[8px] font-extrabold leading-4 border-t border-slate-100 pt-2 shrink-0 ${getWorstTextColor(
+                                card.worstText,
+                              )}`}
+                            >
                               {card.worstText}
                             </div>
                           )}

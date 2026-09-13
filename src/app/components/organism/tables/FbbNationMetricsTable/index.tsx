@@ -1,3 +1,6 @@
+// React
+import { useMemo } from "react";
+
 // Atoms
 import { Skeleton } from "@/app/components/atoms";
 
@@ -22,7 +25,7 @@ interface FbbNationMetricsTableProps {
 const BASE_HEADERS = [
   "Metrics",
   "KPI",
-  "WoW (Win/Lose)",
+  "Win/Lose",
   "Winner",
   "Gap to Winner",
 ];
@@ -33,7 +36,7 @@ const RANK_HEADER = "Rank";
 const isWin = (status?: string) => String(status).toLowerCase() === "win";
 
 /** Pilihan ukuran halaman; nilai aktifnya datang dari `meta.per_page`. */
-const PAGE_SIZE_OPTIONS = [5, 10, 20, 50];
+const PAGE_SIZE_OPTIONS = [10, 20, 50];
 
 const headCell =
   "h-10 bg-[#f8fafc] px-4 text-sm font-medium text-[#334155] border-b border-[#e2e8f0]";
@@ -59,6 +62,19 @@ export function FbbNationMetricsTable({
     GAP_NEAREST_HEADER,
     RANK_HEADER,
   ];
+
+  // Metrics yang sama dan berurutan digabung jadi satu sel memanjang.
+  const groups = useMemo(() => {
+    const result: { metrics: string; rows: FbbNationMetricRow[] }[] = [];
+
+    rows.forEach((row) => {
+      const last = result[result.length - 1];
+      if (last && last.metrics === row.metrics) last.rows.push(row);
+      else result.push({ metrics: row.metrics, rows: [row] });
+    });
+
+    return result;
+  }, [rows]);
 
   return (
     <div className="flex flex-col">
@@ -92,49 +108,61 @@ export function FbbNationMetricsTable({
               ))}
 
             {!loading &&
-              rows.map((row, index) => {
-                const win = isWin(row.status);
+              groups.map((group, groupIndex) =>
+                group.rows.map((row, rowIndex) => {
+                  const win = isWin(row.status);
+                  const isLastRow =
+                    groupIndex === groups.length - 1 &&
+                    rowIndex === group.rows.length - 1;
 
-                return (
-                  <tr
-                    key={`${row.metrics}-${row.kpi}-${index}`}
-                    className="border-b border-[#e2e8f0] transition-colors last:border-b-0 hover:bg-[#f8fafc]"
-                  >
-                    <td className={`${bodyCell} border-r border-[#e2e8f0] text-[#020617]`}>
-                      {row.metrics}
-                    </td>
-                    <td className={`${bodyCell} border-r border-[#e2e8f0] text-[#020617]`}>
-                      {row.kpi}
-                    </td>
-                    <td
-                      className={`${bodyCell} border-r border-[#e2e8f0] text-center ${
-                        win ? "text-[#21a647]" : "text-[#c23837]"
+                  return (
+                    <tr
+                      key={`${row.metrics}-${row.kpi}-${groupIndex}-${rowIndex}`}
+                      className={`border-b border-[#e2e8f0] transition-colors hover:bg-[#f8fafc] ${
+                        isLastRow ? "last:border-b-0" : ""
                       }`}
                     >
-                      {row.status}
-                    </td>
-                    <td className={`${bodyCell} border-r border-[#e2e8f0] text-center text-[#020617]`}>
-                      {row.winner}
-                    </td>
-                    <td className={`${bodyCell} border-r border-[#e2e8f0] text-center text-[#020617] tabular-nums`}>
-                      {row.gap_to_winner}
-                    </td>
-                    {showNearestComp && (
-                      <td className={`${bodyCell} border-r border-[#e2e8f0] text-center text-[#020617]`}>
-                        {row.nearest_comp}
+                      {rowIndex === 0 && (
+                        <td
+                          rowSpan={group.rows.length}
+                          className={`${bodyCell} border-r border-[#e2e8f0] text-[#020617] align-middle`}
+                        >
+                          {group.metrics}
+                        </td>
+                      )}
+                      <td className={`${bodyCell} border-r border-[#e2e8f0] text-[#020617]`}>
+                        {row.kpi}
                       </td>
-                    )}
-                    <td className={`${bodyCell} border-r border-[#e2e8f0] text-center text-[#020617] tabular-nums`}>
-                      {row.gap_to_nearest_comp}
-                    </td>
-                    <td className={`${bodyCell} text-center text-[#020617] tabular-nums`}>
-                      {row.rank}
-                    </td>
-                  </tr>
-                );
-              })}
+                      <td
+                        className={`${bodyCell} border-r border-[#e2e8f0] text-center ${
+                          win ? "text-[#21a647]" : "text-[#c23837]"
+                        }`}
+                      >
+                        {row.status}
+                      </td>
+                      <td className={`${bodyCell} border-r border-[#e2e8f0] text-center text-[#020617]`}>
+                        {row.winner}
+                      </td>
+                      <td className={`${bodyCell} border-r border-[#e2e8f0] text-center text-[#020617] tabular-nums`}>
+                        {row.gap_to_winner}
+                      </td>
+                      {showNearestComp && (
+                        <td className={`${bodyCell} border-r border-[#e2e8f0] text-center text-[#020617]`}>
+                          {row.nearest_comp}
+                        </td>
+                      )}
+                      <td className={`${bodyCell} border-r border-[#e2e8f0] text-center text-[#020617] tabular-nums`}>
+                        {row.gap_to_nearest_comp}
+                      </td>
+                      <td className={`${bodyCell} text-center text-[#020617] tabular-nums`}>
+                        {row.rank}
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
 
-            {!loading && !rows.length && (
+            {!loading && !groups.length && (
               <tr>
                 <td colSpan={headers.length}>
                   <EmptyState

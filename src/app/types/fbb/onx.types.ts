@@ -83,7 +83,7 @@ export interface FbbLoseRegionRow {
   kpi_res: string;
   region_new?: string;
   region?: string;
-  kabupaten: string;
+  kabupaten?: string;
   value_indihome: string;
   trend: string;
   status: string;

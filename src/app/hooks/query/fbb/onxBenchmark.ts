@@ -7,6 +7,7 @@ import {
   getFbbIndihomeTypeOptions,
   getFbbKpiOptions,
   getFbbLevelOptions,
+  getFbbLoseRegion,
   getFbbLoseRegionKabupaten,
   getFbbMapsRegionStatus,
   getFbbMetricsOptions,
@@ -44,11 +45,11 @@ export const useFbbMetricsOptionsQuery = () =>
     select: (response) => (response.data ?? []).map((item) => item.metrics),
   });
 
-export const useFbbKpiOptionsQuery = () =>
+export const useFbbKpiOptionsQuery = (metrics: string) =>
   useQuery({
-    queryKey: fbbKeys.options("kpi"),
+    queryKey: fbbKeys.options(`kpi:${metrics}`),
     staleTime: OPTION_STALE_TIME,
-    queryFn: ({ signal }) => getFbbKpiOptions(signal),
+    queryFn: ({ signal }) => getFbbKpiOptions(metrics, signal),
     select: (response) => (response.data ?? []).map((item) => item.kpi),
   });
 
@@ -94,6 +95,17 @@ export const useFbbMapRegionStatusQuery = (
   });
 
 /** Detail per kabupaten, dipakai tab Detail. */
+export const useFbbLoseRegionSummaryQuery = (
+  params: FbbLoseRegionParams,
+  enabled = true,
+) =>
+  useQuery<FbbLoseRegionResponse>({
+    queryKey: fbbKeys.loseRegion({ ...params }),
+    enabled: enabled && Boolean(params.yearweek),
+    staleTime: DATA_STALE_TIME,
+    queryFn: ({ signal }) => getFbbLoseRegion(params, signal),
+  });
+
 export const useFbbLoseRegionQuery = (
   params: FbbLoseRegionParams,
   enabled = true,
