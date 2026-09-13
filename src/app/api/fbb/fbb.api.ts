@@ -7,6 +7,8 @@ import type {
   SlaWsaResponse,
 } from "@/app/types/fbb/sla.types";
 import type {
+  FbbOoklaMapResponse,
+  FbbOoklaMetricsResponse,
   FbbIndihomeTypeOption,
   FbbKpiOption,
   FbbLevelOption,
@@ -27,6 +29,12 @@ export const FBB_ENDPOINTS = {
   listLevel: "fbb/list-level",
   listIndihomeType: "fbb/list-indihome-type",
   nationMetricsKpi: "fbb/onx/nation-metrics-kpi",
+  ooklaListMetrics: "fbb/ookla/list-metrics",
+  ooklaListKpi: "fbb/ookla/list-kpi",
+  ooklaListIndihomeType: "fbb/ookla/list-indihome-type",
+  ooklaNationMetricsKpi: "fbb/ookla/nation-metrics-kpi",
+  ooklaMapsRegionStatus: "fbb/ookla/maps-region-status",
+  ooklaLoseRegionKabupaten: "fbb/ookla/lose-region-kabupaten",
   mapsRegionStatus: "fbb/onx/maps-region-status",
   loseRegionKabupaten: "fbb/onx/lose-region-kabupaten",
 } as const;
@@ -140,3 +148,113 @@ export const getFbbLoseRegionKabupaten = (
     },
     signal,
   });
+
+/* ------------------------------------------------------------------ *
+ * Ookla (halaman /fbb/ookla)
+ * ------------------------------------------------------------------ */
+
+export const getFbbOoklaMetricsOptions = (signal?: AbortSignal) =>
+  getFbbList<FbbMetricsOption>(FBB_ENDPOINTS.ooklaListMetrics, signal);
+
+/** Daftar KPI Ookla tergantung metrics yang dipilih. */
+export const getFbbOoklaKpiOptions = (metrics?: string, signal?: AbortSignal) =>
+  apiRequest<FbbListResponse<FbbKpiOption>>({
+    method: "GET",
+    url: FBB_ENDPOINTS.ooklaListKpi,
+    params: metrics ? { metrics } : {},
+    signal,
+  });
+
+export const getFbbOoklaIndihomeTypeOptions = (signal?: AbortSignal) =>
+  getFbbList<FbbIndihomeTypeOption>(
+    FBB_ENDPOINTS.ooklaListIndihomeType,
+    signal,
+  );
+
+export interface FbbOoklaMetricsParams {
+  yearweek?: string;
+  indihomeType?: string;
+  metrics?: string;
+  kpi?: string;
+  page?: number;
+  perPage?: number;
+}
+
+export const getFbbOoklaNationMetrics = (
+  { yearweek, indihomeType, metrics, kpi, page, perPage }: FbbOoklaMetricsParams,
+  signal?: AbortSignal,
+) =>
+  apiRequest<FbbOoklaMetricsResponse>({
+    method: "GET",
+    url: FBB_ENDPOINTS.ooklaNationMetricsKpi,
+    params: {
+      ...(yearweek ? { yearweek } : {}),
+      ...(indihomeType ? { indihome_type: indihomeType } : {}),
+      ...(metrics ? { metrics } : {}),
+      ...(kpi ? { kpi } : {}),
+      page: page ?? 1,
+      per_page: perPage ?? 10,
+    },
+    signal,
+  });
+
+/** Status per region untuk peta Ookla; semua region diambil sekali jalan. */
+export const getFbbOoklaMapsRegionStatus = (
+  { yearweek, indihomeType, metrics, kpi, perPage }: FbbOoklaMetricsParams,
+  signal?: AbortSignal,
+) =>
+  apiRequest<FbbOoklaMapResponse>({
+    method: "GET",
+    url: FBB_ENDPOINTS.ooklaMapsRegionStatus,
+    params: {
+      ...(yearweek ? { yearweek } : {}),
+      ...(indihomeType ? { indihome_type: indihomeType } : {}),
+      ...(metrics ? { metrics } : {}),
+      ...(kpi ? { kpi } : {}),
+      page: 1,
+      per_page: perPage ?? 100,
+    },
+    signal,
+  });
+
+export interface FbbOoklaLoseRegionParams {
+  yearweek?: string;
+  indihomeType?: string;
+  metrics?: string;
+  kpi?: string;
+  level?: string;
+  areaName?: string;
+  page?: number;
+  perPage?: number;
+}
+
+/** Detail per kabupaten pada halaman Ookla beserta deret trend-nya. */
+export const getFbbOoklaLoseRegionKabupaten = (
+  {
+    yearweek,
+    indihomeType,
+    metrics,
+    kpi,
+    level = "KABUPATEN",
+    areaName,
+    page,
+    perPage,
+  }: FbbOoklaLoseRegionParams,
+  signal?: AbortSignal,
+) =>
+  apiRequest<FbbLoseRegionResponse>({
+    method: "GET",
+    url: FBB_ENDPOINTS.ooklaLoseRegionKabupaten,
+    params: {
+      ...(yearweek ? { yearweek } : {}),
+      ...(indihomeType ? { indihome_type: indihomeType } : {}),
+      ...(metrics ? { metrics } : {}),
+      ...(kpi ? { kpi } : {}),
+      ...(level ? { level } : {}),
+      ...(areaName ? { area_name: areaName } : {}),
+      page: page ?? 1,
+      per_page: perPage ?? 10,
+    },
+    signal,
+  });
+

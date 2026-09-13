@@ -7,22 +7,8 @@ import { toast } from "react-toastify";
 // Auth
 import { useLogoutMutation } from "@/modules/auth/rtk/auth.rtk";
 
-const getStoredUser = () => {
-  try {
-    return JSON.parse(localStorage.getItem("user_data") ?? "null");
-  } catch {
-    return null;
-  }
-};
-
-/** "Yoga Febriatala" -> "YF"; dipakai sebagai avatar teks. */
-const toInitials = (name: string) =>
-  name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((word) => word[0]?.toUpperCase() ?? "")
-    .join("") || "US";
+// Utils
+import { getStoredUserName, toInitials } from "@/app/utils/user.utils";
 
 /** Avatar + nama user dengan menu profil dan logout. */
 export function UserMenu() {
@@ -32,8 +18,7 @@ export function UserMenu() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [logout] = useLogoutMutation();
 
-  const user = getStoredUser();
-  const name = String(user?.name ?? user?.nama ?? user?.nik ?? "username");
+  const name = getStoredUserName();
 
   useEffect(() => {
     if (!open) return;

@@ -1,6 +1,6 @@
 // React
 import { useEffect, useMemo, useState } from "react";
-import { LuChevronUp } from "react-icons/lu";
+import { LuChevronDown } from "react-icons/lu";
 
 // Hooks
 import {
@@ -14,20 +14,21 @@ import {
   useFbbYearWeekOptionsQuery,
 } from "@/app/hooks";
 
-// Templates
-import FbbOnxTemplate from "@/app/components/templates/FbbOnxTemplate";
-
 // Molecules
 import { SelectMenu } from "@/app/components/molecules/SelectMenu";
 
 // Organism
-import { FbbOnxFilterSidebar } from "@/app/components/organism/forms/FbbOnxFilterSidebar";
+import { DashboardToolbar } from "@/app/components/organism/forms/DashboardToolbar";
+import { FbbOnxFilterBar } from "@/app/components/organism/forms/FbbOnxFilterBar";
 import { FbbOnxMapPanel } from "@/app/components/organism/panels/FbbOnxMapPanel";
 import { FbbLoseRegionTable } from "@/app/components/organism/tables/FbbLoseRegionTable";
 import { FbbNationMetricsTable } from "@/app/components/organism/tables/FbbNationMetricsTable";
 
 // Types
 import type { FbbOnxFilterState } from "@/app/types/fbb/onx.types";
+
+// Utils
+import { getStoredUserName, toInitials } from "@/app/utils/user.utils";
 
 type ViewTab = "maps" | "detail";
 
@@ -54,7 +55,6 @@ const FbbOnxPage = () => {
   const [view, setView] = useState<ViewTab>("maps");
   /** KPI khusus peta/detail; terpisah dari filter KPI tabel ringkasan. */
   const [viewKpi, setViewKpi] = useState("");
-  const [areaName, setAreaName] = useState("");
   const [detailPage, setDetailPage] = useState({
     page: 1,
     perPage: DETAIL_PER_PAGE,
@@ -104,7 +104,6 @@ const FbbOnxPage = () => {
       level: filter.level,
       indihomeType: filter.indihomeType,
       kpi: viewKpi,
-      areaName,
       page: detailPage.page,
       perPage: detailPage.perPage,
     },
@@ -122,60 +121,68 @@ const FbbOnxPage = () => {
     setDetailPage((current) => ({ ...current, page: 1 }));
   };
 
-  const openRegionDetail = (region: string) => {
-    setAreaName(region);
-    setDetailPage((current) => ({ ...current, page: 1 }));
-    setView("detail");
-  };
-
   return (
-    <FbbOnxTemplate
-      sidebar={
-        <FbbOnxFilterSidebar
-          value={filter}
-          onChange={handleFilterChange}
-          loading={yearWeekOptions.isPending}
-          options={{
-            yearweek: yearWeekOptions.data ?? [],
-            metrics: metricsOptions.data ?? [],
-            kpi: kpiOptions.data ?? [],
-            level: levelOptions.data ?? [],
-            indihomeType: indihomeTypeOptions.data ?? [],
-          }}
-        />
-      }
-    >
-      <section className="relative rounded-xl border border-[#DBDBDB] bg-white p-4">
-        <button
-          type="button"
-          onClick={() => setSummaryOpen((open) => !open)}
-          aria-label={summaryOpen ? "Sembunyikan ringkasan" : "Tampilkan ringkasan"}
-          className="absolute right-4 top-4 z-10 flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition-colors hover:bg-slate-50 hover:text-navy"
+    <main className="flex flex-1 flex-col p-4">
+      <div className="flex flex-1 flex-col gap-4 rounded-[36px] border border-[#e2e8f0] bg-white p-4">
+        <DashboardToolbar initials={toInitials(getStoredUserName())}>
+          <FbbOnxFilterBar
+            value={filter}
+            onChange={handleFilterChange}
+            loading={yearWeekOptions.isPending}
+            options={{
+              yearweek: yearWeekOptions.data ?? [],
+              metrics: metricsOptions.data ?? [],
+              kpi: kpiOptions.data ?? [],
+              level: levelOptions.data ?? [],
+              indihomeType: indihomeTypeOptions.data ?? [],
+            }}
+          />
+        </DashboardToolbar>
+
+        <section
+          className={`flex shrink-0 flex-col rounded-[19px] border border-[#e2e8f0] bg-white p-3 shadow-[0px_1px_1.75px_0px_rgba(0,0,0,0.05)] ${
+            summaryOpen ? "gap-2" : "gap-0"
+          }`}
         >
-          <LuChevronUp
-            size={15}
-            className={`transition-transform ${summaryOpen ? "" : "rotate-180"}`}
-          />
-        </button>
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-sm font-medium text-[#020617]">
+              Details Metrics
+            </span>
+            <button
+              type="button"
+              aria-label={summaryOpen ? "Tutup tabel" : "Buka tabel"}
+              aria-expanded={summaryOpen}
+              onClick={() => setSummaryOpen((open) => !open)}
+              className="flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-[#e2e8f0] bg-[#f8fafc] transition-colors hover:bg-[#eef2f6]"
+            >
+              <LuChevronDown
+                className={`size-4 text-[#334155] transition-transform duration-300 ${
+                  summaryOpen ? "" : "-rotate-90"
+                }`}
+              />
+            </button>
+          </div>
 
-        {summaryOpen ? (
-          <FbbNationMetricsTable
-            rows={summaryRows}
-            meta={summary.data?.meta}
-            loading={summary.isPending || summary.isFetching}
-            error={summary.isError}
-            onPageChange={(page, perPage) => setSummaryPage({ page, perPage })}
-          />
-        ) : (
-          <p className="pr-10 text-[13px] font-semibold text-slate-500">
-            Ringkasan metrics &amp; KPI disembunyikan.
-          </p>
-        )}
-      </section>
+          {/* Grid-rows 0fr/1fr: tabel menutup dan membuka dengan animasi. */}
+          <div
+            className={`grid transition-[grid-template-rows] duration-300 ease-in-out ${
+              summaryOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+            }`}
+          >
+            <div className="overflow-hidden">
+              <FbbNationMetricsTable
+                rows={summaryRows}
+                meta={summary.data?.meta}
+                loading={summary.isFetching}
+                error={summary.isError}
+                onPageChange={(page, perPage) => setSummaryPage({ page, perPage })}
+              />
+            </div>
+          </div>
+        </section>
 
-      <section className="flex min-h-[520px] flex-col rounded-xl border border-[#DBDBDB] bg-white p-4">
-        <div className="flex flex-wrap items-center justify-between gap-3 pb-3">
-          <div className="flex flex-wrap items-center gap-2">
+        <section className="flex flex-1 flex-col gap-3 rounded-[19px] border border-[#e2e8f0] bg-white p-4 shadow-[0px_1px_1.75px_0px_rgba(0,0,0,0.05)]">
+          <div className="flex shrink-0 flex-wrap items-center justify-between gap-3">
             <SelectMenu
               value={viewKpi}
               options={(kpiOptions.data ?? []).map((kpi) => ({
@@ -184,62 +191,54 @@ const FbbOnxPage = () => {
               }))}
               onChange={setViewKpi}
               placeholder="Select KPI"
-              size="md"
+              size="sm"
+              className="[&>div]:w-[150px] [&_button]:h-9 [&_button]:w-[150px] [&_button]:justify-between [&_button]:rounded-full [&_button]:border-[#e2e8f0] [&_button]:bg-white [&_button]:px-4 [&_button]:text-sm [&_button]:font-medium [&_button]:text-[#0a0a0a]"
             />
 
-            {areaName && (
-              <button
-                type="button"
-                onClick={() => setAreaName("")}
-                className="cursor-pointer rounded-full border border-slate-200 px-3 py-1.5 text-[12px] font-bold text-slate-600 transition-colors hover:border-slate-300 hover:bg-slate-50"
-              >
-                Area: {areaName} ✕
-              </button>
-            )}
+            <div className="flex items-center rounded-[48px] border border-[#e2e8f0] bg-white p-1 shadow-[0px_1px_1.75px_0px_rgba(0,0,0,0.05)]">
+              {(
+                [
+                  { key: "maps", label: "Map View" },
+                  { key: "detail", label: "Detail View" },
+                ] as const
+              ).map((tab) => (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => setView(tab.key)}
+                  className={`cursor-pointer rounded-[48px] px-3 py-1 text-sm font-medium transition-colors ${
+                    view === tab.key
+                      ? "bg-[#3b82f6] text-white"
+                      : "text-[#64748b] hover:text-[#334155]"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
           </div>
 
-          <div className="flex shrink-0 items-center gap-0.5 rounded-lg border border-slate-200 bg-slate-50 p-0.5">
-            {(
-              [
-                { key: "maps", label: "Maps" },
-                { key: "detail", label: "Detail" },
-              ] as const
-            ).map((tab) => (
-              <button
-                key={tab.key}
-                type="button"
-                onClick={() => setView(tab.key)}
-                className={`cursor-pointer rounded-md px-4 py-1.5 text-[12px] font-extrabold transition-all ${
-                  view === tab.key
-                    ? "bg-[#007BFF] text-white shadow-xs"
-                    : "text-slate-500 hover:text-navy"
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {view === "maps" ? (
-          <FbbOnxMapPanel
-            rows={mapRows}
-            kpi={viewKpi}
-            loading={mapStatus.isPending || mapStatus.isFetching}
-            error={mapStatus.isError}
-            onOpenDetail={openRegionDetail}
-          />
-        ) : (
-          <FbbLoseRegionTable
-            rows={detailRows}
-            meta={detail.data?.meta}
-            loading={detail.isPending || detail.isFetching}
-            error={detail.isError}
-            onPageChange={(page, perPage) => setDetailPage({ page, perPage })}
-          />
-        )}
-      </section>
-    </FbbOnxTemplate>
+          {view === "maps" ? (
+            <div className="h-[520px]">
+              <FbbOnxMapPanel
+                rows={mapRows}
+                kpi={viewKpi}
+                loading={mapStatus.isFetching}
+                error={mapStatus.isError}
+              />
+            </div>
+          ) : (
+            <FbbLoseRegionTable
+              rows={detailRows}
+              meta={detail.data?.meta}
+              loading={detail.isFetching}
+              error={detail.isError}
+              onPageChange={(page, perPage) => setDetailPage({ page, perPage })}
+            />
+          )}
+        </section>
+      </div>
+    </main>
   );
 };
 

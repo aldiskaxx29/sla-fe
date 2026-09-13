@@ -11,6 +11,9 @@ import {
 } from "@/app/components/organism/panels/MonitoringCtiPanel/OnxDetailContent";
 import type { CtiRow } from "@/app/types/monday/ticketQuality.types";
 
+// Utils
+import { formatMonitoringHour } from "@/app/utils/monday.utils";
+
 export type MonitoringSource = "CTI" | "ONX";
 
 interface MonitoringDetailModalProps {
@@ -71,7 +74,7 @@ export function MonitoringDetailModal({
       >
         <header className="flex items-center justify-between gap-4 border-b border-slate-100 px-5 py-4">
           <h2 className="text-sm font-extrabold text-[#213c52]">
-            Monitoring {source} 12:00 WIB
+            Monitoring {source} {formatMonitoringHour()} WIB
           </h2>
 
           <div className="flex shrink-0 items-center gap-2">

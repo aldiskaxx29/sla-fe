@@ -1,14 +1,15 @@
 // React
 import { useEffect, useMemo, useState } from "react";
+import { LuCalendarDays } from "react-icons/lu";
 
 // Hooks
 import { useFbbSlaWsaQuery, useFbbYearWeekQuery } from "@/app/hooks";
-import { useFbbHeaderBadge } from "@/app/layout/AppLayoutFbb/context";
 
 // Molecules
 import { SelectMenu } from "@/app/components/molecules/SelectMenu";
 
 // Organism
+import { DashboardToolbar } from "@/app/components/organism/forms/DashboardToolbar";
 import { FbbSlaSummaryPanel } from "@/app/components/organism/panels/FbbSlaSummaryPanel";
 import { FbbSlaIndicatorTable } from "@/app/components/organism/tables/FbbSlaIndicatorTable";
 
@@ -19,6 +20,7 @@ import {
   formatYearWeekShort,
   summarizeAchievements,
 } from "@/app/utils/fbbSla.utils";
+import { getStoredUserName, toInitials } from "@/app/utils/user.utils";
 
 /** Halaman SLA WISA FBB: ringkasan indikator dan tabelnya per minggu. */
 const FbbSlaPage = () => {
@@ -80,44 +82,60 @@ const FbbSlaPage = () => {
         ? "Gagal memuat daftar minggu."
         : null;
 
-  // Judul halaman ada di header shell FBB; halaman ini hanya menitipkan periode.
-  useFbbHeaderBadge(periodLabel);
-
   return (
-    <div className="m-6 flex flex-col gap-4">
-      <FbbSlaSummaryPanel
-        total={summary.total}
-        achieved={summary.achieved}
-        notAchieved={summary.notAchieved}
-        loading={isLoading}
-      />
+    <>
+      <div className="px-6 pt-2 pb-4">
+        <DashboardToolbar
+          initials={toInitials(getStoredUserName())}
+          actions={
+            <SelectMenu
+              value={yearweek ?? ""}
+              options={weekOptions}
+              onChange={setYearweek}
+              placeholder="Select Week"
+              size="sm"
+              className="[&_button]:h-8 [&_button]:rounded-full [&_button]:border-[#e2e8f0] [&_button]:bg-[#f8fafc] [&_button]:px-3 [&_button]:text-sm [&_button]:font-medium"
+            />
+          }
+        >
+          <div className="flex h-10 shrink-0 items-center gap-2 rounded-full bg-white px-4 shadow-[0px_1px_2px_0px_rgba(15,23,42,0.06)]">
+            <LuCalendarDays className="size-5 shrink-0 text-[#64748b]" />
+            <span className="text-sm font-medium whitespace-nowrap text-[#64748b]">
+              {periodLabel}
+            </span>
+          </div>
+        </DashboardToolbar>
+      </div>
 
-      <section className="rounded-xl border border-[#DBDBDB] bg-white">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-5 py-3">
-          <span className="rounded-full bg-slate-100 px-4 py-1.5 text-[13px] font-semibold text-slate-500">
-            Showing {rows.length} entries
-          </span>
-
-          <SelectMenu
-            value={yearweek ?? ""}
-            options={weekOptions}
-            onChange={setYearweek}
-            placeholder="Select Week"
-            size="sm"
-          />
-        </div>
-
-        <div className="p-4">
-          <FbbSlaIndicatorTable
-            indicators={rows}
-            periodLabel={columnLabel}
+      <main className="flex flex-1 flex-col px-6 pb-6">
+        <div className="flex min-h-0 flex-1 flex-col gap-4 rounded-[36px] border border-[#e2e8f0] bg-white p-4">
+          <FbbSlaSummaryPanel
+            total={summary.total}
+            achieved={summary.achieved}
+            notAchieved={summary.notAchieved}
             loading={isLoading}
-            errorMessage={errorMessage}
-            onRetry={refetch}
           />
+
+          {/* `@container`: lebar kolom tabel menyesuaikan ruang kartu ini,
+              bukan lebar layar — jadi ikut berubah saat sidebar dibuka. */}
+          <div className="@container flex min-h-0 flex-1 flex-col gap-4 rounded-[19px] border border-[#e2e8f0] bg-white p-4 shadow-[0px_1px_1.75px_0px_rgba(0,0,0,0.05)]">
+            <div className="flex w-full flex-wrap items-center justify-end gap-3">
+              <span className="flex h-9 shrink-0 items-center rounded-full bg-[#f1f5f9] px-3 text-sm font-medium text-[#64748b]">
+                Showing {rows.length} entries
+              </span>
+            </div>
+
+            <FbbSlaIndicatorTable
+              indicators={rows}
+              periodLabel={columnLabel}
+              loading={isLoading}
+              errorMessage={errorMessage}
+              onRetry={refetch}
+            />
+          </div>
         </div>
-      </section>
-    </div>
+      </main>
+    </>
   );
 };
 

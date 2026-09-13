@@ -1,5 +1,8 @@
+// React
+import { useMemo } from "react";
+
 // Atoms
-import Skeleton from "@/app/components/atoms/skeleton/Skeleton";
+import { Skeleton } from "@/app/components/atoms";
 
 // Molecules
 import { EmptyState } from "@/app/components/molecules/EmptyState";
@@ -24,12 +27,27 @@ interface FbbSlaIndicatorTableProps {
   onRetry?: () => void;
 }
 
+/**
+ * Lebar kolom mengecil pada layar laptop dan melebar lagi mulai 1500px —
+ * ambangnya memakai `@container` supaya ikut lebar kartu, bukan lebar layar
+ * (sidebar yang dibuka/ditutup ikut mengubah ruang yang tersedia).
+ */
+const COLUMNS = [
+  { key: "segmen", label: "Segmen", width: "w-[140px] @[1500px]:w-[200px]", align: "justify-center text-center" },
+  { key: "indicator", label: "Performance Indicator", width: "w-[300px] @[1500px]:w-[360px]", align: "justify-start text-left" },
+  { key: "layanan", label: "Layanan", width: "w-[120px] @[1500px]:w-[160px]", align: "justify-start text-left" },
+  { key: "satuan", label: "Satuan", width: "w-[90px] @[1500px]:w-[120px]", align: "justify-center text-center" },
+  { key: "source", label: "Source Data", width: "w-[150px] @[1500px]:w-[200px]", align: "justify-start text-left" },
+  { key: "target", label: "Target", width: "w-[100px] @[1500px]:w-[160px]", align: "justify-center text-center" },
+  { key: "realisasi", label: "Realisasi", width: "flex-1 min-w-[110px] @[1500px]:min-w-[140px]", align: "justify-center text-center" },
+  { key: "capaian", label: "Capaian", width: "flex-1 min-w-[110px] @[1500px]:min-w-[140px]", align: "justify-center text-center" },
+];
+
 const SKELETON_ROWS = 6;
-const COLUMN_COUNT = 8;
 
-const headerCell = "px-4 py-3 text-[13px] font-semibold text-navy";
-const bodyCell = "px-4 py-3 text-sm text-slate-600";
+const cellText = "text-sm leading-[17px] font-normal text-[#020617]";
 
+/** Tabel indikator; baris dikelompokkan per segmen seperti desain. */
 export function FbbSlaIndicatorTable({
   indicators,
   periodLabel,
@@ -37,109 +55,177 @@ export function FbbSlaIndicatorTable({
   errorMessage = null,
   onRetry,
 }: FbbSlaIndicatorTableProps) {
+  // Segmen yang sama dan berurutan digabung jadi satu sel memanjang.
+  const groups = useMemo(() => {
+    const result: { segmen: string; rows: SlaWsaItem[] }[] = [];
+
+    indicators.forEach((row) => {
+      const last = result[result.length - 1];
+      if (last && last.segmen === row.segmen) last.rows.push(row);
+      else result.push({ segmen: row.segmen, rows: [row] });
+    });
+
+    return result;
+  }, [indicators]);
+
   return (
-    <div className="w-full overflow-x-auto">
-      <table className="w-full min-w-[1100px] border-collapse text-left">
-        <thead>
-          <tr className="bg-slate-50">
-            <th className={`${headerCell} w-[150px] rounded-l-xl`}>Segmen</th>
-            <th className={`${headerCell} min-w-[300px]`}>
-              Performance Indicator
-            </th>
-            <th className={`${headerCell} w-[140px]`}>Layanan</th>
-            <th className={`${headerCell} w-[90px]`}>Satuan</th>
-            <th className={`${headerCell} w-[220px]`}>Source Data</th>
-            <th className={`${headerCell} w-[100px]`}>Target</th>
-            <th className={`${headerCell} w-[170px]`}>Realisasi {periodLabel}</th>
-            <th className={`${headerCell} w-[170px] rounded-r-xl`}>
-              Capaian {periodLabel}
-            </th>
-          </tr>
-        </thead>
+    <div className="min-h-0 flex-1 overflow-auto rounded-lg border border-[#e2e8f0]">
+      <div className="min-w-[1130px] @[1500px]:min-w-[1500px]">
+        <div className="flex min-h-12 border-b border-[#e2e8f0] bg-[#f8fafc]">
+          {COLUMNS.map((col, index) => {
+            const isFlex = col.width.startsWith("flex-1");
 
-        <tbody>
-          {loading &&
-            Array.from({ length: SKELETON_ROWS }).map((_, rowIndex) => (
-              <tr
-                key={`skeleton-${rowIndex}`}
-                className="border-b border-slate-100 last:border-b-0"
+            return (
+              <div
+                key={col.key}
+                className={`flex items-center gap-2.5 border-[#e2e8f0] py-2 ${
+                  index !== COLUMNS.length - 1 ? "border-r" : ""
+                } ${isFlex ? "px-3" : "shrink-0 px-4"} ${col.width} ${col.align}`}
               >
-                {Array.from({ length: COLUMN_COUNT }).map((__, cellIndex) => (
-                  <td key={`skeleton-cell-${cellIndex}`} className="px-4 py-3">
-                    <Skeleton />
-                  </td>
-                ))}
-              </tr>
-            ))}
-
-          {!loading &&
-            indicators.map((row, index) => {
-              const achievement = parseAchievement(row.capaian);
-              // Capaian yang tidak berbentuk angka dibiarkan netral.
-              const isOnTarget =
-                achievement === null ||
-                achievement >= SLA_ACHIEVEMENT_THRESHOLD;
-
-              return (
-                <tr
-                  key={`${row.performance_indicator}-${row.sumber_data}-${index}`}
-                  className="border-b border-slate-100 transition-colors last:border-b-0 hover:bg-slate-50/60"
+                <span
+                  className={`text-sm leading-[19px] font-medium text-[#334155] ${
+                    isFlex ? "text-center" : "whitespace-nowrap"
+                  }`}
                 >
-                  <td className="px-4 py-3">
-                    <span className="inline-block whitespace-nowrap rounded-lg bg-slate-100 px-3 py-1.5 text-[13px] font-semibold text-slate-600">
-                      {row.segmen}
-                    </span>
-                  </td>
-                  <td className={`${bodyCell} font-semibold text-navy`}>
-                    {row.performance_indicator}
-                  </td>
-                  <td className={bodyCell}>{row.layanan}</td>
-                  <td className={bodyCell}>{row.satuan}</td>
-                  <td className={bodyCell}>{row.sumber_data}</td>
-                  <td className={`${bodyCell} tabular-nums`}>
-                    {formatDecimal(row.target)}
-                  </td>
-                  <td className={`${bodyCell} tabular-nums`}>
-                    {formatDecimal(row.value)}
-                  </td>
-                  <td
-                    className={`px-4 py-3 text-sm font-bold tabular-nums ${
-                      isOnTarget ? "text-emerald-600" : "text-red-500"
-                    }`}
-                  >
-                    {formatAchievementLabel(row.capaian)}
-                  </td>
-                </tr>
-              );
-            })}
+                  {col.label}
+                  {isFlex && periodLabel ? ` ${periodLabel}` : ""}
+                </span>
+              </div>
+            );
+          })}
+        </div>
 
-          {!loading && !indicators.length && (
-            <tr>
-              <td colSpan={COLUMN_COUNT}>
-                <EmptyState
-                  title={errorMessage ?? "Data indikator belum tersedia"}
-                  description={
-                    errorMessage
-                      ? undefined
-                      : "Tidak ada indikator yang cocok dengan filter ini."
-                  }
-                  action={
-                    errorMessage && onRetry ? (
-                      <button
-                        type="button"
-                        onClick={onRetry}
-                        className="cursor-pointer rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition-colors hover:border-slate-300 hover:bg-slate-50"
+        {loading &&
+          Array.from({ length: SKELETON_ROWS }).map((_, rowIndex) => (
+            <div
+              key={`skeleton-${rowIndex}`}
+              className="flex min-h-[48px] items-center border-b border-[#e2e8f0] last:border-b-0"
+            >
+              {COLUMNS.map((col) => (
+                <div
+                  key={col.key}
+                  className={`px-4 py-2 ${col.width} ${
+                    col.width.startsWith("flex-1") ? "" : "shrink-0"
+                  }`}
+                >
+                  <Skeleton />
+                </div>
+              ))}
+            </div>
+          ))}
+
+        {!loading &&
+          groups.map((group, groupIndex) => {
+            const isLastGroup = groupIndex === groups.length - 1;
+
+            return (
+              <div key={`${group.segmen}-${groupIndex}`} className="flex">
+                <div
+                  className={`flex w-[140px] shrink-0 items-center justify-center border-r border-[#e2e8f0] px-4 py-2 text-center @[1500px]:w-[200px] ${
+                    isLastGroup ? "" : "border-b"
+                  }`}
+                >
+                  <span className="text-sm leading-[17px] font-medium text-[#020617]">
+                    {group.segmen}
+                  </span>
+                </div>
+
+                <div className="flex min-w-0 flex-1 flex-col">
+                  {group.rows.map((row, rowIndex) => {
+                    const achievement = parseAchievement(row.capaian);
+                    const onTarget =
+                      achievement === null ||
+                      achievement >= SLA_ACHIEVEMENT_THRESHOLD;
+                    const isLastRow =
+                      isLastGroup && rowIndex === group.rows.length - 1;
+                    const borderB = isLastRow ? "" : "border-b";
+
+                    return (
+                      <div
+                        key={`${row.performance_indicator}-${rowIndex}`}
+                        className="flex min-h-[48px] items-stretch"
                       >
-                        Coba lagi
-                      </button>
-                    ) : null
-                  }
-                />
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+                        <div
+                          className={`flex h-full w-[300px] shrink-0 items-center border-r border-[#e2e8f0] px-4 py-2 @[1500px]:w-[360px] ${borderB}`}
+                        >
+                          <span className={cellText}>
+                            {row.performance_indicator}
+                          </span>
+                        </div>
+                        <div
+                          className={`flex h-full w-[120px] shrink-0 items-center border-r border-[#e2e8f0] px-4 @[1500px]:w-[160px] ${borderB}`}
+                        >
+                          <span title={row.layanan} className={`truncate ${cellText}`}>
+                            {row.layanan}
+                          </span>
+                        </div>
+                        <div
+                          className={`flex h-full w-[90px] shrink-0 items-center justify-center border-r border-[#e2e8f0] px-3 @[1500px]:w-[120px] ${borderB}`}
+                        >
+                          <span className={cellText}>{row.satuan}</span>
+                        </div>
+                        <div
+                          className={`flex h-full w-[150px] shrink-0 items-center border-r border-[#e2e8f0] px-4 @[1500px]:w-[200px] ${borderB}`}
+                        >
+                          <span title={row.sumber_data} className={`truncate ${cellText}`}>
+                            {row.sumber_data}
+                          </span>
+                        </div>
+                        <div
+                          className={`flex h-full w-[100px] shrink-0 items-center justify-center border-r border-[#e2e8f0] px-3 @[1500px]:w-[160px] ${borderB}`}
+                        >
+                          <span className={cellText}>
+                            {formatDecimal(row.target)}
+                          </span>
+                        </div>
+                        <div
+                          className={`flex h-full min-w-[110px] flex-1 items-center justify-center border-r border-[#e2e8f0] px-3 @[1500px]:min-w-[140px] ${borderB}`}
+                        >
+                          <span className={cellText}>
+                            {formatDecimal(row.value)}
+                          </span>
+                        </div>
+                        <div
+                          className={`flex h-full min-w-[110px] flex-1 items-center justify-center border-[#e2e8f0] px-3 @[1500px]:min-w-[140px] ${borderB}`}
+                        >
+                          <span
+                            className={`text-sm leading-[16px] font-normal ${
+                              onTarget ? "text-[#21a647]" : "text-[#c23837]"
+                            }`}
+                          >
+                            {formatAchievementLabel(row.capaian)}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+
+        {!loading && !groups.length && (
+          <EmptyState
+            title={errorMessage ?? "Data indikator belum tersedia"}
+            description={
+              errorMessage
+                ? undefined
+                : "Tidak ada indikator yang cocok dengan filter ini."
+            }
+            action={
+              errorMessage && onRetry ? (
+                <button
+                  type="button"
+                  onClick={onRetry}
+                  className="cursor-pointer rounded-full border border-[#e2e8f0] px-4 py-2 text-sm font-semibold text-[#334155] transition-colors hover:bg-[#f8fafc]"
+                >
+                  Coba lagi
+                </button>
+              ) : null
+            }
+          />
+        )}
+      </div>
     </div>
   );
 }

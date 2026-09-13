@@ -11,6 +11,12 @@ export const fbbKeys = {
   options: (name: string) => [...fbbKeys.all, "options", name] as const,
   nationMetrics: (params: Record<string, unknown>) =>
     [...fbbKeys.all, "onx", "nation-metrics-kpi", params] as const,
+  ooklaNationMetrics: (params: Record<string, unknown>) =>
+    [...fbbKeys.all, "ookla", "nation-metrics-kpi", params] as const,
+  ooklaMapRegionStatus: (params: Record<string, unknown>) =>
+    [...fbbKeys.all, "ookla", "maps-region-status", params] as const,
+  ooklaLoseRegionKabupaten: (params: Record<string, unknown>) =>
+    [...fbbKeys.all, "ookla", "lose-region-kabupaten", params] as const,
   mapRegionStatus: (params: Record<string, unknown>) =>
     [...fbbKeys.all, "onx", "maps-region-status", params] as const,
   loseRegionKabupaten: (params: Record<string, unknown>) =>

@@ -1,7 +1,7 @@
-import { LuCircleAlert, LuGauge, LuRocket } from "react-icons/lu";
+import { LuGauge, LuMonitorCheck, LuMonitorX } from "react-icons/lu";
 
 // Molecules
-import { SummaryStatCard } from "@/app/components/molecules/SummaryStatCard";
+import { KpiStatCard } from "@/app/components/molecules/KpiStatCard";
 
 interface FbbSlaSummaryPanelProps {
   total: number;
@@ -20,32 +20,36 @@ export function FbbSlaSummaryPanel({
   const cards = [
     {
       key: "total",
-      icon: <LuGauge size={18} />,
+      icon: LuGauge,
       label: "Total Performance Indicator",
       value: total,
+      valueClassName: "text-[#050505]",
     },
     {
       key: "achieved",
-      icon: <LuRocket size={18} />,
+      icon: LuMonitorCheck,
       label: "Indicators Achieved",
       value: achieved,
+      valueClassName: "text-[#21a647]",
     },
     {
       key: "not-achieved",
-      icon: <LuCircleAlert size={18} />,
+      icon: LuMonitorX,
       label: "Indicators Not Achieved",
       value: notAchieved,
+      valueClassName: "text-[#c23837]",
     },
   ];
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+    <div className="flex shrink-0 flex-wrap gap-3">
       {cards.map((card) => (
-        <SummaryStatCard
+        <KpiStatCard
           key={card.key}
           icon={card.icon}
           label={card.label}
           value={card.value}
+          valueClassName={card.valueClassName}
           loading={loading}
         />
       ))}

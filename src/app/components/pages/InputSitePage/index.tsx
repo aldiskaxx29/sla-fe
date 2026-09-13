@@ -109,6 +109,7 @@ const InputSitePage = () => {
         year={period.year}
         onCancel={() => setEditedRow(null)}
         onSave={handleSave}
+        isLoading={saveMutation.isPending}
       />
 
       <ImportTemplateModal

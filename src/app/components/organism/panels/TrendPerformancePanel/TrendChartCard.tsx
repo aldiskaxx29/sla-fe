@@ -4,16 +4,15 @@ import type EChartsReactCore from "echarts-for-react/lib/core";
 import type { EChartsOption, LineSeriesOption } from "echarts";
 import {
   LuDownload,
+  LuEye,
+  LuEyeOff,
   LuImage,
   LuMaximize2,
   LuMinimize2,
 } from "react-icons/lu";
 import * as XLSX from "xlsx";
 
-import {
-  SERIES_COLORS,
-  formatSeriesName,
-} from "@/app/components/organism/panels/TrendPerformancePanel/trendChart.shared";
+import { SelectMenu } from "@/app/components/molecules/SelectMenu";
 import { useTrendQualityQuery } from "@/app/hooks/query/monday/trendQuality";
 import type {
   TrendKind,
@@ -21,16 +20,50 @@ import type {
   TrendScope,
 } from "@/app/types/monday/trendQuality.types";
 
+const METRIC_OPTIONS = [
+  { label: "Latency", value: "latency" },
+  { label: "Packet Loss", value: "packetloss" },
+  { label: "Jitter", value: "jitter" },
+];
+
+/** Sama seperti tombol NATION/TERITORY/TREG/REGION di monday monitoring lama. */
+const SCOPE_OPTIONS: { label: string; value: TrendScope }[] = [
+  { label: "Nation", value: "nation" },
+  { label: "Teritory", value: "area" },
+  { label: "Treg", value: "region" },
+  { label: "Region", value: "region_tsel" },
+];
+
+/** Cukup untuk 12 region; warna diulang kalau serinya lebih banyak. */
+const SERIES_COLORS = [
+  "#3B82F6",
+  "#10B981",
+  "#6366F1",
+  "#EC4899",
+  "#F59E0B",
+  "#06B6D4",
+  "#8B5CF6",
+  "#EF4444",
+  "#14B8A6",
+  "#F97316",
+  "#0EA5E9",
+  "#A855F7",
+];
+
 /** Berapa titik terakhir yang tampil sebelum slider digeser. */
 const VISIBLE_WEEKS = 12;
+
+/** "01-sumbagut" -> "01-Sumbagut", "AREA 1" -> "Area 1". */
+const formatSeriesName = (name: string) =>
+  name
+    .toLowerCase()
+    .replace(/(^|[\s-])([a-z])/g, (_, prefix: string, letter: string) =>
+      `${prefix}${letter.toUpperCase()}`,
+    );
 
 interface TrendChartCardProps {
   title: string;
   kind: TrendKind;
-  /** Metrik, level, dan legend dikendalikan panel supaya kedua chart seragam. */
-  metric: TrendMetric;
-  scope: TrendScope;
-  hiddenSeries: string[];
   /** Sudut kartu mengikuti desain awal panel. */
   roundedClassName?: string;
 }
@@ -38,16 +71,21 @@ interface TrendChartCardProps {
 export function TrendChartCard({
   title,
   kind,
-  metric,
-  scope,
-  hiddenSeries,
   roundedClassName = "rounded-2xl",
 }: TrendChartCardProps) {
+  const [metric, setMetric] = useState<TrendMetric>("latency");
+  const [scope, setScope] = useState<TrendScope>("area");
+  const [hiddenSeries, setHiddenSeries] = useState<string[]>([]);
   const [fullscreen, setFullscreen] = useState(false);
   const chartRef = useRef<EChartsReactCore>(null);
 
   const trend = useTrendQualityQuery(kind, metric, scope);
   const series = useMemo(() => trend.data?.series ?? [], [trend.data]);
+
+  // Nama seri berubah tiap ganti level, jadi pilihan legend direset.
+  useEffect(() => {
+    setHiddenSeries([]);
+  }, [scope]);
 
   // Esc keluar dari mode layar penuh.
   useEffect(() => {
@@ -106,6 +144,18 @@ export function TrendChartCard({
     XLSX.writeFile(workbook, `${fileBaseName}.xlsx`);
   };
 
+  const allHidden = series.length > 0 && hiddenSeries.length === series.length;
+
+  const toggleAllSeries = () =>
+    setHiddenSeries(allHidden ? [] : series.map((item) => item.name));
+
+  const toggleSeries = (name: string) =>
+    setHiddenSeries((current) =>
+      current.includes(name)
+        ? current.filter((item) => item !== name)
+        : [...current, name],
+    );
+
   const option = useMemo<EChartsOption>(() => {
     const data = trend.data;
     const weeks = data?.weeks ?? [];
@@ -136,13 +186,11 @@ export function TrendChartCard({
       total > VISIBLE_WEEKS ? ((total - VISIBLE_WEEKS) / total) * 100 : 0;
 
     return {
-      // Margin dalam piksel, bukan persen: waktu kartunya memanjang, ruang
-      // ekstra jatuh ke area garis — bukan jadi celah kosong di bawah.
       grid: {
-        top: 16,
-        left: 8,
-        right: 16,
-        bottom: 44,
+        top: "10%",
+        left: "3%",
+        right: "3%",
+        bottom: "25%",
         containLabel: true,
       },
       tooltip: {
@@ -193,8 +241,8 @@ export function TrendChartCard({
       dataZoom: [
         {
           type: "slider",
-          height: 12,
-          bottom: 6,
+          height: 10,
+          bottom: 10,
           start: zoomStart,
           end: 100,
           textStyle: { color: "transparent" },
@@ -218,51 +266,83 @@ export function TrendChartCard({
       <header className="mb-1 flex flex-wrap items-center justify-between gap-2 px-1">
         <h3 className="text-xs font-bold text-[#213c52]">{title}</h3>
 
-        <div className="flex items-center gap-1">
-          <button
-            type="button"
-            onClick={handleDownloadImage}
-            disabled={!series.length}
-            title="Download PNG"
-            aria-label="Download PNG"
-            className={actionButtonClass}
-          >
-            <LuImage size={12} />
-          </button>
-          <button
-            type="button"
-            onClick={handleDownloadData}
-            disabled={!series.length}
-            title="Download data (XLSX)"
-            aria-label="Download data"
-            className={actionButtonClass}
-          >
-            <LuDownload size={12} />
-          </button>
-          <button
-            type="button"
-            onClick={() => setFullscreen((current) => !current)}
-            title={fullscreen ? "Keluar layar penuh" : "Layar penuh"}
-            aria-label={fullscreen ? "Keluar layar penuh" : "Layar penuh"}
-            className={actionButtonClass}
-          >
-            {fullscreen ? <LuMinimize2 size={12} /> : <LuMaximize2 size={12} />}
-          </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center gap-0.5 rounded-full border border-slate-200 bg-slate-50 p-0.5">
+            {SCOPE_OPTIONS.map((item) => (
+              <button
+                key={item.value}
+                type="button"
+                onClick={() => setScope(item.value)}
+                className={`cursor-pointer rounded-full px-2 py-0.5 text-[9px] font-bold transition-colors ${
+                  scope === item.value
+                    ? "bg-[#213c52] text-white"
+                    : "text-slate-500 hover:text-[#213c52]"
+                }`}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+
+          <SelectMenu
+            value={metric}
+            onChange={(value) => setMetric(value as TrendMetric)}
+            options={METRIC_OPTIONS}
+            size="sm"
+            className="text-xs font-semibold"
+          />
+
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={toggleAllSeries}
+              disabled={!series.length}
+              title={allHidden ? "Tampilkan semua legend" : "Sembunyikan semua legend"}
+              aria-label={allHidden ? "Tampilkan semua legend" : "Sembunyikan semua legend"}
+              className={actionButtonClass}
+            >
+              {allHidden ? <LuEye size={12} /> : <LuEyeOff size={12} />}
+            </button>
+            <button
+              type="button"
+              onClick={handleDownloadImage}
+              disabled={!series.length}
+              title="Download PNG"
+              aria-label="Download PNG"
+              className={actionButtonClass}
+            >
+              <LuImage size={12} />
+            </button>
+            <button
+              type="button"
+              onClick={handleDownloadData}
+              disabled={!series.length}
+              title="Download data (XLSX)"
+              aria-label="Download data"
+              className={actionButtonClass}
+            >
+              <LuDownload size={12} />
+            </button>
+            <button
+              type="button"
+              onClick={() => setFullscreen((current) => !current)}
+              title={fullscreen ? "Keluar layar penuh" : "Layar penuh"}
+              aria-label={fullscreen ? "Keluar layar penuh" : "Layar penuh"}
+              className={actionButtonClass}
+            >
+              {fullscreen ? <LuMinimize2 size={12} /> : <LuMaximize2 size={12} />}
+            </button>
+          </div>
         </div>
       </header>
 
-      {/* Canvas echarts dipasang absolut supaya ukurannya tidak ikut
-          menentukan tinggi alami kartu — kalau tidak, tinggi hasil render
-          sebelumnya "mengunci" kartu dan kolom kiri ikut memanjang. */}
-      <div className="relative w-full flex-1 min-h-40">
-        <div className="absolute inset-0">
-          <ReactECharts
-            ref={chartRef}
-            option={option}
-            notMerge
-            style={{ height: "100%", width: "100%" }}
-          />
-        </div>
+      <div className="relative w-full flex-1 min-h-36">
+        <ReactECharts
+          ref={chartRef}
+          option={option}
+          notMerge
+          style={{ height: "100%", width: "100%" }}
+        />
         {(trend.isPending || trend.isError) && (
           <div className="absolute inset-0 flex items-center justify-center bg-white/70 text-[10px] font-semibold text-slate-500">
             {trend.isError
@@ -272,6 +352,32 @@ export function TrendChartCard({
         )}
       </div>
 
+      <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[9px] font-bold text-slate-600">
+        {series.map((item, index) => {
+          const color = SERIES_COLORS[index % SERIES_COLORS.length];
+          const checked = !hiddenSeries.includes(item.name);
+
+          return (
+            <label
+              key={item.name}
+              className="flex cursor-pointer items-center gap-1.5"
+            >
+              <input
+                type="checkbox"
+                checked={checked}
+                onChange={() => toggleSeries(item.name)}
+                className="h-3 w-3 rounded border-slate-300"
+                style={{ accentColor: color }}
+              />
+              <span
+                className="h-2 w-2 rounded-full"
+                style={{ backgroundColor: color }}
+              />
+              <span>{formatSeriesName(item.name)}</span>
+            </label>
+          );
+        })}
+      </div>
     </div>
   );
 

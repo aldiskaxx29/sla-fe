@@ -49,17 +49,18 @@ const MONDAY_MONITORING_TOKEN =
   "4592|3321d8d4f1cc1768aa1ba79e27fb711aa8d4b5fd8d0ee6e7024fb14edfd36754";
 
 /**
- * Saat development request lewat proxy `/qosmo` (lihat `vite.config.ts`)
- * supaya tidak kena CORS.
+ * Dev lewat proxy `/qosmo` (lihat `vite.config.ts`). Di server, aplikasi PHP
+ * lama ini dilayani pada origin yang sama dengan SPA (`/mondaymonitoring`),
+ * jadi dipakai path relatif — endpoint-nya tidak mengirim header CORS, jadi
+ * URL absolut ke qosmo.telkom.co.id pasti diblokir browser saat aplikasi
+ * diakses dari host lain (mis. http://10.60.174.187:8091).
  */
 export const resolveMondayMonitoringBaseUrl = (
   baseUrl: string | undefined = import.meta.env.VITE_MONDAY_MONITORING_BASE_URL,
 ): string => {
   if (baseUrl) return baseUrl;
 
-  return import.meta.env.DEV
-    ? "/qosmo/mondaymonitoring"
-    : "https://qosmo.telkom.co.id/mondaymonitoring";
+  return import.meta.env.DEV ? "/qosmo/mondaymonitoring" : "/mondaymonitoring";
 };
 
 const mondayMonitoringClient = axios.create({
@@ -217,9 +218,8 @@ export const getCoreTransitDetail = (signal?: AbortSignal) =>
  * ada di aplikasi `executive` pada host yang sama, tanpa token.
  */
 const executiveClient = axios.create({
-  baseURL: import.meta.env.DEV
-    ? "/qosmo/executive"
-    : "https://qosmo.telkom.co.id/executive",
+  // Sama seperti monday-monitoring: satu origin dengan SPA supaya bebas CORS.
+  baseURL: import.meta.env.DEV ? "/qosmo/executive" : "/executive",
 });
 
 export const getCtiTransitDetail = async (

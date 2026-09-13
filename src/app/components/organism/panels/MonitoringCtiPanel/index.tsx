@@ -7,6 +7,7 @@ import {
 } from "@tanstack/react-table";
 import { LuCalendar, LuMaximize2, LuSearch } from "react-icons/lu";
 import { useDebouncedSearch } from "@/app/hooks/custom/pacer";
+import { formatMonitoringHour } from "@/app/utils/monday.utils";
 import { useCtiMonitoringQuery } from "@/app/hooks/query/monday/trendQuality";
 import { useOnxSummaryQuery } from "@/app/hooks/query/monday/onxMonitoring";
 import type { CtiRow } from "@/app/types/monday/ticketQuality.types";
@@ -204,68 +205,67 @@ export function MonitoringCtiPanel() {
 
   return (
     <div className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
-      <header className="flex items-center justify-between gap-2">
+      <header className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-1.5">
-          <h2 className="text-sm font-extrabold text-[#213c52]">
-            Monitoring {activeTab} 12:00 WIB
+          <h2 className="text-xs font-extrabold text-[#213c52]">
+            Monitoring {activeTab} {formatMonitoringHour()} WIB
           </h2>
           <LuCalendar className="text-blue-500" size={14} />
         </div>
 
-        <button
-          type="button"
-          onClick={() => {
-            setDetailTarget(null);
-            setOnxTarget(null);
-            setDetailSource(activeTab);
-            setDetailOpen(true);
-          }}
-          aria-label={`Lihat semua data ${activeTab}`}
-          title={`Lihat semua data ${activeTab}`}
-          className="flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition-colors hover:bg-slate-50 hover:text-[#213c52]"
-        >
-          <LuMaximize2 size={12} />
-        </button>
+        <div className="flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={() => {
+              setDetailTarget(null);
+              setOnxTarget(null);
+              setDetailSource(activeTab);
+              setDetailOpen(true);
+            }}
+            aria-label={`Lihat semua data ${activeTab}`}
+            title={`Lihat semua data ${activeTab}`}
+            className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition-colors hover:bg-slate-50 hover:text-[#213c52]"
+          >
+            <LuMaximize2 size={12} />
+          </button>
+          <button
+            onClick={() => setActiveTab("CTI")}
+            className={`rounded-lg px-2.5 py-0.5 text-[10px] font-extrabold transition-all cursor-pointer ${
+              activeTab === "CTI"
+                ? "bg-[#007BFF] text-white"
+                : "border border-slate-200 bg-white text-slate-500 hover:bg-slate-50"
+            }`}
+          >
+            CTI
+          </button>
+          <button
+            onClick={() => setActiveTab("ONX")}
+            className={`rounded-lg px-2.5 py-0.5 text-[10px] font-extrabold transition-all cursor-pointer ${
+              activeTab === "ONX"
+                ? "bg-[#007BFF] text-white"
+                : "border border-slate-200 bg-white text-slate-500 hover:bg-slate-50"
+            }`}
+          >
+            ONX
+          </button>
+        </div>
       </header>
 
-      {/* Search dan pemilih sumber data sebaris, seperti desain. */}
-      <div className="mt-2 flex items-center gap-2">
-        <div className="relative flex-1">
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search"
-            className="w-full rounded-lg border border-slate-200 bg-slate-50/50 py-1.5 pl-8 pr-3 text-[10px] font-semibold text-[#213c52] outline-none transition-colors focus:border-indigo-500"
-          />
-          <LuSearch
-            className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400"
-            size={12}
-          />
-        </div>
-
-        <div className="flex shrink-0 items-center gap-0.5 rounded-lg border border-slate-200 bg-slate-50 p-0.5">
-          {(["CTI", "ONX"] as const).map((tab) => (
-            <button
-              key={tab}
-              type="button"
-              onClick={() => setActiveTab(tab)}
-              className={`cursor-pointer rounded-md px-2.5 py-1 text-[10px] font-extrabold transition-all ${
-                activeTab === tab
-                  ? "bg-[#007BFF] text-white shadow-xs"
-                  : "text-slate-500 hover:text-[#213c52]"
-              }`}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
+      <div className="relative mt-2">
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search"
+          className="w-full rounded-lg border border-slate-200 bg-slate-50/50 py-1 pl-8 pr-3 text-[10px] font-semibold text-[#213c52] outline-none transition-colors focus:border-indigo-500"
+        />
+        <LuSearch className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" size={12} />
       </div>
 
       {activeTab === "CTI" ? (
         <>
-      {/* Tinggi dikunci ~7 baris (header 2 x 24px + 7 x 22px); sisanya discroll. */}
-      <div className="mt-2 max-h-[210px] overflow-auto">
+      {/* Tinggi dikunci ~5 baris (header 2 x 24px + 5 x 22px); sisanya discroll. */}
+      <div className="mt-2 max-h-[160px] overflow-auto">
         <table className="w-full min-w-[500px] table-fixed border-collapse text-left text-[10px]">
           <colgroup>
             <col style={{ width: "30px" }} />
@@ -336,7 +336,7 @@ export function MonitoringCtiPanel() {
       ) : (
         <>
       {/* Tabel ONX: ringkasan jumlah IP per provider tiap region/code. */}
-      <div className="mt-2 max-h-[210px] overflow-auto">
+      <div className="mt-2 max-h-[160px] overflow-auto">
         <table className="w-full min-w-[500px] table-fixed border-collapse text-left text-[10px]">
           <colgroup>
             <col style={{ width: "30px" }} />
@@ -365,7 +365,7 @@ export function MonitoringCtiPanel() {
             {filteredOnxRows.map((row) => (
               <tr
                 key={`${row.region}-${row.code}`}
-                className="border-b border-slate-100 transition-colors hover:bg-slate-50/30"
+                className="border-b border-slate-100 hover:bg-slate-50/30 transition-colors"
               >
                 <td className="border border-slate-100 px-1 py-1 text-center text-[9px] text-slate-500">
                   {row.no}

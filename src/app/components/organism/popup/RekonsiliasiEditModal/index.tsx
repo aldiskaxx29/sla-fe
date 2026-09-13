@@ -34,12 +34,13 @@ type FormValues = Record<string, unknown>;
 
 interface RekonsiliasiEditModalProps {
   open: boolean;
-  parameter: string;
-  dataModal: Record<string, unknown>;
+  parameter?: string;
+  dataModal?: Record<string, unknown>;
   week?: string | number;
   year?: string | number;
   onCancel: () => void;
   onSave: (payload: FormValues) => void | Promise<void>;
+  isLoading?: boolean;
 }
 
 const toSelectOptions = (values: string[]) =>
@@ -59,11 +60,12 @@ const parseEvidenceUrl = (evidence: unknown): string => {
 /** Form edit satu baris rekonsiliasi, termasuk unggah evidence. */
 const RekonsiliasiEditModal = ({
   open,
-  parameter,
-  dataModal,
+  parameter = "",
+  dataModal = {},
   week,
   onCancel,
   onSave,
+  isLoading = false,
 }: RekonsiliasiEditModalProps) => {
   const [values, setValues] = useState<FormValues>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -237,7 +239,13 @@ const RekonsiliasiEditModal = ({
   };
 
   return (
-    <Modal open={open} onClose={onCancel} width={760} bodyClassName="px-6 pb-4">
+    <Modal
+      open={open}
+      onClose={() => !isLoading && onCancel()}
+      closable={!isLoading}
+      width={760}
+      bodyClassName="px-6 pb-4"
+    >
       <p className="my-3 w-full text-center text-lg font-semibold text-[#0E2133]">
         Update Site Exlcude
       </p>
@@ -451,11 +459,16 @@ const RekonsiliasiEditModal = ({
       </div>
 
       <div className="sticky bottom-0 z-10 -mx-6 mt-6 flex justify-end gap-2 border-t border-[#E5E7EB] bg-white px-6 pb-2 pt-4">
-        <Button variant="secondary" onClick={onCancel}>
+        <Button variant="secondary" onClick={onCancel} disabled={isLoading}>
           Cancel
         </Button>
-        <Button variant="primary" onClick={handleSave}>
-          Save
+        <Button
+          variant="primary"
+          onClick={handleSave}
+          loading={isLoading}
+          disabled={isLoading}
+        >
+          {isLoading ? "Menyimpan..." : "Save"}
         </Button>
       </div>
     </Modal>

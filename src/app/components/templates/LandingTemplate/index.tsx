@@ -75,8 +75,9 @@ const LandingTemplate = ({ children }: LandingTemplateProps) => (
       {children}
     </main>
 
-    <footer className="relative border-t border-slate-200 px-6 py-4 text-center text-[12px] font-medium text-slate-400">
-      © {new Date().getFullYear()} Qosmo · Quality Service Monitoring
+    <footer className="relative border-t border-black/8 bg-[#f9f8f7] px-5 py-3 text-center text-xs text-[#636363]">
+      © {new Date().getFullYear()} Qosmo · Quality Service Monitoring, you agree
+      to our Terms of Service and Privacy Policy.
     </footer>
   </div>
 );

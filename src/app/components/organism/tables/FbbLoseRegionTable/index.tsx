@@ -43,14 +43,19 @@ const parseTrend = (trend?: string) =>
     .filter((value) => Number.isFinite(value))
     .slice(-TREND_POINTS);
 
-const isWin = (status?: string) => String(status).toLowerCase() === "win";
+const isWin = (status?: string, benchmarkStatus?: string) => {
+  if (benchmarkStatus) {
+    return benchmarkStatus.toLowerCase() === "win";
+  }
+  const s = String(status ?? "").toLowerCase();
+  return s === "win" || s.includes("win");
+};
 
 /** Pilihan ukuran halaman; nilai aktifnya datang dari `meta.per_page`. */
-const PAGE_SIZE_OPTIONS = [5, 10, 20, 50];
+const PAGE_SIZE_OPTIONS = [5, 10, 20, 50, 100];
 
-const headCell =
-  "bg-slate-50 px-4 py-3 text-[13px] font-bold text-navy first:rounded-l-xl last:rounded-r-xl";
-const bodyCell = "px-4 py-2.5 text-[13px] text-slate-600";
+const headCell = "h-10 bg-[#f8fafc] px-3 text-[12px] font-medium text-[#334155]";
+const bodyCell = "h-[38px] px-3 text-[12px] font-normal text-[#020617]";
 
 /** Detail per kabupaten, dikelompokkan per region dan bisa dibuka-tutup. */
 export function FbbLoseRegionTable({
@@ -69,7 +74,7 @@ export function FbbLoseRegionTable({
     const byRegion: Record<string, FbbLoseRegionRow[]> = {};
 
     rows.forEach((row) => {
-      const region = row.region_new || "-";
+      const region = row.region || row.region_new || "-";
       if (!byRegion[region]) {
         byRegion[region] = [];
         order.push(region);
@@ -79,7 +84,9 @@ export function FbbLoseRegionTable({
 
     return order.map((region) => {
       const items = byRegion[region];
-      const win = items.filter((item) => isWin(item.status)).length;
+      const win = items.filter((item) =>
+        isWin(item.status, item.benchmark_status),
+      ).length;
 
       return { region, items, win, total: items.length };
     });
@@ -93,7 +100,7 @@ export function FbbLoseRegionTable({
 
   return (
     <div className="flex flex-col">
-      <div className="w-full overflow-x-auto">
+      <div className="w-full overflow-x-auto rounded-[10px] border border-[#e2e8f0]">
         <table className="w-full min-w-[1100px] border-collapse text-left">
           <thead>
             <tr>
@@ -124,8 +131,8 @@ export function FbbLoseRegionTable({
 
                 return (
                   <Fragment key={group.region}>
-                    <tr className="border-b border-slate-100 bg-slate-50/60">
-                      <td className={`${bodyCell} font-extrabold text-navy`}>
+                    <tr className="border-b border-[#e2e8f0] bg-[#f8fafc]">
+                      <td className={`${bodyCell} font-semibold`}>
                         <button
                           type="button"
                           onClick={() => toggle(group.region)}
@@ -153,14 +160,14 @@ export function FbbLoseRegionTable({
 
                     {isOpen &&
                       group.items.map((row, index) => {
-                        const win = isWin(row.status);
+                        const win = isWin(row.status, row.benchmark_status);
 
                         return (
                           <tr
                             key={`${group.region}-${row.kabupaten}-${row.kpi_res}-${index}`}
-                            className="border-b border-slate-100 transition-colors last:border-b-0 hover:bg-slate-50/60"
+                            className="border-b border-l-[3px] border-l-transparent border-[#e2e8f0] transition-colors last:border-b-0 hover:border-l-[#3b82f6] hover:bg-[#f8fafc]"
                           >
-                            <td className={`${bodyCell} pl-10 font-semibold text-navy`}>
+                            <td className={`${bodyCell} pl-10`}>
                               {row.kabupaten}
                             </td>
                             <td className={bodyCell}>{row.kpi_res}</td>
@@ -177,7 +184,7 @@ export function FbbLoseRegionTable({
                               />
                             </td>
                             <td className={bodyCell}>
-                              {row.gap_to_nearest_comp}
+                              {row.nearest_comp || row.gap_to_nearest_comp || "-"}
                             </td>
                             <td className={bodyCell}>{row.winner}</td>
                             <td
@@ -213,7 +220,7 @@ export function FbbLoseRegionTable({
       </div>
 
       {meta && meta.total > 0 && (
-        <div className="border-t border-slate-100 pt-2">
+        <div className="pt-2">
           <Pagination
             current={meta.current_page}
             pageSize={meta.per_page}

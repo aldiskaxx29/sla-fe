@@ -1,27 +1,26 @@
 // React
-import { useMemo, useState, type ReactNode } from "react";
+import { useMemo } from "react";
 import { useLocation } from "react-router-dom";
-import { LuActivity, LuRadio, LuRouter } from "react-icons/lu";
+import { LuRadio, LuRouter, LuTrendingUpDown } from "react-icons/lu";
 
 // Components
 import { AppRouteWrapper } from "@/app/components";
 
 // Layout
-import AppShell, { type AppShellMenu } from "@/app/layout/AppShell";
+import AppShell from "@/app/layout/AppShell";
 
-// Context
-import { FbbShellContext } from "@/app/layout/AppLayoutFbb/context";
+// Organism
+import type { DashboardSidebarMenu } from "@/app/components/organism/navigation/DashboardSidebar";
 
-const FBB_MENUS: AppShellMenu[] = [
-  { path: "/fbb/sla", label: "SLA WISA FBB", icon: LuActivity },
-  { path: "/fbb/onx", label: "ONX Dashboard", icon: LuRouter },
-  { path: "/fbb/ookla", label: "Ookla Dashboard", icon: LuRadio },
+const FBB_MENUS: DashboardSidebarMenu[] = [
+  { key: "sla", label: "SLA WISA FBB", path: "/fbb/sla", icon: LuTrendingUpDown },
+  { key: "onx", label: "ONX Dashboard", path: "/fbb/onx", icon: LuRouter },
+  { key: "ookla", label: "Ookla Dashboard", path: "/fbb/ookla", icon: LuRadio },
 ];
 
-/** Shell dashboard FBB: sidebar menu FBB dan header judul halaman. */
+/** Shell dashboard FBB: sidebar menu FBB dan bar judul halaman. */
 const AppLayoutFbb = () => {
   const location = useLocation();
-  const [badge, setBadge] = useState<ReactNode>(null);
 
   const activeMenu = useMemo(
     () =>
@@ -30,14 +29,10 @@ const AppLayoutFbb = () => {
     [location.pathname],
   );
 
-  const shell = useMemo(() => ({ setBadge }), []);
-
   return (
-    <FbbShellContext.Provider value={shell}>
-      <AppShell menus={FBB_MENUS} title={activeMenu.label} badge={badge}>
-        <AppRouteWrapper />
-      </AppShell>
-    </FbbShellContext.Provider>
+    <AppShell menus={FBB_MENUS} activeKey={activeMenu.key} title={activeMenu.label}>
+      <AppRouteWrapper />
+    </AppShell>
   );
 };
 

@@ -444,10 +444,7 @@ const buildMttrCard = (
     beforeValue: "",
     currentValue: "",
     tableData,
-    worstText:
-      hasNationAch && !isOnTarget
-        ? `Nation : ${formatPercent(nation?.ach)} / ${formatPercent(nation?.target)}`
-        : undefined,
+    // Angka nation hanya dipakai menentukan status kartu, tidak ditampilkan.
     detail: buildMttrDetail(name, rows),
   };
 };

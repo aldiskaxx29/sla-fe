@@ -16,7 +16,12 @@ import { toast } from "react-toastify";
 // service-nya sudah ada di qosmo pada path /pqm-reoprt (ejaan sesuai server),
 // jadi satu origin dengan aplikasi; saat dev dilewatkan proxy /pqm-api
 // (vite.config.ts) supaya tidak kena CORS.
-const PQM_PRODUCTION_BASE_URL = "https://qosmo.telkom.co.id/pqm-reoprt";
+/**
+ * Service PQM dilayani pada origin yang sama dengan aplikasi (path
+ * `/pqm-reoprt`), dan responsnya tidak mengirim header CORS — jadi jangan
+ * memakai URL absolut ke qosmo.telkom.co.id dari host lain.
+ */
+const PQM_PRODUCTION_BASE_URL = "/pqm-reoprt";
 const PQM_DOWNLOAD_PATH = "/api/pqm-report/download";
 
 const configuredPqmBaseUrl = import.meta.env.VITE_PQM_API_BASE_URL?.replace(

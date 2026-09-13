@@ -44,6 +44,8 @@ export interface FbbNationMetricRow {
   status: string;
   winner: string;
   gap_to_winner: string;
+  /** Nama pesaing terdekat. */
+  nearest_comp: string;
   gap_to_nearest_comp: string;
   rank: number;
 }
@@ -79,14 +81,17 @@ export interface FbbMapRegionResponse {
 /** Satu baris detail kabupaten; `trend` deret nilai dipisah koma. */
 export interface FbbLoseRegionRow {
   kpi_res: string;
-  region_new: string;
+  region_new?: string;
+  region?: string;
   kabupaten: string;
   value_indihome: string;
   trend: string;
   status: string;
+  benchmark_status?: string;
   winner: string;
   gap_to_winner: string;
-  gap_to_nearest_comp: string;
+  nearest_comp?: string;
+  gap_to_nearest_comp?: string;
   rank: number;
 }
 
@@ -102,4 +107,41 @@ export interface FbbOnxFilterState {
   kpi: string;
   level: string;
   indihomeType: string;
+}
+
+/* ------------------------------------------------------------------ *
+ * Ookla — bentuk field-nya berbeda dari ONX, jadi dipetakan di hook.
+ * ------------------------------------------------------------------ */
+
+export interface FbbOoklaMetricRow {
+  metrics_result: string;
+  kpi_result: string;
+  /** "win" atau "lose". */
+  benchmark: string;
+  winner: string;
+  gap_to_winner: string;
+  gap_to_nearest: string;
+  provider_rank: number;
+}
+
+export interface FbbOoklaMetricsResponse {
+  status: boolean;
+  data: FbbOoklaMetricRow[];
+  meta: FbbOnxMeta;
+}
+
+/** Baris peta Ookla; `status` berbentuk "kalah/total", mis. "7/7". */
+export interface FbbOoklaMapRow {
+  metrics_result: string;
+  kpi_result: string;
+  region: string;
+  winner: string;
+  benchmark: string;
+  status: string;
+}
+
+export interface FbbOoklaMapResponse {
+  status: boolean;
+  data: FbbOoklaMapRow[];
+  meta?: FbbOnxMeta;
 }

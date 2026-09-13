@@ -41,13 +41,14 @@ const LandingPage = () => {
     <LandingTemplate>
       <div className="flex flex-col items-center gap-4 text-center">
         <div className="flex items-center gap-3">
-          <h1 className="text-3xl font-extrabold tracking-tight text-navy">
+          <h1 className="text-[32px] leading-tight font-bold tracking-[-0.48px] text-[#050505]">
             Explore Dashboards
           </h1>
         </div>
 
-        <p className="max-w-xl text-sm text-slate-500">
-          Akses dashboard CNOP, FBB, EBIS, dan OLO dari satu tempat.
+        <p className="max-w-xl text-center text-sm text-[#636363]">
+          Access CNOP, FBB, EBIS, and OLO dashboards from one streamlined
+          workspace.
         </p>
 
         <nav className="mt-4 flex flex-wrap items-center justify-center gap-3 rounded-3xl bg-stone-500/10 p-4">
@@ -59,12 +60,12 @@ const LandingPage = () => {
                 key={shortcut.key}
                 type="button"
                 onClick={() => navigate(shortcut.to())}
-                className="flex cursor-pointer items-center gap-2.5 rounded-full border border-slate-200 bg-white py-2.5 pl-2.5 pr-5 shadow-xs transition-all hover:border-slate-300 hover:shadow-md"
+                className="flex w-[120px] cursor-pointer items-center gap-3 rounded-full border border-[#e6e5e3] bg-white p-3 transition-colors hover:bg-black/[0.02]"
               >
-                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-500">
-                  <Icon size={17} />
+                <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[rgba(10,18,31,0.08)] text-[#525252]">
+                  <Icon size={16} />
                 </span>
-                <span className="text-base font-extrabold text-navy">
+                <span className="text-lg font-semibold text-[#050505]">
                   {shortcut.label}
                 </span>
               </button>

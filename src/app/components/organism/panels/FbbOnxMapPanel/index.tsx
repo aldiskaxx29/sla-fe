@@ -7,7 +7,7 @@ import Map, {
   type MapRef,
 } from "react-map-gl/mapbox";
 import "mapbox-gl/dist/mapbox-gl.css";
-import { LuMinus, LuPlus, LuX } from "react-icons/lu";
+import { LuX } from "react-icons/lu";
 
 // Atoms
 import { StatusPill } from "@/app/components/atoms";
@@ -34,8 +34,8 @@ const INDONESIA_FIT_BOUNDS: [[number, number], [number, number]] = [
   [141.5, 7.0],
 ];
 
-const WIN_COLOR = "#22C55E";
-const LOSE_COLOR = "#F87171";
+const WIN_COLOR = "#21a647";
+const LOSE_COLOR = "#c23837";
 
 /** "11/11" -> { value: 11, total: 11 } */
 const parseLosePerTotal = (raw?: string) => {
@@ -106,8 +106,6 @@ interface FbbOnxMapPanelProps {
   kpi: string;
   loading?: boolean;
   error?: boolean;
-  /** Dipanggil saat tombol detail di popup ditekan. */
-  onOpenDetail?: (region: string) => void;
 }
 
 /** Peta status menang/kalah per region untuk KPI yang dipilih. */
@@ -116,7 +114,6 @@ export function FbbOnxMapPanel({
   kpi,
   loading = false,
   error = false,
-  onOpenDetail,
 }: FbbOnxMapPanelProps) {
   const [activeRegionName, setActiveRegionName] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -155,7 +152,7 @@ export function FbbOnxMapPanel({
         "fill-color": matchPairs.length
           ? ["match", ["upcase", ["get", "REGION"]], ...matchPairs, "rgba(0,0,0,0)"]
           : "rgba(0,0,0,0)",
-        "fill-opacity": 0.75,
+        "fill-opacity": 0.5,
       },
     };
   }, [summaries]);
@@ -176,7 +173,7 @@ export function FbbOnxMapPanel({
   const activeRegion = activeRegionName ? summaries[activeRegionName] : null;
 
   return (
-    <div className="relative min-h-[420px] flex-1 overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+    <div className="relative h-[520px] w-full overflow-hidden rounded-[10px] bg-[#f1f5f9]">
       {MAPBOX_TOKEN && MAPBOX_STYLE_URL ? (
         <div ref={containerRef} className="absolute inset-0">
           <Map
@@ -187,15 +184,16 @@ export function FbbOnxMapPanel({
               bounds: INDONESIA_FIT_BOUNDS,
               fitBoundsOptions: { padding: 8 },
             }}
-            onLoad={(event) =>
-              event.target.fitBounds(INDONESIA_FIT_BOUNDS, {
-                padding: 8,
-                duration: 0,
-              })
-            }
+            onLoad={(event) => {
+              const map = event.target;
+              map.fitBounds(INDONESIA_FIT_BOUNDS, { padding: 8, duration: 0 });
+              // Satu tingkat lebih dekat dari hasil fit; sisanya digeser manual.
+              map.setZoom(map.getZoom() + 1);
+            }}
             interactiveLayerIds={[REGION_FILL_LAYER]}
             onClick={handleMapClick}
             attributionControl={false}
+            dragPan
             dragRotate={false}
             scrollZoom={false}
             style={{ width: "100%", height: "100%" }}
@@ -213,7 +211,7 @@ export function FbbOnxMapPanel({
       )}
 
       <div className="pointer-events-none absolute top-3 left-3 right-3 flex items-start justify-between gap-2">
-        <span className="rounded-lg border border-slate-100 bg-white/90 px-2.5 py-1 text-[11px] font-bold text-slate-600 shadow-xs backdrop-blur-xs">
+        <span className="rounded-[24px] border border-[#e2e8f0] bg-white px-4 py-2 text-xs font-medium text-[#020617]">
           {loading
             ? "Memuat status region..."
             : error
@@ -221,22 +219,36 @@ export function FbbOnxMapPanel({
               : `KPI ${kpi || "-"}`}
         </span>
 
-        <span className="flex items-center gap-3 rounded-lg border border-slate-100 bg-white/90 px-2.5 py-1 text-[11px] font-bold text-slate-600 shadow-xs backdrop-blur-xs">
+        <span className="flex items-center gap-4 rounded-[24px] border border-[#e2e8f0] bg-white px-4 py-2 text-xs text-[#020617]">
           <span className="flex items-center gap-1">
-            <span className="h-2 w-2 rounded-full bg-emerald-500" />
+            <span
+              className="size-3 rounded-full"
+              style={{
+                backgroundColor: "#21a64733",
+                outline: "1px solid #21a647",
+                outlineOffset: "-0.5px",
+              }}
+            />
             Win
           </span>
           <span className="flex items-center gap-1">
-            <span className="h-2 w-2 rounded-full bg-red-400" />
+            <span
+              className="size-3 rounded-full"
+              style={{
+                backgroundColor: "#c2383733",
+                outline: "1px solid #c23837",
+                outlineOffset: "-0.5px",
+              }}
+            />
             Lose
           </span>
         </span>
       </div>
 
       {activeRegion && (
-        <div className="absolute bottom-4 left-4 w-72 rounded-xl border border-slate-100 bg-white/95 p-3 shadow-lg backdrop-blur-xs">
+        <div className="absolute bottom-4 left-4 w-72 rounded-xl bg-white/[0.92] p-3 shadow-[0px_8px_24px_rgba(2,6,23,0.12)] backdrop-blur-[8.75px]">
           <header className="flex items-center justify-between gap-2 pb-2">
-            <span className="truncate text-[13px] font-extrabold text-navy">
+            <span className="truncate text-sm leading-5 font-semibold text-[#020617]">
               {activeRegion.region}
             </span>
             <div className="flex shrink-0 items-center gap-1">
@@ -311,38 +323,9 @@ export function FbbOnxMapPanel({
             </table>
           </div>
 
-          {onOpenDetail && (
-            <button
-              type="button"
-              onClick={() => onOpenDetail(activeRegion.region)}
-              className="mt-2 w-full cursor-pointer rounded-lg bg-[#007BFF] px-3 py-1.5 text-[11px] font-bold text-white transition-colors hover:bg-blue-600"
-            >
-              Lihat detail kabupaten
-            </button>
-          )}
         </div>
       )}
 
-      {MAPBOX_TOKEN && MAPBOX_STYLE_URL && (
-        <div className="absolute right-3 bottom-4 flex flex-col gap-1">
-          <button
-            type="button"
-            onClick={() => mapRef.current?.zoomIn()}
-            aria-label="Perbesar peta"
-            className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 shadow-sm transition-colors hover:bg-slate-50"
-          >
-            <LuPlus size={13} />
-          </button>
-          <button
-            type="button"
-            onClick={() => mapRef.current?.zoomOut()}
-            aria-label="Perkecil peta"
-            className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 shadow-sm transition-colors hover:bg-slate-50"
-          >
-            <LuMinus size={13} />
-          </button>
-        </div>
-      )}
     </div>
   );
 }

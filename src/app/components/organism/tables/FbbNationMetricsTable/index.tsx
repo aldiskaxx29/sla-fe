@@ -19,14 +19,15 @@ interface FbbNationMetricsTableProps {
   onPageChange: (page: number, perPage: number) => void;
 }
 
-const HEADERS = [
+const BASE_HEADERS = [
   "Metrics",
   "KPI",
   "WoW (Win/Lose)",
   "Winner",
   "Gap to Winner",
-  "Gap to Nearest Comp",
 ];
+const NEAREST_COMP_HEADER = "Nearest Comp";
+const GAP_NEAREST_HEADER = "Gap to Nearest Comp";
 
 const isWin = (status?: string) => String(status).toLowerCase() === "win";
 
@@ -34,8 +35,8 @@ const isWin = (status?: string) => String(status).toLowerCase() === "win";
 const PAGE_SIZE_OPTIONS = [5, 10, 20, 50];
 
 const headCell =
-  "bg-slate-50 px-4 py-3 text-[13px] font-bold text-navy first:rounded-l-xl last:rounded-r-xl";
-const bodyCell = "px-4 py-2.5 text-[13px] text-slate-600";
+  "h-10 bg-[#f8fafc] px-4 text-sm font-medium text-[#334155] border-b border-[#e2e8f0]";
+const bodyCell = "h-8 px-4 text-sm font-normal";
 
 /** Tabel ringkasan menang/kalah per metrics & KPI tingkat nasional. */
 export function FbbNationMetricsTable({
@@ -48,16 +49,27 @@ export function FbbNationMetricsTable({
   // Skeleton sebanyak baris yang akan datang, supaya tingginya tidak melompat.
   const skeletonRows = meta?.per_page ?? PAGE_SIZE_OPTIONS[0];
 
+  // Ookla tidak mengirim nama pesaing terdekat, hanya selisihnya — kolomnya
+  // disembunyikan kalau memang tidak ada isinya.
+  const showNearestComp = rows.some((row) => Boolean(row.nearest_comp));
+  const headers = [
+    ...BASE_HEADERS,
+    ...(showNearestComp ? [NEAREST_COMP_HEADER] : []),
+    GAP_NEAREST_HEADER,
+  ];
+
   return (
     <div className="flex flex-col">
-      <div className="w-full overflow-x-auto">
+      <div className="w-full overflow-x-auto rounded-lg border border-[#e2e8f0] shadow-[0px_1px_2.625px_0px_rgba(0,0,0,0.1)]">
         <table className="w-full min-w-[860px] border-collapse text-left">
           <thead>
             <tr>
-              {HEADERS.map((label, index) => (
+              {headers.map((label, index) => (
                 <th
                   key={label}
-                  className={`${headCell} ${index > 1 ? "text-center" : ""}`}
+                  className={`${headCell} ${
+                    index !== headers.length - 1 ? "border-r border-[#e2e8f0]" : ""
+                  } ${index > 1 ? "text-center" : ""}`}
                 >
                   {label}
                 </th>
@@ -69,7 +81,7 @@ export function FbbNationMetricsTable({
             {loading &&
               Array.from({ length: skeletonRows }).map((_, rowIndex) => (
                 <tr key={`skeleton-${rowIndex}`} className="border-b border-slate-100">
-                  {HEADERS.map((label) => (
+                  {headers.map((label) => (
                     <td key={label} className="px-4 py-3">
                       <Skeleton />
                     </td>
@@ -84,24 +96,33 @@ export function FbbNationMetricsTable({
                 return (
                   <tr
                     key={`${row.metrics}-${row.kpi}-${index}`}
-                    className="border-b border-slate-100 transition-colors last:border-b-0 hover:bg-slate-50/60"
+                    className="border-b border-[#e2e8f0] transition-colors last:border-b-0 hover:bg-[#f8fafc]"
                   >
-                    <td className={`${bodyCell} font-semibold text-navy`}>
+                    <td className={`${bodyCell} border-r border-[#e2e8f0] text-[#020617]`}>
                       {row.metrics}
                     </td>
-                    <td className={bodyCell}>{row.kpi}</td>
+                    <td className={`${bodyCell} border-r border-[#e2e8f0] text-[#020617]`}>
+                      {row.kpi}
+                    </td>
                     <td
-                      className={`${bodyCell} text-center font-bold ${
-                        win ? "text-emerald-600" : "text-red-500"
+                      className={`${bodyCell} border-r border-[#e2e8f0] text-center ${
+                        win ? "text-[#21a647]" : "text-[#c23837]"
                       }`}
                     >
                       {row.status}
                     </td>
-                    <td className={`${bodyCell} text-center`}>{row.winner}</td>
-                    <td className={`${bodyCell} text-center tabular-nums`}>
+                    <td className={`${bodyCell} border-r border-[#e2e8f0] text-center text-[#020617]`}>
+                      {row.winner}
+                    </td>
+                    <td className={`${bodyCell} border-r border-[#e2e8f0] text-center text-[#020617] tabular-nums`}>
                       {row.gap_to_winner}
                     </td>
-                    <td className={`${bodyCell} text-center`}>
+                    {showNearestComp && (
+                      <td className={`${bodyCell} border-r border-[#e2e8f0] text-center text-[#020617]`}>
+                        {row.nearest_comp}
+                      </td>
+                    )}
+                    <td className={`${bodyCell} text-center text-[#020617] tabular-nums`}>
                       {row.gap_to_nearest_comp}
                     </td>
                   </tr>
@@ -110,7 +131,7 @@ export function FbbNationMetricsTable({
 
             {!loading && !rows.length && (
               <tr>
-                <td colSpan={HEADERS.length}>
+                <td colSpan={headers.length}>
                   <EmptyState
                     title={
                       error
@@ -129,7 +150,7 @@ export function FbbNationMetricsTable({
       </div>
 
       {meta && meta.total > 0 && (
-        <div className="border-t border-slate-100 pt-2">
+        <div className="pt-2">
           <Pagination
             current={meta.current_page}
             pageSize={meta.per_page}
