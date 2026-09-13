@@ -7,7 +7,7 @@ import Map, {
   type MapRef,
 } from "react-map-gl/mapbox";
 import "mapbox-gl/dist/mapbox-gl.css";
-import { LuX } from "react-icons/lu";
+import { LuMinus, LuPlus, LuX } from "react-icons/lu";
 
 // Atoms
 import { StatusPill } from "@/app/components/atoms";
@@ -170,6 +170,14 @@ export function FbbOnxMapPanel({
     setActiveRegionName(name || null);
   }, []);
 
+  const handleZoomIn = useCallback(() => {
+    mapRef.current?.zoomIn({ duration: 250 });
+  }, []);
+
+  const handleZoomOut = useCallback(() => {
+    mapRef.current?.zoomOut({ duration: 250 });
+  }, []);
+
   const activeRegion = activeRegionName ? summaries[activeRegionName] : null;
 
   return (
@@ -326,6 +334,24 @@ export function FbbOnxMapPanel({
         </div>
       )}
 
+      <div className="absolute right-4 bottom-4 z-10 flex flex-col overflow-hidden rounded-lg border border-[#e2e8f0] bg-white shadow-[0px_2px_8px_rgba(0,0,0,0.1)]">
+        <button
+          type="button"
+          aria-label="Zoom in"
+          onClick={handleZoomIn}
+          className="flex size-8 cursor-pointer items-center justify-center border-b border-[#e2e8f0] text-[#334155] transition-colors hover:bg-[#f8fafc] hover:text-[#0f172a]"
+        >
+          <LuPlus size={16} />
+        </button>
+        <button
+          type="button"
+          aria-label="Zoom out"
+          onClick={handleZoomOut}
+          className="flex size-8 cursor-pointer items-center justify-center text-[#334155] transition-colors hover:bg-[#f8fafc] hover:text-[#0f172a]"
+        >
+          <LuMinus size={16} />
+        </button>
+      </div>
     </div>
   );
 }

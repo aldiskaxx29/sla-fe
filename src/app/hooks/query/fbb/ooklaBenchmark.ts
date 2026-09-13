@@ -136,7 +136,7 @@ export const useFbbOoklaLoseRegionQuery = (
 ) =>
   useQuery<FbbLoseRegionResponse>({
     queryKey: fbbKeys.ooklaLoseRegionKabupaten({ ...params }),
-    enabled: enabled && Boolean(params.yearweek) && Boolean(params.kpi),
+    enabled: enabled && Boolean(params.yearweek),
     staleTime: DATA_STALE_TIME,
     queryFn: ({ signal }) => getFbbOoklaLoseRegionKabupaten(params, signal),
   });

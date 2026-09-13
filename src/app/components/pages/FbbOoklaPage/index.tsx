@@ -92,9 +92,14 @@ const FbbOoklaPage = () => {
   }, [kpiOptions.data, filter.kpi]);
 
   useEffect(() => {
-    const first = kpiOptions.data?.[0];
-    if (first && !viewKpi) setViewKpi(first);
+    const list = kpiOptions.data;
+    if (!list?.length) return;
+    if (viewKpi && list.includes(viewKpi)) return;
+
+    setViewKpi(list[0]);
   }, [kpiOptions.data, viewKpi]);
+
+  const activeKpi = viewKpi || kpiOptions.data?.[0] || filter.kpi || "";
 
   const summary = useFbbOoklaNationMetricsQuery({
     yearweek: filter.yearweek,
@@ -110,7 +115,7 @@ const FbbOoklaPage = () => {
       yearweek: filter.yearweek,
       indihomeType: filter.indihomeType,
       metrics: filter.metrics,
-      kpi: viewKpi,
+      kpi: activeKpi,
     },
     view === "maps",
   );
@@ -120,7 +125,7 @@ const FbbOoklaPage = () => {
       yearweek: filter.yearweek,
       indihomeType: filter.indihomeType,
       metrics: filter.metrics,
-      kpi: viewKpi,
+      kpi: activeKpi,
       level: "KABUPATEN",
       page: detailPage.page,
       perPage: detailPage.perPage,
@@ -209,7 +214,7 @@ const FbbOoklaPage = () => {
           <div className="flex shrink-0 flex-wrap items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-2">
               <SelectMenu
-                value={viewKpi}
+                value={activeKpi}
                 options={(kpiOptions.data ?? []).map((kpi) => ({
                   label: kpi,
                   value: kpi,
@@ -247,7 +252,7 @@ const FbbOoklaPage = () => {
           {view === "maps" ? (
             <FbbOnxMapPanel
               rows={mapRows}
-              kpi={viewKpi}
+              kpi={activeKpi}
               loading={mapStatus.isFetching}
               error={mapStatus.isError}
             />
