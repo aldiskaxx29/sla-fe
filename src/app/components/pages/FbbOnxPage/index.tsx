@@ -6,7 +6,6 @@ import { LuChevronDown } from "react-icons/lu";
 import {
   useFbbIndihomeTypeOptionsQuery,
   useFbbKpiOptionsQuery,
-  useFbbLevelOptionsQuery,
   useFbbLoseRegionQuery,
   useFbbMapRegionStatusQuery,
   useFbbMetricsOptionsQuery,
@@ -36,11 +35,14 @@ type ViewTab = "maps" | "detail";
 const SUMMARY_PER_PAGE = 5;
 const DETAIL_PER_PAGE = 10;
 
+/** Level tidak lagi dipilih user: ringkasan selalu nasional, detail per kabupaten. */
+const SUMMARY_LEVEL = "NATION";
+const DETAIL_LEVEL = "KABUPATEN";
+
 const DEFAULT_FILTER: FbbOnxFilterState = {
   yearweek: "",
   metrics: "",
   kpi: "",
-  level: "KABUPATEN",
   indihomeType: "INDIHOME ALL",
 };
 
@@ -63,7 +65,6 @@ const FbbOnxPage = () => {
   const yearWeekOptions = useFbbYearWeekOptionsQuery();
   const metricsOptions = useFbbMetricsOptionsQuery();
   const kpiOptions = useFbbKpiOptionsQuery();
-  const levelOptions = useFbbLevelOptionsQuery();
   const indihomeTypeOptions = useFbbIndihomeTypeOptionsQuery();
 
   // Minggu terbaru dan KPI pertama dipakai sampai user memilih sendiri.
@@ -81,7 +82,7 @@ const FbbOnxPage = () => {
 
   const summary = useFbbNationMetricsQuery({
     yearweek: filter.yearweek,
-    level: filter.level,
+    level: SUMMARY_LEVEL,
     indihomeType: filter.indihomeType,
     metrics: filter.metrics,
     kpi: filter.kpi,
@@ -101,7 +102,7 @@ const FbbOnxPage = () => {
   const detail = useFbbLoseRegionQuery(
     {
       yearweek: filter.yearweek,
-      level: filter.level,
+      level: DETAIL_LEVEL,
       indihomeType: filter.indihomeType,
       kpi: viewKpi,
       page: detailPage.page,
@@ -133,7 +134,6 @@ const FbbOnxPage = () => {
               yearweek: yearWeekOptions.data ?? [],
               metrics: metricsOptions.data ?? [],
               kpi: kpiOptions.data ?? [],
-              level: levelOptions.data ?? [],
               indihomeType: indihomeTypeOptions.data ?? [],
             }}
           />

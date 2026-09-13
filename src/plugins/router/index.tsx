@@ -2,6 +2,7 @@ import { lazy } from "react";
 import { useRoutes } from "react-router-dom";
 
 import {
+  AppLayoutEbis,
   AppLayoutEmpty,
   AppLayoutAuth,
   AppLayoutDefault,
@@ -15,6 +16,7 @@ import { useDashboardRouter } from "@/modules/dashboard/router/dashboard.router"
 import { useSiteRouter } from "@/modules/site/router/site.router";
 import { useMondayRouter } from "@/app/router/monday.router";
 import { useFbbRouter } from "@/app/router/fbb.router";
+import { useEbisRouter } from "@/app/router/ebis.router";
 import { useLandingRouter } from "@/app/router/landing.router";
 import { useDailyMonitoringRouter } from "@/modules/daily-monitoring/router/dailyMonitoring.router";
 // import { useQualityHealthinessRouter } from "@/modules/quality-healthiness/router/quality-healthiness.router";
@@ -41,6 +43,7 @@ const useRouter = () => {
   const rekonsiliasi = useRekonsiliasiRouter();
   const monday = useMondayRouter();
   const fbb = useFbbRouter();
+  const ebis = useEbisRouter();
   const landing = useLandingRouter();
   const dailyMonitoring = useDailyMonitoringRouter();
   // const qualityHealthiness = useQualityHealthinessRouter();
@@ -98,6 +101,12 @@ const useRouter = () => {
           path: "",
           element: <AppLayoutFbb />,
           children: [...fbb],
+        },
+        {
+          // EBIS memakai shell yang sama dengan FBB, menunya KPI Enterprise.
+          path: "",
+          element: <AppLayoutEbis />,
+          children: [...ebis],
         },
         {
           // Profil tidak butuh menu CNOP, cukup tombol kembali ke landing.

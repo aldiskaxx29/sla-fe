@@ -46,6 +46,7 @@ export interface OnxDetailResponse {
   data: OnxDetailRow[];
 }
 
+/** Filter detail ONX; dikirim sesuai yang diklik user. */
 export interface OnxDetailParams {
   region?: string;
   provider?: OnxProvider;

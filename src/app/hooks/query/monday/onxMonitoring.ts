@@ -20,7 +20,7 @@ export const useOnxSummaryQuery = (enabled = true) =>
     queryFn: ({ signal }) => getOnxSummary(signal),
   });
 
-/** Detail per IP; hanya jalan setelah ada region/code yang dipilih. */
+/** Detail per IP; hanya jalan setelah ada region yang dipilih. */
 export const useOnxDetailQuery = (params: OnxDetailParams | null) =>
   useQuery<OnxDetailResponse>({
     queryKey: mondayMonitoringKeys.onxDetail(

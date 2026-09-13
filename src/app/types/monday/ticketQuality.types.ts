@@ -4,6 +4,20 @@ export type SlaDetailColumn = {
   key: string;
   label: string;
   align?: "left" | "center" | "right";
+  /** Judul grup di baris header pertama, mis. "Ticket Close". */
+  group?: string;
+  /** Warna sel header, mengikuti arti kolomnya. */
+  tone?: "green" | "yellow" | "red";
+};
+
+/** Pewarnaan baris ala tabel MTTR: hijau kalau ach >= target. */
+export type SlaDetailAchievement = {
+  achKey: string;
+  targetKey: string;
+  /** Kolom nama region yang ikut diwarnai. */
+  labelKey: string;
+  /** Baris ringkasan (mis. Jawa / Non Jawa) diberi latar penuh. */
+  groupRows?: string[];
 };
 
 export type SlaDetailRow = Record<string, string | number | null>;
@@ -19,6 +33,22 @@ export type SlaDetailDrilldown = {
   regionKey: string;
 };
 
+/** Kunci grup RCA pada assets/data/resumGroupingRca.json. */
+export type SlaRcaKey =
+  | "packetloss_5"
+  | "packetloss_1_5"
+  | "latency"
+  | "jitter";
+
+/** Ringkasan RCA yang ditampilkan sebagai kartu di atas tabel popup. */
+export type SlaRcaSummary = {
+  key: SlaRcaKey;
+  /** Angka pada kartu "Total Not Clear". */
+  notClear?: string;
+  /** Satuan di bawah angka, mis. "Site". */
+  notClearUnit?: string;
+};
+
 /** Isi popup detail saat kartu SLA diklik. */
 export type SlaCardDetail = {
   title: string;
@@ -28,6 +58,9 @@ export type SlaCardDetail = {
   /** Kolom penanda baris bermasalah, dipakai untuk pewarnaan. */
   statusKey?: string;
   drilldown?: SlaDetailDrilldown;
+  /** Kartu ringkasan RCA (Total Not Clear, Capacity, ...) di atas tabel. */
+  rca?: SlaRcaSummary;
+  achievement?: SlaDetailAchievement;
 };
 
 export type MetricSubCard = {

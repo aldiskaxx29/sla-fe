@@ -9,10 +9,9 @@ import { AppRouteGuard } from "@/app/components";
 
 // Pages
 const LandingPage = lazy(() => import("@/app/components/pages/LandingPage"));
-const EbisPage = lazy(() => import("@/app/components/pages/EbisPage"));
 const OloPage = lazy(() => import("@/app/components/pages/OloPage"));
 
-/** Landing pemilih dashboard plus dua dashboard yang belum tersedia. */
+/** Landing pemilih dashboard plus dashboard yang belum tersedia. */
 const useLandingRouter = (): RouteObject[] => {
   return [
     {
@@ -20,14 +19,6 @@ const useLandingRouter = (): RouteObject[] => {
       element: (
         <AppRouteGuard>
           <LandingPage />
-        </AppRouteGuard>
-      ),
-    },
-    {
-      path: "ebis",
-      element: (
-        <AppRouteGuard>
-          <EbisPage />
         </AppRouteGuard>
       ),
     },

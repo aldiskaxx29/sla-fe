@@ -15,6 +15,7 @@ import type {
   MttrTicketRow,
   SiteDetailRow,
   SlaPeriod,
+  SlaRcaGroupingResponse,
 } from "@/app/types/monday/slaPerformance.types";
 import type {
   BaselineRegionRaw,
@@ -117,6 +118,13 @@ export const getMttrRegionSla = (
     period === "month" && file !== "regionCritical"
       ? `assets/sla/weekToDate/${file}.json`
       : slaAssetPath(rekon, `mttr/${file}.json`),
+    signal,
+  );
+
+/** Ringkasan RCA site not clear; satu file untuk semua level SLA. */
+export const getSlaRcaGrouping = (signal?: AbortSignal) =>
+  getMondayMonitoringFile<SlaRcaGroupingResponse>(
+    "assets/data/resumGroupingRca.json",
     signal,
   );
 

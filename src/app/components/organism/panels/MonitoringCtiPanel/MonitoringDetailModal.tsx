@@ -69,13 +69,21 @@ export function MonitoringDetailModal({
         role="dialog"
         aria-modal="true"
         aria-label={`Monitoring ${source}`}
-        className="flex max-h-[82vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl"
+        className="flex max-h-[85vh] w-full max-w-[1250px] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl"
         onClick={(event) => event.stopPropagation()}
       >
         <header className="flex items-center justify-between gap-4 border-b border-slate-100 px-5 py-4">
-          <h2 className="text-sm font-extrabold text-[#213c52]">
-            Monitoring {source} {formatMonitoringHour()} WIB
-          </h2>
+          <div className="flex min-w-0 items-center gap-2">
+            <h2 className="text-sm font-extrabold text-[#213c52]">
+              Monitoring {source} {formatMonitoringHour()} WIB
+            </h2>
+            {/* Region yang sedang dibuka, seperti di tampilan lamanya. */}
+            {source === "ONX" && onxTarget?.region && (
+              <span className="truncate rounded-full border border-blue-200 bg-blue-50 px-2.5 py-0.5 text-[10px] font-bold text-blue-700">
+                {onxTarget.region}
+              </span>
+            )}
+          </div>
 
           <div className="flex shrink-0 items-center gap-2">
             <div className="flex items-center gap-0.5 rounded-lg border border-slate-200 bg-slate-50 p-0.5">

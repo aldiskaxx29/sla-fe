@@ -23,10 +23,22 @@ const MondayPage = () => {
   const { data: latestWeek } = useLatestPacketLossWeekQuery();
   const weekLabel = formatMondayWeekLabel(latestWeek);
 
+  const prevWeek = latestWeek
+    ? (() => {
+        const week = Number(String(latestWeek).slice(4));
+        return Number.isFinite(week) && week > 1 ? week - 1 : null;
+      })()
+    : null;
+
   const leftContent = (
     <div className="flex shrink-0 items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-[10px] font-medium text-slate-500">
       <LuCalendar className="text-slate-400" size={13} />
       <span>Last Updated : {weekLabel || "memuat periode..."}</span>
+      {prevWeek !== null && (
+        <span className="text-cyan-500">
+          , Untuk Access Week {prevWeek}
+        </span>
+      )}
     </div>
   );
 

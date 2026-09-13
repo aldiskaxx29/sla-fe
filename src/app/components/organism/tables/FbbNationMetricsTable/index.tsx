@@ -28,6 +28,7 @@ const BASE_HEADERS = [
 ];
 const NEAREST_COMP_HEADER = "Nearest Comp";
 const GAP_NEAREST_HEADER = "Gap to Nearest Comp";
+const RANK_HEADER = "Rank";
 
 const isWin = (status?: string) => String(status).toLowerCase() === "win";
 
@@ -56,6 +57,7 @@ export function FbbNationMetricsTable({
     ...BASE_HEADERS,
     ...(showNearestComp ? [NEAREST_COMP_HEADER] : []),
     GAP_NEAREST_HEADER,
+    RANK_HEADER,
   ];
 
   return (
@@ -122,8 +124,11 @@ export function FbbNationMetricsTable({
                         {row.nearest_comp}
                       </td>
                     )}
-                    <td className={`${bodyCell} text-center text-[#020617] tabular-nums`}>
+                    <td className={`${bodyCell} border-r border-[#e2e8f0] text-center text-[#020617] tabular-nums`}>
                       {row.gap_to_nearest_comp}
+                    </td>
+                    <td className={`${bodyCell} text-center text-[#020617] tabular-nums`}>
+                      {row.rank}
                     </td>
                   </tr>
                 );

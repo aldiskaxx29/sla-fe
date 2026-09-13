@@ -6,6 +6,7 @@ import {
   getCoreTransitDetail,
   getMttrTickets,
   getSiteDetailRegion,
+  getSlaRcaGrouping,
   mondayMonitoringKeys,
 } from "@/app/api";
 
@@ -15,6 +16,7 @@ import type {
   SlaDetailColumn,
   SlaDetailRow,
 } from "@/app/types/monday/ticketQuality.types";
+import type { SlaRcaGroupingResponse } from "@/app/types/monday/slaPerformance.types";
 
 export interface SlaDrilldownResult {
   columns: SlaDetailColumn[];
@@ -164,3 +166,12 @@ export const useSlaDrilldownQuery = (
     },
   });
 };
+
+/** Ringkasan RCA (Capacity, Issue TSEL, ...) untuk kartu di popup SLA. */
+export const useSlaRcaGroupingQuery = (enabled: boolean) =>
+  useQuery<SlaRcaGroupingResponse>({
+    queryKey: mondayMonitoringKeys.rcaGrouping(),
+    enabled,
+    staleTime: 5 * 60 * 1000,
+    queryFn: ({ signal }) => getSlaRcaGrouping(signal),
+  });

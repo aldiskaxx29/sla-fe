@@ -59,8 +59,10 @@ interface RegionSummary {
   lose: number;
   total: number;
   win_status: boolean;
-  /** Rincian per provider pembanding, untuk keterangan di popup. */
-  rows: FbbMapRegionRow[];
+  /** Provider dengan kabupaten menang terbanyak di region ini. */
+  winner: string;
+  /** Jumlah kabupaten yang dimenangkan `winner`; hanya untuk membandingkan. */
+  winnerScore: number;
 }
 
 /**
@@ -81,16 +83,24 @@ const summarizeRegions = (rows: FbbMapRegionRow[]) => {
       lose: 0,
       total: 0,
       win_status: false,
-      rows: [],
+      winner: "-",
+      winnerScore: -1,
     });
 
     const parsed = parseLosePerTotal(row.lose_per_total);
-    summary.rows.push(row);
-
     if (!parsed) return;
+
+    // Baris `win` = kabupaten yang dimenangkan Indihome, baris `lose` =
+    // kabupaten yang dimenangkan pembandingnya. Yang terbanyak jadi pemenang.
+    const won = isWinRow(row.benchmark) ? parsed.total : parsed.value;
 
     if (isWinRow(row.benchmark)) summary.win += parsed.total;
     else summary.lose += parsed.value;
+
+    if (won > summary.winnerScore) {
+      summary.winner = row.winner || "-";
+      summary.winnerScore = won;
+    }
   });
 
   Object.values(byRegion).forEach((summary) => {
@@ -277,8 +287,10 @@ export function FbbOnxMapPanel({
 
           <dl className="flex flex-col gap-1 border-t border-slate-100 pt-2 text-[11px] font-semibold text-slate-500">
             <div className="flex items-center justify-between gap-2">
-              <dt>KPI</dt>
-              <dd className="font-bold text-navy">{kpi || "-"}</dd>
+              <dt>Winner</dt>
+              <dd className="truncate font-bold text-navy">
+                {activeRegion.winner}
+              </dd>
             </div>
             <div className="flex items-center justify-between gap-2">
               <dt>Win</dt>
@@ -293,44 +305,6 @@ export function FbbOnxMapPanel({
               </dd>
             </div>
           </dl>
-
-          {/* Keterangan per pembanding, apa adanya dari endpoint. */}
-          <div className="mt-2 max-h-40 overflow-auto border-t border-slate-100 pt-2">
-            <table className="w-full text-left text-[10.5px]">
-              <thead>
-                <tr className="text-[9.5px] font-bold uppercase tracking-wide text-slate-400">
-                  <th className="pb-1">Winner</th>
-                  <th className="pb-1 text-center">Benchmark</th>
-                  <th className="pb-1 text-right">Lose/Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                {activeRegion.rows.map((row) => {
-                  const win = isWinRow(row.benchmark);
-
-                  return (
-                    <tr
-                      key={`${row.regions}-${row.winner}`}
-                      className="border-t border-slate-50"
-                    >
-                      <td className="py-1 font-bold text-navy">{row.winner}</td>
-                      <td
-                        className={`py-1 text-center font-bold uppercase ${
-                          win ? "text-emerald-600" : "text-red-500"
-                        }`}
-                      >
-                        {row.benchmark}
-                      </td>
-                      <td className="py-1 text-right font-semibold tabular-nums text-slate-500">
-                        {row.lose_per_total}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-
         </div>
       )}
 

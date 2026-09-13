@@ -36,7 +36,6 @@ const DEFAULT_FILTER: FbbOnxFilterState = {
   yearweek: "",
   metrics: "",
   kpi: "",
-  level: "KABUPATEN",
   indihomeType: "",
 };
 

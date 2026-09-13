@@ -8,6 +8,7 @@ export const mondayMonitoringKeys = {
   trendQuality: (kind: string, metric: string, scope: string) =>
     [...mondayMonitoringKeys.all, "trend-quality", kind, metric, scope] as const,
   ctiMonitoring: () => [...mondayMonitoringKeys.all, "cti-monitoring"] as const,
+  rcaGrouping: () => [...mondayMonitoringKeys.all, "rca-grouping"] as const,
   rpjBenchmark: () => [...mondayMonitoringKeys.all, "rpj-benchmark"] as const,
   baselinePerformance: () =>
     [...mondayMonitoringKeys.all, "baseline-performance"] as const,

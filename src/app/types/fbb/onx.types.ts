@@ -105,7 +105,6 @@ export interface FbbOnxFilterState {
   yearweek: string;
   metrics: string;
   kpi: string;
-  level: string;
   indihomeType: string;
 }
 

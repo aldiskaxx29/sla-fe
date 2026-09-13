@@ -138,7 +138,7 @@ export function SlaPerformancePanel() {
                   className="flex flex-col"
                 >
                   <div
-                    className={`bg-gray-200 text-center text-[11px] font-extrabold text-black uppercase tracking-widest shrink-0 h-13 flex items-start justify-center pt-2 ${
+                    className={`bg-[#f1f5f9] shadow-[0_2px_6px_rgba(15,23,42,0.10)] text-center text-[11px] font-extrabold text-black uppercase tracking-widest shrink-0 h-13 flex items-start justify-center pt-2 ${
                       groupIdx === 0
                         ? "rounded-t-3xl z-0"
                         : "rounded-t-3xl mt-0 z-0"
@@ -176,7 +176,15 @@ export function SlaPerformancePanel() {
                               : "rounded-t-2xl -mt-3.5"
                           }`}
                         >
-                          <header className="flex items-center justify-center gap-1.5 pb-1 border-b border-slate-100 shrink-0">
+                          {/* Pita judul: hijau saat tercapai, merah saat tidak;
+                              ditarik ke tepi kartu supaya menutup sudutnya. */}
+                          <header
+                            className={`-mx-2.5 -mt-1.5 mb-1 flex shrink-0 items-center justify-center gap-1.5 px-2.5 py-1.5 ${
+                              card.status === "success"
+                                ? "bg-[#c9f2dc]"
+                                : "bg-[#fcd6d8]"
+                            } ${cardIdx === 0 ? "rounded-t-3xl" : "rounded-t-2xl"}`}
+                          >
                             {card.status === "success" ? (
                               <span className="flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full bg-green-500 text-[6px] font-bold text-white">
                                 <LuCheck size={8} />
@@ -271,7 +279,7 @@ export function SlaPerformancePanel() {
                   className="flex flex-col"
                 >
                   <div
-                    className={`bg-gray-200 text-center text-[11px] font-extrabold text-black uppercase tracking-widest shrink-0 h-13 flex items-start justify-center pt-2 ${
+                    className={`bg-[#f1f5f9] shadow-[0_2px_6px_rgba(15,23,42,0.10)] text-center text-[11px] font-extrabold text-black uppercase tracking-widest shrink-0 h-13 flex items-start justify-center pt-2 ${
                       groupIdx === 0
                         ? "rounded-t-xl z-0"
                         : "rounded-t-2xl mt-0 z-0"
@@ -309,7 +317,15 @@ export function SlaPerformancePanel() {
                               : "rounded-t-2xl -mt-3.5"
                           }`}
                         >
-                          <header className="flex items-center justify-center gap-1.5 pb-1 border-b border-slate-100 shrink-0">
+                          {/* Pita judul: hijau saat tercapai, merah saat tidak;
+                              ditarik ke tepi kartu supaya menutup sudutnya. */}
+                          <header
+                            className={`-mx-2.5 -mt-1.5 mb-1 flex shrink-0 items-center justify-center gap-1.5 px-2.5 py-1.5 ${
+                              card.status === "success"
+                                ? "bg-[#c9f2dc]"
+                                : "bg-[#fcd6d8]"
+                            } ${cardIdx === 0 ? "rounded-t-3xl" : "rounded-t-2xl"}`}
+                          >
                             {card.status === "success" ? (
                               <span className="flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full bg-green-500 text-[6px] font-bold text-white">
                                 <LuCheck size={8} />

@@ -1,11 +1,9 @@
 // React
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { LuCalendarDays } from "react-icons/lu";
 
-// Hooks
-import { useFbbSlaWsaQuery, useFbbYearWeekOptionsQuery } from "@/app/hooks";
-
 // Molecules
+import { SampleDataBadge } from "@/app/components/molecules/SampleDataBadge";
 import { SelectMenu } from "@/app/components/molecules/SelectMenu";
 
 // Organism
@@ -22,56 +20,33 @@ import {
 } from "@/app/utils/fbbSla.utils";
 import { getStoredUserName, toInitials } from "@/app/utils/user.utils";
 
-/** Halaman SLA WISA FBB: ringkasan indikator dan tabelnya per minggu. */
-const FbbSlaPage = () => {
-  const [yearweek, setYearweek] = useState<string | null>(null);
+// Sample
+import {
+  SAMPLE_EBIS_WEEKS,
+  buildSampleEbisKpi,
+} from "@/app/components/pages/EbisKpiPage/sample";
 
-  // `fbb/list-yearweek` sudah mengirim minggu yang datanya tersedia saja,
-  // terbaru di urutan pertama.
-  const {
-    data: yearWeeks,
-    isFetching: isFetchingYearWeek,
-    isError: isYearWeekError,
-  } = useFbbYearWeekOptionsQuery();
+/**
+ * KPI Enterprise EBIS. Susunannya sama dengan SLA WISA FBB, hanya indikatornya
+ * yang khusus enterprise — datanya masih contoh sampai endpoint-nya siap.
+ */
+const EbisKpiPage = () => {
+  const [yearweek, setYearweek] = useState(SAMPLE_EBIS_WEEKS[0]);
 
-  const activeYearWeek = yearWeeks?.[0] ?? null;
-
-  // Default ke minggu aktif selama user belum memilih sendiri.
-  useEffect(() => {
-    if (yearweek || !activeYearWeek) return;
-
-    setYearweek(activeYearWeek);
-  }, [activeYearWeek, yearweek]);
-
-  const {
-    data: slaData,
-    isFetching: isFetchingSla,
-    isError: isSlaError,
-    refetch,
-  } = useFbbSlaWsaQuery(yearweek);
-
-  const rows = useMemo(() => slaData?.data ?? [], [slaData]);
+  const rows = useMemo(() => buildSampleEbisKpi(yearweek), [yearweek]);
 
   const weekOptions = useMemo(
     () =>
-      (yearWeeks ?? []).map((week) => ({
+      SAMPLE_EBIS_WEEKS.map((week) => ({
         label: formatYearWeek(week),
         value: week,
       })),
-    [yearWeeks],
+    [],
   );
 
   const summary = summarizeAchievements(rows);
-  const periodLabel = buildPeriodLabel(rows, yearweek ?? undefined);
-  const columnLabel = formatYearWeekShort(rows[0]?.yearweek ?? yearweek ?? "");
-
-  const isLoading = isFetchingSla || (!yearweek && isFetchingYearWeek);
-  const errorMessage =
-    isSlaError || (slaData && slaData.status === false)
-      ? "Gagal memuat data SLA WISA FBB."
-      : isYearWeekError && !yearweek
-        ? "Gagal memuat daftar minggu."
-        : null;
+  const periodLabel = buildPeriodLabel(rows, yearweek);
+  const columnLabel = formatYearWeekShort(rows[0]?.yearweek ?? yearweek);
 
   return (
     <>
@@ -80,7 +55,7 @@ const FbbSlaPage = () => {
           initials={toInitials(getStoredUserName())}
           actions={
             <SelectMenu
-              value={yearweek ?? ""}
+              value={yearweek}
               options={weekOptions}
               onChange={setYearweek}
               placeholder="Select Week"
@@ -104,13 +79,13 @@ const FbbSlaPage = () => {
             total={summary.total}
             achieved={summary.achieved}
             notAchieved={summary.notAchieved}
-            loading={isLoading}
           />
 
-          {/* `@container`: lebar kolom tabel menyesuaikan ruang kartu ini,
-              bukan lebar layar — jadi ikut berubah saat sidebar dibuka. */}
+          {/* `@container`: lebar kolom tabel mengikuti ruang kartu ini,
+              bukan lebar layar. */}
           <div className="@container flex min-h-0 flex-1 flex-col gap-4 rounded-[19px] border border-[#e2e8f0] bg-white p-4 shadow-[0px_1px_1.75px_0px_rgba(0,0,0,0.05)]">
             <div className="flex w-full flex-wrap items-center justify-end gap-3">
+              <SampleDataBadge />
               <span className="flex h-9 shrink-0 items-center rounded-full bg-[#f1f5f9] px-3 text-sm font-medium text-[#64748b]">
                 Showing {rows.length} entries
               </span>
@@ -119,9 +94,6 @@ const FbbSlaPage = () => {
             <FbbSlaIndicatorTable
               indicators={rows}
               periodLabel={columnLabel}
-              loading={isLoading}
-              errorMessage={errorMessage}
-              onRetry={refetch}
             />
           </div>
         </div>
@@ -130,4 +102,4 @@ const FbbSlaPage = () => {
   );
 };
 
-export default FbbSlaPage;
+export default EbisKpiPage;

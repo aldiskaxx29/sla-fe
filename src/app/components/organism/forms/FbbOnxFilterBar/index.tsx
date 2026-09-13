@@ -11,8 +11,6 @@ interface FbbOnxFilterBarProps {
     yearweek: string[];
     metrics: string[];
     kpi: string[];
-    /** Kosongkan untuk menyembunyikan filter level (mis. halaman Ookla). */
-    level?: string[];
     indihomeType: string[];
   };
   loading?: boolean;
@@ -72,16 +70,6 @@ export function FbbOnxFilterBar({
         size="sm"
         className={PILL_CLASS}
       />
-      {options.level?.length ? (
-        <SelectMenu
-          value={value.level}
-          options={toOptions(options.level)}
-          onChange={(level) => update({ level })}
-          placeholder="Select Level"
-          size="sm"
-          className={PILL_CLASS}
-        />
-      ) : null}
       <SelectMenu
         value={value.indihomeType}
         options={toOptions(options.indihomeType)}

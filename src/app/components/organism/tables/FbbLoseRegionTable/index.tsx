@@ -28,9 +28,11 @@ const HEADERS = [
   "Value Indihome",
   "Trend",
   "Status",
+  "Status Benchmark",
   "Nearest Competitor",
   "Winner",
   "Gap to Winner",
+  "Rank",
 ];
 
 /** Deret trend bisa ratusan titik; sparkline cukup memakai yang terbaru. */
@@ -43,13 +45,9 @@ const parseTrend = (trend?: string) =>
     .filter((value) => Number.isFinite(value))
     .slice(-TREND_POINTS);
 
-const isWin = (status?: string, benchmarkStatus?: string) => {
-  if (benchmarkStatus) {
-    return benchmarkStatus.toLowerCase() === "win";
-  }
-  const s = String(status ?? "").toLowerCase();
-  return s === "win" || s.includes("win");
-};
+/** "Win", "CONSECUTIVE WIN", "Consecutive Win" -> true. */
+const isWin = (...values: (string | undefined)[]) =>
+  values.some((value) => String(value ?? "").toLowerCase().includes("win"));
 
 /** Pilihan ukuran halaman; nilai aktifnya datang dari `meta.per_page`. */
 const PAGE_SIZE_OPTIONS = [5, 10, 20, 50, 100];
@@ -84,9 +82,7 @@ export function FbbLoseRegionTable({
 
     return order.map((region) => {
       const items = byRegion[region];
-      const win = items.filter((item) =>
-        isWin(item.status, item.benchmark_status),
-      ).length;
+      const win = items.filter((item) => isWin(item.status)).length;
 
       return { region, items, win, total: items.length };
     });
@@ -101,7 +97,7 @@ export function FbbLoseRegionTable({
   return (
     <div className="flex flex-col">
       <div className="w-full overflow-x-auto rounded-[10px] border border-[#e2e8f0]">
-        <table className="w-full min-w-[1100px] border-collapse text-left">
+        <table className="w-full min-w-[1240px] border-collapse text-left">
           <thead>
             <tr>
               {HEADERS.map((label) => (
@@ -155,12 +151,12 @@ export function FbbLoseRegionTable({
                           tone={groupWin ? "win" : "lose"}
                         />
                       </td>
-                      <td className={bodyCell} colSpan={3} />
+                      <td className={bodyCell} colSpan={5} />
                     </tr>
 
                     {isOpen &&
                       group.items.map((row, index) => {
-                        const win = isWin(row.status, row.benchmark_status);
+                        const win = isWin(row.status);
 
                         return (
                           <tr
@@ -183,6 +179,16 @@ export function FbbLoseRegionTable({
                                 tone={win ? "win" : "lose"}
                               />
                             </td>
+                            <td className="px-4 py-2.5">
+                              {row.benchmark_status ? (
+                                <StatusPill
+                                  label={row.benchmark_status}
+                                  tone={win ? "win" : "lose"}
+                                />
+                              ) : (
+                                "-"
+                              )}
+                            </td>
                             <td className={bodyCell}>
                               {row.nearest_comp || row.gap_to_nearest_comp || "-"}
                             </td>
@@ -193,6 +199,9 @@ export function FbbLoseRegionTable({
                               }`}
                             >
                               {row.gap_to_winner}
+                            </td>
+                            <td className={`${bodyCell} tabular-nums`}>
+                              {row.rank}
                             </td>
                           </tr>
                         );

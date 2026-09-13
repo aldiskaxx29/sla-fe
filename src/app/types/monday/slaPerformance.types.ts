@@ -1,3 +1,5 @@
+import type { SlaRcaKey } from "@/app/types/monday/ticketQuality.types";
+
 /**
  * Bentuk mentah data SLA dari Monday Monitoring lama. Angkanya dikirim sebagai
  * string dan tidak konsisten: ada yang pakai titik ("99.50"), ada yang koma
@@ -38,8 +40,15 @@ export interface MttrRegionRow {
   /** Bisa null kalau minggu itu tidak ada tiket close. */
   ach: string | null;
   tiket_close?: string;
+  /** Tiket close yang memenuhi SLA (hijau). */
+  tiket_close_clear?: string;
   tiket_close_not_clear?: string;
   tiket_open?: string;
+  /** Sebaran tiket open: masih aman, mendekati, dan lewat SLA. */
+  hijau?: string;
+  kuning?: string;
+  merah?: string;
+  total_tiket?: string;
 }
 
 /** assets/sla/core/{packetloss,jitter,latency_*}.json */
@@ -118,3 +127,13 @@ export interface CoreTransitRow {
   latency_bds?: string | number | null;
   latency_pnk?: string | number | null;
 }
+
+/** Satu baris ringkasan RCA; `grouping_rca` null artinya belum dikelompokkan. */
+export interface SlaRcaGroupingItem {
+  grouping_rca: string | null;
+  total: number;
+}
+
+export type SlaRcaGroupingResponse = Partial<
+  Record<SlaRcaKey, SlaRcaGroupingItem[]>
+>;

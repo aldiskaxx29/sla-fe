@@ -6,6 +6,7 @@ import type {
   MsaAccessRow,
   MttrRegionRow,
   SlaPerformanceSources,
+  SlaRcaGroupingItem,
 } from "@/app/types/monday/slaPerformance.types";
 import type {
   MetricSubCard,
@@ -57,6 +58,79 @@ const plTotalOf = (rows: AccessPlTotal[], distribution: string) => {
 const dash = (value: unknown) =>
   value === undefined || value === null || value === "" ? "-" : String(value);
 
+/** Satu kartu RCA di popup: judul, persentase, dan rincian penyebabnya. */
+export interface SlaRcaBucket {
+  id: "cap" | "tsel" | "technical" | "oe" | "others";
+  label: string;
+  total: number;
+  percent: number;
+  items: { label: string; total: number }[];
+}
+
+const RCA_LABELS: Record<SlaRcaBucket["id"], string> = {
+  cap: "Capacity",
+  tsel: "Issue TSEL",
+  technical: "Technical",
+  oe: "OE",
+  others: "Others",
+};
+
+/** Aturan pengelompokan mengikuti aplikasi lama; urutannya berpengaruh. */
+const rcaBucketOf = (name?: string | null): SlaRcaBucket["id"] => {
+  const text = String(name ?? "").toLowerCase();
+
+  if (text.includes("cap")) return "cap";
+  if (text.includes("tsel")) return "tsel";
+  if (text.includes("force") || text.includes("technical")) return "technical";
+  if (text.includes("qe")) return "oe";
+
+  return "others";
+};
+
+/**
+ * Ubah daftar RCA mentah jadi lima kartu. Baris tanpa `grouping_rca` tetap
+ * dihitung (masuk Others) supaya persentasenya sama dengan aplikasi lama.
+ */
+export const groupSlaRca = (items: SlaRcaGroupingItem[] = []): SlaRcaBucket[] => {
+  const buckets: Record<SlaRcaBucket["id"], SlaRcaBucket> = {
+    cap: { id: "cap", label: RCA_LABELS.cap, total: 0, percent: 0, items: [] },
+    tsel: { id: "tsel", label: RCA_LABELS.tsel, total: 0, percent: 0, items: [] },
+    technical: {
+      id: "technical",
+      label: RCA_LABELS.technical,
+      total: 0,
+      percent: 0,
+      items: [],
+    },
+    oe: { id: "oe", label: RCA_LABELS.oe, total: 0, percent: 0, items: [] },
+    others: {
+      id: "others",
+      label: RCA_LABELS.others,
+      total: 0,
+      percent: 0,
+      items: [],
+    },
+  };
+
+  let grandTotal = 0;
+
+  items.forEach((item) => {
+    const total = toNumber(item.total) ?? 0;
+    const bucket = buckets[rcaBucketOf(item.grouping_rca)];
+
+    bucket.total += total;
+    grandTotal += total;
+    if (item.grouping_rca) {
+      bucket.items.push({ label: item.grouping_rca, total });
+    }
+  });
+
+  return Object.values(buckets).map((bucket) => ({
+    ...bucket,
+    percent: grandTotal ? Math.round((bucket.total / grandTotal) * 100) : 0,
+  }));
+};
+
 /** Detail per region untuk kartu PL access (MSA). */
 const buildPacketLossDetail = (
   name: string,
@@ -67,6 +141,12 @@ const buildPacketLossDetail = (
   subtitle: "Rincian per region — klik baris untuk daftar site",
   statusKey: "status",
   drilldown: { kind: "site", level: "packetloss", distributionPl, regionKey: "region" },
+  rca: {
+    key: distributionPl === "1-5%" ? "packetloss_1_5" : "packetloss_5",
+    // Angka nation wide = jumlah site yang belum clear minggu ini.
+    notClear: dash(findNation(rows)?.realisasi),
+    notClearUnit: "Site",
+  },
   columns: [
     { key: "region", label: "Region" },
     { key: "totalSite", label: "Total Site", align: "right" },
@@ -95,6 +175,11 @@ const buildCnopAccessDetail = (
   subtitle: "Rincian per region — klik baris untuk daftar site",
   statusKey: "status",
   drilldown: { kind: "site", level, regionKey: "region" },
+  rca: {
+    key: level,
+    notClear: dash(findNation(rows)?.not_clear),
+    notClearUnit: "Site",
+  },
   columns: [
     { key: "region", label: "Region" },
     { key: "totalSite", label: "Total Site", align: "right" },
@@ -166,6 +251,47 @@ const buildCoreLatencyDetail = (
 });
 
 /** Detail tiket MTTR per region. */
+/** Baris ringkasan pada tabel MTTR; diberi latar penuh seperti aplikasi lama. */
+const MTTR_GROUP_ROWS = ["Jawa", "Non Jawa"];
+
+/**
+ * Urutan tabel MTTR: grup Jawa beserta regionnya, lalu Non Jawa, lalu Nation
+ * Wide. Region dikelompokkan lewat treshold-nya (48 jam untuk Jawa, 72 jam
+ * untuk Non Jawa) supaya tidak bergantung pada urutan file.
+ */
+const orderMttrRows = (rows: MttrRegionRow[]) => {
+  const named = (name: string) =>
+    rows.find(
+      (row) =>
+        String(row.region_tsel ?? "").trim().toUpperCase() ===
+        name.toUpperCase(),
+    ) ?? null;
+
+  const jawa = named("Jawa");
+  const nonJawa = named("Non Jawa");
+  const nation = rows.find((row) => isNationRegion(row.region_tsel)) ?? null;
+  const summaries = [jawa, nonJawa, nation];
+
+  const details = rows
+    .filter((row) => !summaries.includes(row))
+    .sort((left, right) =>
+      String(left.region_tsel).localeCompare(String(right.region_tsel)),
+    );
+
+  const jawaDetails = jawa
+    ? details.filter((row) => row.treshold === jawa.treshold)
+    : [];
+  const nonJawaDetails = details.filter((row) => !jawaDetails.includes(row));
+
+  return [
+    ...(jawa ? [jawa] : []),
+    ...jawaDetails,
+    ...(nonJawa ? [nonJawa] : []),
+    ...nonJawaDetails,
+    ...(nation ? [nation] : []),
+  ];
+};
+
 const buildMttrDetail = (
   name: string,
   rows: MttrRegionRow[],
@@ -174,23 +300,70 @@ const buildMttrDetail = (
   subtitle: "Rincian per region — klik baris untuk daftar tiket",
   drilldown: { kind: "mttr-ticket", regionKey: "region" },
   columns: [
+    { key: "no", label: "No", align: "center" },
     { key: "region", label: "Region" },
-    { key: "treshold", label: "Threshold", align: "right" },
-    { key: "target", label: "Target", align: "right" },
-    { key: "ach", label: "Ach", align: "right" },
-    { key: "close", label: "Tiket Close", align: "right" },
-    { key: "notClear", label: "Close Not Clear", align: "right" },
-    { key: "open", label: "Tiket Open", align: "right" },
+    { key: "treshold", label: "Treshold", align: "center" },
+    { key: "target", label: "Target (%)", align: "center" },
+    { key: "ach", label: "Realisasi Ach (%)", align: "center" },
+    { key: "closeTotal", label: "Total", group: "Ticket Close", align: "center" },
+    {
+      key: "closeHijau",
+      label: "Hijau",
+      group: "Ticket Close",
+      tone: "green",
+      align: "center",
+    },
+    {
+      key: "closeMerah",
+      label: "Merah",
+      group: "Ticket Close",
+      tone: "red",
+      align: "center",
+    },
+    { key: "openTotal", label: "Total", group: "Ticket Open", align: "center" },
+    {
+      key: "openHijau",
+      label: "Hijau",
+      group: "Ticket Open",
+      tone: "green",
+      align: "center",
+    },
+    {
+      key: "openKuning",
+      label: "Kuning",
+      group: "Ticket Open",
+      tone: "yellow",
+      align: "center",
+    },
+    {
+      key: "openMerah",
+      label: "Merah",
+      group: "Ticket Open",
+      tone: "red",
+      align: "center",
+    },
+    { key: "totalTiket", label: "Total Ticket", align: "center" },
   ],
-  statusKey: "notClear",
-  rows: rows.map((row) => ({
+  achievement: {
+    achKey: "ach",
+    targetKey: "target",
+    labelKey: "region",
+    groupRows: MTTR_GROUP_ROWS,
+  },
+  rows: orderMttrRows(rows).map((row, index) => ({
+    no: index + 1,
     region: dash(row.region_tsel),
     treshold: dash(row.treshold),
-    target: formatPercent(row.target),
-    ach: row.ach === null ? "-" : formatPercent(row.ach),
-    close: dash(row.tiket_close),
-    notClear: dash(row.tiket_close_not_clear),
-    open: dash(row.tiket_open),
+    target: dash(row.target),
+    ach: dash(row.ach),
+    closeTotal: dash(row.tiket_close),
+    closeHijau: dash(row.tiket_close_clear),
+    closeMerah: dash(row.tiket_close_not_clear),
+    openTotal: dash(row.tiket_open),
+    openHijau: dash(row.hijau),
+    openKuning: dash(row.kuning),
+    openMerah: dash(row.merah),
+    totalTiket: dash(row.total_tiket),
   })),
 });
 

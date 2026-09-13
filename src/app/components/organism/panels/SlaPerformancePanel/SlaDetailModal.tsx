@@ -1,7 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { LuChevronLeft, LuChevronRight, LuSearch, LuX } from "react-icons/lu";
 
-import { useSlaDrilldownQuery } from "@/app/hooks/query/monday/slaDrilldown";
+import {
+  useSlaDrilldownQuery,
+  useSlaRcaGroupingQuery,
+} from "@/app/hooks/query/monday/slaDrilldown";
+
+// Utils
+import { groupSlaRca } from "@/app/utils/slaPerformance.utils";
 import type {
   SlaCardDetail,
   SlaDetailColumn,
@@ -29,6 +35,21 @@ const isStatusText = (value: string | number | null) =>
     String(value ?? "").toLowerCase(),
   );
 
+/** Latar sel header untuk kolom hijau/kuning/merah pada tabel MTTR. */
+const toneClass = (tone?: SlaDetailColumn["tone"]) => {
+  if (tone === "green") return "bg-emerald-500 text-white";
+  if (tone === "yellow") return "bg-amber-500 text-white";
+  if (tone === "red") return "bg-red-500 text-white";
+
+  return "bg-[#213c52] text-white";
+};
+
+/** "91,10" dan "91.10" sama-sama dianggap angka. */
+const toComparable = (value: string | number | null | undefined) => {
+  const numeric = Number(String(value ?? "").trim().replace(",", "."));
+  return Number.isFinite(numeric) ? numeric : null;
+};
+
 const alignClass = (column: SlaDetailColumn) =>
   column.align === "right"
     ? "text-right"
@@ -41,6 +62,16 @@ export function SlaDetailModal({ detail, onClose }: SlaDetailModalProps) {
   const [drillRegion, setDrillRegion] = useState<string | null>(null);
 
   const drilldown = useSlaDrilldownQuery(detail, drillRegion);
+  // Kartu RCA hanya dipakai pada tampilan ringkasan region.
+  const rcaGrouping = useSlaRcaGroupingQuery(
+    Boolean(detail?.rca) && !drillRegion,
+  );
+
+  const rcaBuckets = useMemo(() => {
+    if (!detail?.rca) return [];
+
+    return groupSlaRca(rcaGrouping.data?.[detail.rca.key] ?? []);
+  }, [detail?.rca, rcaGrouping.data]);
 
   // Reset saat popup dibuka untuk kartu lain.
   useEffect(() => {
@@ -64,9 +95,11 @@ export function SlaDetailModal({ detail, onClose }: SlaDetailModalProps) {
 
   const isDrilling = Boolean(drillRegion);
 
-  const columns: SlaDetailColumn[] = isDrilling
-    ? (drilldown.data?.columns ?? [])
-    : (detail?.columns ?? []);
+  const columns: SlaDetailColumn[] = useMemo(
+    () =>
+      isDrilling ? (drilldown.data?.columns ?? []) : (detail?.columns ?? []),
+    [isDrilling, drilldown.data, detail],
+  );
 
   const baseRows: SlaDetailRow[] = useMemo(
     () => (isDrilling ? (drilldown.data?.rows ?? []) : (detail?.rows ?? [])),
@@ -74,6 +107,24 @@ export function SlaDetailModal({ detail, onClose }: SlaDetailModalProps) {
   );
 
   const statusKey = isDrilling ? drilldown.data?.statusKey : detail?.statusKey;
+
+  // Kolom bergrup ("Ticket Close", "Ticket Open") dirender jadi header dua baris.
+  const headerGroups = useMemo(() => {
+    const groups: { label?: string; columns: SlaDetailColumn[] }[] = [];
+
+    columns.forEach((column) => {
+      const last = groups[groups.length - 1];
+
+      if (column.group && last?.label === column.group) last.columns.push(column);
+      else groups.push({ label: column.group, columns: [column] });
+    });
+
+    return groups;
+  }, [columns]);
+
+  const hasGroupedHeader = headerGroups.some((group) => Boolean(group.label));
+
+  const achievement = isDrilling ? undefined : detail?.achievement;
 
   const rows = useMemo(() => {
     const keyword = search.trim().toLowerCase();
@@ -161,6 +212,50 @@ export function SlaDetailModal({ detail, onClose }: SlaDetailModalProps) {
           </div>
         </header>
 
+        {detail.rca && !isDrilling && (
+          <div className="flex flex-wrap items-stretch gap-2 border-b border-slate-100 bg-slate-100/70 px-5 py-3">
+            <div className="flex w-32 shrink-0 flex-col items-center justify-center rounded-lg bg-orange-100 p-2.5 text-center shadow-sm">
+              <span className="text-[11px] font-bold text-slate-600">
+                Total Not Clear
+              </span>
+              <span className="text-xl leading-tight font-extrabold text-[#213c52]">
+                {detail.rca.notClear ?? "-"}
+              </span>
+              <span className="text-[11px] font-bold text-slate-600">
+                {detail.rca.notClearUnit ?? "Site"}
+              </span>
+            </div>
+
+            {rcaBuckets.map((bucket) => (
+              <div
+                key={bucket.id}
+                className="min-w-0 flex-1 basis-[150px] rounded-lg bg-white p-2.5 leading-snug shadow-sm"
+              >
+                <p className="text-[11px] font-bold text-slate-700">
+                  {bucket.label} : {bucket.percent}% ({bucket.total})
+                </p>
+                {bucket.items.map((item, index) => (
+                  <p
+                    key={item.label}
+                    className={`text-[9px] font-medium text-slate-500 ${
+                      index === 0 ? "mt-1" : ""
+                    }`}
+                  >
+                    {String.fromCharCode(97 + index)}. {item.label} :{" "}
+                    {item.total}
+                  </p>
+                ))}
+              </div>
+            ))}
+
+            {rcaGrouping.isPending && (
+              <div className="flex items-center px-2 text-[11px] font-semibold text-slate-400">
+                Memuat ringkasan RCA...
+              </div>
+            )}
+          </div>
+        )}
+
         <div className="border-b border-slate-100 px-5 py-3">
           <div className="relative">
             <LuSearch
@@ -189,25 +284,91 @@ export function SlaDetailModal({ detail, onClose }: SlaDetailModalProps) {
           ) : (
             <table className="w-full border-collapse text-left text-[11px]">
               <thead>
-                <tr>
-                  {columns.map((column) => (
-                    <th
-                      key={column.key}
-                      className={`sticky top-0 z-10 whitespace-nowrap bg-white px-2 py-2 text-[10px] font-bold uppercase tracking-wide text-slate-400 shadow-[inset_0_-1px_0_#E2E8F0] ${alignClass(column)}`}
-                    >
-                      {column.label}
-                    </th>
-                  ))}
-                </tr>
+                {hasGroupedHeader ? (
+                  <>
+                    <tr>
+                      {headerGroups.map((group) =>
+                        group.label ? (
+                          <th
+                            key={`group-${group.label}`}
+                            colSpan={group.columns.length}
+                            className={`sticky top-0 z-10 border border-slate-700 px-2 py-1.5 text-center text-[10px] font-bold whitespace-nowrap ${toneClass()}`}
+                          >
+                            {group.label}
+                          </th>
+                        ) : (
+                          <th
+                            key={`solo-${group.columns[0].key}`}
+                            rowSpan={2}
+                            className={`sticky top-0 z-10 border border-slate-700 px-2 py-1.5 text-[10px] font-bold whitespace-nowrap ${toneClass()} ${alignClass(group.columns[0])}`}
+                          >
+                            {group.columns[0].label}
+                          </th>
+                        ),
+                      )}
+                    </tr>
+                    <tr>
+                      {headerGroups
+                        .filter((group) => group.label)
+                        .flatMap((group) => group.columns)
+                        .map((column) => (
+                          <th
+                            key={`sub-${column.key}`}
+                            className={`sticky top-[30px] z-10 border border-slate-700 px-2 py-1 text-center text-[10px] font-bold whitespace-nowrap ${toneClass(column.tone)}`}
+                          >
+                            {column.label}
+                          </th>
+                        ))}
+                    </tr>
+                  </>
+                ) : (
+                  <tr>
+                    {columns.map((column) => (
+                      <th
+                        key={column.key}
+                        className={`sticky top-0 z-10 whitespace-nowrap bg-white px-2 py-2 text-[10px] font-bold uppercase tracking-wide text-slate-400 shadow-[inset_0_-1px_0_#E2E8F0] ${alignClass(column)}`}
+                      >
+                        {column.label}
+                      </th>
+                    ))}
+                  </tr>
+                )}
               </thead>
               <tbody>
-                {rows.map((row, index) => (
+                {rows.map((row, index) => {
+                  // Ach di bawah target berarti region-nya merah, selain itu hijau.
+                  const ach = achievement
+                    ? toComparable(row[achievement.achKey])
+                    : null;
+                  const target = achievement
+                    ? toComparable(row[achievement.targetKey])
+                    : null;
+                  // Hijau hanya kalau realisasi/ach melewati target.
+                  const achieved =
+                    ach === null || target === null ? null : ach > target;
+                  const isGroupRow = Boolean(
+                    achievement?.groupRows?.some(
+                      (name) =>
+                        name.toUpperCase() ===
+                        String(row[achievement.labelKey] ?? "")
+                          .trim()
+                          .toUpperCase(),
+                    ),
+                  );
+                  const achClass =
+                    achieved === null
+                      ? ""
+                      : achieved
+                        ? "text-emerald-600"
+                        : "text-red-500";
+
+                  return (
                   <tr
                     key={`${row[columns[0]?.key ?? ""] ?? index}-${index}`}
                     onClick={() =>
                       canDrill && setDrillRegion(String(row[regionKey] ?? ""))
                     }
-                    className={`border-b border-slate-50 transition-colors last:border-b-0 ${
+                    className={`border-b border-slate-100 transition-colors last:border-b-0 ${
                       canDrill
                         ? "cursor-pointer hover:bg-indigo-50/50"
                         : "hover:bg-slate-50/60"
@@ -216,18 +377,38 @@ export function SlaDetailModal({ detail, onClose }: SlaDetailModalProps) {
                     {columns.map((column) => {
                       const value = row[column.key];
                       const danger = column.key === statusKey && isDangerValue(value);
+                      const isAchCell =
+                        achievement &&
+                        (column.key === achievement.achKey ||
+                          column.key === achievement.labelKey);
+                      const isLabelCell =
+                        achievement && column.key === achievement.labelKey;
 
                       return (
                         <td
                           key={column.key}
                           className={`px-2 py-2 font-semibold ${
+                            hasGroupedHeader ? "border border-slate-200" : ""
+                          } ${
                             column.key === "analisis" || column.key === "headline"
                               ? "max-w-[260px] truncate"
                               : "whitespace-nowrap"
                           } ${
                             column.align === "right" ? "tabular-nums" : ""
                           } ${alignClass(column)} ${
-                            danger ? "text-red-500" : "text-[#213c52]"
+                            isLabelCell && isGroupRow
+                              ? `font-bold text-white ${
+                                  achieved === null
+                                    ? "bg-slate-400"
+                                    : achieved
+                                      ? "bg-emerald-500"
+                                      : "bg-red-500"
+                                }`
+                              : isAchCell
+                                ? achClass
+                                : danger
+                                  ? "text-red-500"
+                                  : "text-[#213c52]"
                           }`}
                           title={
                             column.key === "analisis" || column.key === "headline"
@@ -252,7 +433,8 @@ export function SlaDetailModal({ detail, onClose }: SlaDetailModalProps) {
                       );
                     })}
                   </tr>
-                ))}
+                  );
+                })}
 
                 {!rows.length && (
                   <tr>

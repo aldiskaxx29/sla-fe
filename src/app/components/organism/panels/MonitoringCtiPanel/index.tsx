@@ -56,9 +56,17 @@ export function MonitoringCtiPanel() {
     setDetailOpen(true);
   };
 
-  /** Klik region/code (atau angka provider) membuka popup detail ONX-nya. */
-  const openOnxDetail = (row: OnxSummaryRow, provider?: OnxProvider) => {
-    setOnxTarget({ region: row.region, code: row.code, provider });
+  /** Parameter detail mengikuti yang diklik: nama region mengambil satu region
+   *  penuh, code menambah filter code, angka provider menambah provider-nya. */
+  const openOnxDetail = (
+    row: OnxSummaryRow,
+    options: { withCode?: boolean; provider?: OnxProvider } = {},
+  ) => {
+    setOnxTarget({
+      region: row.region,
+      ...(options.withCode || options.provider ? { code: row.code } : {}),
+      ...(options.provider ? { provider: options.provider } : {}),
+    });
     setDetailSource("ONX");
     setDetailOpen(true);
   };
@@ -382,7 +390,7 @@ export function MonitoringCtiPanel() {
                 <td className="border border-slate-100 px-1 py-1 text-center text-[9px]">
                   <button
                     type="button"
-                    onClick={() => openOnxDetail(row)}
+                    onClick={() => openOnxDetail(row, { withCode: true })}
                     className="cursor-pointer font-extrabold text-highlight transition-colors hover:underline"
                   >
                     {row.code}
@@ -395,7 +403,7 @@ export function MonitoringCtiPanel() {
                   >
                     <button
                       type="button"
-                      onClick={() => openOnxDetail(row, provider.key)}
+                      onClick={() => openOnxDetail(row, { provider: provider.key })}
                       title={`Detail ${provider.label} ${row.code}`}
                       className="cursor-pointer font-extrabold text-slate-700 transition-colors hover:text-indigo-500 hover:underline"
                     >
