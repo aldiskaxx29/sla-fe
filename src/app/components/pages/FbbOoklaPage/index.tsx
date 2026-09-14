@@ -89,7 +89,7 @@ const FbbOoklaPage = () => {
   const summary = useFbbOoklaNationMetricsQuery({
     yearweek: filter.yearweek,
     indihomeType: filter.indihomeType,
-    metrics: filter.kpi ? filter.metrics : "",
+    metrics: filter.metrics,
     kpi: filter.kpi,
     page: summaryPage.page,
     perPage: summaryPage.perPage,
