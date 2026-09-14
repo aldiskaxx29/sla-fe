@@ -69,6 +69,15 @@ const mondayMonitoringClient = axios.create({
   headers: { Authorization: `Bearer ${MONDAY_MONITORING_TOKEN}` },
 });
 
+/**
+ * Detail site per region hanya berisi data di aplikasi `weeklymonitoring`
+ * (repo monday lama); `mondaymonitoring` membalas `[]` untuk query yang sama.
+ */
+const weeklyMonitoringClient = axios.create({
+  baseURL: import.meta.env.DEV ? "/qosmo/weeklymonitoring" : "/weeklymonitoring",
+  headers: { Authorization: `Bearer ${MONDAY_MONITORING_TOKEN}` },
+});
+
 /** Semua data SLA disimpan sebagai file JSON statis di server lama. */
 const getMondayMonitoringFile = async <TResponse>(
   path: string,
@@ -181,7 +190,7 @@ export const getSiteDetailRegion = async (
   },
   signal?: AbortSignal,
 ): Promise<SiteDetailRow[]> => {
-  const { data } = await mondayMonitoringClient.get<SiteDetailRow[] | string>(
+  const { data } = await weeklyMonitoringClient.get<SiteDetailRow[] | string>(
     "/api.php",
     {
       params: {
