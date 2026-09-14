@@ -30,6 +30,15 @@ const NEAREST_COMP_HEADER = "Nearest Comp";
 const GAP_NEAREST_HEADER = "Gap to Nearest Comp";
 const RANK_HEADER = "Rank";
 
+const formatValue = (value: FbbNationMetricRow["value"]) => {
+  if (value === null || value === undefined || value === "") return "-";
+
+  const number = Number(value);
+  if (!Number.isFinite(number)) return String(value);
+
+  return number.toLocaleString("id-ID", { maximumFractionDigits: 2 });
+};
+
 const isWin = (status?: string) => String(status).toLowerCase() === "win";
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50];
@@ -125,7 +134,7 @@ export function FbbNationMetricsTable({
                         {row.kpi}
                       </td>
                       <td className={`${bodyCell} border-r border-[#e2e8f0] text-center text-[#020617] tabular-nums`}>
-                        {row.value ?? "-"}
+                        {formatValue(row.value)}
                       </td>
                       <td
                         className={`${bodyCell} border-r border-[#e2e8f0] text-center ${
