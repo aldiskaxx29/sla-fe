@@ -21,6 +21,7 @@ interface FbbNationMetricsTableProps {
 const BASE_HEADERS = [
   "Metrics",
   "KPI",
+  "Value",
   "Win/Lose",
   "Winner",
   "Gap to Winner",
@@ -122,6 +123,9 @@ export function FbbNationMetricsTable({
                       )}
                       <td className={`${bodyCell} border-r border-[#e2e8f0] text-[#020617]`}>
                         {row.kpi}
+                      </td>
+                      <td className={`${bodyCell} border-r border-[#e2e8f0] text-center text-[#020617] tabular-nums`}>
+                        {row.value ?? "-"}
                       </td>
                       <td
                         className={`${bodyCell} border-r border-[#e2e8f0] text-center ${

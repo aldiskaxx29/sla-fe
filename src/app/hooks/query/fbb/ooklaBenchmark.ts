@@ -61,6 +61,7 @@ const toStatusLabel = (benchmark?: string) => {
 const toSharedRow = (row: FbbOoklaMetricRow): FbbNationMetricRow => ({
   metrics: row.metrics_result,
   kpi: row.kpi_result,
+  value: row.value,
   status: toStatusLabel(row.benchmark),
   winner: row.winner,
   gap_to_winner: row.gap_to_winner,

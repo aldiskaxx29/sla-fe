@@ -37,6 +37,7 @@ export interface FbbOnxMeta {
 export interface FbbNationMetricRow {
   metrics: string;
   kpi: string;
+  value?: string | number | null;
   status: string;
   winner: string;
   gap_to_winner: string;
@@ -100,6 +101,7 @@ export interface FbbOnxFilterState {
 export interface FbbOoklaMetricRow {
   metrics_result: string;
   kpi_result: string;
+  value?: string | number | null;
   benchmark: string;
   winner: string;
   gap_to_winner: string;
