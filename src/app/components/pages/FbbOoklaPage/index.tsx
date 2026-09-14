@@ -7,6 +7,7 @@ import {
   useFbbOoklaIndihomeTypeOptionsQuery,
   useFbbOoklaKpiOptionsQuery,
   useFbbOoklaLoseRegionQuery,
+  useFbbOoklaLoseRegionSummaryQuery,
   useFbbOoklaMapRegionStatusQuery,
   useFbbOoklaMetricsOptionsQuery,
   useFbbOoklaNationMetricsQuery,
@@ -24,13 +25,17 @@ import { FbbLoseRegionTable } from "@/app/components/organism/tables/FbbLoseRegi
 import { FbbNationMetricsTable } from "@/app/components/organism/tables/FbbNationMetricsTable";
 
 // Types
-import type { FbbOnxFilterState } from "@/app/types/fbb/onx.types";
+import type {
+  FbbNationMetricRow,
+  FbbOnxFilterState,
+} from "@/app/types/fbb/onx.types";
 
 // Utils
 import { getStoredUserName, toInitials } from "@/app/utils/user.utils";
 
 const SUMMARY_PER_PAGE = 10;
-const DETAIL_PER_PAGE = 10;
+const DETAIL_PER_PAGE = 100;
+const DETAIL_REGION_PER_PAGE = 100;
 
 const DEFAULT_FILTER: FbbOnxFilterState = {
   yearweek: "",
@@ -38,6 +43,9 @@ const DEFAULT_FILTER: FbbOnxFilterState = {
   kpi: "",
   indihomeType: "",
 };
+
+const isLose = (row: FbbNationMetricRow) =>
+  String(row.status).toLowerCase() === "lose";
 
 /** Dashboard Ookla: Details Metrics, peta & detail kabupaten dari API Ookla. */
 const FbbOoklaPage = () => {
@@ -49,6 +57,11 @@ const FbbOoklaPage = () => {
   });
   const [view, setView] = useState<"maps" | "detail">("maps");
   const [viewKpi, setViewKpi] = useState("");
+  const [expandedRegion, setExpandedRegion] = useState("");
+  const [detailRegionPage, setDetailRegionPage] = useState({
+    page: 1,
+    perPage: DETAIL_REGION_PER_PAGE,
+  });
   const [detailPage, setDetailPage] = useState({
     page: 1,
     perPage: DETAIL_PER_PAGE,
@@ -90,16 +103,6 @@ const FbbOoklaPage = () => {
     setFilter((current) => ({ ...current, kpi: list[0] }));
   }, [kpiOptions.data, filter.kpi]);
 
-  useEffect(() => {
-    const list = kpiOptions.data;
-    if (!list?.length) return;
-    if (viewKpi && list.includes(viewKpi)) return;
-
-    setViewKpi(list[0]);
-  }, [kpiOptions.data, viewKpi]);
-
-  const activeKpi = viewKpi || kpiOptions.data?.[0] || filter.kpi || "";
-
   const summary = useFbbOoklaNationMetricsQuery({
     yearweek: filter.yearweek,
     indihomeType: filter.indihomeType,
@@ -109,32 +112,74 @@ const FbbOoklaPage = () => {
     perPage: summaryPage.perPage,
   });
 
+  const summaryRows = useMemo(() => summary.data?.rows ?? [], [summary.data]);
+  const loseKpiOptions = useMemo(
+    () => Array.from(new Set(summaryRows.filter(isLose).map((row) => row.kpi))),
+    [summaryRows],
+  );
+  const activeKpi = viewKpi || loseKpiOptions[0] || filter.kpi || "";
+  const activeMetric = useMemo(() => {
+    if (filter.metrics) return filter.metrics;
+
+    return (
+      summaryRows.find((row) => row.kpi === activeKpi)?.metrics ??
+      summaryRows[0]?.metrics ??
+      ""
+    );
+  }, [activeKpi, filter.metrics, summaryRows]);
+
   const mapStatus = useFbbOoklaMapRegionStatusQuery(
     {
       yearweek: filter.yearweek,
       indihomeType: filter.indihomeType,
-      metrics: filter.metrics,
+      metrics: activeMetric,
       kpi: activeKpi,
     },
-    view === "maps",
+    view === "maps" && Boolean(activeMetric && activeKpi),
+  );
+
+  const detailRegion = useFbbOoklaLoseRegionSummaryQuery(
+    {
+      yearweek: filter.yearweek,
+      indihomeType: filter.indihomeType,
+      metrics: activeMetric,
+      kpi: activeKpi,
+      page: detailRegionPage.page,
+      perPage: detailRegionPage.perPage,
+    },
+    view === "detail" && Boolean(activeMetric && activeKpi),
   );
 
   const detail = useFbbOoklaLoseRegionQuery(
     {
       yearweek: filter.yearweek,
       indihomeType: filter.indihomeType,
-      metrics: filter.metrics,
+      metrics: activeMetric,
       kpi: activeKpi,
+      region: expandedRegion,
       level: "KABUPATEN",
+      benchmarkStatus: "Lose",
       page: detailPage.page,
       perPage: detailPage.perPage,
     },
-    view === "detail",
+    view === "detail" && Boolean(activeMetric && activeKpi && expandedRegion),
   );
 
-  const summaryRows = useMemo(() => summary.data?.rows ?? [], [summary.data]);
   const mapRows = useMemo(() => mapStatus.data ?? [], [mapStatus.data]);
+  const detailRegionRows = useMemo(
+    () => detailRegion.data?.data ?? [],
+    [detailRegion.data],
+  );
   const detailRows = useMemo(() => detail.data?.data ?? [], [detail.data]);
+
+  useEffect(() => {
+    if (summary.isFetching) return;
+
+    const firstLoseKpi = loseKpiOptions[0] ?? "";
+    if (!viewKpi || !loseKpiOptions.includes(viewKpi)) {
+      setViewKpi(firstLoseKpi);
+    }
+  }, [loseKpiOptions, summary.isFetching, viewKpi]);
 
   const handleFilterChange = (next: FbbOnxFilterState) => {
     setFilter((current) => ({
@@ -142,14 +187,25 @@ const FbbOoklaPage = () => {
       // Ganti metrics membuat daftar KPI berubah, jadi KPI-nya dikosongkan.
       kpi: next.metrics === current.metrics ? next.kpi : "",
     }));
+    setExpandedRegion("");
     setSummaryPage((current) => ({ ...current, page: 1 }));
+    setDetailRegionPage((current) => ({ ...current, page: 1 }));
     setDetailPage((current) => ({ ...current, page: 1 }));
   };
 
   const handleViewKpiChange = (kpi: string) => {
     setViewKpi(kpi);
+    setExpandedRegion("");
+    setDetailRegionPage((current) => ({ ...current, page: 1 }));
     setDetailPage((current) => ({ ...current, page: 1 }));
   };
+
+  const handleToggleRegion = (region: string) => {
+    setExpandedRegion((current) => (current === region ? "" : region));
+    setDetailPage((current) => ({ ...current, page: 1 }));
+  };
+
+  const detailLoading = detailRegion.isFetching;
 
   return (
     <main className="flex flex-1 flex-col p-4">
@@ -174,9 +230,7 @@ const FbbOoklaPage = () => {
           }`}
         >
           <div className="flex items-center justify-between gap-3">
-            <span className="text-sm font-medium text-[#020617]">
-              Details Metrics
-            </span>
+            <span className="text-sm font-medium text-[#020617]">Nations</span>
             <button
               type="button"
               aria-label={summaryOpen ? "Tutup tabel" : "Buka tabel"}
@@ -203,7 +257,9 @@ const FbbOoklaPage = () => {
                 meta={summary.data?.meta}
                 loading={summary.isFetching}
                 error={summary.isError}
-                onPageChange={(page, perPage) => setSummaryPage({ page, perPage })}
+                onPageChange={(page, perPage) =>
+                  setSummaryPage({ page, perPage })
+                }
               />
             </div>
           </div>
@@ -214,7 +270,7 @@ const FbbOoklaPage = () => {
             <div className="flex flex-wrap items-center gap-2">
               <SelectMenu
                 value={activeKpi}
-                options={(kpiOptions.data ?? []).map((kpi) => ({
+                options={loseKpiOptions.map((kpi) => ({
                   label: kpi,
                   value: kpi,
                 }))}
@@ -257,11 +313,20 @@ const FbbOoklaPage = () => {
             />
           ) : (
             <FbbLoseRegionTable
-              rows={detailRows}
-              meta={detail.data?.meta}
-              loading={detail.isFetching}
-              error={detail.isError}
-              onPageChange={(page, perPage) => setDetailPage({ page, perPage })}
+              rows={detailRegionRows}
+              childRows={detailRows}
+              meta={detailRegion.data?.meta}
+              loading={detailLoading}
+              childLoading={detail.isFetching}
+              error={detailRegion.isError}
+              childError={detail.isError}
+              expandedRegion={expandedRegion}
+              onToggleRegion={handleToggleRegion}
+              onPageChange={(page, perPage) => {
+                setDetailRegionPage({ page, perPage });
+                setExpandedRegion("");
+                setDetailPage((current) => ({ ...current, page: 1 }));
+              }}
             />
           )}
         </section>

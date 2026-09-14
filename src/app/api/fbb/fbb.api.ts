@@ -34,6 +34,7 @@ export const FBB_ENDPOINTS = {
   ooklaListIndihomeType: "fbb/ookla/list-indihome-type",
   ooklaNationMetricsKpi: "fbb/ookla/nation-metrics-kpi",
   ooklaMapsRegionStatus: "fbb/ookla/maps-region-status",
+  ooklaLoseRegion: "fbb/ookla/lose-region",
   ooklaLoseRegionKabupaten: "fbb/ookla/lose-region-kabupaten",
   mapsRegionStatus: "fbb/onx/maps-region-status",
   loseRegion: "fbb/onx/lose-region",
@@ -263,9 +264,37 @@ export interface FbbOoklaLoseRegionParams {
   kpi?: string;
   level?: string;
   areaName?: string;
+  region?: string;
+  benchmarkStatus?: string;
   page?: number;
   perPage?: number;
 }
+
+/** Detail agregat per region pada halaman Ookla beserta deret trend-nya. */
+export const getFbbOoklaLoseRegion = (
+  {
+    yearweek,
+    indihomeType,
+    metrics,
+    kpi,
+    page,
+    perPage,
+  }: FbbOoklaLoseRegionParams,
+  signal?: AbortSignal,
+) =>
+  apiRequest<FbbLoseRegionResponse>({
+    method: "GET",
+    url: FBB_ENDPOINTS.ooklaLoseRegion,
+    params: {
+      ...(yearweek ? { yearweek } : {}),
+      ...(indihomeType ? { indihome_type: indihomeType } : {}),
+      ...(metrics ? { metrics } : {}),
+      ...(kpi ? { kpi } : {}),
+      page: page ?? 1,
+      per_page: perPage ?? 100,
+    },
+    signal,
+  });
 
 /** Detail per kabupaten pada halaman Ookla beserta deret trend-nya. */
 export const getFbbOoklaLoseRegionKabupaten = (
@@ -276,6 +305,8 @@ export const getFbbOoklaLoseRegionKabupaten = (
     kpi,
     level = "KABUPATEN",
     areaName,
+    region,
+    benchmarkStatus,
     page,
     perPage,
   }: FbbOoklaLoseRegionParams,
@@ -291,8 +322,10 @@ export const getFbbOoklaLoseRegionKabupaten = (
       ...(kpi ? { kpi } : {}),
       ...(level ? { level } : {}),
       ...(areaName ? { area_name: areaName } : {}),
+      ...(region ? { region } : {}),
+      ...(benchmarkStatus ? { benchmark_status: benchmarkStatus } : {}),
       page: page ?? 1,
-      per_page: perPage ?? 10,
+      per_page: perPage ?? 100,
     },
     signal,
   });

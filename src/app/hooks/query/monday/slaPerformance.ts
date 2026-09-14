@@ -211,7 +211,10 @@ export const useSlaPerformanceQuery = (
           { code: "BTC", rows: coreLatencyBtc },
           { code: "PNK", rows: coreLatencyPnk },
         ],
-        plCurrentWeek,
+        // `accessPl` tidak punya parameter rekon, jadi untuk After Rekon jangan
+        // pakai total before dari endpoint itu. Builder akan fallback ke
+        // `realisasi` NATION WIDE dari JSON after packetloss{5,15}.
+        plCurrentWeek: rekon === "after" ? [] : plCurrentWeek,
         plPreviousWeek,
         currentWeekLabel:
           period === "month"

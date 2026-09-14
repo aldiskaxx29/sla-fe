@@ -311,7 +311,6 @@ const FbbOnxPage = () => {
               rows={detailRegionRows}
               childRows={detailRows}
               meta={detailRegion.data?.meta}
-              childMeta={detail.data?.meta}
               loading={detailLoading}
               childLoading={detail.isFetching}
               error={detailRegion.isError}
@@ -323,7 +322,6 @@ const FbbOnxPage = () => {
                 setExpandedRegion("");
                 setDetailPage((current) => ({ ...current, page: 1 }));
               }}
-              onChildPageChange={(page, perPage) => setDetailPage({ page, perPage })}
             />
           )}
         </section>

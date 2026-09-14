@@ -18,7 +18,6 @@ interface FbbLoseRegionTableProps {
   rows: FbbLoseRegionRow[];
   childRows?: FbbLoseRegionRow[];
   meta?: FbbOnxMeta;
-  childMeta?: FbbOnxMeta;
   loading?: boolean;
   childLoading?: boolean;
   error?: boolean;
@@ -26,7 +25,6 @@ interface FbbLoseRegionTableProps {
   expandedRegion?: string;
   onToggleRegion?: (region: string) => void;
   onPageChange: (page: number, perPage: number) => void;
-  onChildPageChange?: (page: number, perPage: number) => void;
 }
 
 const HEADERS = [
@@ -88,7 +86,6 @@ export function FbbLoseRegionTable({
   rows,
   childRows = [],
   meta,
-  childMeta,
   loading = false,
   childLoading = false,
   error = false,
@@ -96,7 +93,6 @@ export function FbbLoseRegionTable({
   expandedRegion = "",
   onToggleRegion,
   onPageChange,
-  onChildPageChange,
 }: FbbLoseRegionTableProps) {
   const expandable = Boolean(onToggleRegion);
   // Skeleton sebanyak baris yang akan datang, supaya tingginya tidak melompat.
@@ -310,17 +306,6 @@ export function FbbLoseRegionTable({
         </div>
       )}
 
-      {expandedRegion && childMeta && childMeta.total > 0 && onChildPageChange && (
-        <div className="pt-2">
-          <Pagination
-            current={childMeta.current_page}
-            pageSize={childMeta.per_page}
-            total={childMeta.total}
-            onChange={onChildPageChange}
-            pageSizeOptions={PAGE_SIZE_OPTIONS}
-          />
-        </div>
-      )}
     </div>
   );
 }

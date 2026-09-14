@@ -50,12 +50,36 @@ const toComparable = (value: string | number | null | undefined) => {
   return Number.isFinite(numeric) ? numeric : null;
 };
 
-const alignClass = (column: SlaDetailColumn) =>
-  column.align === "right"
-    ? "text-right"
-    : column.align === "center"
-      ? "text-center"
-      : "text-left";
+const cellAlignClass = (column: SlaDetailColumn) =>
+  column.key.toLowerCase().includes("region") ||
+  column.label.toLowerCase() === "region"
+    ? "text-left align-middle"
+    : "text-center align-middle";
+
+const regionToneClass = ({
+  column,
+  danger,
+  achieved,
+  hasStatusKey,
+}: {
+  column: SlaDetailColumn;
+  danger: boolean;
+  achieved: boolean | null;
+  hasStatusKey: boolean;
+}) => {
+  if (column.key !== "region") return "";
+  if (achieved !== null) {
+    return achieved
+      ? "bg-emerald-500 font-bold text-white"
+      : "bg-red-500 font-bold text-white";
+  }
+
+  if (!hasStatusKey) return "bg-slate-400 font-bold text-white";
+
+  return danger
+    ? "bg-red-100 font-bold text-red-700"
+    : "bg-emerald-100 font-bold text-emerald-700";
+};
 
 export function SlaDetailModal({ detail, onClose }: SlaDetailModalProps) {
   const [search, setSearch] = useState("");
@@ -282,7 +306,7 @@ export function SlaDetailModal({ detail, onClose }: SlaDetailModalProps) {
               {errorMessage}
             </p>
           ) : (
-            <table className="w-full border-collapse text-left text-[11px]">
+            <table className="w-full border-collapse text-center text-[11px]">
               <thead>
                 {hasGroupedHeader ? (
                   <>
@@ -300,7 +324,7 @@ export function SlaDetailModal({ detail, onClose }: SlaDetailModalProps) {
                           <th
                             key={`solo-${group.columns[0].key}`}
                             rowSpan={2}
-                            className={`sticky top-0 z-10 border border-slate-700 px-2 py-1.5 text-[10px] font-bold whitespace-nowrap ${toneClass()} ${alignClass(group.columns[0])}`}
+                            className={`sticky top-0 z-10 border border-slate-700 px-2 py-1.5 text-[10px] font-bold whitespace-nowrap ${toneClass()} ${cellAlignClass(group.columns[0])}`}
                           >
                             {group.columns[0].label}
                           </th>
@@ -326,7 +350,7 @@ export function SlaDetailModal({ detail, onClose }: SlaDetailModalProps) {
                     {columns.map((column) => (
                       <th
                         key={column.key}
-                        className={`sticky top-0 z-10 whitespace-nowrap bg-white px-2 py-2 text-[10px] font-bold uppercase tracking-wide text-slate-400 shadow-[inset_0_-1px_0_#E2E8F0] ${alignClass(column)}`}
+                        className={`sticky top-0 z-10 whitespace-nowrap bg-white px-2 py-2 text-[10px] font-bold uppercase tracking-wide text-slate-400 shadow-[inset_0_-1px_0_#E2E8F0] ${cellAlignClass(column)}`}
                       >
                         {column.label}
                       </th>
@@ -346,15 +370,6 @@ export function SlaDetailModal({ detail, onClose }: SlaDetailModalProps) {
                   // Hijau hanya kalau realisasi/ach melewati target.
                   const achieved =
                     ach === null || target === null ? null : ach > target;
-                  const isGroupRow = Boolean(
-                    achievement?.groupRows?.some(
-                      (name) =>
-                        name.toUpperCase() ===
-                        String(row[achievement.labelKey] ?? "")
-                          .trim()
-                          .toUpperCase(),
-                    ),
-                  );
                   const achClass =
                     achieved === null
                       ? ""
@@ -376,13 +391,21 @@ export function SlaDetailModal({ detail, onClose }: SlaDetailModalProps) {
                   >
                     {columns.map((column) => {
                       const value = row[column.key];
-                      const danger = column.key === statusKey && isDangerValue(value);
+                      const statusValue =
+                        statusKey && column.key === "region" ? row[statusKey] : value;
+                      const danger =
+                        column.key === statusKey ||
+                        (statusKey && column.key === "region")
+                          ? isDangerValue(statusValue)
+                          : false;
                       const isAchCell =
                         achievement &&
                         (column.key === achievement.achKey ||
                           column.key === achievement.labelKey);
-                      const isLabelCell =
-                        achievement && column.key === achievement.labelKey;
+                      const shouldToneRegion =
+                        column.key === "region" &&
+                        (Boolean(statusKey) ||
+                          column.key === achievement?.labelKey);
 
                       return (
                         <td
@@ -393,17 +416,14 @@ export function SlaDetailModal({ detail, onClose }: SlaDetailModalProps) {
                             column.key === "analisis" || column.key === "headline"
                               ? "max-w-[260px] truncate"
                               : "whitespace-nowrap"
-                          } ${
-                            column.align === "right" ? "tabular-nums" : ""
-                          } ${alignClass(column)} ${
-                            isLabelCell && isGroupRow
-                              ? `font-bold text-white ${
-                                  achieved === null
-                                    ? "bg-slate-400"
-                                    : achieved
-                                      ? "bg-emerald-500"
-                                      : "bg-red-500"
-                                }`
+                          } tabular-nums ${cellAlignClass(column)} ${
+                            shouldToneRegion
+                              ? regionToneClass({
+                                  column,
+                                  danger,
+                                  achieved,
+                                  hasStatusKey: Boolean(statusKey),
+                                })
                               : isAchCell
                                 ? achClass
                                 : danger

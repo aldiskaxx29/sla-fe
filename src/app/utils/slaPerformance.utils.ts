@@ -27,15 +27,69 @@ const formatPercent = (value?: string | number | null) => {
   return numeric === null ? "-" : `${numeric.toFixed(2)}%`;
 };
 
-/** "13-NATION WIDE" dan "NATION WIDE" harus dianggap sama. */
-const normalizeRegion = (name?: string) =>
-  String(name ?? "")
+const REGION_ALIASES: Record<string, string> = {
+  "INNER JABOTABEK": "JABOTABEK INNER",
+  "OUTER JABOTABEK": "JABOTABEK OUTER",
+  JABAR: "JAWA BARAT",
+  "WEST JAVA": "JAWA BARAT",
+  JATENG: "JAWA TENGAH",
+  "JATENG DIY": "JAWA TENGAH",
+  "JAWA TENGAH DIY": "JAWA TENGAH",
+  "CENTRAL JAVA": "JAWA TENGAH",
+  JATIM: "JAWA TIMUR",
+  "EAST JAVA": "JAWA TIMUR",
+  "BALI NUSA TENGGARA": "BALI NUSRA",
+  "MALUKU DAN PAPUA": "PUMA",
+  "PAPUA MALUKU": "PUMA",
+};
+
+/** "13-NATION WIDE", "JABOTABEK_INNER", dan variasi alias harus dianggap sama. */
+const normalizeRegion = (name?: string) => {
+  const normalized = String(name ?? "")
     .toUpperCase()
-    .replace(/[\d-]/g, "")
+    .replace(/^\s*\d+\s*[-_.]?\s*/, "")
+    .replace(/[-_]+/g, " ")
     .replace(/\s+/g, " ")
     .trim();
 
+  return REGION_ALIASES[normalized] ?? normalized;
+};
+
 const isNationRegion = (name?: string) => normalizeRegion(name) === "NATION WIDE";
+
+const REGION_ORDER = [
+  "SUMBAGUT",
+  "SUMBAGTENG",
+  "SUMBAGSEL",
+  "JABOTABEK INNER",
+  "JABOTABEK OUTER",
+  "JAWA BARAT",
+  "JAWA TENGAH",
+  "JAWA TIMUR",
+  "BALI NUSRA",
+  "KALIMANTAN",
+  "SULAWESI",
+  "PUMA",
+  "NATION WIDE",
+];
+
+const regionOrderOf = (name?: string) => {
+  const normalized = normalizeRegion(name);
+  const index = REGION_ORDER.indexOf(normalized);
+  return index === -1 ? REGION_ORDER.length : index;
+};
+
+const orderByRegion = <TRow extends { region_tsel?: string; region?: string }>(
+  rows: TRow[],
+) =>
+  [...rows].sort((left, right) => {
+    const leftName = left.region_tsel ?? left.region;
+    const rightName = right.region_tsel ?? right.region;
+    const byOrder = regionOrderOf(leftName) - regionOrderOf(rightName);
+
+    if (byOrder !== 0) return byOrder;
+    return normalizeRegion(leftName).localeCompare(normalizeRegion(rightName));
+  });
 
 const findNation = <TRow extends { region_tsel?: string; region?: string }>(
   rows: TRow[],
@@ -153,9 +207,8 @@ const buildPacketLossDetail = (
     { key: "target", label: "Target", align: "right" },
     { key: "realisasi", label: "Realisasi", align: "right" },
     { key: "gap", label: "Gap", align: "right" },
-    { key: "status", label: "Status", align: "center" },
   ],
-  rows: rows.map((row) => ({
+  rows: orderByRegion(rows).map((row) => ({
     region: dash(row.region_tsel),
     totalSite: dash(row.total_site),
     target: dash(row.target),
@@ -186,9 +239,8 @@ const buildCnopAccessDetail = (
     { key: "notClear", label: "Not Clear", align: "right" },
     { key: "target", label: "Target", align: "right" },
     { key: "ach", label: "Ach", align: "right" },
-    { key: "status", label: "Status", align: "center" },
   ],
-  rows: rows.map((row) => ({
+  rows: orderByRegion(rows).map((row) => ({
     region: dash(row.region_tsel),
     totalSite: dash(row.total_site),
     notClear: dash(row.not_clear),
@@ -212,7 +264,7 @@ const buildCoreDetail = (name: string, rows: CoreSlaRow[]): SlaCardDetail => ({
     { key: "clear", label: "Clear", align: "right" },
     { key: "notClear", label: "Not Clear", align: "right" },
   ],
-  rows: rows.map((row) => ({
+  rows: orderByRegion(rows).map((row) => ({
     region: dash(row.region),
     target: formatPercent(row.target_sla),
     realisasi: formatPercent(coreRealisasi(row)),
@@ -239,7 +291,7 @@ const buildCoreLatencyDetail = (
     { key: "notClear", label: "Not Clear", align: "right" },
   ],
   rows: sources.flatMap(({ code, rows }) =>
-    rows.map((row) => ({
+    orderByRegion(rows).map((row) => ({
       verifier: code,
       region: dash(row.region),
       target: formatPercent(row.target_sla),
@@ -254,43 +306,8 @@ const buildCoreLatencyDetail = (
 /** Baris ringkasan pada tabel MTTR; diberi latar penuh seperti aplikasi lama. */
 const MTTR_GROUP_ROWS = ["Jawa", "Non Jawa"];
 
-/**
- * Urutan tabel MTTR: grup Jawa beserta regionnya, lalu Non Jawa, lalu Nation
- * Wide. Region dikelompokkan lewat treshold-nya (48 jam untuk Jawa, 72 jam
- * untuk Non Jawa) supaya tidak bergantung pada urutan file.
- */
-const orderMttrRows = (rows: MttrRegionRow[]) => {
-  const named = (name: string) =>
-    rows.find(
-      (row) =>
-        String(row.region_tsel ?? "").trim().toUpperCase() ===
-        name.toUpperCase(),
-    ) ?? null;
-
-  const jawa = named("Jawa");
-  const nonJawa = named("Non Jawa");
-  const nation = rows.find((row) => isNationRegion(row.region_tsel)) ?? null;
-  const summaries = [jawa, nonJawa, nation];
-
-  const details = rows
-    .filter((row) => !summaries.includes(row))
-    .sort((left, right) =>
-      String(left.region_tsel).localeCompare(String(right.region_tsel)),
-    );
-
-  const jawaDetails = jawa
-    ? details.filter((row) => row.treshold === jawa.treshold)
-    : [];
-  const nonJawaDetails = details.filter((row) => !jawaDetails.includes(row));
-
-  return [
-    ...(jawa ? [jawa] : []),
-    ...jawaDetails,
-    ...(nonJawa ? [nonJawa] : []),
-    ...nonJawaDetails,
-    ...(nation ? [nation] : []),
-  ];
-};
+/** Urutan tabel MTTR mengikuti urutan region pada popup SLA. */
+const orderMttrRows = (rows: MttrRegionRow[]) => orderByRegion(rows);
 
 const buildMttrDetail = (
   name: string,
@@ -603,12 +620,13 @@ const buildMttrCard = (
 
   const nationTarget = toNumber(nation?.target);
   const nationAch = toNumber(nation?.ach);
-  // `ach` nation bisa null saat minggu itu tidak ada tiket close; jatuhkan
-  // penilaian ke baris Jawa/Non Jawa supaya kartu tidak salah merah.
+  // Status kartu harus mengikuti baris yang terlihat di card. Nation Wide
+  // tetap dipakai sebagai fallback kalau ringkasan Jawa/Non Jawa tidak ada.
   const hasNationAch = nationTarget !== null && nationAch !== null;
-  const isOnTarget = hasNationAch
-    ? (nationAch as number) >= (nationTarget as number)
-    : tableData.length > 0 && tableData.every((row) => row.ach >= row.target);
+  const isOnTarget =
+    tableData.length > 0
+      ? tableData.every((row) => row.ach >= row.target)
+      : hasNationAch && (nationAch as number) >= (nationTarget as number);
 
   return {
     id,
@@ -617,7 +635,6 @@ const buildMttrCard = (
     beforeValue: "",
     currentValue: "",
     tableData,
-    // Angka nation hanya dipakai menentukan status kartu, tidak ditampilkan.
     detail: buildMttrDetail(name, rows),
   };
 };

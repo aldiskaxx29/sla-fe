@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 // Api
 import {
   fbbKeys,
+  getFbbOoklaLoseRegion,
   getFbbOoklaLoseRegionKabupaten,
   getFbbOoklaMapsRegionStatus,
   getFbbOoklaIndihomeTypeOptions,
@@ -129,7 +130,19 @@ export const useFbbOoklaMapRegionStatusQuery = (
     },
   });
 
-/** Detail per kabupaten pada halaman Ookla, dipakai tab Detail View. */
+/** Detail agregat per region pada halaman Ookla, dipakai sebagai parent row. */
+export const useFbbOoklaLoseRegionSummaryQuery = (
+  params: FbbOoklaLoseRegionParams,
+  enabled = true,
+) =>
+  useQuery<FbbLoseRegionResponse>({
+    queryKey: fbbKeys.ooklaLoseRegion({ ...params }),
+    enabled: enabled && Boolean(params.yearweek),
+    staleTime: DATA_STALE_TIME,
+    queryFn: ({ signal }) => getFbbOoklaLoseRegion(params, signal),
+  });
+
+/** Detail per kabupaten pada halaman Ookla, dipakai saat region dibuka. */
 export const useFbbOoklaLoseRegionQuery = (
   params: FbbOoklaLoseRegionParams,
   enabled = true,
@@ -140,4 +153,3 @@ export const useFbbOoklaLoseRegionQuery = (
     staleTime: DATA_STALE_TIME,
     queryFn: ({ signal }) => getFbbOoklaLoseRegionKabupaten(params, signal),
   });
-
