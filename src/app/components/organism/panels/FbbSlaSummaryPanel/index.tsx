@@ -1,6 +1,5 @@
 import { LuGauge, LuMonitorCheck, LuMonitorX } from "react-icons/lu";
 
-// Molecules
 import { KpiStatCard } from "@/app/components/molecules/KpiStatCard";
 
 interface FbbSlaSummaryPanelProps {
@@ -10,7 +9,6 @@ interface FbbSlaSummaryPanelProps {
   loading?: boolean;
 }
 
-/** Tiga kartu ringkasan di atas tabel indikator SLA WISA FBB. */
 export function FbbSlaSummaryPanel({
   total,
   achieved,

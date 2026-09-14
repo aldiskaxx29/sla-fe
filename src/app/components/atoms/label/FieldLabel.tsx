@@ -1,4 +1,3 @@
-// React
 import type { ReactNode } from "react";
 
 interface FieldLabelProps {
@@ -9,7 +8,6 @@ interface FieldLabelProps {
   className?: string;
 }
 
-/** Label di atas kontrol form, plus pesan error di bawahnya. */
 const FieldLabel = ({
   label,
   required = false,

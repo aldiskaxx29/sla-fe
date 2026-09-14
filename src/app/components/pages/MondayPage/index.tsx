@@ -1,25 +1,17 @@
-// React Icons
 import { LuCalendar } from "react-icons/lu";
 
-// Hooks
 import { useLatestPacketLossWeekQuery } from "@/app/hooks/query/monday/slaPerformance";
 
-// Organism
 import { SlaPerformancePanel } from "@/app/components/organism/panels/SlaPerformancePanel";
 import { TrendPerformancePanel } from "@/app/components/organism/panels/TrendPerformancePanel";
 import { BaselinePerformancePanel } from "@/app/components/organism/panels/BaselinePerformancePanel";
 import { WinningBenchmarkPanel } from "@/app/components/organism/panels/WinningBenchmarkPanel";
 
-// Templates
 import MondayTemplate from "@/app/components/templates/MondayTemplate";
 
-// Utils
 import { formatMondayWeekLabel } from "@/app/utils/monday.utils";
 
-/** Monday Monitoring — sebelumnya iframe, kini komponen sendiri. */
 const MondayPage = () => {
-  // Minggu terakhir yang datanya sudah ada di server, dipakai juga oleh panel
-  // SLA Performance — jadi keterangan periodenya ikut data, bukan ditulis tangan.
   const { data: latestWeek } = useLatestPacketLossWeekQuery();
   const weekLabel = formatMondayWeekLabel(latestWeek);
 

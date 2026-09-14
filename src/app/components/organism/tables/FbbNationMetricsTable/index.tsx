@@ -1,14 +1,10 @@
-// React
 import { useMemo } from "react";
 
-// Atoms
 import { Skeleton } from "@/app/components/atoms";
 
-// Molecules
 import { EmptyState } from "@/app/components/molecules/EmptyState";
 import Pagination from "@/app/components/molecules/Pagination";
 
-// Types
 import type {
   FbbNationMetricRow,
   FbbOnxMeta,
@@ -35,14 +31,12 @@ const RANK_HEADER = "Rank";
 
 const isWin = (status?: string) => String(status).toLowerCase() === "win";
 
-/** Pilihan ukuran halaman; nilai aktifnya datang dari `meta.per_page`. */
 const PAGE_SIZE_OPTIONS = [10, 20, 50];
 
 const headCell =
   "h-10 bg-[#f8fafc] px-4 text-sm font-medium text-[#334155] border-b border-[#e2e8f0]";
 const bodyCell = "h-8 px-4 text-sm font-normal";
 
-/** Tabel ringkasan menang/kalah per metrics & KPI tingkat nasional. */
 export function FbbNationMetricsTable({
   rows,
   meta,
@@ -50,11 +44,8 @@ export function FbbNationMetricsTable({
   error = false,
   onPageChange,
 }: FbbNationMetricsTableProps) {
-  // Skeleton sebanyak baris yang akan datang, supaya tingginya tidak melompat.
   const skeletonRows = meta?.per_page ?? PAGE_SIZE_OPTIONS[0];
 
-  // Ookla tidak mengirim nama pesaing terdekat, hanya selisihnya — kolomnya
-  // disembunyikan kalau memang tidak ada isinya.
   const showNearestComp = rows.some((row) => Boolean(row.nearest_comp));
   const headers = [
     ...BASE_HEADERS,
@@ -63,7 +54,6 @@ export function FbbNationMetricsTable({
     RANK_HEADER,
   ];
 
-  // Metrics yang sama dan berurutan digabung jadi satu sel memanjang.
   const groups = useMemo(() => {
     const result: { metrics: string; rows: FbbNationMetricRow[] }[] = [];
 

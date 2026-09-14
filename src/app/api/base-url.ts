@@ -1,13 +1,7 @@
-// Axios
 import axios, { AxiosError, AxiosRequestConfig } from "axios";
 
-// Toast
 import { toast } from "react-toastify";
 
-/**
- * Base URL sebenarnya diarahkan ke proxy vite saat development,
- * supaya request tidak kena CORS. Lihat `vite.config.ts`.
- */
 export const resolveApiBaseUrl = (
   baseUrl: string | undefined = import.meta.env.VITE_APP_BASE_URL,
 ): string => {
@@ -21,10 +15,6 @@ export const resolveApiBaseUrl = (
   return baseUrl;
 };
 
-/**
- * Backend menerima nilai jamak sebagai `key[]=value` yang berulang,
- * mis. `filter[region_tsel][]=PUMA&filter[region_tsel][]=BALI NUSRA`.
- */
 export const serializeParams = (params: Record<string, unknown>): string => {
   const searchParams = new URLSearchParams();
 
@@ -75,8 +65,6 @@ const getErrorMessage = (error: AxiosError): string => {
 apiClient.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
-    // Request yang dibatalkan (mis. filter berubah sebelum response datang)
-    // bukan kegagalan — jangan ditampilkan ke user.
     if (error.code === "ERR_CANCELED" || error.name === "CanceledError") {
       return Promise.reject(error);
     }
@@ -98,7 +86,6 @@ apiClient.interceptors.response.use(
   },
 );
 
-/** Mengambil langsung body response, karena itu yang selalu dipakai pemanggil. */
 export const apiRequest = async <TResponse>(
   config: AxiosRequestConfig,
 ): Promise<TResponse> => {

@@ -1,13 +1,9 @@
-// React
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-// Toast
 import { toast } from "react-toastify";
 
-// Api
 import { downloadEvidence, getRekonsiliasiDetail } from "@/app/api";
 
-// Atoms
 import {
   Button,
   Checkbox,
@@ -19,10 +15,8 @@ import {
   TextInput,
 } from "@/app/components/atoms";
 
-// Molecules
 import Modal from "@/app/components/molecules/Modal";
 
-// Options
 import {
   GROUPING_OPTIONS,
   MTTRQ_GROUPING_RCA_OPTIONS,
@@ -57,7 +51,6 @@ const parseEvidenceUrl = (evidence: unknown): string => {
   }
 };
 
-/** Form edit satu baris rekonsiliasi, termasuk unggah evidence. */
 const RekonsiliasiEditModal = ({
   open,
   parameter = "",
@@ -338,7 +331,6 @@ const RekonsiliasiEditModal = ({
                     ...current,
                     group2,
                     group1: group1FromGroup2(group2),
-                    // Update Progress bergantung group1, jadi ikut direset.
                     group22: "",
                   }));
                   setErrors((current) => ({

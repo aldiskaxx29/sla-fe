@@ -1,4 +1,3 @@
-// React
 import type { ReactNode } from "react";
 
 interface InputSiteTemplateProps {
@@ -6,7 +5,6 @@ interface InputSiteTemplateProps {
   children: ReactNode;
 }
 
-/** Kerangka halaman rekonsiliasi: kartu putih berisi toolbar dan area tabel. */
 const InputSiteTemplate = ({ toolbar, children }: InputSiteTemplateProps) => {
   return (
     <div className="bg-white border border-[#DBDBDB] rounded-xl p-4 m-6 overflow-x-hidden">

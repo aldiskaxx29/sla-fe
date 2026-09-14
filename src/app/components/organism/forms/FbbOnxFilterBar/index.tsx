@@ -1,7 +1,5 @@
-// Molecules
 import { SelectMenu } from "@/app/components/molecules/SelectMenu";
 
-// Types
 import type { FbbOnxFilterState } from "@/app/types/fbb/onx.types";
 
 interface FbbOnxFilterBarProps {
@@ -16,7 +14,6 @@ interface FbbOnxFilterBarProps {
   loading?: boolean;
 }
 
-/** "202635" -> "W35 2026" */
 const weekLabel = (yearweek: string) =>
   yearweek.length === 6
     ? `W${Number(yearweek.slice(4))} ${yearweek.slice(0, 4)}`
@@ -27,11 +24,9 @@ const toOptions = (values: string[], allLabel?: string) => [
   ...values.map((value) => ({ label: value, value })),
 ];
 
-/** Pil filter dibuat selebar 160px seperti desain. */
 const PILL_CLASS =
   "[&>div]:w-[160px] [&_button]:h-8 [&_button]:w-[160px] [&_button]:justify-between [&_button]:rounded-full [&_button]:border-[#e2e8f0] [&_button]:bg-[#f8fafc] [&_button]:px-3 [&_button]:text-xs [&_button]:font-medium [&_button]:text-[#0f172a] [&_button>span]:truncate";
 
-/** Deretan filter benchmark ONX dalam satu bar mendatar. */
 export function FbbOnxFilterBar({
   value,
   onChange,

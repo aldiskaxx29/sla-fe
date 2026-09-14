@@ -1,10 +1,3 @@
-/**
- * Satu pintu untuk semua ikon, memakai react-icons (set Feather).
- * Pemanggil memakai nama netral seperti `IconSearch`, sehingga set ikonnya
- * bisa diganti di berkas ini saja tanpa menyentuh komponen lain.
- */
-
-// React Icons
 import {
   FiCheck,
   FiChevronDown,
@@ -39,7 +32,6 @@ export const IconTrash = FiTrash2;
 export const IconFileSheet = FiFileText;
 export const IconInfo = FiInfo;
 
-/** Ikon muat dengan animasi putar sudah menyatu. */
 export const IconSpinner = ({ className = "", ...props }: IconProps) => (
   <FiLoader className={`animate-spin ${className}`} {...props} />
 );

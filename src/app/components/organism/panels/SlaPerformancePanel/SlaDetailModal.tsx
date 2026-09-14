@@ -6,7 +6,6 @@ import {
   useSlaRcaGroupingQuery,
 } from "@/app/hooks/query/monday/slaDrilldown";
 
-// Utils
 import { groupSlaRca } from "@/app/utils/slaPerformance.utils";
 import type {
   SlaCardDetail,
@@ -19,7 +18,6 @@ interface SlaDetailModalProps {
   onClose: () => void;
 }
 
-/** Nilai yang menandakan baris bermasalah pada kolom status. */
 const isDangerValue = (value: string | number | null) => {
   const text = String(value ?? "").toLowerCase();
   if (!text || text === "-") return false;
@@ -35,7 +33,6 @@ const isStatusText = (value: string | number | null) =>
     String(value ?? "").toLowerCase(),
   );
 
-/** Latar sel header untuk kolom hijau/kuning/merah pada tabel MTTR. */
 const toneClass = (tone?: SlaDetailColumn["tone"]) => {
   if (tone === "green") return "bg-emerald-500 text-white";
   if (tone === "yellow") return "bg-amber-500 text-white";
@@ -44,7 +41,6 @@ const toneClass = (tone?: SlaDetailColumn["tone"]) => {
   return "bg-[#213c52] text-white";
 };
 
-/** "91,10" dan "91.10" sama-sama dianggap angka. */
 const toComparable = (value: string | number | null | undefined) => {
   const numeric = Number(String(value ?? "").trim().replace(",", "."));
   return Number.isFinite(numeric) ? numeric : null;
@@ -86,7 +82,6 @@ export function SlaDetailModal({ detail, onClose }: SlaDetailModalProps) {
   const [drillRegion, setDrillRegion] = useState<string | null>(null);
 
   const drilldown = useSlaDrilldownQuery(detail, drillRegion);
-  // Kartu RCA hanya dipakai pada tampilan ringkasan region.
   const rcaGrouping = useSlaRcaGroupingQuery(
     Boolean(detail?.rca) && !drillRegion,
   );
@@ -97,7 +92,6 @@ export function SlaDetailModal({ detail, onClose }: SlaDetailModalProps) {
     return groupSlaRca(rcaGrouping.data?.[detail.rca.key] ?? []);
   }, [detail?.rca, rcaGrouping.data]);
 
-  // Reset saat popup dibuka untuk kartu lain.
   useEffect(() => {
     setSearch("");
     setDrillRegion(null);
@@ -108,7 +102,6 @@ export function SlaDetailModal({ detail, onClose }: SlaDetailModalProps) {
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key !== "Escape") return;
-      // Esc menutup rincian lanjutan dulu, baru popup-nya.
       if (drillRegion) setDrillRegion(null);
       else onClose();
     };
@@ -132,7 +125,6 @@ export function SlaDetailModal({ detail, onClose }: SlaDetailModalProps) {
 
   const statusKey = isDrilling ? drilldown.data?.statusKey : detail?.statusKey;
 
-  // Kolom bergrup ("Ticket Close", "Ticket Open") dirender jadi header dua baris.
   const headerGroups = useMemo(() => {
     const groups: { label?: string; columns: SlaDetailColumn[] }[] = [];
 
@@ -360,14 +352,12 @@ export function SlaDetailModal({ detail, onClose }: SlaDetailModalProps) {
               </thead>
               <tbody>
                 {rows.map((row, index) => {
-                  // Ach di bawah target berarti region-nya merah, selain itu hijau.
                   const ach = achievement
                     ? toComparable(row[achievement.achKey])
                     : null;
                   const target = achievement
                     ? toComparable(row[achievement.targetKey])
                     : null;
-                  // Hijau hanya kalau realisasi/ach melewati target.
                   const achieved =
                     ach === null || target === null ? null : ach > target;
                   const achClass =

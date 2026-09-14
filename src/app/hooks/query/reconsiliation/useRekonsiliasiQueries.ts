@@ -1,4 +1,3 @@
-// React Query
 import {
   keepPreviousData,
   useMutation,
@@ -6,10 +5,8 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 
-// Toast
 import { toast } from "react-toastify";
 
-// Api
 import {
   downloadRekonsiliasiTemplate,
   getRekonsiliasiList,
@@ -19,14 +16,12 @@ import {
   saveRekonsiliasi,
 } from "@/app/api";
 
-// Types
 import type {
   DownloadTemplateParams,
   ImportTemplatePayload,
   RekonsiliasiListParams,
 } from "@/app/types/reconsiliation/rekonsiliasi.types";
 
-/** Daftar tahun/bulan/minggu yang tersedia. Jarang berubah, jadi di-cache lama. */
 export const useYearWeekQuery = () =>
   useQuery({
     queryKey: rekonsiliasiKeys.yearWeek(),
@@ -43,8 +38,6 @@ export const useRekonsiliasiListQuery = (
     queryKey: rekonsiliasiKeys.list(params),
     queryFn: ({ signal }) => getRekonsiliasiList(params, signal),
     enabled,
-    // Data halaman sebelumnya ditahan supaya tabel tidak berkedip kosong
-    // saat pindah halaman atau ganti filter.
     placeholderData: keepPreviousData,
     staleTime: 30 * 1000,
   });

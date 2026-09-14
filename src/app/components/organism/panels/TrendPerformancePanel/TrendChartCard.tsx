@@ -26,7 +26,6 @@ const METRIC_OPTIONS = [
   { label: "Jitter", value: "jitter" },
 ];
 
-/** Sama seperti tombol NATION/TERITORY/TREG/REGION di monday monitoring lama. */
 const SCOPE_OPTIONS: { label: string; value: TrendScope }[] = [
   { label: "Nation", value: "nation" },
   { label: "Teritory", value: "area" },
@@ -34,7 +33,6 @@ const SCOPE_OPTIONS: { label: string; value: TrendScope }[] = [
   { label: "Region", value: "region_tsel" },
 ];
 
-/** Cukup untuk 12 region; warna diulang kalau serinya lebih banyak. */
 const SERIES_COLORS = [
   "#3B82F6",
   "#10B981",
@@ -50,10 +48,8 @@ const SERIES_COLORS = [
   "#A855F7",
 ];
 
-/** Berapa titik terakhir yang tampil sebelum slider digeser. */
 const VISIBLE_WEEKS = 12;
 
-/** "01-sumbagut" -> "01-Sumbagut", "AREA 1" -> "Area 1". */
 const formatSeriesName = (name: string) =>
   name
     .toLowerCase()
@@ -64,7 +60,6 @@ const formatSeriesName = (name: string) =>
 interface TrendChartCardProps {
   title: string;
   kind: TrendKind;
-  /** Sudut kartu mengikuti desain awal panel. */
   roundedClassName?: string;
 }
 
@@ -82,12 +77,10 @@ export function TrendChartCard({
   const trend = useTrendQualityQuery(kind, metric, scope);
   const series = useMemo(() => trend.data?.series ?? [], [trend.data]);
 
-  // Nama seri berubah tiap ganti level, jadi pilihan legend direset.
   useEffect(() => {
     setHiddenSeries([]);
   }, [scope]);
 
-  // Esc keluar dari mode layar penuh.
   useEffect(() => {
     if (!fullscreen) return;
 
@@ -101,7 +94,6 @@ export function TrendChartCard({
 
   const fileBaseName = `trend_${kind}_${scope}_${metric}`;
 
-  /** Unduh chart apa adanya sebagai PNG. */
   const handleDownloadImage = () => {
     const instance = chartRef.current?.getEchartsInstance();
     if (!instance) return;
@@ -116,7 +108,6 @@ export function TrendChartCard({
     link.click();
   };
 
-  /** Unduh data yang sedang tampil (minggu x seri) sebagai XLSX. */
   const handleDownloadData = () => {
     const data = trend.data;
     if (!data?.weeks.length) return;
@@ -180,7 +171,6 @@ export function TrendChartCard({
       }))
       .filter((_, index) => !hiddenSeries.includes(series[index].name));
 
-    // Default tampilkan minggu terbaru saja; sisanya lewat slider.
     const total = weeks.length;
     const zoomStart =
       total > VISIBLE_WEEKS ? ((total - VISIBLE_WEEKS) / total) * 100 : 0;

@@ -1,4 +1,3 @@
-// React
 import { forwardRef } from "react";
 import type { InputHTMLAttributes } from "react";
 
@@ -6,7 +5,6 @@ interface TextInputProps extends InputHTMLAttributes<HTMLInputElement> {
   invalid?: boolean;
 }
 
-/** Input teks satu baris. */
 const TextInput = forwardRef<HTMLInputElement, TextInputProps>(
   ({ invalid = false, className = "", ...inputProps }, ref) => (
     <input

@@ -11,7 +11,6 @@ import {
 } from "@/app/components/organism/panels/MonitoringCtiPanel/OnxDetailContent";
 import type { CtiRow } from "@/app/types/monday/ticketQuality.types";
 
-// Utils
 import { formatMonitoringHour } from "@/app/utils/monday.utils";
 
 export type MonitoringSource = "CTI" | "ONX";
@@ -20,7 +19,6 @@ interface MonitoringDetailModalProps {
   open: boolean;
   source: MonitoringSource;
   onSourceChange: (source: MonitoringSource) => void;
-  /** Data CTI dipakai bersama kartu, jadi tidak di-fetch ulang di sini. */
   ctiRows: CtiRow[];
   ctiTarget: CtiDetailTarget | null;
   onCtiTargetChange: (target: CtiDetailTarget | null) => void;
@@ -31,7 +29,6 @@ interface MonitoringDetailModalProps {
 
 const SOURCES: MonitoringSource[] = ["CTI", "ONX"];
 
-/** Satu popup untuk dua sumber monitoring; isinya ganti lewat tab CTI/ONX. */
 export function MonitoringDetailModal({
   open,
   source,
@@ -45,7 +42,6 @@ export function MonitoringDetailModal({
 }: MonitoringDetailModalProps) {
   const hasDrilldown = source === "CTI" ? Boolean(ctiTarget) : Boolean(onxTarget);
 
-  // Isi popup menangani Escape-nya sendiri saat sedang di drilldown.
   useEffect(() => {
     if (!open || hasDrilldown) return;
 
@@ -77,7 +73,6 @@ export function MonitoringDetailModal({
             <h2 className="text-sm font-extrabold text-[#213c52]">
               Monitoring {source} {formatMonitoringHour()} WIB
             </h2>
-            {/* Region yang sedang dibuka, seperti di tampilan lamanya. */}
             {source === "ONX" && onxTarget?.region && (
               <span className="truncate rounded-full border border-blue-200 bg-blue-50 px-2.5 py-0.5 text-[10px] font-bold text-blue-700">
                 {onxTarget.region}

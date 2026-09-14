@@ -1,7 +1,5 @@
-// React
 import type { ReactNode } from "react";
 
-// Atoms
 import { IconCheck } from "@/app/components/atoms/icon";
 
 interface CheckboxProps {
@@ -12,7 +10,6 @@ interface CheckboxProps {
   className?: string;
 }
 
-/** Checkbox custom: kotak teal saat tercentang, bukan kotak gelap. */
 const Checkbox = ({
   checked,
   onChange,
@@ -32,7 +29,6 @@ const Checkbox = ({
     <span
       className={[
         "inline-flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors",
-        // Input-nya sr-only, jadi cincin fokus dipasang di kotaknya.
         "has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-teal-500/40",
         checked
           ? "border-teal-600 bg-teal-600 text-white"

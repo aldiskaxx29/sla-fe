@@ -1,10 +1,7 @@
-// Assets
 import xlxsIcon from "@/assets/file-spreadsheet.svg";
 
-// Atoms
 import { FilterDropdown, PillButton, SearchInput } from "@/app/components/atoms";
 
-// Types
 import type { RekonsiliasiPeriod } from "@/app/hooks/custom/useRekonsiliasiPeriod";
 
 interface RekonsiliasiFilterBarProps {
@@ -16,7 +13,6 @@ interface RekonsiliasiFilterBarProps {
   isDownloading?: boolean;
 }
 
-/** Baris filter periode beserta pencarian dan aksi Excel. */
 const RekonsiliasiFilterBar = ({
   period,
   search,

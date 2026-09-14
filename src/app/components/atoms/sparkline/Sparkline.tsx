@@ -1,22 +1,18 @@
 interface SparklineProps {
-  /** Deret nilai, urut dari paling lama ke paling baru. */
   values: number[];
   width?: number;
   height?: number;
-  /** Warna dipaksa; default hijau kalau titik akhir naik, merah kalau turun. */
   color?: string;
+  lowerIsBetter?: boolean;
   className?: string;
 }
 
-/**
- * Grafik garis mini tanpa sumbu, untuk kolom "Trend" di dalam tabel. Sengaja
- * SVG polos, bukan echarts, supaya ratusan baris tetap ringan.
- */
 const Sparkline = ({
   values,
   width = 64,
   height = 22,
   color,
+  lowerIsBetter = false,
   className = "",
 }: SparklineProps) => {
   const points = values.filter((value) => Number.isFinite(value));
@@ -33,15 +29,15 @@ const Sparkline = ({
   const path = points
     .map((value, index) => {
       const x = index * step;
-      // SVG menggambar dari atas, jadi nilainya dibalik.
       const y = height - ((value - min) / span) * height;
       return `${index === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`;
     })
     .join(" ");
 
-  const stroke =
-    color ??
-    (points[points.length - 1] >= points[0] ? "#10B981" : "#EF4444");
+  const first = points[0];
+  const last = points[points.length - 1];
+  const improving = lowerIsBetter ? last <= first : last >= first;
+  const stroke = color ?? (improving ? "#10B981" : "#EF4444");
 
   return (
     <svg

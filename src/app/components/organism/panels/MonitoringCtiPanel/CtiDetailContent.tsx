@@ -14,7 +14,6 @@ export interface CtiDetailTarget {
 
 interface CtiDetailContentProps {
   rows: CtiRow[];
-  /** Terisi kalau popup dibuka langsung ke detail satu transit. */
   target: CtiDetailTarget | null;
   onSelectTarget: (target: CtiDetailTarget | null) => void;
 }
@@ -27,7 +26,6 @@ const VERIFIERS: { key: "bds" | "btc" | "pink"; label: CtiVerifier }[] = [
 
 const today = () => new Date().toISOString().slice(0, 10);
 
-/** Isi popup untuk mode CTI: daftar PE transit dan tren per transit. */
 export function CtiDetailContent({
   rows,
   target,
@@ -41,7 +39,6 @@ export function CtiDetailContent({
     target ? { ...target, startDate, endDate } : null,
   );
 
-  // Escape mundur dari drilldown dulu; menutup popup diurus shell-nya.
   useEffect(() => {
     if (!target) return;
 
@@ -107,7 +104,6 @@ export function CtiDetailContent({
           type: "line",
           smooth: true,
           symbolSize: 7,
-          // Titik jadi merah begitu latency melewati baseline.
           data: points.map((point) => ({
             value: point.latency,
             itemStyle: {

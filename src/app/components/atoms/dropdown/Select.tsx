@@ -1,7 +1,5 @@
-// React
 import { useEffect, useMemo, useRef, useState } from "react";
 
-// Atoms
 import {
   IconCheck,
   IconChevronDown,
@@ -16,7 +14,6 @@ export interface SelectOption {
 
 interface SelectProps {
   options: SelectOption[];
-  /** String untuk mode tunggal, array untuk `multiple`. */
   value?: string | string[];
   onChange?: (value: string | string[]) => void;
   placeholder?: string;
@@ -24,7 +21,6 @@ interface SelectProps {
   searchable?: boolean;
   disabled?: boolean;
   invalid?: boolean;
-  /** Gaya kotak pemicu; dikosongkan untuk dipakai di dalam pil filter. */
   triggerClassName?: string;
   className?: string;
 }
@@ -32,7 +28,6 @@ interface SelectProps {
 const toArray = (value?: string | string[]) =>
   Array.isArray(value) ? value : value ? [value] : [];
 
-/** Dropdown pilihan tanpa dependensi komponen pihak ketiga. */
 const Select = ({
   options,
   value,

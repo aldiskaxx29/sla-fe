@@ -1,19 +1,14 @@
-// React
 import { useEffect, useMemo, useRef, useState } from "react";
 
-// Atoms
 import { Button, Checkbox, IconFilter, Popover } from "@/app/components/atoms";
 
 interface ColumnFilterPopoverProps {
-  /** Pilihan yang tersedia untuk kolom ini. */
   options: string[];
-  /** Nilai yang sedang aktif; pengiriman ke server dilakukan pemanggil. */
   value: string[];
   onApply: (values: string[]) => void;
   searchable?: boolean;
 }
 
-/** Filter checkbox pada header kolom, menggantikan filterDropdown antd. */
 const ColumnFilterPopover = ({
   options,
   value,
@@ -25,7 +20,6 @@ const ColumnFilterPopover = ({
   const [keyword, setKeyword] = useState("");
   const triggerRef = useRef<HTMLButtonElement>(null);
 
-  // Draft disamakan lagi dengan nilai aktif setiap popover dibuka.
   useEffect(() => {
     if (isOpen) {
       setDraft(value);

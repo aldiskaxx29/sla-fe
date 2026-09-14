@@ -7,12 +7,10 @@ import { useBaselineTrendQuery } from "@/app/hooks/query/monday/baselinePerforma
 import type { BaselineRegionRow } from "@/app/types/monday/baseline.types";
 
 interface BaselineTrendModalProps {
-  /** Region yang diklik; null berarti popup tertutup. */
   region: BaselineRegionRow | null;
   onClose: () => void;
 }
 
-/** Berapa minggu terakhir yang tampil sebelum slider digeser. */
 const VISIBLE_WEEKS = 20;
 
 export function BaselineTrendModal({ region, onClose }: BaselineTrendModalProps) {

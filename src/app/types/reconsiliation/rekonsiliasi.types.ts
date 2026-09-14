@@ -1,4 +1,3 @@
-/** Baris rekonsiliasi. Kolomnya berbeda-beda per parameter, jadi dibiarkan longgar. */
 export interface RekonsiliasiRow extends Record<string, unknown> {
   id?: number | string;
   site_id?: string;
@@ -25,11 +24,9 @@ export interface RekonsiliasiMeta {
   total_unfiltered?: number;
   search?: string | null;
   searchable?: string[];
-  /** Daftar field yang boleh dipakai pada `searchable`, dikirim BE. */
   searchable_available?: string[];
 }
 
-/** Nilai unik tiap kolom yang bisa difilter, dikirim BE lewat `options`. */
 export type RekonsiliasiFilterOptions = Record<string, string[]>;
 
 export interface RekonsiliasiListResponse {
@@ -47,14 +44,11 @@ export interface RekonsiliasiListParams {
   parameter: string;
   year: string;
   month: string;
-  /** Kosong untuk parameter mttrq, karena mttrq dihitung per bulan. */
   week?: string;
   page: number;
   perPage: number;
-  /** Pencarian LIKE, dipasangkan dengan `searchable`. */
   search?: string;
   searchable?: string[];
-  /** Filter checkbox per kolom: `{ region_tsel: ["PUMA"] }`. */
   filter?: Record<string, string[]>;
 }
 
@@ -105,7 +99,6 @@ export interface TablePagination {
   total: number;
 }
 
-/** Kotak pencarian bebas pada satu kolom (mis. Site ID). */
 export interface ColumnSearch {
   field: string;
   value: string;

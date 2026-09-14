@@ -18,12 +18,6 @@ import type {
 } from "@/app/types/monday/ticketQuality.types";
 import { SlaDetailModal } from "@/app/components/organism/panels/SlaPerformancePanel/SlaDetailModal";
 
-/**
- * Kartu ditumpuk saling menimpa (margin negatif), jadi tingginya tidak boleh
- * dibagi rata: kartu yang barisnya lebih banyak harus dapat porsi lebih besar,
- * kalau tidak baris terakhirnya tertutup kartu di bawahnya. Bobot di bawah ini
- * kira-kira jumlah baris yang dirender tiap kartu.
- */
 const getCardWeight = (card: MetricSubCard, reservesBottom = false) =>
   1 +
   (card.beforeValue || card.currentValue ? 1.7 : 0) +
@@ -31,7 +25,6 @@ const getCardWeight = (card: MetricSubCard, reservesBottom = false) =>
   (card.nestedData?.total !== undefined ? 0.9 : 0) +
   (card.nestedData?.worstReg ? 0.7 : 0) +
   (card.worstText ? 1 : 0) +
-  // padding bawah tebal pada kartu yang ditimpa kartu berikutnya
   (reservesBottom ? 0.8 : 0);
 
 const getGroupWeight = (group: SLAMetricCard) =>
@@ -41,11 +34,6 @@ const getGroupWeight = (group: SLAMetricCard) =>
     0,
   );
 
-/**
- * `flexBasis: auto` + `flexShrink: 0` membuat kartu tidak pernah lebih pendek
- * dari isinya, jadi barisnya tidak mungkin tertimpa kartu/grup berikutnya.
- * Sisa ruang panel baru dibagi lewat `flexGrow` sesuai bobot isi.
- */
 const flexByWeight = (weight: number) => ({
   flexGrow: Math.round(weight * 100) / 100,
   flexShrink: 0,
@@ -65,7 +53,6 @@ export function SlaPerformancePanel() {
   const [rekon, setRekon] = useState<SlaRekon>("before");
   const [activeDetail, setActiveDetail] = useState<SlaCardDetail | null>(null);
 
-  // Periode di-anchor ke minggu terakhir yang datanya ada di server.
   const { data: latestWeek } = useLatestPacketLossWeekQuery();
 
   const {
@@ -163,9 +150,6 @@ export function SlaPerformancePanel() {
                           : cardIdx === 1
                             ? "z-20"
                             : "z-30";
-                      // Kartu berikutnya sengaja ditarik naik menimpa kartu ini,
-                      // jadi kartu yang punya penerus diberi padding bawah tebal:
-                      // yang tertimpa ruang kosong, bukan barisnya.
                       const isLastCard = cardIdx === group.subCards.length - 1;
                       return (
                         <div
@@ -184,8 +168,6 @@ export function SlaPerformancePanel() {
                               : "rounded-t-2xl -mt-3.5"
                           }`}
                         >
-                          {/* Pita judul: hijau saat tercapai, merah saat tidak;
-                              ditarik ke tepi kartu supaya menutup sudutnya. */}
                           <header
                             className={`-mx-2.5 -mt-1.5 mb-1 flex shrink-0 items-center justify-center gap-1.5 px-2.5 py-1.5 ${
                               card.status === "success"
@@ -312,9 +294,6 @@ export function SlaPerformancePanel() {
                           : cardIdx === 1
                             ? "z-20"
                             : "z-30";
-                      // Kartu berikutnya sengaja ditarik naik menimpa kartu ini,
-                      // jadi kartu yang punya penerus diberi padding bawah tebal:
-                      // yang tertimpa ruang kosong, bukan barisnya.
                       const isLastCard = cardIdx === group.subCards.length - 1;
                       return (
                         <div
@@ -333,8 +312,6 @@ export function SlaPerformancePanel() {
                               : "rounded-t-2xl -mt-3.5"
                           }`}
                         >
-                          {/* Pita judul: hijau saat tercapai, merah saat tidak;
-                              ditarik ke tepi kartu supaya menutup sudutnya. */}
                           <header
                             className={`-mx-2.5 -mt-1.5 mb-1 flex shrink-0 items-center justify-center gap-1.5 px-2.5 py-1.5 ${
                               card.status === "success"

@@ -1,7 +1,5 @@
-// React
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
-// Atoms
 import { IconSpinner } from "@/app/components/atoms/icon";
 
 export type ButtonVariant =
@@ -13,7 +11,6 @@ export type ButtonVariant =
 export type ButtonSize = "sm" | "md" | "lg";
 
 const VARIANT_CLASS: Record<ButtonVariant, string> = {
-  // Memakai token yang benar-benar ada di tema (src/index.css).
   primary:
     "bg-primary-500 text-white border border-transparent hover:opacity-90",
   secondary:
@@ -36,13 +33,10 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   size?: ButtonSize;
   loading?: boolean;
   block?: boolean;
-  /** Ditaruh sebelum label. */
   icon?: ReactNode;
-  /** Ditaruh setelah label. */
   suffixIcon?: ReactNode;
 }
 
-/** Tombol dasar; seluruh gaya bisa ditimpa lewat `className`. */
 const Button = ({
   variant = "secondary",
   size = "md",

@@ -1,10 +1,5 @@
-// Types
 import type { RekonsiliasiListParams } from "@/app/types/reconsiliation/rekonsiliasi.types";
 
-/**
- * Kunci cache react-query. Dipusatkan supaya invalidasi setelah simpan/import
- * tidak perlu menebak bentuk key-nya.
- */
 export const rekonsiliasiKeys = {
   all: ["rekonsiliasi"] as const,
   yearWeek: () => [...rekonsiliasiKeys.all, "year-week"] as const,

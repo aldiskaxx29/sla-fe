@@ -1,7 +1,5 @@
-// React Query
 import { useQuery } from "@tanstack/react-query";
 
-// Api
 import {
   fbbKeys,
   getFbbOoklaLoseRegion,
@@ -15,7 +13,6 @@ import {
   type FbbOoklaMetricsParams,
 } from "@/app/api";
 
-// Types
 import type {
   FbbLoseRegionResponse,
   FbbMapRegionRow,
@@ -36,7 +33,6 @@ export const useFbbOoklaMetricsOptionsQuery = () =>
     select: (response) => (response.data ?? []).map((item) => item.metrics),
   });
 
-/** KPI Ookla mengikuti metrics yang dipilih; tanpa metrics tidak dipanggil. */
 export const useFbbOoklaKpiOptionsQuery = (metrics: string) =>
   useQuery({
     queryKey: fbbKeys.options(`ookla-kpi:${metrics}`),
@@ -55,7 +51,6 @@ export const useFbbOoklaIndihomeTypeOptionsQuery = () =>
       (response.data ?? []).map((item) => item.indihome_type),
   });
 
-/** "lose" -> "Lose"; tabelnya menampilkan teks status apa adanya. */
 const toStatusLabel = (benchmark?: string) => {
   const value = String(benchmark ?? "").toLowerCase();
   if (!value) return "-";
@@ -63,11 +58,6 @@ const toStatusLabel = (benchmark?: string) => {
   return value.charAt(0).toUpperCase() + value.slice(1);
 };
 
-/**
- * Nama field Ookla berbeda dari ONX (`metrics_result`, `benchmark`, ...), jadi
- * dipetakan ke bentuk baris yang sama supaya tabelnya bisa dipakai bersama.
- * Ookla tidak mengirim nama pesaing terdekat, hanya selisihnya.
- */
 const toSharedRow = (row: FbbOoklaMetricRow): FbbNationMetricRow => ({
   metrics: row.metrics_result,
   kpi: row.kpi_result,
@@ -84,7 +74,6 @@ export interface FbbOoklaMetricsData {
   meta?: FbbOnxMeta;
 }
 
-/** Tabel Details Metrics pada halaman Ookla. */
 export const useFbbOoklaNationMetricsQuery = (
   params: FbbOoklaMetricsParams,
   enabled = true,
@@ -103,10 +92,6 @@ export const useFbbOoklaNationMetricsQuery = (
     },
   });
 
-/**
- * Baris peta Ookla dipetakan ke bentuk yang sama dengan ONX (`regions`,
- * `lose_per_total`) supaya panel petanya bisa dipakai bersama.
- */
 const toMapRow = (row: FbbOoklaMapRow): FbbMapRegionRow => ({
   regions: row.region,
   winner: row.winner,
@@ -114,7 +99,6 @@ const toMapRow = (row: FbbOoklaMapRow): FbbMapRegionRow => ({
   lose_per_total: row.status,
 });
 
-/** Status menang/kalah per region untuk peta Ookla. */
 export const useFbbOoklaMapRegionStatusQuery = (
   params: FbbOoklaMetricsParams,
   enabled = true,
@@ -130,7 +114,6 @@ export const useFbbOoklaMapRegionStatusQuery = (
     },
   });
 
-/** Detail agregat per region pada halaman Ookla, dipakai sebagai parent row. */
 export const useFbbOoklaLoseRegionSummaryQuery = (
   params: FbbOoklaLoseRegionParams,
   enabled = true,
@@ -142,7 +125,6 @@ export const useFbbOoklaLoseRegionSummaryQuery = (
     queryFn: ({ signal }) => getFbbOoklaLoseRegion(params, signal),
   });
 
-/** Detail per kabupaten pada halaman Ookla, dipakai saat region dibuka. */
 export const useFbbOoklaLoseRegionQuery = (
   params: FbbOoklaLoseRegionParams,
   enabled = true,

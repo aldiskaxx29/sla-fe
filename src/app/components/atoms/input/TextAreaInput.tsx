@@ -1,4 +1,3 @@
-// React
 import type { TextareaHTMLAttributes } from "react";
 
 interface TextAreaInputProps

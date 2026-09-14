@@ -1,16 +1,11 @@
-// React
 import type { ReactNode } from "react";
 
 interface DashboardToolbarProps {
-  /** Kontrol kiri, mis. pil periode atau filter. */
   children?: ReactNode;
-  /** Kontrol di sisi kanan sebelum avatar, mis. pemilih minggu. */
   actions?: ReactNode;
-  /** Inisial user pada avatar bulat di ujung kanan. */
   initials: string;
 }
 
-/** Baris kontrol di atas kartu: isi kiri bebas, kanan kontrol + avatar user. */
 export function DashboardToolbar({
   children,
   actions,

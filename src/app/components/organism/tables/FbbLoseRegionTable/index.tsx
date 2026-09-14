@@ -1,14 +1,11 @@
 import { Fragment } from "react";
 import { LuChevronDown, LuChevronRight } from "react-icons/lu";
 
-// Atoms
 import { Skeleton, Sparkline, StatusPill } from "@/app/components/atoms";
 
-// Molecules
 import { EmptyState } from "@/app/components/molecules/EmptyState";
 import Pagination from "@/app/components/molecules/Pagination";
 
-// Types
 import type {
   FbbLoseRegionRow,
   FbbOnxMeta,
@@ -39,7 +36,6 @@ const HEADERS = [
   "Gap to Winner",
 ];
 
-/** Deret trend bisa ratusan titik; sparkline cukup memakai yang terbaru. */
 const TREND_POINTS = 30;
 
 const parseTrend = (trend?: string) =>
@@ -49,7 +45,11 @@ const parseTrend = (trend?: string) =>
     .filter((value) => Number.isFinite(value))
     .slice(-TREND_POINTS);
 
-/** "Win", "CONSECUTIVE WIN", "Consecutive Win" -> true. */
+const isLowerBetterKpi = (kpi?: string) =>
+  /latency|jitter|packet\s*loss|packetloss|ttfb|time\s*to\s*first\s*byte/i.test(
+    String(kpi ?? ""),
+  );
+
 const isWin = (...values: (string | undefined)[]) =>
   values.some((value) => String(value ?? "").toLowerCase().includes("win"));
 
@@ -74,14 +74,12 @@ const formatGap = (value?: string) => {
   return raw.startsWith("-") ? raw.slice(1) : raw;
 };
 
-/** Pilihan ukuran halaman; nilai aktifnya datang dari `meta.per_page`. */
 const PAGE_SIZE_OPTIONS = [10, 20, 50, 100, 200, 500];
 
 const headCell =
   "sticky top-0 z-10 h-10 bg-[#f8fafc] px-3 text-[12px] font-medium text-[#334155]";
 const bodyCell = "h-[38px] px-3 text-[12px] font-normal text-[#020617]";
 
-/** Detail per kabupaten, dikelompokkan per region dan bisa dibuka-tutup. */
 export function FbbLoseRegionTable({
   rows,
   childRows = [],
@@ -95,7 +93,6 @@ export function FbbLoseRegionTable({
   onPageChange,
 }: FbbLoseRegionTableProps) {
   const expandable = Boolean(onToggleRegion);
-  // Skeleton sebanyak baris yang akan datang, supaya tingginya tidak melompat.
   const skeletonRows = Math.min(meta?.per_page ?? PAGE_SIZE_OPTIONS[0], 10);
 
   return (
@@ -162,7 +159,10 @@ export function FbbLoseRegionTable({
                         {row.value_indihome}
                       </td>
                       <td className="px-3 py-2">
-                        <Sparkline values={parseTrend(row.trend)} />
+                        <Sparkline
+                          values={parseTrend(row.trend)}
+                          lowerIsBetter={isLowerBetterKpi(row.kpi_res)}
+                        />
                       </td>
                       <td className="px-3 py-2">
                         <StatusPill label={status} tone={win ? "win" : "lose"} />
@@ -220,7 +220,10 @@ export function FbbLoseRegionTable({
                               {child.value_indihome}
                             </td>
                             <td className="px-3 py-2">
-                              <Sparkline values={parseTrend(child.trend)} />
+                              <Sparkline
+                                values={parseTrend(child.trend)}
+                                lowerIsBetter={isLowerBetterKpi(child.kpi_res)}
+                              />
                             </td>
                             <td className="px-3 py-2">
                               <StatusPill

@@ -1,17 +1,13 @@
-// React
 import { useMemo, useState } from "react";
 import { LuCalendarDays } from "react-icons/lu";
 
-// Molecules
 import { SampleDataBadge } from "@/app/components/molecules/SampleDataBadge";
 import { SelectMenu } from "@/app/components/molecules/SelectMenu";
 
-// Organism
 import { DashboardToolbar } from "@/app/components/organism/forms/DashboardToolbar";
 import { FbbSlaSummaryPanel } from "@/app/components/organism/panels/FbbSlaSummaryPanel";
 import { FbbSlaIndicatorTable } from "@/app/components/organism/tables/FbbSlaIndicatorTable";
 
-// Utils
 import {
   buildPeriodLabel,
   formatYearWeek,
@@ -20,16 +16,11 @@ import {
 } from "@/app/utils/fbbSla.utils";
 import { getStoredUserName, toInitials } from "@/app/utils/user.utils";
 
-// Sample
 import {
   SAMPLE_EBIS_WEEKS,
   buildSampleEbisKpi,
 } from "@/app/components/pages/EbisKpiPage/sample";
 
-/**
- * KPI Enterprise EBIS. Susunannya sama dengan SLA WISA FBB, hanya indikatornya
- * yang khusus enterprise — datanya masih contoh sampai endpoint-nya siap.
- */
 const EbisKpiPage = () => {
   const [yearweek, setYearweek] = useState(SAMPLE_EBIS_WEEKS[0]);
 
@@ -81,8 +72,6 @@ const EbisKpiPage = () => {
             notAchieved={summary.notAchieved}
           />
 
-          {/* `@container`: lebar kolom tabel mengikuti ruang kartu ini,
-              bukan lebar layar. */}
           <div className="@container flex min-h-0 flex-1 flex-col gap-4 rounded-[19px] border border-[#e2e8f0] bg-white p-4 shadow-[0px_1px_1.75px_0px_rgba(0,0,0,0.05)]">
             <div className="flex w-full flex-wrap items-center justify-end gap-3">
               <SampleDataBadge />

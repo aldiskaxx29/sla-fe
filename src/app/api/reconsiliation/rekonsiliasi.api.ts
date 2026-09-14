@@ -1,7 +1,5 @@
-// Api
 import { apiClient, apiRequest } from "@/app/api/base-url";
 
-// Types
 import type {
   DownloadTemplateParams,
   ImportTemplatePayload,
@@ -20,7 +18,6 @@ export const REKONSILIASI_ENDPOINTS = {
   downloadEvidence: "download/evidence",
 } as const;
 
-/** `{ region_tsel: ["PUMA"] }` menjadi `{ "filter[region_tsel]": ["PUMA"] }`. */
 const flattenFilter = (filter?: Record<string, string[]>) => {
   if (!filter) return {};
 
@@ -72,7 +69,6 @@ export const getRekonsiliasiList = (
     signal,
   });
 
-/** Daftar tahun, bulan, dan minggu yang tersedia beserta periode aktifnya. */
 export const getYearWeek = (signal?: AbortSignal) =>
   apiRequest<YearWeekResponse>({
     method: "GET",
@@ -80,7 +76,6 @@ export const getYearWeek = (signal?: AbortSignal) =>
     signal,
   });
 
-/** Detail satu baris untuk mengisi form edit. */
 export const getRekonsiliasiDetail = (
   params: { id: string | number; parameter: string; week?: string | number },
   signal?: AbortSignal,

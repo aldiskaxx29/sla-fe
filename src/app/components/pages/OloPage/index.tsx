@@ -1,13 +1,9 @@
-// React
 import { useNavigate } from "react-router-dom";
 
-// Templates
 import LandingTemplate from "@/app/components/templates/LandingTemplate";
 
-// Molecules
 import { EmptyState } from "@/app/components/molecules/EmptyState";
 
-/** Dashboard OLO belum tersedia. */
 const OloPage = () => {
   const navigate = useNavigate();
 

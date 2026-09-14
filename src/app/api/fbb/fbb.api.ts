@@ -1,7 +1,5 @@
-// Api
 import { apiRequest } from "@/app/api/base-url";
 
-// Types
 import type {
   FbbYearWeekResponse,
   SlaWsaResponse,
@@ -41,7 +39,6 @@ export const FBB_ENDPOINTS = {
   loseRegionKabupaten: "fbb/onx/lose-region-kabupaten",
 } as const;
 
-/** Indikator SLA WISA FBB pada satu yearweek, mis. "202635". */
 export const getFbbSlaWsa = (yearweek?: string | null, signal?: AbortSignal) =>
   apiRequest<SlaWsaResponse>({
     method: "GET",
@@ -50,17 +47,12 @@ export const getFbbSlaWsa = (yearweek?: string | null, signal?: AbortSignal) =>
     signal,
   });
 
-/** Daftar minggu yang datanya tersedia, plus minggu aktif. */
 export const getFbbYearWeek = (signal?: AbortSignal) =>
   apiRequest<FbbYearWeekResponse>({
     method: "GET",
     url: FBB_ENDPOINTS.yearWeek,
     signal,
   });
-
-/* ------------------------------------------------------------------ *
- * ONX benchmark (halaman /fbb/onx)
- * ------------------------------------------------------------------ */
 
 const getFbbList = <TItem>(url: string, signal?: AbortSignal) =>
   apiRequest<FbbListResponse<TItem>>({ method: "GET", url, signal });
@@ -95,7 +87,6 @@ export interface FbbNationMetricsParams {
   perPage?: number;
 }
 
-/** Ringkasan menang/kalah per metrics & KPI di tingkat nasional. */
 export const getFbbNationMetricsKpi = (
   { yearweek, level, indihomeType, metrics, kpi, page, perPage }: FbbNationMetricsParams,
   signal?: AbortSignal,
@@ -115,7 +106,6 @@ export const getFbbNationMetricsKpi = (
     signal,
   });
 
-/** Status menang/total tiap region, dipakai mewarnai peta. */
 export const getFbbMapsRegionStatus = (
   params: { yearweek?: string; indihomeType?: string; kpi?: string },
   signal?: AbortSignal,
@@ -132,13 +122,10 @@ export const getFbbMapsRegionStatus = (
   });
 
 export interface FbbLoseRegionParams extends FbbNationMetricsParams {
-  /** Nama region/kabupaten yang sedang dibuka detailnya. */
   areaName?: string;
-  /** Nama region untuk endpoint ONX terbaru. */
   regionNew?: string;
 }
 
-/** Detail agregat per region beserta deret trend-nya. */
 export const getFbbLoseRegion = (
   { yearweek, indihomeType, metrics, kpi, page, perPage }: FbbLoseRegionParams,
   signal?: AbortSignal,
@@ -157,7 +144,6 @@ export const getFbbLoseRegion = (
     signal,
   });
 
-/** Detail per kabupaten beserta deret trend-nya. */
 export const getFbbLoseRegionKabupaten = (
   {
     yearweek,
@@ -189,14 +175,9 @@ export const getFbbLoseRegionKabupaten = (
     signal,
   });
 
-/* ------------------------------------------------------------------ *
- * Ookla (halaman /fbb/ookla)
- * ------------------------------------------------------------------ */
-
 export const getFbbOoklaMetricsOptions = (signal?: AbortSignal) =>
   getFbbList<FbbMetricsOption>(FBB_ENDPOINTS.ooklaListMetrics, signal);
 
-/** Daftar KPI Ookla tergantung metrics yang dipilih. */
 export const getFbbOoklaKpiOptions = (metrics?: string, signal?: AbortSignal) =>
   apiRequest<FbbListResponse<FbbKpiOption>>({
     method: "GET",
@@ -238,7 +219,6 @@ export const getFbbOoklaNationMetrics = (
     signal,
   });
 
-/** Status per region untuk peta Ookla; semua region diambil sekali jalan. */
 export const getFbbOoklaMapsRegionStatus = (
   { yearweek, indihomeType, metrics, kpi, perPage }: FbbOoklaMetricsParams,
   signal?: AbortSignal,
@@ -270,7 +250,6 @@ export interface FbbOoklaLoseRegionParams {
   perPage?: number;
 }
 
-/** Detail agregat per region pada halaman Ookla beserta deret trend-nya. */
 export const getFbbOoklaLoseRegion = (
   {
     yearweek,
@@ -296,7 +275,6 @@ export const getFbbOoklaLoseRegion = (
     signal,
   });
 
-/** Detail per kabupaten pada halaman Ookla beserta deret trend-nya. */
 export const getFbbOoklaLoseRegionKabupaten = (
   {
     yearweek,

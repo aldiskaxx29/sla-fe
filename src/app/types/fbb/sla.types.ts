@@ -1,4 +1,3 @@
-/** Satu baris indikator SLA WISA FBB dari endpoint `fbb/sla/wsa`. */
 export interface SlaWsaItem {
   sumber_data: string;
   segmen: string;
@@ -11,7 +10,6 @@ export interface SlaWsaItem {
   provider: string;
   parameter: string;
   satuan: string;
-  /** Angka dikirim sebagai string, mis. "33.102492". */
   target: string;
   value: string;
   capaian: string;
@@ -36,7 +34,6 @@ export interface SlaWsaResponse {
 
 export interface FbbYearWeekResponse {
   status: boolean;
-  /** Minggu berjalan menurut server, dipakai sebagai pilihan awal. */
   active_yearweek?: string;
   data: string[];
 }

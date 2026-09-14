@@ -1,13 +1,10 @@
-// React Query
 import { useQuery } from "@tanstack/react-query";
 
-// Dayjs
 import dayjs from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek";
 import isoWeeksInYear from "dayjs/plugin/isoWeeksInYear";
 import isLeapYear from "dayjs/plugin/isLeapYear";
 
-// Api
 import {
   getAccessPacketLossTotals,
   getCnopAccessSla,
@@ -17,7 +14,6 @@ import {
   mondayMonitoringKeys,
 } from "@/app/api";
 
-// Types
 import type {
   AccessPlTotal,
   SlaPeriod,
@@ -26,20 +22,17 @@ import type {
 } from "@/app/types/monday/slaPerformance.types";
 import type { SLAMetricCard } from "@/app/types/monday/ticketQuality.types";
 
-// Utils
 import { buildSlaPerformanceCards } from "@/app/utils/slaPerformance.utils";
 
 dayjs.extend(isLeapYear);
 dayjs.extend(isoWeek);
 dayjs.extend(isoWeeksInYear);
 
-/** Data minggu berjalan biasanya belum ada, jadi mundur beberapa minggu. */
 const LATEST_WEEK_LOOKBACK = 4;
 
 const toYearWeek = (date: dayjs.Dayjs) =>
   `${date.isoWeekYear()}${String(date.isoWeek()).padStart(2, "0")}`;
 
-/** Daftar yearweek terbaru lebih dulu, mis. ["202637", "202636", ...]. */
 const getRecentYearWeeks = (count: number) =>
   Array.from({ length: count }, (_, index) =>
     toYearWeek(dayjs().subtract(index, "week")),
@@ -72,12 +65,10 @@ const MONTH_LABELS = [
   "Des",
 ];
 
-/** Minggu ISO yang hari Senin-nya jatuh di bulan tersebut. */
 const getYearWeeksOfMonth = (date: dayjs.Dayjs) => {
   const weeks: string[] = [];
   let cursor = date.startOf("month").startOf("isoWeek");
 
-  // Minggu pertama bisa dimulai di bulan sebelumnya, jadi dilewati.
   if (cursor.month() !== date.month()) cursor = cursor.add(1, "week");
 
   while (cursor.month() === date.month() && cursor.year() === date.year()) {
@@ -104,11 +95,6 @@ const sumAccessPl = (totals: AccessPlTotal[][]): AccessPlTotal[] => {
   }));
 };
 
-/**
- * Snapshot JSON di server lama tidak menerima parameter minggu; hanya jumlah
- * site packet loss access yang per minggu. Jadi minggu terbaru dicari dengan
- * mundur dari minggu berjalan sampai ketemu yang datanya ada.
- */
 export const useLatestPacketLossWeekQuery = () =>
   useQuery({
     queryKey: mondayMonitoringKeys.latestPlWeek(),
@@ -142,8 +128,6 @@ export const useSlaPerformanceQuery = (
       const currentWeek = yearWeek as string;
       const previousWeek = shiftYearWeek(currentWeek, -1);
 
-      // Periode bulanan: jumlah site PL access diakumulasi per bulan, memakai
-      // bulan tempat minggu terakhir berada dan bulan sebelumnya.
       const anchor = dayjs()
         .year(Number(currentWeek.slice(0, 4)))
         .isoWeek(Number(currentWeek.slice(4)));
@@ -211,9 +195,6 @@ export const useSlaPerformanceQuery = (
           { code: "BTC", rows: coreLatencyBtc },
           { code: "PNK", rows: coreLatencyPnk },
         ],
-        // `accessPl` tidak punya parameter rekon, jadi untuk After Rekon jangan
-        // pakai total before dari endpoint itu. Builder akan fallback ke
-        // `realisasi` NATION WIDE dari JSON after packetloss{5,15}.
         plCurrentWeek: rekon === "after" ? [] : plCurrentWeek,
         plPreviousWeek,
         currentWeekLabel:

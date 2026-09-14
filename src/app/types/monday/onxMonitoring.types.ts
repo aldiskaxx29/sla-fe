@@ -1,7 +1,5 @@
-/** Provider yang diukur ONX; kolomnya sama di ringkasan maupun detail. */
 export type OnxProvider = "aws" | "google" | "others";
 
-/** Satu baris ringkasan `monday-monitoring/onx/summary` (jumlah IP per provider). */
 export interface OnxSummaryRow {
   no: number;
   region: string;
@@ -20,7 +18,6 @@ export interface OnxSummaryResponse {
   data: OnxSummaryRow[];
 }
 
-/** Satu IP tujuan pada detail ONX; baseline-nya per IP, bukan per baris. */
 export interface OnxDetailEntry {
   ip_address: string;
   baseline: number | null;
@@ -39,14 +36,12 @@ export interface OnxDetailRow {
 
 export interface OnxDetailResponse {
   status: boolean;
-  /** "ALL" kalau tidak difilter, selain itu nama provider-nya. */
   provider?: string;
   date?: string;
   hour?: number;
   data: OnxDetailRow[];
 }
 
-/** Filter detail ONX; dikirim sesuai yang diklik user. */
 export interface OnxDetailParams {
   region?: string;
   provider?: OnxProvider;

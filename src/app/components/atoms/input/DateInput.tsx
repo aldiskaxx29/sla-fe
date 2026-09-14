@@ -1,10 +1,8 @@
-// React
 import type { InputHTMLAttributes } from "react";
 
 interface DateInputProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "onChange"> {
   value?: string;
-  /** Nilai dikirim dalam format YYYY-MM-DD, atau string kosong bila dikosongkan. */
   onChange?: (value: string) => void;
   invalid?: boolean;
 }

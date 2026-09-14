@@ -1,8 +1,6 @@
-// React
 import { useEffect, useMemo, useState } from "react";
 import { LuChevronDown } from "react-icons/lu";
 
-// Hooks
 import {
   useFbbIndihomeTypeOptionsQuery,
   useFbbKpiOptionsQuery,
@@ -14,33 +12,27 @@ import {
   useFbbYearWeekOptionsQuery,
 } from "@/app/hooks";
 
-// Molecules
 import { SelectMenu } from "@/app/components/molecules/SelectMenu";
 
-// Organism
 import { DashboardToolbar } from "@/app/components/organism/forms/DashboardToolbar";
 import { FbbOnxFilterBar } from "@/app/components/organism/forms/FbbOnxFilterBar";
 import { FbbOnxMapPanel } from "@/app/components/organism/panels/FbbOnxMapPanel";
 import { FbbLoseRegionTable } from "@/app/components/organism/tables/FbbLoseRegionTable";
 import { FbbNationMetricsTable } from "@/app/components/organism/tables/FbbNationMetricsTable";
 
-// Types
 import type {
   FbbNationMetricRow,
   FbbOnxFilterState,
 } from "@/app/types/fbb/onx.types";
 
-// Utils
 import { getStoredUserName, toInitials } from "@/app/utils/user.utils";
 
 type ViewTab = "maps" | "detail";
 
-/** Baris per halaman bawaan; keduanya bisa diubah lewat select di paginasi. */
 const SUMMARY_PER_PAGE = 10;
 const DETAIL_PER_PAGE = 500;
 const DETAIL_REGION_PER_PAGE = 10;
 
-/** Level tidak lagi dipilih user: ringkasan selalu nasional, detail per kabupaten. */
 const SUMMARY_LEVEL = "NATION";
 const DETAIL_LEVEL = "KABUPATEN";
 
@@ -54,7 +46,6 @@ const DEFAULT_FILTER: FbbOnxFilterState = {
 const isLose = (row: FbbNationMetricRow) =>
   String(row.status).toLowerCase() === "lose";
 
-/** Halaman benchmark ONX: ringkasan metrics/KPI, peta status region, dan detail kabupaten. */
 const FbbOnxPage = () => {
   const [filter, setFilter] = useState<FbbOnxFilterState>(DEFAULT_FILTER);
   const [summaryOpen, setSummaryOpen] = useState(true);
@@ -63,7 +54,6 @@ const FbbOnxPage = () => {
     perPage: SUMMARY_PER_PAGE,
   });
   const [view, setView] = useState<ViewTab>("maps");
-  /** KPI khusus peta/detail; terpisah dari filter KPI tabel ringkasan. */
   const [viewKpi, setViewKpi] = useState("");
   const [expandedRegion, setExpandedRegion] = useState("");
   const [detailRegionPage, setDetailRegionPage] = useState({
@@ -80,7 +70,6 @@ const FbbOnxPage = () => {
   const kpiOptions = useFbbKpiOptionsQuery(filter.metrics);
   const indihomeTypeOptions = useFbbIndihomeTypeOptionsQuery();
 
-  // Minggu terbaru dipakai sampai user memilih sendiri.
   useEffect(() => {
     const latest = yearWeekOptions.data?.[0];
     if (latest && !filter.yearweek) {
@@ -175,7 +164,6 @@ const FbbOnxPage = () => {
     }
   }, [loseKpiOptions, summary.isFetching, viewKpi]);
 
-  /** Ganti filter selalu mengembalikan paginasi ke halaman pertama. */
   const handleFilterChange = (next: FbbOnxFilterState) => {
     setFilter(next);
     setExpandedRegion("");
@@ -239,7 +227,6 @@ const FbbOnxPage = () => {
             </button>
           </div>
 
-          {/* Grid-rows 0fr/1fr: tabel menutup dan membuka dengan animasi. */}
           <div
             className={`grid transition-[grid-template-rows] duration-300 ease-in-out ${
               summaryOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"

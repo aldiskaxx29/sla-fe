@@ -1,14 +1,11 @@
-// Atoms
 import { Checkbox, IconEdit } from "@/app/components/atoms";
 
-// Utils
 import {
   buildFilterOptions,
   calculateTtrFinal,
   formatTableValue,
 } from "@/app/utils/table.utils";
 
-// Types
 import type { TableColumn } from "@/app/types/table.types";
 import type {
   RekonsiliasiFilterOptions,
@@ -39,7 +36,6 @@ const getDynamicTitle = (parameter: string) => {
   return "";
 };
 
-/** Sebuah baris ditandai kalau salah satu status-nya bernilai 2 (excluded). */
 const getExcludeState = (record: RekonsiliasiRow, parameter: string) => {
   const toNumber = (value: unknown) => Number(value ?? 0);
 
@@ -92,11 +88,6 @@ const createColumnBuilders = ({
   filterOptions,
   onEdit,
 }: BuildColumnsParams) => {
-  /**
-   * Filter checkbox; penyaringan dilakukan server lewat filter[field][].
-   * Pilihannya murni dari `options` response — kosong berarti tidak ada
-   * pilihan yang bisa ditawarkan.
-   */
   const checkboxFilter = (field: string) =>
     ({
       type: "checkbox",
@@ -177,7 +168,6 @@ const createColumnBuilders = ({
   };
 };
 
-/** Kolom untuk parameter packetloss, jitter, dan latency. */
 export const buildAccessColumns = (
   params: BuildColumnsParams,
 ): TableColumn<RekonsiliasiRow>[] => {
@@ -270,8 +260,6 @@ export const buildAccessColumns = (
     {
       key: "grouping_rca",
       title: "Group RCA",
-      // Field yang ditampilkan sengaja sama dengan field yang difilter
-      // (filter[grouping_rca][]) supaya isi kolom dan hasil filter cocok.
       dataIndex: "grouping_rca",
       width: 170,
       filter: checkboxFilter("grouping_rca"),
@@ -282,7 +270,6 @@ export const buildAccessColumns = (
       dataIndex: "detail_rca",
       align: "center",
       width: 290,
-      // Kolom sempit, teks panjang dibiarkan turun beberapa baris.
       wrap: true,
       filter: searchFilter("detail_rca"),
     },
@@ -316,7 +303,6 @@ export const buildAccessColumns = (
   ];
 };
 
-/** Kolom untuk parameter mttrq, yang dihitung per bulan. */
 export const buildMttrqColumns = (
   params: BuildColumnsParams,
 ): TableColumn<RekonsiliasiRow>[] => {

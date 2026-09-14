@@ -1,17 +1,13 @@
-// React
 import { useEffect, useRef, useState } from "react";
 
-// Atoms
 import { Button, IconSearch, Popover, TextInput } from "@/app/components/atoms";
 
 interface ColumnSearchPopoverProps {
-  /** Judul kolom, dipakai pada placeholder. */
   label: string;
   value: string;
   onApply: (value: string) => void;
 }
 
-/** Kotak pencarian bebas pada header kolom. */
 const ColumnSearchPopover = ({
   label,
   value,

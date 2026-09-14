@@ -1,20 +1,14 @@
-// React
 import { useEffect, useState } from "react";
 
-// Dayjs
 import dayjs from "dayjs";
 
-// Assets
 import xlxsIcon from "@/assets/file-spreadsheet.svg";
 
-// Atoms
 import { Button, IconInfo } from "@/app/components/atoms";
 
-// Molecules
 import FileDropzone from "@/app/components/molecules/FileDropzone";
 import Modal from "@/app/components/molecules/Modal";
 
-// Config
 import {
   EVIDENCE_OPTIONS,
   EXCLUDE_OPTIONS,
@@ -42,7 +36,6 @@ interface ImportTemplateModalProps {
   isMttrqParameter?: boolean;
 }
 
-/** Konfirmasi periode tujuan sebelum file Excel diunggah. */
 const ImportTemplateModal = ({
   open,
   onCancel,

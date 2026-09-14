@@ -1,10 +1,7 @@
-// React
 import { useEffect, useMemo, useRef, useState } from "react";
 
-// Dayjs
 import dayjs from "dayjs";
 
-// Config
 import {
   DEFAULT_PARAMETER,
   EVIDENCE_OPTIONS,
@@ -14,17 +11,10 @@ import {
   SITE_TYPE_OPTIONS,
 } from "@/app/config/rekonsiliasi.config";
 
-// Hooks
 import { useYearWeekQuery } from "@/app/hooks/query/reconsiliation/useRekonsiliasiQueries";
 
-// Types
 import type { FilterWeekGroup } from "@/app/types/reconsiliation/rekonsiliasi.types";
 
-/**
- * Menyimpan seluruh pilihan periode (parameter, tahun, bulan, minggu) beserta
- * daftar pilihannya. Daftar dan periode aktif diambil dari endpoint yearweek,
- * dengan daftar statis sebagai cadangan kalau endpoint-nya gagal.
- */
 export const useRekonsiliasiPeriod = () => {
   const { data: yearWeek, isPending: isYearWeekPending } = useYearWeekQuery();
 
@@ -40,8 +30,6 @@ export const useRekonsiliasiPeriod = () => {
 
   const isMttrqParameter = MTTRQ_PARAMETERS.includes(parameter);
 
-  // Daftar bulan dan minggu sepenuhnya dari endpoint yearweek; tanpa itu
-  // dropdown-nya kosong, bukan diisi daftar bawaan.
   const filterWeeks = useMemo<FilterWeekGroup[]>(() => {
     const fromApi = yearWeek?.filterWeeks;
     if (!Array.isArray(fromApi) || !fromApi.length) return [];
@@ -57,15 +45,12 @@ export const useRekonsiliasiPeriod = () => {
     [filterWeeks, month],
   );
 
-  /** Mttrq dihitung per bulan, jadi minggunya tidak dikirim. */
   const effectiveWeek = useMemo(() => {
     if (isMttrqParameter) return "";
     if (week) return week;
     return selectedWeeks.find((item) => item !== "all") ?? selectedWeeks[0] ?? "";
   }, [isMttrqParameter, selectedWeeks, week]);
 
-  // Periode aktif dari BE dipakai sekali sebagai nilai awal, setelah itu
-  // pilihan user yang menang.
   useEffect(() => {
     if (!yearWeek || hasAppliedActivePeriod.current) return;
     hasAppliedActivePeriod.current = true;
@@ -76,7 +61,6 @@ export const useRekonsiliasiPeriod = () => {
     if (yearWeek.active_week) setWeek(String(yearWeek.active_week));
   }, [yearWeek]);
 
-  // Minggu terpilih harus selalu ada di dalam bulan yang sedang aktif.
   useEffect(() => {
     if (isMttrqParameter || !selectedWeeks.length) return;
 
@@ -135,8 +119,6 @@ export const useRekonsiliasiPeriod = () => {
     setWeek,
     effectiveWeek,
     isMttrqParameter,
-    /** Fetch tabel ditahan sampai periode aktif diketahui, supaya tidak
-     *  ada request dengan periode default yang langsung ditimpa. */
     isReady: !isYearWeekPending,
     options: {
       parameter: PARAMETER_OPTIONS,

@@ -12,7 +12,6 @@ const TONE_CLASS: Record<StatusTone, string> = {
   neutral: "bg-slate-100 text-slate-500",
 };
 
-/** Label status Win/Lose berbentuk pil, dipakai di tabel benchmark FBB. */
 const StatusPill = ({ label, tone = "neutral", className = "" }: StatusPillProps) => (
   <span
     className={`inline-block rounded-full px-2.5 py-0.5 text-[11px] font-bold ${TONE_CLASS[tone]} ${className}`.trim()}

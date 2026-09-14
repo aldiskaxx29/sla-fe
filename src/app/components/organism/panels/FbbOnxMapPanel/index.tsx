@@ -9,13 +9,10 @@ import Map, {
 import "mapbox-gl/dist/mapbox-gl.css";
 import { LuMinus, LuPlus, LuX } from "react-icons/lu";
 
-// Atoms
 import { StatusPill } from "@/app/components/atoms";
 
-// Hooks
 import { useThrottledEvent } from "@/app/hooks/custom/pacer";
 
-// Types
 import type { FbbMapRegionRow } from "@/app/types/fbb/onx.types";
 
 const MAPBOX_TOKEN =
@@ -27,8 +24,57 @@ const MAPBOX_STYLE_URL =
 const REGION_GEOJSON_URL = "/geojson/region.json";
 const REGION_SOURCE_ID = "fbb-onx-region";
 const REGION_FILL_LAYER = "fbb-onx-region-fill";
+const REGION_LABEL_SOURCE_ID = "fbb-onx-region-label";
 
-/** Framing awal; nama region di geojson sama persis dengan yang dikirim API. */
+type RegionGeoJson = GeoJSON.FeatureCollection<
+  GeoJSON.Geometry,
+  { REGION?: string; LONGITUDE?: number; LATITUDE?: number }
+>;
+
+const toLabelPoints = (
+  geojson: RegionGeoJson,
+): GeoJSON.FeatureCollection<GeoJSON.Point, { REGION: string }> => ({
+  type: "FeatureCollection",
+  features: geojson.features.flatMap((feature) => {
+    const { REGION, LONGITUDE, LATITUDE } = feature.properties ?? {};
+    if (!REGION || !Number.isFinite(LONGITUDE) || !Number.isFinite(LATITUDE)) {
+      return [];
+    }
+
+    return [
+      {
+        type: "Feature",
+        properties: { REGION },
+        geometry: {
+          type: "Point",
+          coordinates: [Number(LONGITUDE), Number(LATITUDE)],
+        },
+      },
+    ];
+  }),
+});
+
+const labelLayer: LayerProps = {
+  id: "fbb-onx-region-label-text",
+  type: "symbol",
+  layout: {
+    "text-field": ["get", "REGION"],
+    "text-font": ["DIN Pro Bold", "Arial Unicode MS Bold"],
+    "text-size": ["interpolate", ["linear"], ["zoom"], 4, 10, 7, 13],
+    "text-transform": "uppercase",
+    "text-letter-spacing": 0.04,
+    "text-max-width": 8,
+    "text-variable-anchor": ["center", "top", "bottom", "left", "right"],
+    "text-radial-offset": 0.6,
+    "text-justify": "auto",
+  },
+  paint: {
+    "text-color": "#0f172a",
+    "text-halo-color": "#ffffff",
+    "text-halo-width": 1.4,
+  },
+};
+
 const INDONESIA_FIT_BOUNDS: [[number, number], [number, number]] = [
   [94.5, -11.0],
   [141.5, 7.0],
@@ -37,7 +83,6 @@ const INDONESIA_FIT_BOUNDS: [[number, number], [number, number]] = [
 const WIN_COLOR = "#21a647";
 const LOSE_COLOR = "#c23837";
 
-/** "11/11" -> { value: 11, total: 11 } */
 const parseLosePerTotal = (raw?: string) => {
   const [valueRaw, totalRaw] = String(raw ?? "").split("/");
   const value = Number(valueRaw);
@@ -53,23 +98,14 @@ const isWinRow = (benchmark?: string) =>
 
 interface RegionSummary {
   region: string;
-  /** Kabupaten yang dimenangkan Indihome (penyebut pada baris benchmark win). */
   win: number;
-  /** Total kalah dari seluruh pembanding. */
   lose: number;
   total: number;
   win_status: boolean;
-  /** Provider dengan kabupaten menang terbanyak di region ini. */
   winner: string;
-  /** Jumlah kabupaten yang dimenangkan `winner`; hanya untuk membandingkan. */
   winnerScore: number;
 }
 
-/**
- * Respons peta berisi satu baris per pasangan region x winner, jadi angka
- * region dihitung di sini: baris `win` menyumbang jumlah kemenangan Indihome,
- * baris `lose` menyumbang jumlah kalahnya.
- */
 const summarizeRegions = (rows: FbbMapRegionRow[]) => {
   const byRegion: Record<string, RegionSummary> = {};
 
@@ -90,8 +126,6 @@ const summarizeRegions = (rows: FbbMapRegionRow[]) => {
     const parsed = parseLosePerTotal(row.lose_per_total);
     if (!parsed) return;
 
-    // Baris `win` = kabupaten yang dimenangkan Indihome, baris `lose` =
-    // kabupaten yang dimenangkan pembandingnya. Yang terbanyak jadi pemenang.
     const won = isWinRow(row.benchmark) ? parsed.total : parsed.value;
 
     if (isWinRow(row.benchmark)) summary.win += parsed.total;
@@ -118,7 +152,6 @@ interface FbbOnxMapPanelProps {
   error?: boolean;
 }
 
-/** Peta status menang/kalah per region untuk KPI yang dipilih. */
 export function FbbOnxMapPanel({
   rows,
   kpi,
@@ -145,9 +178,28 @@ export function FbbOnxMapPanel({
     };
   }, [handleResize]);
 
+  const [regionGeoJson, setRegionGeoJson] = useState<RegionGeoJson | null>(
+    null,
+  );
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    fetch(REGION_GEOJSON_URL, { signal: controller.signal })
+      .then((response) => response.json() as Promise<RegionGeoJson>)
+      .then(setRegionGeoJson)
+      .catch(() => {});
+
+    return () => controller.abort();
+  }, []);
+
+  const labelPoints = useMemo(
+    () => (regionGeoJson ? toLabelPoints(regionGeoJson) : null),
+    [regionGeoJson],
+  );
+
   const summaries = useMemo(() => summarizeRegions(rows), [rows]);
 
-  // Region yang hilang dari respons tidak diwarnai sama sekali.
   const fillLayer = useMemo<LayerProps>(() => {
     const matchPairs: string[] = [];
 
@@ -205,7 +257,6 @@ export function FbbOnxMapPanel({
             onLoad={(event) => {
               const map = event.target;
               map.fitBounds(INDONESIA_FIT_BOUNDS, { padding: 8, duration: 0 });
-              // Satu tingkat lebih dekat dari hasil fit; sisanya digeser manual.
               map.setZoom(map.getZoom() + 1);
             }}
             interactiveLayerIds={[REGION_FILL_LAYER]}
@@ -216,10 +267,21 @@ export function FbbOnxMapPanel({
             scrollZoom={false}
             style={{ width: "100%", height: "100%" }}
           >
-            <Source id={REGION_SOURCE_ID} type="geojson" data={REGION_GEOJSON_URL}>
-              <Layer {...fillLayer} />
-              <Layer {...borderLayer} />
-            </Source>
+            {regionGeoJson && (
+              <Source id={REGION_SOURCE_ID} type="geojson" data={regionGeoJson}>
+                <Layer {...fillLayer} />
+                <Layer {...borderLayer} />
+              </Source>
+            )}
+            {labelPoints && (
+              <Source
+                id={REGION_LABEL_SOURCE_ID}
+                type="geojson"
+                data={labelPoints}
+              >
+                <Layer {...labelLayer} />
+              </Source>
+            )}
           </Map>
         </div>
       ) : (

@@ -1,9 +1,7 @@
-// React
 import { useEffect } from "react";
 import type { ReactNode } from "react";
 import { createPortal } from "react-dom";
 
-// Atoms
 import { IconClose } from "@/app/components/atoms/icon";
 
 interface ModalProps {
@@ -11,13 +9,11 @@ interface ModalProps {
   onClose: () => void;
   children: ReactNode;
   width?: number;
-  /** Menutup lewat overlay/Esc dimatikan saat proses masih berjalan. */
   closable?: boolean;
   bodyClassName?: string;
   className?: string;
 }
 
-/** Dialog terpusat dengan overlay, tombol tutup, Esc, dan kunci scroll body. */
 const Modal = ({
   open,
   onClose,
@@ -46,8 +42,6 @@ const Modal = ({
 
   if (!open) return null;
 
-  // Dipasang ke `body` supaya tidak terkurung stacking context induk —
-  // tanpa ini modal bisa tertutup header meski z-index-nya lebih besar.
   return createPortal(
     <div className="fixed inset-0 z-[1200] flex items-center justify-center p-4">
       <div

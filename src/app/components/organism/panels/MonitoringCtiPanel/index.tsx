@@ -32,8 +32,6 @@ const ONX_PROVIDERS: { key: OnxProvider; label: string }[] = [
 export function MonitoringCtiPanel() {
   const [activeTab, setActiveTab] = useState<MonitoringSource>("CTI");
 
-  // Data CTI tetap diambil walau tab ONX aktif: popup-nya bisa ditukar ke CTI
-  // kapan saja dan memakai baris yang sama dengan kartu ini.
   const { data: ctiData = [], isPending, isError } = useCtiMonitoringQuery();
   const onxSummary = useOnxSummaryQuery(activeTab === "ONX");
   const onxRows = useMemo(
@@ -49,15 +47,12 @@ export function MonitoringCtiPanel() {
   const [detailTarget, setDetailTarget] = useState<CtiDetailTarget | null>(null);
   const [onxTarget, setOnxTarget] = useState<OnxDetailTarget | null>(null);
 
-  /** Klik nilai latency langsung membuka popup pada detail transit itu. */
   const openTransitDetail = (peTransit: string, verifier: CtiVerifier) => {
     setDetailTarget({ transit: peTransit, verifier });
     setDetailSource("CTI");
     setDetailOpen(true);
   };
 
-  /** Parameter detail mengikuti yang diklik: nama region mengambil satu region
-   *  penuh, code menambah filter code, angka provider menambah provider-nya. */
   const openOnxDetail = (
     row: OnxSummaryRow,
     options: { withCode?: boolean; provider?: OnxProvider } = {},
@@ -272,7 +267,6 @@ export function MonitoringCtiPanel() {
 
       {activeTab === "CTI" ? (
         <>
-      {/* Tinggi dikunci ~5 baris (header 2 x 24px + 5 x 22px); sisanya discroll. */}
       <div className="mt-2 max-h-[160px] overflow-auto">
         <table className="w-full min-w-[500px] table-fixed border-collapse text-left text-[10px]">
           <colgroup>
@@ -292,8 +286,6 @@ export function MonitoringCtiPanel() {
                   <th
                     key={header.id}
                     colSpan={header.colSpan}
-                    // inset shadow: garis header tetap terlihat saat body
-                    // discroll (border tabel `collapse` tidak ikut sticky)
                     className={`sticky z-10 h-6 border border-slate-200 bg-[#F8FAFC] px-1 py-1 text-center text-[9px] font-extrabold text-[#213c52] shadow-[inset_0_-1px_0_#E2E8F0] ${
                       groupIndex === 0 ? "top-0" : "top-6"
                     }`}
@@ -343,7 +335,6 @@ export function MonitoringCtiPanel() {
         </>
       ) : (
         <>
-      {/* Tabel ONX: ringkasan jumlah IP per provider tiap region/code. */}
       <div className="mt-2 max-h-[160px] overflow-auto">
         <table className="w-full min-w-[500px] table-fixed border-collapse text-left text-[10px]">
           <colgroup>

@@ -1,17 +1,13 @@
-// React Query
 import { useQuery } from "@tanstack/react-query";
 
-// Api
 import { getOnxDetail, getOnxSummary, mondayMonitoringKeys } from "@/app/api";
 
-// Types
 import type {
   OnxDetailParams,
   OnxDetailResponse,
   OnxSummaryResponse,
 } from "@/app/types/monday/onxMonitoring.types";
 
-/** Ringkasan jumlah IP per provider tiap region/code. */
 export const useOnxSummaryQuery = (enabled = true) =>
   useQuery<OnxSummaryResponse>({
     queryKey: mondayMonitoringKeys.onxSummary(),
@@ -20,7 +16,6 @@ export const useOnxSummaryQuery = (enabled = true) =>
     queryFn: ({ signal }) => getOnxSummary(signal),
   });
 
-/** Detail per IP; hanya jalan setelah ada region yang dipilih. */
 export const useOnxDetailQuery = (params: OnxDetailParams | null) =>
   useQuery<OnxDetailResponse>({
     queryKey: mondayMonitoringKeys.onxDetail(

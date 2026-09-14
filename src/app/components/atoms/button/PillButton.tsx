@@ -1,12 +1,9 @@
-// React
 import type { ReactNode } from "react";
 
-// Atoms
 import Button from "./Button";
 
 interface PillButtonProps {
   label: string;
-  /** Path gambar ikon, mis. hasil import svg. */
   icon?: string;
   onClick: () => void;
   loading?: boolean;
@@ -14,7 +11,6 @@ interface PillButtonProps {
   children?: ReactNode;
 }
 
-/** Tombol aksi berbentuk pil dengan ikon di kanan label. */
 const PillButton = ({
   label,
   icon,

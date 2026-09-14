@@ -1,19 +1,15 @@
-// React
 import type { ComponentType } from "react";
 
-// Atoms
 import { Skeleton } from "@/app/components/atoms";
 
 interface KpiStatCardProps {
   icon: ComponentType<{ className?: string }>;
   label: string;
   value: string | number;
-  /** Kelas warna angka, mis. `text-[#21a647]`. */
   valueClassName?: string;
   loading?: boolean;
 }
 
-/** Kartu ringkasan satu angka: label di kiri, nilainya dipisah garis di kanan. */
 export function KpiStatCard({
   icon: Icon,
   label,

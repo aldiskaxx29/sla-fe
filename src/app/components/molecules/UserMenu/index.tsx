@@ -1,16 +1,12 @@
-// React
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LuChevronDown, LuLogOut, LuUser } from "react-icons/lu";
 import { toast } from "react-toastify";
 
-// Auth
 import { useLogoutMutation } from "@/modules/auth/rtk/auth.rtk";
 
-// Utils
 import { getStoredUserName, toInitials } from "@/app/utils/user.utils";
 
-/** Avatar + nama user dengan menu profil dan logout. */
 export function UserMenu() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);

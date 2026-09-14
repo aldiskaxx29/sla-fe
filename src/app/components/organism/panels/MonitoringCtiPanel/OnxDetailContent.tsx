@@ -14,9 +14,7 @@ import type {
 
 export interface OnxDetailTarget {
   region: string;
-  /** Terisi kalau yang diklik kode-nya, bukan nama region. */
   code?: string;
-  /** Terisi kalau yang diklik angka satu provider. */
   provider?: OnxProvider;
 }
 
@@ -34,7 +32,6 @@ const PROVIDERS: { key: OnxProvider; label: string }[] = [
 const headCell =
   "sticky top-0 z-10 bg-white px-2 py-2 text-[10px] font-bold uppercase tracking-wide text-slate-400 shadow-[inset_0_-1px_0_#E2E8F0]";
 
-/** Tabel detail memakai garis penuh seperti tampilan lamanya. */
 const detailHeadCell =
   "border-r border-b border-slate-200 bg-[#f8fafc] px-2.5 py-2 align-middle";
 const subHeadCell =
@@ -49,7 +46,6 @@ const toNumber = (value: number | string | null | undefined) => {
   return Number.isFinite(numeric) ? numeric : null;
 };
 
-/** Latency merah begitu melewati baseline IP-nya sendiri. */
 function LatencyValue({ entry }: { entry?: OnxDetailEntry }) {
   const latency = toNumber(entry?.latency);
   const baseline = toNumber(entry?.baseline);
@@ -85,7 +81,6 @@ const CSV_HEADERS = [
 const csvCell = (value: unknown) =>
   `"${String(value ?? "").replace(/"/g, '""')}"`;
 
-/** Unduh detail region yang sedang tampil apa adanya sebagai CSV. */
 const exportDetail = (region: string, rows: OnxDetailRow[]) => {
   const lines = [CSV_HEADERS.join(",")];
 
@@ -126,7 +121,6 @@ const exportDetail = (region: string, rows: OnxDetailRow[]) => {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 };
 
-/** Isi popup untuk mode ONX: ringkasan per region/code lalu detail per IP. */
 export function OnxDetailContent({
   target,
   onSelectTarget,
@@ -134,8 +128,6 @@ export function OnxDetailContent({
   const [search, setSearch] = useState("");
 
   const summary = useOnxSummaryQuery();
-  // Parameter mengikuti yang diklik: region saja, region + code, atau
-  // region + code + provider.
   const detail = useOnxDetailQuery(
     target
       ? {
@@ -146,7 +138,6 @@ export function OnxDetailContent({
       : null,
   );
 
-  // Escape mundur dari detail dulu; menutup popup diurus shell-nya.
   useEffect(() => {
     if (!target) return;
 
@@ -158,8 +149,6 @@ export function OnxDetailContent({
     return () => document.removeEventListener("keydown", handleKeyDown, true);
   }, [target, onSelectTarget]);
 
-  // Kalau yang diklik satu provider, kolom provider lain tidak perlu tampil —
-  // server pun hanya mengirim provider itu.
   const visibleProviders = useMemo(
     () =>
       target?.provider
@@ -171,7 +160,6 @@ export function OnxDetailContent({
   const summaryRows = useMemo(() => summary.data?.data ?? [], [summary.data]);
   const detailRows = useMemo(() => detail.data?.data ?? [], [detail.data]);
 
-  // Pencarian di layar detail menyaring per code atau IP tujuan.
   const filteredDetail = useMemo(() => {
     const keyword = search.trim().toLowerCase();
     if (!keyword) return detailRows;
@@ -308,8 +296,6 @@ export function OnxDetailContent({
 
                 <tbody>
                   {filteredDetail.map((row, rowIndex) => {
-                    // Tiap provider punya daftar IP sendiri; barisnya dibuat
-                    // sebanyak daftar terpanjang, kolom sisanya dikosongkan.
                     const lists = visibleProviders.map(
                       (provider) => row[provider.key] ?? [],
                     );
@@ -317,7 +303,6 @@ export function OnxDetailContent({
                       1,
                       ...lists.map((list) => list.length),
                     );
-                    // Baris yang kode-nya diklik dari ringkasan disorot kuning.
                     const highlighted =
                       Boolean(target.code) &&
                       row.code?.toUpperCase() === target.code?.toUpperCase();

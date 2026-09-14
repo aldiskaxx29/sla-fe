@@ -1,16 +1,11 @@
-// React
 import { useMemo } from "react";
 
-// Atoms
 import { Skeleton } from "@/app/components/atoms";
 
-// Molecules
 import { EmptyState } from "@/app/components/molecules/EmptyState";
 
-// Types
 import type { SlaWsaItem } from "@/app/types/fbb/sla.types";
 
-// Utils
 import {
   SLA_ACHIEVEMENT_THRESHOLD,
   formatAchievementLabel,
@@ -20,18 +15,12 @@ import {
 
 interface FbbSlaIndicatorTableProps {
   indicators: SlaWsaItem[];
-  /** Label periode pada judul kolom Realisasi/Capaian, mis. "W35'26". */
   periodLabel: string;
   loading?: boolean;
   errorMessage?: string | null;
   onRetry?: () => void;
 }
 
-/**
- * Lebar kolom mengecil pada layar laptop dan melebar lagi mulai 1500px —
- * ambangnya memakai `@container` supaya ikut lebar kartu, bukan lebar layar
- * (sidebar yang dibuka/ditutup ikut mengubah ruang yang tersedia).
- */
 const COLUMNS = [
   { key: "segmen", label: "Segmen", width: "w-[140px] @[1500px]:w-[200px]", align: "justify-center text-center" },
   { key: "indicator", label: "Performance Indicator", width: "w-[300px] @[1500px]:w-[360px]", align: "justify-start text-left" },
@@ -48,7 +37,6 @@ const SKELETON_ROWS = 6;
 const cellText = "text-sm leading-[17px] font-normal text-[#020617]";
 const gridBorder = "border-r border-b border-[#cbd5e1]";
 
-/** Tabel indikator; baris dikelompokkan per segmen seperti desain. */
 export function FbbSlaIndicatorTable({
   indicators,
   periodLabel,
@@ -56,7 +44,6 @@ export function FbbSlaIndicatorTable({
   errorMessage = null,
   onRetry,
 }: FbbSlaIndicatorTableProps) {
-  // Segmen yang sama dan berurutan digabung jadi satu sel memanjang.
   const groups = useMemo(() => {
     const result: { segmen: string; rows: SlaWsaItem[] }[] = [];
 

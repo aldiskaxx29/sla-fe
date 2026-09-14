@@ -1,21 +1,12 @@
-// React
 import type { ReactNode } from "react";
 
 interface MondayTemplateProps {
-  /** Info kiri, mis. keterangan periode terakhir diperbarui. */
   leftContent?: ReactNode;
-  /** Kontrol kanan, mis. filter dan tombol export. */
   rightContent?: ReactNode;
   children: ReactNode;
   className?: string;
 }
 
-/**
- * Kerangka halaman monday: kartu putih berisi toolbar dan area panel.
- *
- * Padanan `PageCardLayout` di qosmo-new, tanpa `PageHeader`-nya — judul,
- * toggle tema, dan user menu sudah disediakan header global sla-fe.
- */
 const MondayTemplate = ({
   leftContent,
   rightContent,

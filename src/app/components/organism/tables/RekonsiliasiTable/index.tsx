@@ -1,21 +1,15 @@
-// React
 import { useMemo } from "react";
 
-// Atoms
 import { Skeleton } from "@/app/components/atoms";
 
-// Molecules
 import ColumnFilterPopover from "@/app/components/molecules/ColumnFilterPopover";
 import ColumnSearchPopover from "@/app/components/molecules/ColumnSearchPopover";
 import Pagination from "@/app/components/molecules/Pagination";
 
-// Utils
 import { formatTableValue } from "@/app/utils/table.utils";
 
-// Columns
 import { buildAccessColumns, buildMttrqColumns } from "./columns";
 
-// Types
 import type { TableColumn } from "@/app/types/table.types";
 import type {
   ColumnSearch,
@@ -47,7 +41,6 @@ interface RekonsiliasiTableProps {
   onEdit: (row: RekonsiliasiRow) => void;
 }
 
-/** Tabel rekonsiliasi: header dengan filter per kolom, isi, dan paginasi. */
 const RekonsiliasiTable = ({
   rows,
   isLoading,
@@ -79,8 +72,6 @@ const RekonsiliasiTable = ({
       : buildAccessColumns(params);
   }, [parameter, week, pagination, filterOptions, onEdit]);
 
-  // Setiap pengambilan data — muat awal maupun pindah halaman dan ganti
-  // filter — ditampilkan sebagai skeleton.
   const showSkeleton = isLoading;
 
   const renderFilter = (column: TableColumn<RekonsiliasiRow>) => {

@@ -1,7 +1,5 @@
-// React
 import { useState } from "react";
 
-// Hooks
 import {
   useDownloadTemplateMutation,
   useImportTemplateMutation,
@@ -10,25 +8,20 @@ import {
   useSaveRekonsiliasiMutation,
 } from "@/app/hooks";
 
-// Templates
 import InputSiteTemplate from "@/app/components/templates/InputSiteTemplate";
 
-// Organism
 import RekonsiliasiFilterBar from "@/app/components/organism/forms/RekonsiliasiFilterBar";
 import ImportTemplateModal from "@/app/components/organism/popup/ImportTemplateModal";
 import RekonsiliasiEditModal from "@/app/components/organism/popup/RekonsiliasiEditModal";
 import RekonsiliasiTable from "@/app/components/organism/tables/RekonsiliasiTable";
 
-// Utils
 import {
   buildRekonsiliasiFormData,
   type RekonsiliasiSavePayload,
 } from "@/app/utils/rekonsiliasi.utils";
 
-// Types
 import type { RekonsiliasiRow } from "@/app/types/reconsiliation/rekonsiliasi.types";
 
-/** Halaman rekonsiliasi site: filter periode, tabel data, edit, dan import Excel. */
 const InputSitePage = () => {
   const period = useRekonsiliasiPeriod();
   const table = useRekonsiliasiTable({ period });

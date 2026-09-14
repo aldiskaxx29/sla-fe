@@ -15,14 +15,10 @@ import type {
 } from "@/app/types/monday/baseline.types";
 import { BaselineTrendModal } from "@/app/components/organism/panels/BaselinePerformancePanel/BaselineTrendModal";
 
-// sla-fe memakai nama VITE_MAPBOX_TOKEN; nama dari qosmo-new tetap didukung.
 const MAPBOX_TOKEN =
   import.meta.env.VITE_MAPBOX_ACCESS_TOKEN ??
   import.meta.env.VITE_MAPBOX_TOKEN ??
   "";
-// Default-nya style publik Mapbox, sama dengan peta lain di sla-fe. Style
-// bawaan qosmo-new (`mapbox://styles/obby19/...`) milik akun berbeda, jadi
-// tidak bisa dimuat oleh token di sini.
 const MAPBOX_STYLE_URL =
   import.meta.env.VITE_MAPBOX_STYLE_URL ?? "mapbox://styles/mapbox/light-v11";
 const REGION_GEOJSON_URL = "/geojson/region.json";
@@ -31,7 +27,6 @@ const INDONESIA_BOUNDS: [[number, number], [number, number]] = [
   [145.0, 10.0],
 ];
 
-/** Nama region di geojson tidak sama persis dengan nama di data baseline. */
 const GEOJSON_TO_BASELINE_REGION: Record<string, string> = {
   SUMBAGUT: "SUMBAGUT",
   SUMBAGTENG: "SUMBAGTENG",
@@ -66,10 +61,6 @@ const PERFORMANCE_FILTERS = [
   { label: "Good", value: "good" },
 ];
 
-/**
- * WoW dari API adalah selisih jumlah site not clear terhadap minggu lalu, jadi
- * angka negatif berarti membaik.
- */
 function WowBadge({ value }: { value: number }) {
   const improving = value <= 0;
 
@@ -86,13 +77,10 @@ function WowBadge({ value }: { value: number }) {
   );
 }
 
-/** Warna tiap region di peta diambil dari status baseline-nya. */
 const buildRegionFillLayer = (
   regions: BaselineRegionRow[],
   filter: string,
 ): LayerProps => {
-  // Catatan: `Map` di file ini adalah komponen react-map-gl, jadi lookup-nya
-  // memakai objek biasa.
   const byRegion: Record<string, BaselineRegionRow> = {};
   regions.forEach((row) => {
     byRegion[row.region.toUpperCase()] = row;
@@ -151,7 +139,6 @@ export function BaselinePerformancePanel() {
     [regions, performanceFilter],
   );
 
-  /** Kartu di atas peta menyorot region dengan not clear terparah. */
   const highlightRegions = useMemo(
     () =>
       [...filteredRegions]
@@ -182,7 +169,6 @@ export function BaselinePerformancePanel() {
     };
   }, [handleResize]);
 
-  /** Enam kolom "Site Not Clear": latency, %, WoW, packetloss, %, WoW. */
   const renderNotClearCells = (row: BaselineRegionRow, onDark = false) => {
     const cells = [
       { key: "lat", value: row.latency, kind: "count" as const, divider: true },

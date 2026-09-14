@@ -1,11 +1,5 @@
-// Types
 import type { SlaWsaItem } from "@/app/types/fbb/sla.types";
 
-/**
- * Data contoh KPI Enterprise. Endpoint-nya belum ada, jadi halaman ini masih
- * memakai angka statis dengan bentuk yang sama seperti SLA WISA FBB supaya
- * tabelnya bisa langsung dipakai bersama.
- */
 interface SampleIndicator {
   segmen: string;
   indicator: string;
@@ -14,7 +8,6 @@ interface SampleIndicator {
   sumber: string;
   target: number;
   value: number;
-  /** Makin kecil makin bagus, mis. latency dan MTTR. */
   lowerIsBetter?: boolean;
 }
 
@@ -79,7 +72,6 @@ const SAMPLE_INDICATORS: SampleIndicator[] = [
   },
 ];
 
-/** Minggu yang tersedia pada data contoh, terbaru di depan. */
 export const SAMPLE_EBIS_WEEKS = [
   "202635",
   "202634",
@@ -96,16 +88,11 @@ const WEEK_RANGES: Record<string, { start: string; end: string }> = {
   "202631": { start: "2026-07-31", end: "2026-08-06" },
 };
 
-/**
- * Minggu terbaru memakai angka dasar; minggu sebelumnya digeser ±1,5% supaya
- * ganti filter terlihat efeknya tanpa membuat angkanya jadi tidak masuk akal.
- */
 const shiftValue = (indicator: SampleIndicator, weekIndex: number) => {
   if (weekIndex === 0) return indicator.value;
 
   const shifted = indicator.value * (1 + (((weekIndex * 37) % 7) - 3) / 200);
 
-  // Availability tidak mungkin lewat 100%.
   return !indicator.lowerIsBetter && indicator.satuan === "%"
     ? Math.min(shifted, 99.99)
     : shifted;
@@ -119,7 +106,6 @@ const toCapaian = (indicator: SampleIndicator, value: number) => {
   return `${(ratio * 100).toFixed(1)}%`;
 };
 
-/** Baris indikator untuk satu minggu, bentuknya sama dengan respons SLA WISA. */
 export const buildSampleEbisKpi = (yearweek: string): SlaWsaItem[] => {
   const weekIndex = Math.max(SAMPLE_EBIS_WEEKS.indexOf(yearweek), 0);
   const range = WEEK_RANGES[yearweek] ?? WEEK_RANGES[SAMPLE_EBIS_WEEKS[0]];

@@ -1,10 +1,8 @@
-// Atoms
 import { IconClose, IconSearch } from "@/app/components/atoms/icon";
 
 interface SearchInputProps {
   value: string;
   onChange: (value: string) => void;
-  /** Dipanggil saat Enter atau ikon cari diklik. */
   onSearch?: (value: string) => void;
   placeholder?: string;
   className?: string;

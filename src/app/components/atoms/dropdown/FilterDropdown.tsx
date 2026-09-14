@@ -1,4 +1,3 @@
-// Atoms
 import Select from "./Select";
 import type { SelectOption } from "./Select";
 
@@ -11,7 +10,6 @@ interface FilterDropdownProps {
   className?: string;
 }
 
-/** Dropdown berbentuk pil dengan label menempel di kirinya. */
 const FilterDropdown = ({
   title,
   options,

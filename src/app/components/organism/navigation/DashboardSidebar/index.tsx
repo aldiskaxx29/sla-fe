@@ -1,4 +1,3 @@
-// React
 import { useState, type ComponentType } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -7,7 +6,6 @@ import {
   LuLayoutDashboard,
 } from "react-icons/lu";
 
-// Auth
 import { LANDING_PATH } from "@/modules/auth/rtk/auth.rtk";
 
 export interface DashboardSidebarMenu {
@@ -19,22 +17,15 @@ export interface DashboardSidebarMenu {
 
 interface DashboardSidebarProps {
   menus?: DashboardSidebarMenu[];
-  /** `key` menu yang sedang aktif. */
   activeKey?: string;
 }
 
-/**
- * Border gradien tidak bisa dibuat dengan `border-image` (sudutnya selalu
- * kotak), jadi dipakai trik dua lapis background: isi menggambar di padding
- * box, gradien kedua di border box.
- */
 const ACTIVE_ITEM =
   "border-[3px] border-transparent text-white shadow-[0px_4px_10px_0px_rgba(11,87,208,0.35)] [background-origin:border-box] [background-clip:padding-box,border-box] [background-image:linear-gradient(180deg,#86b4ff_0%,#0661f7_100%),linear-gradient(180deg,#cee1ff_0%,rgba(11,87,208,0)_46.777%,#cee1ff_100%)]";
 
 const ACTIVE_ICON =
   "bg-[linear-gradient(180deg,#86b4ff_0%,#0661f7_100%)] text-white shadow-[0px_4px_10px_0px_rgba(11,87,208,0.35)]";
 
-/** Nama menu yang mengambang saat ikon di rail sempit di-hover. */
 function SidebarTooltip({ label }: { label: string }) {
   return (
     <span
@@ -46,7 +37,6 @@ function SidebarTooltip({ label }: { label: string }) {
   );
 }
 
-/** Sidebar dashboard: rail ikon 60px yang bisa dilebarkan jadi 208px. */
 export function DashboardSidebar({
   menus = [],
   activeKey,

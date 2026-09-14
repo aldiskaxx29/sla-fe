@@ -1,14 +1,11 @@
-// React Query
 import { useQuery } from "@tanstack/react-query";
 
-// Api
 import {
   getBaselinePerformance,
   getBaselineTrend,
   mondayMonitoringKeys,
 } from "@/app/api";
 
-// Types
 import type {
   BaselinePerformanceData,
   BaselineRegionRaw,
@@ -18,7 +15,6 @@ import type {
   BaselineTrendSeries,
 } from "@/app/types/monday/baseline.types";
 
-/** Ambang status mengikuti penandaan merah di monday monitoring lama (>= 20%). */
 export const BASELINE_CRITICAL_THRESHOLD = 20;
 export const BASELINE_WARNING_THRESHOLD = 10;
 
@@ -52,7 +48,6 @@ export const useBaselinePerformanceQuery = () =>
     },
   });
 
-/** "20241" -> "2024 W1", "202410" -> "2024 W10". */
 const formatWeekLabel = (raw: string) => {
   const text = String(raw ?? "");
   if (text.length < 5) return text;
@@ -68,7 +63,6 @@ const toSeriesMap = (series: BaselineTrendSeries[] = []) =>
     return acc;
   }, {});
 
-/** Tren mingguan site not clear per region untuk popup detail. */
 export const useBaselineTrendQuery = (enabled = true) =>
   useQuery<BaselineTrendData>({
     queryKey: mondayMonitoringKeys.baselineTrend(),

@@ -1,7 +1,5 @@
-// React Query
 import { useQuery } from "@tanstack/react-query";
 
-// Api
 import {
   getCtiMonitoring,
   getCtiTransitDetail,
@@ -9,7 +7,6 @@ import {
   mondayMonitoringKeys,
 } from "@/app/api";
 
-// Types
 import type { CtiRow } from "@/app/types/monday/ticketQuality.types";
 import type {
   CtiRawRow,
@@ -20,9 +17,7 @@ import type {
 } from "@/app/types/monday/trendQuality.types";
 
 export interface TrendQualityData {
-  /** Label sumbu X, mis. "W35". */
   weeks: string[];
-  /** Keterangan tambahan per minggu untuk tooltip, mis. rentang tanggalnya. */
   weekInfo: string[];
   series: { name: string; data: (number | null)[] }[];
   unit: string;
@@ -34,7 +29,6 @@ const METRIC_UNIT: Record<TrendMetric, string> = {
   jitter: "ms",
 };
 
-/** Kolom bds/btc/pnk dikirim sebagai HTML, angkanya diambil dari teksnya. */
 const parseHtmlNumber = (value?: string | number | null) => {
   if (value === undefined || value === null) return 0;
   if (typeof value === "number") return value;
@@ -102,7 +96,6 @@ export const useCtiMonitoringQuery = (enabled = true) =>
     },
   });
 
-/** Detail per jam satu transit+verifier untuk popup Monitoring CTI. */
 export const useCtiTransitDetailQuery = (
   params: {
     transit: string;

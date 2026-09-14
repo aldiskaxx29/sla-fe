@@ -1,4 +1,3 @@
-/** Pasangan Grouping RCA (group1) dan RCA Rekonsiliasi (group2). */
 export const GROUPING_OPTIONS = [
   { group1: "Capacity", group2: "Cap End Site Need Order" },
   { group1: "Capacity", group2: "Cap End Site Order" },
@@ -42,7 +41,6 @@ export const GROUPING_OPTIONS = [
   { group1: "Technical", group2: "Sparepart Readiness" },
 ];
 
-/** Update Progress, dikelompokkan mengikuti group1 yang terpilih. */
 export const PROGRESS_OPTIONS = [
   { group11: "Capacity", group22: "Channel Spacing" },
   { group11: "Capacity", group22: "Upgrade Redeploy" },

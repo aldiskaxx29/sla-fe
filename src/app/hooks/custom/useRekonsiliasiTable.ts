@@ -1,11 +1,8 @@
-// React
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-// Hooks
 import { useRekonsiliasiListQuery } from "@/app/hooks/query/reconsiliation/useRekonsiliasiQueries";
 import type { RekonsiliasiPeriod } from "./useRekonsiliasiPeriod";
 
-// Types
 import type {
   ColumnSearch,
   RekonsiliasiFilterOptions,
@@ -23,14 +20,6 @@ interface UseRekonsiliasiTableParams {
   period: RekonsiliasiPeriod;
 }
 
-/**
- * Menyatukan state filter kolom, pencarian, dan paginasi dengan query datanya.
- *
- * Backend membedakan dua cara penyaringan:
- * - kolom checkbox lewat `filter[field][]`, boleh beberapa kolom sekaligus;
- * - pencarian teks lewat `search` + `searchable`, hanya satu yang bisa aktif
- *   karena keduanya berbagi satu parameter `search`.
- */
 export const useRekonsiliasiTable = ({ period }: UseRekonsiliasiTableParams) => {
   const [columnFilters, setColumnFilters] = useState<Record<string, string[]>>(
     {},
@@ -45,8 +34,6 @@ export const useRekonsiliasiTable = ({ period }: UseRekonsiliasiTableParams) => 
   const [filterOptions, setFilterOptions] = useState<
     RekonsiliasiFilterOptions | undefined
   >(undefined);
-  // Daftar field yang boleh dicari juga datang dari response
-  // (`meta.searchable_available`), jadi tidak ada daftar hardcode.
   const [searchableFields, setSearchableFields] = useState<
     string[] | undefined
   >(undefined);
@@ -56,11 +43,6 @@ export const useRekonsiliasiTable = ({ period }: UseRekonsiliasiTableParams) => 
     Boolean(search.trim()) ||
     Object.values(columnFilters).some((values) => values.length > 0);
 
-  /**
-   * Dropdown menampilkan satu entri per nilai, tapi BE menyimpan beda
-   * kapitalisasi ("Technical TSEL" vs "Technical Tsel"). Semua varian dikirim
-   * supaya tidak ada baris yang terlewat.
-   */
   const expandedFilters = useMemo(() => {
     const result: Record<string, string[]> = {};
 
@@ -137,8 +119,6 @@ export const useRekonsiliasiTable = ({ period }: UseRekonsiliasiTableParams) => 
   const total =
     listQuery.data?.meta?.total ?? listQuery.data?.total ?? rows.length;
 
-  // `options` ikut menyempit saat ada filter aktif, jadi daftar pilihan hanya
-  // diperbarui dari response tanpa filter.
   useEffect(() => {
     if (hasActiveFilter) return;
 
@@ -161,7 +141,6 @@ export const useRekonsiliasiTable = ({ period }: UseRekonsiliasiTableParams) => 
     );
   }, [listQuery.data]);
 
-  // Ganti periode berarti kembali ke halaman pertama.
   useEffect(() => {
     setPagination((current) =>
       current.current === 1 ? current : { ...current, current: 1 },
@@ -179,7 +158,6 @@ export const useRekonsiliasiTable = ({ period }: UseRekonsiliasiTableParams) => 
     columnFilters,
   ]);
 
-  // Kolom tiap parameter berbeda, jadi filternya direset saat parameter ganti.
   useEffect(() => {
     setColumnFilters((current) => (Object.keys(current).length ? {} : current));
     setColumnSearch((current) => (current ? null : current));
@@ -188,12 +166,10 @@ export const useRekonsiliasiTable = ({ period }: UseRekonsiliasiTableParams) => 
 
   const handleSearchChange = useCallback((value: string) => {
     setSearch(value);
-    // Search bar dan search per kolom berbagi parameter `search`.
     if (value) setColumnSearch(null);
     setPagination((current) => ({ ...current, current: 1 }));
   }, []);
 
-  /** Filter checkbox: beberapa kolom boleh aktif bersamaan. */
   const handleFilterChange = useCallback(
     (field: string, values: string[]) => {
       setColumnFilters((current) => {
@@ -209,7 +185,6 @@ export const useRekonsiliasiTable = ({ period }: UseRekonsiliasiTableParams) => 
     [],
   );
 
-  /** Pencarian per kolom: hanya satu yang bisa aktif karena `search` cuma satu. */
   const handleColumnSearchChange = useCallback(
     (field: string, value: string) => {
       const trimmed = value.trim();

@@ -1,4 +1,3 @@
-// React
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { ReactNode, RefObject } from "react";
 import { createPortal } from "react-dom";
@@ -7,23 +6,15 @@ const GAP = 4;
 
 interface PopoverProps {
   open: boolean;
-  /** Elemen pemicu; posisi panel dihitung dari kotaknya. */
   anchorRef: RefObject<HTMLElement | null>;
   onClose: () => void;
   children: ReactNode;
-  /** "start" sejajar kiri pemicu, "end" sejajar kanannya. */
   align?: "start" | "end";
-  /** Lebar panel mengikuti lebar pemicu. */
   matchAnchorWidth?: boolean;
   minWidth?: number;
   className?: string;
 }
 
-/**
- * Panel mengapung yang dirender ke `body` lewat portal, supaya tidak terpotong
- * oleh induk yang punya `overflow` (toolbar filter dan tabel keduanya
- * memakai overflow-x-auto).
- */
 const Popover = ({
   open,
   anchorRef,
@@ -48,7 +39,6 @@ const Popover = ({
       const panelHeight = panelRef.current?.offsetHeight ?? 0;
       const panelWidth = panelRef.current?.offsetWidth ?? rect.width;
 
-      // Dibalik ke atas kalau ruang di bawah tidak cukup.
       const openUpward =
         rect.bottom + GAP + panelHeight > window.innerHeight &&
         rect.top - GAP - panelHeight > 0;
@@ -68,7 +58,6 @@ const Popover = ({
     updatePosition();
 
     window.addEventListener("resize", updatePosition);
-    // `true` supaya ikut terpicu oleh scroll kontainer, bukan hanya window.
     window.addEventListener("scroll", updatePosition, true);
 
     return () => {
@@ -83,7 +72,6 @@ const Popover = ({
     const handlePointerDown = (event: MouseEvent) => {
       const target = event.target as Node;
 
-      // Klik pada pemicu diurus oleh pemicunya sendiri (toggle).
       if (
         panelRef.current?.contains(target) ||
         anchorRef.current?.contains(target)

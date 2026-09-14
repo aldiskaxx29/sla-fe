@@ -1,7 +1,5 @@
-// React Query
 import { useQuery } from "@tanstack/react-query";
 
-// Api
 import {
   getCoreTransitDetail,
   getMttrTickets,
@@ -10,7 +8,6 @@ import {
   mondayMonitoringKeys,
 } from "@/app/api";
 
-// Types
 import type {
   SlaCardDetail,
   SlaDetailColumn,
@@ -27,7 +24,6 @@ export interface SlaDrilldownResult {
 const dash = (value: unknown) =>
   value === undefined || value === null || value === "" ? "-" : String(value);
 
-/** Sebagian teks dari API masih membawa tag HTML dan baris baru. */
 const toPlainText = (value: unknown) =>
   dash(value)
     .replace(/<br\s*\/?>/gi, " · ")
@@ -35,7 +31,6 @@ const toPlainText = (value: unknown) =>
     .replace(/\s+/g, " ")
     .trim();
 
-/** Nama region di file tiket berawalan kode, mis. "07-BALINUSRA". */
 const normalizeRegion = (value?: string) =>
   String(value ?? "")
     .toUpperCase()
@@ -76,10 +71,6 @@ const TRANSIT_COLUMNS: SlaDetailColumn[] = [
   { key: "latPnk", label: "Lat PNK", align: "right" },
 ];
 
-/**
- * Rincian lanjutan saat satu baris popup diklik: daftar site, tiket MTTR,
- * atau nilai per transit untuk region tersebut.
- */
 export const useSlaDrilldownQuery = (
   detail: SlaCardDetail | null,
   region: string | null,
@@ -167,7 +158,6 @@ export const useSlaDrilldownQuery = (
   });
 };
 
-/** Ringkasan RCA (Capacity, Issue TSEL, ...) untuk kartu di popup SLA. */
 export const useSlaRcaGroupingQuery = (enabled: boolean) =>
   useQuery<SlaRcaGroupingResponse>({
     queryKey: mondayMonitoringKeys.rcaGrouping(),

@@ -3,7 +3,6 @@ import { LuChevronDown, LuChevronRight } from "react-icons/lu";
 
 import { useRpjBenchmarkQuery } from "@/app/hooks/query/monday/rpjBenchmark";
 
-// Assets — lihat catatan di NotchedCard soal kenapa tidak lewat `public`.
 import isatIcon from "@/assets/icons/isat_.png";
 import smartfrenIcon from "@/assets/icons/smartfren.png";
 import tselIcon from "@/assets/icons/tsel_.png";
@@ -31,7 +30,6 @@ const METRICS: { key: RpjMetric; label: string }[] = [
   { key: "jitter", label: "Jitter" },
 ];
 
-/** Semua metrik di sini "lower is better", jadi pemenangnya nilai terkecil. */
 const bestOperator = (values: RpjOperatorValues) => {
   let winner: keyof RpjOperatorValues | null = null;
   let best = Number.POSITIVE_INFINITY;
@@ -97,9 +95,6 @@ export function WinningBenchmarkPanel() {
     });
 
   return (
-    // `min-h-0` juga wajib di kartunya: tanpa itu, kartu sebagai flex item
-    // tidak boleh lebih pendek dari isinya, jadi baris yang di-expand ikut
-    // menambah tinggi kartu alih-alih memunculkan scroll.
     <div className="flex h-full min-h-0 flex-col rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
       <header className="mb-2">
         <h2 className="text-xs font-extrabold text-[#213c52]">
@@ -107,10 +102,6 @@ export function WinningBenchmarkPanel() {
         </h2>
       </header>
 
-      {/* `min-h-0` membuat wadah ini boleh lebih pendek dari isinya, jadi saat
-          baris di-expand tabelnya yang discroll — tinggi kartu tidak berubah.
-          `h-full` pada tabel tetap dipakai supaya saat isinya sedikit, sisa
-          ruang dibagi rata ke tiap baris. */}
       <div className="flex min-h-0 flex-1 overflow-auto">
         <table className="h-full w-full min-w-[620px] border-collapse text-left">
           <thead>

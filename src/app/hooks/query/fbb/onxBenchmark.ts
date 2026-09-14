@@ -1,7 +1,5 @@
-// React Query
 import { useQuery } from "@tanstack/react-query";
 
-// Api
 import {
   fbbKeys,
   getFbbIndihomeTypeOptions,
@@ -17,7 +15,6 @@ import {
   type FbbNationMetricsParams,
 } from "@/app/api";
 
-// Types
 import type {
   FbbLoseRegionResponse,
   FbbMapRegionResponse,
@@ -27,7 +24,6 @@ import type {
 const OPTION_STALE_TIME = 30 * 60 * 1000;
 const DATA_STALE_TIME = 5 * 60 * 1000;
 
-/** Satu hook per dropdown; isinya jarang berubah jadi cache-nya panjang. */
 export const useFbbYearWeekOptionsQuery = () =>
   useQuery({
     queryKey: fbbKeys.options("yearweek"),
@@ -70,7 +66,6 @@ export const useFbbIndihomeTypeOptionsQuery = () =>
       (response.data ?? []).map((item) => item.indihome_type),
   });
 
-/** Tabel ringkasan metrics/KPI nasional. */
 export const useFbbNationMetricsQuery = (
   params: FbbNationMetricsParams,
   enabled = true,
@@ -82,7 +77,6 @@ export const useFbbNationMetricsQuery = (
     queryFn: ({ signal }) => getFbbNationMetricsKpi(params, signal),
   });
 
-/** Status per region untuk peta. */
 export const useFbbMapRegionStatusQuery = (
   params: { yearweek?: string; indihomeType?: string; kpi?: string },
   enabled = true,
@@ -94,7 +88,6 @@ export const useFbbMapRegionStatusQuery = (
     queryFn: ({ signal }) => getFbbMapsRegionStatus(params, signal),
   });
 
-/** Detail per kabupaten, dipakai tab Detail. */
 export const useFbbLoseRegionSummaryQuery = (
   params: FbbLoseRegionParams,
   enabled = true,

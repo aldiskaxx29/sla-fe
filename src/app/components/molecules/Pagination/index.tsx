@@ -1,7 +1,5 @@
-// React
 import { useMemo } from "react";
 
-// Atoms
 import {
   IconChevronLeft,
   IconChevronRight,
@@ -16,7 +14,6 @@ interface PaginationProps {
   pageSizeOptions?: number[];
 }
 
-/** Nomor halaman dipangkas dengan elipsis supaya barisnya tidak memanjang. */
 const buildPageItems = (current: number, lastPage: number) => {
   const items: (number | "gap-left" | "gap-right")[] = [];
   const push = (item: number | "gap-left" | "gap-right") => items.push(item);

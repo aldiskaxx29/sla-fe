@@ -1,4 +1,3 @@
-/** Kunci cache react-query untuk data Monday Monitoring lama. */
 export const mondayMonitoringKeys = {
   all: ["monday-monitoring"] as const,
   slaPerformance: (yearWeek: string, rekon: string) =>

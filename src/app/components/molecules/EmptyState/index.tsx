@@ -1,15 +1,12 @@
-// React
 import type { ReactNode } from "react";
 
 interface EmptyStateProps {
   title: string;
   description?: string;
-  /** Mis. tombol "Coba lagi" saat data gagal dimuat. */
   action?: ReactNode;
   className?: string;
 }
 
-/** Pesan tengah untuk halaman/tabel yang belum ada isinya atau gagal dimuat. */
 export function EmptyState({
   title,
   description,

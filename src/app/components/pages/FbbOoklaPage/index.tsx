@@ -1,8 +1,6 @@
-// React
 import { useEffect, useMemo, useState } from "react";
 import { LuChevronDown } from "react-icons/lu";
 
-// Hooks
 import {
   useFbbOoklaIndihomeTypeOptionsQuery,
   useFbbOoklaKpiOptionsQuery,
@@ -14,23 +12,19 @@ import {
   useFbbYearWeekOptionsQuery,
 } from "@/app/hooks";
 
-// Molecules
 import { SelectMenu } from "@/app/components/molecules/SelectMenu";
 
-// Organism
 import { DashboardToolbar } from "@/app/components/organism/forms/DashboardToolbar";
 import { FbbOnxFilterBar } from "@/app/components/organism/forms/FbbOnxFilterBar";
 import { FbbOnxMapPanel } from "@/app/components/organism/panels/FbbOnxMapPanel";
 import { FbbLoseRegionTable } from "@/app/components/organism/tables/FbbLoseRegionTable";
 import { FbbNationMetricsTable } from "@/app/components/organism/tables/FbbNationMetricsTable";
 
-// Types
 import type {
   FbbNationMetricRow,
   FbbOnxFilterState,
 } from "@/app/types/fbb/onx.types";
 
-// Utils
 import { getStoredUserName, toInitials } from "@/app/utils/user.utils";
 
 const SUMMARY_PER_PAGE = 10;
@@ -47,7 +41,6 @@ const DEFAULT_FILTER: FbbOnxFilterState = {
 const isLose = (row: FbbNationMetricRow) =>
   String(row.status).toLowerCase() === "lose";
 
-/** Dashboard Ookla: Details Metrics, peta & detail kabupaten dari API Ookla. */
 const FbbOoklaPage = () => {
   const [filter, setFilter] = useState<FbbOnxFilterState>(DEFAULT_FILTER);
   const [summaryOpen, setSummaryOpen] = useState(true);
@@ -72,7 +65,6 @@ const FbbOoklaPage = () => {
   const kpiOptions = useFbbOoklaKpiOptionsQuery(filter.metrics);
   const indihomeTypeOptions = useFbbOoklaIndihomeTypeOptionsQuery();
 
-  // Minggu terbaru, metrics pertama, dan tipe indihome pertama jadi nilai awal.
   useEffect(() => {
     const latest = yearWeekOptions.data?.[0];
     if (latest && !filter.yearweek) {
@@ -94,7 +86,6 @@ const FbbOoklaPage = () => {
     }
   }, [indihomeTypeOptions.data, filter.indihomeType]);
 
-  // Daftar KPI ikut metrics, jadi pilihannya direset saat metrics berganti.
   useEffect(() => {
     const list = kpiOptions.data;
     if (!list?.length) return;
@@ -184,7 +175,6 @@ const FbbOoklaPage = () => {
   const handleFilterChange = (next: FbbOnxFilterState) => {
     setFilter((current) => ({
       ...next,
-      // Ganti metrics membuat daftar KPI berubah, jadi KPI-nya dikosongkan.
       kpi: next.metrics === current.metrics ? next.kpi : "",
     }));
     setExpandedRegion("");

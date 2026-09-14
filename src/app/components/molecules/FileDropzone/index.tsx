@@ -1,7 +1,5 @@
-// React
 import { useEffect, useRef, useState } from "react";
 
-// Atoms
 import {
   Button,
   IconFileSheet,
@@ -21,11 +19,9 @@ interface FileDropzoneProps {
   onFileChange: (file: File | null) => void;
   disabled?: boolean;
   accept?: string;
-  /** Berubah nilainya akan mengosongkan pilihan file, mis. saat modal ditutup. */
   resetKey?: unknown;
 }
 
-/** Area unggah satu berkas: drop area saat kosong, kartu ringkas saat terisi. */
 const FileDropzone = ({
   file,
   onFileChange,

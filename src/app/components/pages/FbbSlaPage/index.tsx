@@ -1,19 +1,14 @@
-// React
 import { useEffect, useMemo, useState } from "react";
 import { LuCalendarDays } from "react-icons/lu";
 
-// Hooks
 import { useFbbSlaWsaQuery, useFbbYearWeekOptionsQuery } from "@/app/hooks";
 
-// Molecules
 import { SelectMenu } from "@/app/components/molecules/SelectMenu";
 
-// Organism
 import { DashboardToolbar } from "@/app/components/organism/forms/DashboardToolbar";
 import { FbbSlaSummaryPanel } from "@/app/components/organism/panels/FbbSlaSummaryPanel";
 import { FbbSlaIndicatorTable } from "@/app/components/organism/tables/FbbSlaIndicatorTable";
 
-// Utils
 import {
   buildPeriodLabel,
   formatYearWeek,
@@ -22,12 +17,9 @@ import {
 } from "@/app/utils/fbbSla.utils";
 import { getStoredUserName, toInitials } from "@/app/utils/user.utils";
 
-/** Halaman SLA WISA FBB: ringkasan indikator dan tabelnya per minggu. */
 const FbbSlaPage = () => {
   const [yearweek, setYearweek] = useState<string | null>(null);
 
-  // `fbb/list-yearweek` sudah mengirim minggu yang datanya tersedia saja,
-  // terbaru di urutan pertama.
   const {
     data: yearWeeks,
     isFetching: isFetchingYearWeek,
@@ -36,7 +28,6 @@ const FbbSlaPage = () => {
 
   const activeYearWeek = yearWeeks?.[0] ?? null;
 
-  // Default ke minggu aktif selama user belum memilih sendiri.
   useEffect(() => {
     if (yearweek || !activeYearWeek) return;
 
@@ -107,8 +98,6 @@ const FbbSlaPage = () => {
             loading={isLoading}
           />
 
-          {/* `@container`: lebar kolom tabel menyesuaikan ruang kartu ini,
-              bukan lebar layar — jadi ikut berubah saat sidebar dibuka. */}
           <div className="@container flex min-h-0 flex-1 flex-col gap-4 rounded-[19px] border border-[#e2e8f0] bg-white p-4 shadow-[0px_1px_1.75px_0px_rgba(0,0,0,0.05)]">
             <div className="flex w-full flex-wrap items-center justify-end gap-3">
               <span className="flex h-9 shrink-0 items-center rounded-full bg-[#f1f5f9] px-3 text-sm font-medium text-[#64748b]">

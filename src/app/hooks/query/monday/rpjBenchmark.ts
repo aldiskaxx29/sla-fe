@@ -1,10 +1,7 @@
-// React Query
 import { useQuery } from "@tanstack/react-query";
 
-// Api
 import { getRpjBenchmark, mondayMonitoringKeys } from "@/app/api";
 
-// Types
 import type {
   MagistaRow,
   RpjBenchmarkRow,
@@ -25,7 +22,6 @@ const toValues = (row?: MagistaRow): RpjOperatorValues => ({
   xl: toNumber(row?.xl),
 });
 
-/** "TREG3-JAWA BARAT" -> "Treg 3 - Jawa Barat", "SUMBAGUT" -> "Sumbagut". */
 const formatLabel = (location: string) => {
   const titled = location
     .toLowerCase()
@@ -40,14 +36,9 @@ const formatLabel = (location: string) => {
     .trim();
 };
 
-/** Baris induk adalah TREG dan NATION; sisanya region di bawah TREG terdekat. */
 const isParentLocation = (location: string) =>
   /^TREG/i.test(location) || location.toUpperCase() === "NATION";
 
-/**
- * Winning Benchmark RPJ CX: tiga file magista (latency, packet loss, jitter)
- * dengan urutan baris yang sama, digabung jadi satu pohon region.
- */
 export const useRpjBenchmarkQuery = () =>
   useQuery<RpjBenchmarkRow[]>({
     queryKey: mondayMonitoringKeys.rpjBenchmark(),
