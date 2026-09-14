@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { LuChevronDown } from "react-icons/lu";
 
 import {
@@ -43,6 +43,8 @@ const isLose = (row: FbbNationMetricRow) =>
 
 const FbbOoklaPage = () => {
   const [filter, setFilter] = useState<FbbOnxFilterState>(DEFAULT_FILTER);
+  const shouldDefaultMetrics = useRef(true);
+  const shouldDefaultKpi = useRef(true);
   const [summaryOpen, setSummaryOpen] = useState(true);
   const [summaryPage, setSummaryPage] = useState({
     page: 1,
@@ -74,9 +76,10 @@ const FbbOoklaPage = () => {
 
   useEffect(() => {
     const first = metricsOptions.data?.[0];
-    if (first && !filter.metrics) {
-      setFilter((current) => ({ ...current, metrics: first }));
-    }
+    if (!first || filter.metrics || !shouldDefaultMetrics.current) return;
+
+    shouldDefaultMetrics.current = false;
+    setFilter((current) => ({ ...current, metrics: first }));
   }, [metricsOptions.data, filter.metrics]);
 
   useEffect(() => {
@@ -90,14 +93,16 @@ const FbbOoklaPage = () => {
     const list = kpiOptions.data;
     if (!list?.length) return;
     if (filter.kpi && list.includes(filter.kpi)) return;
+    if (!filter.kpi && !shouldDefaultKpi.current) return;
 
+    shouldDefaultKpi.current = false;
     setFilter((current) => ({ ...current, kpi: list[0] }));
   }, [kpiOptions.data, filter.kpi]);
 
   const summary = useFbbOoklaNationMetricsQuery({
     yearweek: filter.yearweek,
     indihomeType: filter.indihomeType,
-    metrics: filter.metrics,
+    metrics: filter.kpi ? filter.metrics : "",
     kpi: filter.kpi,
     page: summaryPage.page,
     perPage: summaryPage.perPage,
@@ -173,6 +178,10 @@ const FbbOoklaPage = () => {
   }, [loseKpiOptions, summary.isFetching, viewKpi]);
 
   const handleFilterChange = (next: FbbOnxFilterState) => {
+    if (next.metrics !== filter.metrics) {
+      shouldDefaultMetrics.current = false;
+      shouldDefaultKpi.current = Boolean(next.metrics);
+    }
     setFilter((current) => ({
       ...next,
       kpi: next.metrics === current.metrics ? next.kpi : "",

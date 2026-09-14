@@ -23,7 +23,7 @@ const LandingTemplate = ({ children }: LandingTemplateProps) => (
         First Insight
       </button>
 
-      <button
+      {/* <button
         type="button"
         aria-label="Pengaturan"
         onClick={() => showInfo("Pengaturan belum tersedia.")}
@@ -39,7 +39,7 @@ const LandingTemplate = ({ children }: LandingTemplateProps) => (
       >
         <LuBell size={15} />
         Notifikasi
-      </button>
+      </button> */}
 
       <UserMenu />
     </header>
