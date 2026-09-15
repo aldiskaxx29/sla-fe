@@ -14,13 +14,16 @@ import {
   useUrlSearchState,
 } from "@/app/hooks";
 
+import { DashboardToolbar } from "@/app/components/molecules/DashboardToolbar";
+import { SectionCard } from "@/app/components/molecules/SectionCard";
 import { SelectMenu } from "@/app/components/molecules/SelectMenu";
 
-import { DashboardToolbar } from "@/app/components/organism/forms/DashboardToolbar";
-import { FbbOnxFilterBar } from "@/app/components/organism/forms/FbbOnxFilterBar";
-import { FbbOnxMapPanel } from "@/app/components/organism/panels/FbbOnxMapPanel";
-import { FbbLoseRegionTable } from "@/app/components/organism/tables/FbbLoseRegionTable";
-import { FbbNationMetricsTable } from "@/app/components/organism/tables/FbbNationMetricsTable";
+import { FbbOnxFilterBar } from "@/app/components/organisms/forms/FbbOnxFilterBar";
+import { FbbOnxMapPanel } from "@/app/components/organisms/panels/FbbOnxMapPanel";
+import { FbbLoseRegionTable } from "@/app/components/organisms/tables/FbbLoseRegionTable";
+import { FbbNationMetricsTable } from "@/app/components/organisms/tables/FbbNationMetricsTable";
+
+import DashboardContentTemplate from "@/app/components/templates/DashboardContentTemplate";
 
 import type {
   FbbNationMetricRow,
@@ -191,8 +194,9 @@ const FbbOoklaPage = () => {
   const detailLoading = detailRegion.isFetching;
 
   return (
-    <main className="flex flex-1 flex-col p-4">
-      <div className="flex flex-1 flex-col gap-4 rounded-[36px] border border-[#e2e8f0] bg-white p-4">
+    <DashboardContentTemplate
+      toolbarPlacement="inside"
+      toolbar={
         <DashboardToolbar initials={toInitials(getStoredUserName())}>
           <FbbOnxFilterBar
             value={filter}
@@ -206,117 +210,117 @@ const FbbOoklaPage = () => {
             }}
           />
         </DashboardToolbar>
+      }
+    >
+      <SectionCard
+        className={`flex shrink-0 flex-col p-3 ${
+          summaryOpen ? "gap-2" : "gap-0"
+        }`}
+      >
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-sm font-medium text-[#020617]">Nations</span>
+          <button
+            type="button"
+            aria-label={summaryOpen ? "Tutup tabel" : "Buka tabel"}
+            aria-expanded={summaryOpen}
+            onClick={() => setSummaryOpen((open) => !open)}
+            className="flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-[#e2e8f0] bg-[#f8fafc] transition-colors hover:bg-[#eef2f6]"
+          >
+            <LuChevronDown
+              className={`size-4 text-[#334155] transition-transform duration-300 ${
+                summaryOpen ? "" : "-rotate-90"
+              }`}
+            />
+          </button>
+        </div>
 
-        <section
-          className={`flex shrink-0 flex-col rounded-[19px] border border-[#e2e8f0] bg-white p-3 shadow-[0px_1px_1.75px_0px_rgba(0,0,0,0.05)] ${
-            summaryOpen ? "gap-2" : "gap-0"
+        <div
+          className={`grid transition-[grid-template-rows] duration-300 ease-in-out ${
+            summaryOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
           }`}
         >
-          <div className="flex items-center justify-between gap-3">
-            <span className="text-sm font-medium text-[#020617]">Nations</span>
-            <button
-              type="button"
-              aria-label={summaryOpen ? "Tutup tabel" : "Buka tabel"}
-              aria-expanded={summaryOpen}
-              onClick={() => setSummaryOpen((open) => !open)}
-              className="flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-[#e2e8f0] bg-[#f8fafc] transition-colors hover:bg-[#eef2f6]"
-            >
-              <LuChevronDown
-                className={`size-4 text-[#334155] transition-transform duration-300 ${
-                  summaryOpen ? "" : "-rotate-90"
+          <div className="overflow-hidden">
+            <FbbNationMetricsTable
+              rows={summaryRows}
+              meta={summary.data?.meta}
+              loading={summary.isFetching}
+              error={summary.isError}
+              onPageChange={summaryPage.setPagination}
+            />
+          </div>
+        </div>
+      </SectionCard>
+
+      <SectionCard className="flex flex-1 flex-col gap-3 p-4">
+        <div className="flex shrink-0 flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <SelectMenu
+              value={activeKpi}
+              options={loseKpiOptions.map((kpi) => ({
+                label: kpi,
+                value: kpi,
+              }))}
+              onChange={handleViewKpiChange}
+              placeholder="Select KPI"
+              size="sm"
+              className="[&>div]:w-[220px] [&_button]:h-9 [&_button]:w-[220px] [&_button]:justify-between [&_button]:rounded-full [&_button]:border-[#e2e8f0] [&_button]:bg-white [&_button]:px-4 [&_button]:text-sm [&_button]:font-medium [&_button]:text-[#0a0a0a] [&_button>span]:truncate"
+            />
+          </div>
+
+          <div className="flex items-center rounded-[48px] border border-[#e2e8f0] bg-white p-1 shadow-[0px_1px_1.75px_0px_rgba(0,0,0,0.05)]">
+            {(
+              [
+                { key: "maps", label: "Map View" },
+                { key: "detail", label: "Detail View" },
+              ] as const
+            ).map((tab) => (
+              <button
+                key={tab.key}
+                type="button"
+                onClick={() =>
+                  setParams({
+                    [VIEW_PARAM]: tab.key === "detail" ? "detail" : null,
+                  })
+                }
+                className={`cursor-pointer rounded-[48px] px-3 py-1 text-sm font-medium transition-colors ${
+                  view === tab.key
+                    ? "bg-[#3b82f6] text-white"
+                    : "text-[#64748b] hover:text-[#334155]"
                 }`}
-              />
-            </button>
+              >
+                {tab.label}
+              </button>
+            ))}
           </div>
+        </div>
 
-          <div
-            className={`grid transition-[grid-template-rows] duration-300 ease-in-out ${
-              summaryOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
-            }`}
-          >
-            <div className="overflow-hidden">
-              <FbbNationMetricsTable
-                rows={summaryRows}
-                meta={summary.data?.meta}
-                loading={summary.isFetching}
-                error={summary.isError}
-                onPageChange={summaryPage.setPagination}
-              />
-            </div>
-          </div>
-        </section>
-
-        <section className="flex flex-1 flex-col gap-3 rounded-[19px] border border-[#e2e8f0] bg-white p-4 shadow-[0px_1px_1.75px_0px_rgba(0,0,0,0.05)]">
-          <div className="flex shrink-0 flex-wrap items-center justify-between gap-3">
-            <div className="flex flex-wrap items-center gap-2">
-              <SelectMenu
-                value={activeKpi}
-                options={loseKpiOptions.map((kpi) => ({
-                  label: kpi,
-                  value: kpi,
-                }))}
-                onChange={handleViewKpiChange}
-                placeholder="Select KPI"
-                size="sm"
-                className="[&>div]:w-[220px] [&_button]:h-9 [&_button]:w-[220px] [&_button]:justify-between [&_button]:rounded-full [&_button]:border-[#e2e8f0] [&_button]:bg-white [&_button]:px-4 [&_button]:text-sm [&_button]:font-medium [&_button]:text-[#0a0a0a] [&_button>span]:truncate"
-              />
-            </div>
-
-            <div className="flex items-center rounded-[48px] border border-[#e2e8f0] bg-white p-1 shadow-[0px_1px_1.75px_0px_rgba(0,0,0,0.05)]">
-              {(
-                [
-                  { key: "maps", label: "Map View" },
-                  { key: "detail", label: "Detail View" },
-                ] as const
-              ).map((tab) => (
-                <button
-                  key={tab.key}
-                  type="button"
-                  onClick={() =>
-                    setParams({
-                      [VIEW_PARAM]: tab.key === "detail" ? "detail" : null,
-                    })
-                  }
-                  className={`cursor-pointer rounded-[48px] px-3 py-1 text-sm font-medium transition-colors ${
-                    view === tab.key
-                      ? "bg-[#3b82f6] text-white"
-                      : "text-[#64748b] hover:text-[#334155]"
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {view === "maps" ? (
-            <FbbOnxMapPanel
-              rows={mapRows}
-              kpi={activeKpi}
-              loading={mapStatus.isFetching}
-              error={mapStatus.isError}
-            />
-          ) : (
-            <FbbLoseRegionTable
-              rows={detailRegionRows}
-              childRows={detailRows}
-              meta={detailRegion.data?.meta}
-              loading={detailLoading}
-              childLoading={detail.isFetching}
-              error={detailRegion.isError}
-              childError={detail.isError}
-              expandedRegion={expandedRegion}
-              onToggleRegion={handleToggleRegion}
-              onPageChange={(page, perPage) => {
-                detailRegionPage.setPagination(page, perPage);
-                setExpandedRegion("");
-                setDetailPage((current) => ({ ...current, page: 1 }));
-              }}
-            />
-          )}
-        </section>
-      </div>
-    </main>
+        {view === "maps" ? (
+          <FbbOnxMapPanel
+            rows={mapRows}
+            kpi={activeKpi}
+            loading={mapStatus.isFetching}
+            error={mapStatus.isError}
+          />
+        ) : (
+          <FbbLoseRegionTable
+            rows={detailRegionRows}
+            childRows={detailRows}
+            meta={detailRegion.data?.meta}
+            loading={detailLoading}
+            childLoading={detail.isFetching}
+            error={detailRegion.isError}
+            childError={detail.isError}
+            expandedRegion={expandedRegion}
+            onToggleRegion={handleToggleRegion}
+            onPageChange={(page, perPage) => {
+              detailRegionPage.setPagination(page, perPage);
+              setExpandedRegion("");
+              setDetailPage((current) => ({ ...current, page: 1 }));
+            }}
+          />
+        )}
+      </SectionCard>
+    </DashboardContentTemplate>
   );
 };
 

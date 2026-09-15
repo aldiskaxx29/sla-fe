@@ -1,6 +1,6 @@
 import { combineReducers } from "@reduxjs/toolkit";
 
-import auth from "@/modules/auth/redux/auth.slice.ts";
+import auth from "@/app/redux/auth.slice";
 import { dashboardApi } from "@/modules/dashboard/rtk/dashboard.rtk";
 
 const plainReducers = {

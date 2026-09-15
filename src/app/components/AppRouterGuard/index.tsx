@@ -5,7 +5,7 @@ import {
   getCurrentUser,
   getPostLoginRedirectPath,
   isAuthenticated,
-} from "@/modules/auth/rtk/auth.rtk";
+} from "@/app/utils/auth.utils";
 import { getMenuByPath, getVisibleMenus } from "@/app/config/menuConfig";
 
 // Interfaces

@@ -2,6 +2,13 @@ import axios, { AxiosError, AxiosRequestConfig } from "axios";
 
 import { toast } from "react-toastify";
 
+declare module "axios" {
+  interface AxiosRequestConfig {
+    skipErrorToast?: boolean;
+    skipAuthRedirect?: boolean;
+  }
+}
+
 export const resolveApiBaseUrl = (
   baseUrl: string | undefined = import.meta.env.VITE_APP_BASE_URL,
 ): string => {
@@ -51,6 +58,17 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
+export const getApiErrorMessage = (error: unknown, fallback: string): string => {
+  if (axios.isAxiosError(error)) {
+    const data = error.response?.data as { message?: string } | undefined;
+    return data?.message || fallback;
+  }
+
+  if (error instanceof Error && error.message) return error.message;
+
+  return fallback;
+};
+
 const getErrorMessage = (error: AxiosError): string => {
   const data = error.response?.data as { message?: string } | undefined;
 
@@ -69,7 +87,7 @@ apiClient.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    if (error.response?.status === 401) {
+    if (error.response?.status === 401 && !error.config?.skipAuthRedirect) {
       localStorage.removeItem("access_token");
       localStorage.removeItem("user_data");
 
@@ -80,7 +98,9 @@ apiClient.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    toast.error(getErrorMessage(error));
+    if (!error.config?.skipErrorToast) {
+      toast.error(getErrorMessage(error));
+    }
 
     return Promise.reject(error);
   },

@@ -8,7 +8,7 @@ import type {
 
 // Mutations
 import { toast } from "react-toastify";
-import { authLogout } from "@/modules/auth/redux/auth.slice";
+import { authLogout } from "@/app/redux/auth.slice";
 
 const resolveBaseUrl = (baseUrl: string | undefined) => {
   if (!baseUrl) return "/api";

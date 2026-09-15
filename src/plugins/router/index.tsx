@@ -1,4 +1,3 @@
-import { lazy } from "react";
 import { useRoutes } from "react-router-dom";
 
 import {
@@ -12,7 +11,7 @@ import {
 } from "@/app/layout";
 import { useAppRouter } from "@/app/router/app.router";
 import { useRekonsiliasiRouter } from "@/app/router/rekonsiliasi.router";
-import { useAuthRouter } from "@/modules/auth/router/auth.router";
+import { useAuthConfirmRouter, useAuthRouter } from "@/app/router/auth.router";
 import { useDashboardRouter } from "@/modules/dashboard/router/dashboard.router";
 import { useSiteRouter } from "@/modules/site/router/site.router";
 import { useMondayRouter } from "@/app/router/monday.router";
@@ -35,11 +34,10 @@ import { useAccessPredictionRouter } from "@/modules/vaccess/router/prediction.r
 import { useResumeRCARouter } from "@/modules/vaccess/router/resumerca.router";
 import { useTutelaRouter } from "@/modules/tutela/router/tutela.router";
 
-const AuthConfirm = lazy(() => import("@/modules/auth/pages/ConfirmPage"));
-
 const useRouter = () => {
   const app = useAppRouter();
   const auth = useAuthRouter();
+  const authConfirm = useAuthConfirmRouter();
   const dashboard = useDashboardRouter();
   const site = useSiteRouter();
   const rekonsiliasi = useRekonsiliasiRouter();
@@ -82,16 +80,7 @@ const useRouter = () => {
         {
           path: "",
           element: <AppLayoutAuth />,
-          children: [
-            {
-              path: "confirm",
-              element: <AuthConfirm />,
-            },
-            {
-              path: "confirmasi",
-              element: <AuthConfirm />,
-            },
-          ],
+          children: [...authConfirm],
         },
         {
           // Landing dan dashboard "coming soon" tidak memakai header CNOP.

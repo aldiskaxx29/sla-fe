@@ -306,8 +306,40 @@ const buildCoreLatencyDetail = (
 /** Baris ringkasan pada tabel MTTR; diberi latar penuh seperti aplikasi lama. */
 const MTTR_GROUP_ROWS = ["Jawa", "Non Jawa"];
 
-/** Urutan tabel MTTR mengikuti urutan region pada popup SLA. */
-const orderMttrRows = (rows: MttrRegionRow[]) => orderByRegion(rows);
+const MTTR_REGION_ORDER = [
+  "JAWA",
+  "JABOTABEK OUTER",
+  "JABOTABEK INNER",
+  "JAWA BARAT",
+  "JAWA TENGAH",
+  "JAWA TIMUR",
+  "NON JAWA",
+  "SUMBAGUT",
+  "SUMBAGTENG",
+  "SUMBAGSEL",
+  "BALI NUSRA",
+  "BALINUSRA",
+  "KALIMANTAN",
+  "SULAWESI",
+  "PUMA",
+  "NATION WIDE",
+];
+
+const mttrRegionOrderOf = (name?: string) => {
+  const index = MTTR_REGION_ORDER.indexOf(normalizeRegion(name));
+  return index === -1 ? MTTR_REGION_ORDER.length : index;
+};
+
+const orderMttrRows = (rows: MttrRegionRow[]) =>
+  [...rows].sort((left, right) => {
+    const byOrder =
+      mttrRegionOrderOf(left.region_tsel) - mttrRegionOrderOf(right.region_tsel);
+
+    if (byOrder !== 0) return byOrder;
+    return normalizeRegion(left.region_tsel).localeCompare(
+      normalizeRegion(right.region_tsel),
+    );
+  });
 
 const buildMttrDetail = (
   name: string,
@@ -645,7 +677,6 @@ export const buildSlaPerformanceCards = (
   {
     title: "Packet Loss",
     subCards: [
-      buildCorePacketLossCard(sources.corePacketLoss),
       buildPacketLossAccessCard(
         "pl_5_access",
         "PL 5% Access",
@@ -660,12 +691,12 @@ export const buildSlaPerformanceCards = (
         "1-5%",
         sources,
       ),
+      buildCorePacketLossCard(sources.corePacketLoss),
     ],
   },
   {
     title: "Latency",
     subCards: [
-      buildCoreLatencyCard(sources.coreLatency),
       buildCnopAccessCard(
         "lat_access",
         "Latency Access",
@@ -673,12 +704,12 @@ export const buildSlaPerformanceCards = (
         "latency",
         { withNestedTotal: false },
       ),
+      buildCoreLatencyCard(sources.coreLatency),
     ],
   },
   {
     title: "Jitter",
     subCards: [
-      buildCoreJitterCard(sources.coreJitter),
       buildCnopAccessCard(
         "jit_access",
         "Jitter Access",
@@ -686,6 +717,7 @@ export const buildSlaPerformanceCards = (
         "jitter",
         { withNestedTotal: true },
       ),
+      buildCoreJitterCard(sources.coreJitter),
     ],
   },
   {

@@ -3,3 +3,7 @@ export { default as ColumnSearchPopover } from "./ColumnSearchPopover";
 export { default as FileDropzone } from "./FileDropzone";
 export { default as Modal } from "./Modal";
 export { default as Pagination } from "./Pagination";
+export { default as FilterDropdown } from "./FilterDropdown";
+export { default as SearchInput } from "./SearchInput";
+export { default as Select } from "./Select";
+export type { SelectOption } from "./Select";

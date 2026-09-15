@@ -2,10 +2,10 @@ import { LuCalendar } from "react-icons/lu";
 
 import { useLatestPacketLossWeekQuery } from "@/app/hooks/query/monday/slaPerformance";
 
-import { SlaPerformancePanel } from "@/app/components/organism/panels/SlaPerformancePanel";
-import { TrendPerformancePanel } from "@/app/components/organism/panels/TrendPerformancePanel";
-import { BaselinePerformancePanel } from "@/app/components/organism/panels/BaselinePerformancePanel";
-import { WinningBenchmarkPanel } from "@/app/components/organism/panels/WinningBenchmarkPanel";
+import { SlaPerformancePanel } from "@/app/components/organisms/panels/SlaPerformancePanel";
+import { TrendPerformancePanel } from "@/app/components/organisms/panels/TrendPerformancePanel";
+import { BaselinePerformancePanel } from "@/app/components/organisms/panels/BaselinePerformancePanel";
+import { WinningBenchmarkPanel } from "@/app/components/organisms/panels/WinningBenchmarkPanel";
 
 import MondayTemplate from "@/app/components/templates/MondayTemplate";
 

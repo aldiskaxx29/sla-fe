@@ -2,11 +2,14 @@ import { useMemo, useState } from "react";
 import { LuCalendarDays } from "react-icons/lu";
 
 import { SampleDataBadge } from "@/app/components/molecules/SampleDataBadge";
+import { DashboardToolbar } from "@/app/components/molecules/DashboardToolbar";
+import { SectionCard } from "@/app/components/molecules/SectionCard";
 import { SelectMenu } from "@/app/components/molecules/SelectMenu";
 
-import { DashboardToolbar } from "@/app/components/organism/forms/DashboardToolbar";
-import { FbbSlaSummaryPanel } from "@/app/components/organism/panels/FbbSlaSummaryPanel";
-import { FbbSlaIndicatorTable } from "@/app/components/organism/tables/FbbSlaIndicatorTable";
+import { FbbSlaSummaryPanel } from "@/app/components/organisms/panels/FbbSlaSummaryPanel";
+import { FbbSlaIndicatorTable } from "@/app/components/organisms/tables/FbbSlaIndicatorTable";
+
+import DashboardContentTemplate from "@/app/components/templates/DashboardContentTemplate";
 
 import {
   buildPeriodLabel,
@@ -16,10 +19,7 @@ import {
 } from "@/app/utils/fbbSla.utils";
 import { getStoredUserName, toInitials } from "@/app/utils/user.utils";
 
-import {
-  SAMPLE_EBIS_WEEKS,
-  buildSampleEbisKpi,
-} from "@/app/components/pages/EbisKpiPage/sample";
+import { SAMPLE_EBIS_WEEKS, buildSampleEbisKpi } from "@/app/api/ebis";
 
 const EbisKpiPage = () => {
   const [yearweek, setYearweek] = useState(SAMPLE_EBIS_WEEKS[0]);
@@ -40,8 +40,8 @@ const EbisKpiPage = () => {
   const columnLabel = formatYearWeekShort(rows[0]?.yearweek ?? yearweek);
 
   return (
-    <>
-      <div className="px-6 pt-2 pb-4">
+    <DashboardContentTemplate
+      toolbar={
         <DashboardToolbar
           initials={toInitials(getStoredUserName())}
           actions={
@@ -62,32 +62,31 @@ const EbisKpiPage = () => {
             </span>
           </div>
         </DashboardToolbar>
-      </div>
+      }
+    >
+      <FbbSlaSummaryPanel
+        total={summary.total}
+        achieved={summary.achieved}
+        notAchieved={summary.notAchieved}
+      />
 
-      <main className="flex flex-1 flex-col px-6 pb-6">
-        <div className="flex min-h-0 flex-1 flex-col gap-4 rounded-[36px] border border-[#e2e8f0] bg-white p-4">
-          <FbbSlaSummaryPanel
-            total={summary.total}
-            achieved={summary.achieved}
-            notAchieved={summary.notAchieved}
-          />
-
-          <div className="@container flex min-h-0 flex-1 flex-col gap-4 rounded-[19px] border border-[#e2e8f0] bg-white p-4 shadow-[0px_1px_1.75px_0px_rgba(0,0,0,0.05)]">
-            <div className="flex w-full flex-wrap items-center justify-end gap-3">
-              <SampleDataBadge />
-              <span className="flex h-9 shrink-0 items-center rounded-full bg-[#f1f5f9] px-3 text-sm font-medium text-[#64748b]">
-                Showing {rows.length} entries
-              </span>
-            </div>
-
-            <FbbSlaIndicatorTable
-              indicators={rows}
-              periodLabel={columnLabel}
-            />
-          </div>
+      <SectionCard
+        as="div"
+        className="@container flex min-h-0 flex-1 flex-col gap-4 p-4"
+      >
+        <div className="flex w-full flex-wrap items-center justify-end gap-3">
+          <SampleDataBadge />
+          <span className="flex h-9 shrink-0 items-center rounded-full bg-[#f1f5f9] px-3 text-sm font-medium text-[#64748b]">
+            Showing {rows.length} entries
+          </span>
         </div>
-      </main>
-    </>
+
+        <FbbSlaIndicatorTable
+          indicators={rows}
+          periodLabel={columnLabel}
+        />
+      </SectionCard>
+    </DashboardContentTemplate>
   );
 };
 

@@ -7,8 +7,9 @@ export type ButtonVariant =
   | "secondary"
   | "ghost"
   | "danger"
-  | "pill";
-export type ButtonSize = "sm" | "md" | "lg";
+  | "pill"
+  | "gradient";
+export type ButtonSize = "sm" | "md" | "lg" | "xl";
 
 const VARIANT_CLASS: Record<ButtonVariant, string> = {
   primary:
@@ -20,12 +21,15 @@ const VARIANT_CLASS: Record<ButtonVariant, string> = {
   danger:
     "bg-transparent text-red-600 border border-transparent hover:bg-red-50",
   pill: "bg-[#EDFFFD] text-brand-secondary border-0 rounded-full font-medium",
+  gradient:
+    "border-0 bg-gradient-to-br from-[#3E99E7] to-[#4666E3] font-medium text-white shadow-md transition-colors duration-200 hover:from-[#4666E3] hover:to-[#3E99E7]",
 };
 
 const SIZE_CLASS: Record<ButtonSize, string> = {
   sm: "h-7 px-2 text-xs gap-1",
   md: "h-9 px-4 text-sm gap-2",
   lg: "h-11 px-3 text-sm gap-2",
+  xl: "h-12 px-4 text-base gap-2",
 };
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {

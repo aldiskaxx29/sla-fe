@@ -3,7 +3,7 @@ import {
   getPostLoginRedirectPath,
   isAuthenticated,
   isUserAccessPending,
-} from "@/modules/auth/rtk/auth.rtk";
+} from "@/app/utils/auth.utils";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 
 interface GuardProps {

@@ -2,7 +2,7 @@ import { Navigate } from "react-router-dom";
 import {
   getPostLoginRedirectPath,
   isAuthenticated,
-} from "@/modules/auth/rtk/auth.rtk";
+} from "@/app/utils/auth.utils";
 import { RouteObject } from "react-router-dom";
 
 import { AppLayoutEmpty } from "@/app/layout";

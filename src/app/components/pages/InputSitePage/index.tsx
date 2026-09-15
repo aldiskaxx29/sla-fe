@@ -10,10 +10,10 @@ import {
 
 import InputSiteTemplate from "@/app/components/templates/InputSiteTemplate";
 
-import RekonsiliasiFilterBar from "@/app/components/organism/forms/RekonsiliasiFilterBar";
-import ImportTemplateModal from "@/app/components/organism/popup/ImportTemplateModal";
-import RekonsiliasiEditModal from "@/app/components/organism/popup/RekonsiliasiEditModal";
-import RekonsiliasiTable from "@/app/components/organism/tables/RekonsiliasiTable";
+import RekonsiliasiFilterBar from "@/app/components/organisms/forms/RekonsiliasiFilterBar";
+import ImportTemplateModal from "@/app/components/organisms/popup/ImportTemplateModal";
+import RekonsiliasiEditModal from "@/app/components/organisms/popup/RekonsiliasiEditModal";
+import RekonsiliasiTable from "@/app/components/organisms/tables/RekonsiliasiTable";
 
 import {
   buildRekonsiliasiFormData,

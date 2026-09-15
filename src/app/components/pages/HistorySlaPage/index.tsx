@@ -1,94 +1,118 @@
 import { useMemo, useState } from "react";
 import { LuSearch } from "react-icons/lu";
 
-import { useHistorySlaQuery } from "@/app/hooks";
+import { useDebouncedSearch } from "@/app/hooks/custom/pacer";
+import {
+  useHistorySlaHighlightSummaryQuery,
+  useHistorySlaTableQuery,
+  useHistorySlaTrendQuery,
+  useUrlPagination,
+} from "@/app/hooks";
 
+import { SectionCard } from "@/app/components/molecules/SectionCard";
 import { SelectMenu } from "@/app/components/molecules/SelectMenu";
 
-import { HistorySlaTrendChart } from "@/app/components/organism/charts/HistorySlaTrendChart";
-import { HistorySlaHighlightPanel } from "@/app/components/organism/panels/HistorySlaHighlightPanel";
-import { HistorySlaAchievementTable } from "@/app/components/organism/tables/HistorySlaAchievementTable";
+import { HistorySlaTrendChart } from "@/app/components/organisms/charts/HistorySlaTrendChart";
+import { HistorySlaHighlightPanel } from "@/app/components/organisms/panels/HistorySlaHighlightPanel";
+import { HistorySlaAchievementTable } from "@/app/components/organisms/tables/HistorySlaAchievementTable";
+
+import DashboardContentTemplate from "@/app/components/templates/DashboardContentTemplate";
 
 const ALL_KPI = "";
+const ALL_KPI_LABEL = "All KPI";
+const TABLE_PER_PAGE = 10;
 
 const HistorySlaPage = () => {
   const [search, setSearch] = useState("");
-  const [kpi, setKpi] = useState(ALL_KPI);
+  const [kpiCategory, setKpiCategory] = useState(ALL_KPI);
+  const pagination = useUrlPagination({ defaultPerPage: TABLE_PER_PAGE });
 
-  const { data, isFetching } = useHistorySlaQuery();
+  const debouncedSearch = useDebouncedSearch(search.trim());
 
-  const indicators = useMemo(() => data?.indicators ?? [], [data]);
+  const highlight = useHistorySlaHighlightSummaryQuery();
+  const trend = useHistorySlaTrendQuery();
+  const table = useHistorySlaTableQuery({
+    kpiCategory,
+    search: debouncedSearch,
+    page: pagination.page,
+    perPage: pagination.perPage,
+  });
 
-  const kpiOptions = useMemo(
-    () => [
-      { label: "All KPI", value: ALL_KPI },
-      ...Array.from(new Set(indicators.map((row) => row.kpi))).map(
-        (value) => ({ label: value, value }),
-      ),
-    ],
-    [indicators],
-  );
-
-  const filteredIndicators = useMemo(() => {
-    const keyword = search.trim().toLowerCase();
-
-    return indicators.filter(
-      (row) =>
-        (kpi === ALL_KPI || row.kpi === kpi) &&
-        (!keyword || row.indicator.toLowerCase().includes(keyword)),
+  const kpiOptions = useMemo(() => {
+    const categories = (table.data?.categoryOptions ?? []).filter(
+      (option) => option.toLowerCase() !== ALL_KPI_LABEL.toLowerCase(),
     );
-  }, [indicators, kpi, search]);
+
+    return [
+      { label: ALL_KPI_LABEL, value: ALL_KPI },
+      ...categories.map((category) => ({ label: category, value: category })),
+    ];
+  }, [table.data?.categoryOptions]);
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    pagination.resetPage();
+  };
+
+  const handleKpiCategoryChange = (value: string) => {
+    setKpiCategory(value);
+    pagination.resetPage();
+  };
 
   return (
-    <main className="flex flex-1 flex-col px-6 pt-2 pb-6">
-      <div className="flex min-h-0 flex-1 flex-col gap-4 rounded-[36px] border border-[#e2e8f0] bg-white p-4">
-        <div className="grid shrink-0 grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
-          <HistorySlaHighlightPanel
-            totalNotAchieved={data?.total_not_achieved ?? 0}
-            totalKpi={data?.total_kpi ?? 0}
-            segments={data?.segments ?? []}
-            loading={isFetching}
-          />
-          <HistorySlaTrendChart
-            points={data?.trend ?? []}
-            loading={isFetching}
-          />
-        </div>
+    <DashboardContentTemplate>
+      <div className="grid shrink-0 grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
+        <HistorySlaHighlightPanel
+          totalNotAchieved={highlight.data?.total_kpi_not_achieved.value ?? 0}
+          totalKpi={highlight.data?.total_kpi_not_achieved.total ?? 0}
+          breakdown={highlight.data?.breakdown ?? []}
+          loading={highlight.isFetching}
+          error={highlight.isError}
+        />
+        <HistorySlaTrendChart
+          points={trend.data?.points ?? []}
+          activeMonth={trend.data?.activeMonth}
+          loading={trend.isFetching}
+          error={trend.isError}
+        />
+      </div>
 
-        <section className="flex flex-col gap-4 rounded-[19px] border border-[#e2e8f0] bg-white p-4 shadow-[0px_1px_1.75px_0px_rgba(0,0,0,0.05)]">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex flex-wrap items-center gap-3">
-              <label className="flex h-10 w-full items-center gap-2 rounded-full border border-[#e2e8f0] bg-white px-4 focus-within:border-[#cbd5e1] sm:w-[320px]">
-                <LuSearch className="size-4 shrink-0 text-[#64748b]" />
-                <input
-                  type="search"
-                  value={search}
-                  onChange={(event) => setSearch(event.target.value)}
-                  placeholder="Search"
-                  className="w-full bg-transparent text-sm text-[#020617] outline-none placeholder:text-[#64748b]"
-                />
-              </label>
-
-              <SelectMenu
-                value={kpi}
-                options={kpiOptions}
-                onChange={setKpi}
-                className="relative z-50 [&_button]:h-10 [&_button]:w-[200px] [&_button]:rounded-full [&_button]:border-[#e2e8f0] [&_button]:px-4 [&_button]:text-sm [&_button]:text-[#020617]"
+      <SectionCard>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <label className="flex h-10 w-full items-center gap-2 rounded-full border border-[#e2e8f0] bg-white px-4 focus-within:border-[#cbd5e1] sm:w-[320px]">
+              <LuSearch className="size-4 shrink-0 text-[#64748b]" />
+              <input
+                type="search"
+                value={search}
+                onChange={(event) => handleSearchChange(event.target.value)}
+                placeholder="Search"
+                className="w-full bg-transparent text-sm text-[#020617] outline-none placeholder:text-[#64748b]"
               />
-            </div>
+            </label>
 
-            <span className="flex h-9 shrink-0 items-center rounded-full bg-[#f1f5f9] px-3 text-sm font-medium text-[#64748b]">
-              Showing {filteredIndicators.length} entries
-            </span>
+            <SelectMenu
+              value={kpiCategory}
+              options={kpiOptions}
+              onChange={handleKpiCategoryChange}
+              className="relative z-50 [&_button]:h-10 [&_button]:w-[200px] [&_button]:rounded-full [&_button]:border-[#e2e8f0] [&_button]:px-4 [&_button]:text-sm [&_button]:text-[#020617]"
+            />
           </div>
 
-          <HistorySlaAchievementTable
-            indicators={filteredIndicators}
-            loading={isFetching}
-          />
-        </section>
-      </div>
-    </main>
+          <span className="flex h-9 shrink-0 items-center rounded-full bg-[#f1f5f9] px-3 text-sm font-medium text-[#64748b]">
+            Showing {table.data?.meta?.total ?? 0} entries
+          </span>
+        </div>
+
+        <HistorySlaAchievementTable
+          indicators={table.data?.rows ?? []}
+          meta={table.data?.meta}
+          loading={table.isFetching}
+          error={table.isError}
+          onPageChange={pagination.setPagination}
+        />
+      </SectionCard>
+    </DashboardContentTemplate>
   );
 };
 

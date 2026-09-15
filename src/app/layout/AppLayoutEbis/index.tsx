@@ -1,16 +1,12 @@
-// React
 import { useMemo } from "react";
 import { useLocation } from "react-router-dom";
 import { LuTrendingUpDown } from "react-icons/lu";
 
-// Components
 import { AppRouteWrapper } from "@/app/components";
 
-// Layout
-import AppShell from "@/app/layout/AppShell";
+import DashboardShellTemplate from "@/app/components/templates/DashboardShellTemplate";
 
-// Organism
-import type { DashboardSidebarMenu } from "@/app/components/organism/navigation/DashboardSidebar";
+import type { DashboardSidebarMenu } from "@/app/components/organisms/navigation/DashboardSidebar";
 
 const EBIS_MENUS: DashboardSidebarMenu[] = [
   {
@@ -21,7 +17,6 @@ const EBIS_MENUS: DashboardSidebarMenu[] = [
   },
 ];
 
-/** Shell dashboard EBIS; menunya baru KPI Enterprise. */
 const AppLayoutEbis = () => {
   const location = useLocation();
 
@@ -33,13 +28,13 @@ const AppLayoutEbis = () => {
   );
 
   return (
-    <AppShell
+    <DashboardShellTemplate
       menus={EBIS_MENUS}
       activeKey={activeMenu.key}
       title="EBIS"
     >
       <AppRouteWrapper />
-    </AppShell>
+    </DashboardShellTemplate>
   );
 };
 

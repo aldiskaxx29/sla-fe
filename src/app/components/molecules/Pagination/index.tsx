@@ -1,10 +1,8 @@
 import { useMemo } from "react";
 
-import {
-  IconChevronLeft,
-  IconChevronRight,
-  Select,
-} from "@/app/components/atoms";
+import { IconChevronLeft, IconChevronRight } from "@/app/components/atoms";
+
+import Select from "@/app/components/molecules/Select";
 
 interface PaginationProps {
   current: number;

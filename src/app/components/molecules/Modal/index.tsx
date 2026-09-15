@@ -10,6 +10,7 @@ interface ModalProps {
   children: ReactNode;
   width?: number;
   closable?: boolean;
+  maskClosable?: boolean;
   bodyClassName?: string;
   className?: string;
 }
@@ -20,6 +21,7 @@ const Modal = ({
   children,
   width = 540,
   closable = true,
+  maskClosable = true,
   bodyClassName = "",
   className = "",
 }: ModalProps) => {
@@ -46,7 +48,7 @@ const Modal = ({
     <div className="fixed inset-0 z-[1200] flex items-center justify-center p-4">
       <div
         className="absolute inset-0 bg-black/45"
-        onClick={() => closable && onClose()}
+        onClick={() => closable && maskClosable && onClose()}
       />
       <div
         role="dialog"

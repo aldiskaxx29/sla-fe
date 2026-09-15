@@ -6,11 +6,11 @@ import { LuRadio, LuRouter, LuTrendingUpDown } from "react-icons/lu";
 // Components
 import { AppRouteWrapper } from "@/app/components";
 
-// Layout
-import AppShell from "@/app/layout/AppShell";
+// Templates
+import DashboardShellTemplate from "@/app/components/templates/DashboardShellTemplate";
 
 // Organism
-import type { DashboardSidebarMenu } from "@/app/components/organism/navigation/DashboardSidebar";
+import type { DashboardSidebarMenu } from "@/app/components/organisms/navigation/DashboardSidebar";
 
 const FBB_MENUS: DashboardSidebarMenu[] = [
   { key: "sla", label: "SLA WISA FBB", path: "/fbb/sla", icon: LuTrendingUpDown },
@@ -30,9 +30,9 @@ const AppLayoutFbb = () => {
   );
 
   return (
-    <AppShell menus={FBB_MENUS} activeKey={activeMenu.key} title={activeMenu.label}>
+    <DashboardShellTemplate menus={FBB_MENUS} activeKey={activeMenu.key} title={activeMenu.label}>
       <AppRouteWrapper />
-    </AppShell>
+    </DashboardShellTemplate>
   );
 };
 

@@ -11,7 +11,7 @@ import {
 
 import LandingTemplate from "@/app/components/templates/LandingTemplate";
 
-import { getCnopRedirectPath } from "@/modules/auth/rtk/auth.rtk";
+import { getCnopRedirectPath } from "@/app/utils/auth.utils";
 
 import qosmoIcon from "@/assets/qosmo-icon.png";
 

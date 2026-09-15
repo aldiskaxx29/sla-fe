@@ -1,14 +1,14 @@
 // Components
 import { AppRouteWrapper } from "@/app/components";
 
-// Layout
-import AppShell from "@/app/layout/AppShell";
+// Templates
+import DashboardShellTemplate from "@/app/components/templates/DashboardShellTemplate";
 
 /** Halaman profil berdiri sendiri: tanpa menu CNOP, cukup kembali ke landing. */
 const AppLayoutProfile = () => (
-  <AppShell title="Profile">
+  <DashboardShellTemplate title="Profile">
     <AppRouteWrapper />
-  </AppShell>
+  </DashboardShellTemplate>
 );
 
 AppLayoutProfile.displayName = "AppLayoutProfile";

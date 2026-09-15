@@ -21,7 +21,9 @@ import profile from "@/assets/profile.svg";
 
 // Router
 import { useLocation, useNavigate } from "react-router-dom";
-import { LANDING_PATH, useLogoutMutation } from "@/modules/auth/rtk/auth.rtk";
+import { LANDING_PATH } from "@/app/config/auth.config";
+import { getApiErrorMessage } from "@/app/api/base-url";
+import { useLogoutMutation } from "@/app/hooks/query/auth";
 
 import { toast } from "react-toastify";
 import type { RootState } from "@/plugins/redux";
@@ -64,7 +66,7 @@ const AppLayoutDefault = () => {
   /* --------------------------------- Logout --------------------------------- */
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
-  const [logout] = useLogoutMutation();
+  const logout = useLogoutMutation();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -86,20 +88,15 @@ const AppLayoutDefault = () => {
   const handleLogout = async () => {
     try {
       setLoading(true);
-      await logout().unwrap();
+      await logout.mutateAsync();
       toast.dismiss();
       toast.success("Logout successful", { position: "top-right" });
       navigate("login");
     } catch (err: unknown) {
-      let msg = "Logout failed. Please try again.";
-      if (typeof err === "object" && err !== null) {
-        // @ts-expect-error: err might have data/message
-        msg = err.data?.message ?? err.message ?? msg;
-      } else if (typeof err === "string") {
-        msg = err;
-      }
       toast.dismiss();
-      toast.error(msg, { position: "top-right" });
+      toast.error(getApiErrorMessage(err, "Logout failed. Please try again."), {
+        position: "top-right",
+      });
     } finally {
       setLoading(false);
     }

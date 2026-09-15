@@ -1,18 +1,44 @@
-import type { HistorySlaResponse } from "@/app/types/first-insight/historySla.types";
+import { apiRequest } from "@/app/api/base-url";
 
-import { HISTORY_SLA_DUMMY } from "./historySla.dummy";
+import type {
+  HistorySlaHighlightSummaryResponse,
+  HistorySlaTableParams,
+  HistorySlaTableResponse,
+  HistorySlaTrendResponse,
+} from "@/app/types/first-insight/historySla.types";
 
-const DUMMY_DELAY = 400;
+export const FIRST_INSIGHT_ENDPOINTS = {
+  highlightSummary: "first-insight/highlight-summary",
+  trendKpiNotClear: "first-insight/trend-kpi-not-clear",
+  table: "first-insight/table",
+} as const;
 
-export const getHistorySla = (signal?: AbortSignal) =>
-  new Promise<HistorySlaResponse>((resolve, reject) => {
-    const timer = setTimeout(
-      () => resolve({ status: true, data: HISTORY_SLA_DUMMY }),
-      DUMMY_DELAY,
-    );
+export const getHistorySlaHighlightSummary = (signal?: AbortSignal) =>
+  apiRequest<HistorySlaHighlightSummaryResponse>({
+    method: "GET",
+    url: FIRST_INSIGHT_ENDPOINTS.highlightSummary,
+    signal,
+  });
 
-    signal?.addEventListener("abort", () => {
-      clearTimeout(timer);
-      reject(new DOMException("Aborted", "AbortError"));
-    });
+export const getHistorySlaTrend = (signal?: AbortSignal) =>
+  apiRequest<HistorySlaTrendResponse>({
+    method: "GET",
+    url: FIRST_INSIGHT_ENDPOINTS.trendKpiNotClear,
+    signal,
+  });
+
+export const getHistorySlaTable = (
+  { kpiCategory, search, page, perPage }: HistorySlaTableParams,
+  signal?: AbortSignal,
+) =>
+  apiRequest<HistorySlaTableResponse>({
+    method: "GET",
+    url: FIRST_INSIGHT_ENDPOINTS.table,
+    params: {
+      ...(kpiCategory ? { kpi_category: kpiCategory } : {}),
+      ...(search ? { search } : {}),
+      page: page ?? 1,
+      per_page: perPage ?? 10,
+    },
+    signal,
   });

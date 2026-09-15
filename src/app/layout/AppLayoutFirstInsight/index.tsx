@@ -6,11 +6,11 @@ import { LuRadioTower } from "react-icons/lu";
 // Components
 import { AppRouteWrapper } from "@/app/components";
 
-// Layout
-import AppShell from "@/app/layout/AppShell";
+// Templates
+import DashboardShellTemplate from "@/app/components/templates/DashboardShellTemplate";
 
 // Organism
-import type { DashboardSidebarMenu } from "@/app/components/organism/navigation/DashboardSidebar";
+import type { DashboardSidebarMenu } from "@/app/components/organisms/navigation/DashboardSidebar";
 
 const FIRST_INSIGHT_MENUS: DashboardSidebarMenu[] = [
   {
@@ -33,13 +33,13 @@ const AppLayoutFirstInsight = () => {
   );
 
   return (
-    <AppShell
+    <DashboardShellTemplate
       menus={FIRST_INSIGHT_MENUS}
       activeKey={activeMenu.key}
       title={activeMenu.label}
     >
       <AppRouteWrapper />
-    </AppShell>
+    </DashboardShellTemplate>
   );
 };
 

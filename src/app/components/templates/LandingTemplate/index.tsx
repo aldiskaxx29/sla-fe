@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { LuSparkles } from "react-icons/lu";
 
-import { UserMenu } from "@/app/components/molecules/UserMenu";
+import { UserMenu } from "@/app/components/organisms/navigation/UserMenu";
 
 interface LandingTemplateProps {
   children: ReactNode;
@@ -16,8 +16,8 @@ const LandingTemplate = ({ children }: LandingTemplateProps) => {
       <header className="flex flex-wrap items-center justify-end gap-2 px-6 py-4">
         <button
           type="button"
-          // onClick={() => navigate("/first-insight")}
-          onClick={() => "Fitur First Insight belum tersedia."}
+          onClick={() => navigate("/first-insight")}
+          // onClick={() => "Fitur First Insight belum tersedia."}
           className="flex cursor-pointer items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-[13px] font-semibold text-[#4f46e5] transition-colors hover:bg-indigo-50"
         >
           <LuSparkles size={15} />

@@ -1,6 +1,6 @@
+export * from "./alert";
 export * from "./button";
 export * from "./checkbox";
-export * from "./dropdown";
 export * from "./icon";
 export * from "./input";
 export * from "./label";
