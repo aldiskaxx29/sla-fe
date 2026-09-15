@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { useRekonsiliasiListQuery } from "@/app/hooks/query/reconsiliation/useRekonsiliasiQueries";
 import type { RekonsiliasiPeriod } from "./useRekonsiliasiPeriod";
+import { useUrlPagination } from "./useUrlSearchState";
 
 import type {
   ColumnSearch,
@@ -26,11 +27,12 @@ export const useRekonsiliasiTable = ({ period }: UseRekonsiliasiTableParams) => 
   );
   const [columnSearch, setColumnSearch] = useState<ColumnSearch | null>(null);
   const [search, setSearch] = useState("");
-  const [pagination, setPagination] = useState<TablePagination>({
-    current: 1,
-    pageSize: DEFAULT_PAGE_SIZE,
-    total: 0,
-  });
+  const urlPagination = useUrlPagination({ defaultPerPage: DEFAULT_PAGE_SIZE });
+  const { resetPage, setPagination } = urlPagination;
+  const pagination = useMemo<Omit<TablePagination, "total">>(
+    () => ({ current: urlPagination.page, pageSize: urlPagination.perPage }),
+    [urlPagination.page, urlPagination.perPage],
+  );
   const [filterOptions, setFilterOptions] = useState<
     RekonsiliasiFilterOptions | undefined
   >(undefined);
@@ -141,11 +143,7 @@ export const useRekonsiliasiTable = ({ period }: UseRekonsiliasiTableParams) => 
     );
   }, [listQuery.data]);
 
-  useEffect(() => {
-    setPagination((current) =>
-      current.current === 1 ? current : { ...current, current: 1 },
-    );
-  }, [
+  const filterKey = JSON.stringify([
     period.parameter,
     period.year,
     period.month,
@@ -157,6 +155,20 @@ export const useRekonsiliasiTable = ({ period }: UseRekonsiliasiTableParams) => 
     columnSearch,
     columnFilters,
   ]);
+  const settledFilterKey = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!period.isSettled) return;
+
+    if (
+      settledFilterKey.current !== null &&
+      settledFilterKey.current !== filterKey
+    ) {
+      resetPage();
+    }
+
+    settledFilterKey.current = filterKey;
+  }, [filterKey, period.isSettled, resetPage]);
 
   useEffect(() => {
     setColumnFilters((current) => (Object.keys(current).length ? {} : current));
@@ -167,8 +179,8 @@ export const useRekonsiliasiTable = ({ period }: UseRekonsiliasiTableParams) => 
   const handleSearchChange = useCallback((value: string) => {
     setSearch(value);
     if (value) setColumnSearch(null);
-    setPagination((current) => ({ ...current, current: 1 }));
-  }, []);
+    resetPage();
+  }, [resetPage]);
 
   const handleFilterChange = useCallback(
     (field: string, values: string[]) => {
@@ -180,9 +192,9 @@ export const useRekonsiliasiTable = ({ period }: UseRekonsiliasiTableParams) => 
           Object.entries(current).filter(([key]) => key !== field),
         );
       });
-      setPagination((current) => ({ ...current, current: 1 }));
+      resetPage();
     },
-    [],
+    [resetPage],
   );
 
   const handleColumnSearchChange = useCallback(
@@ -191,14 +203,15 @@ export const useRekonsiliasiTable = ({ period }: UseRekonsiliasiTableParams) => 
 
       setSearch("");
       setColumnSearch(trimmed ? { field, value: trimmed } : null);
-      setPagination((current) => ({ ...current, current: 1 }));
+      resetPage();
     },
-    [],
+    [resetPage],
   );
 
-  const handlePageChange = useCallback((page: number, pageSize: number) => {
-    setPagination((current) => ({ ...current, current: page, pageSize }));
-  }, []);
+  const handlePageChange = useCallback(
+    (page: number, pageSize: number) => setPagination(page, pageSize),
+    [setPagination],
+  );
 
   return {
     rows,

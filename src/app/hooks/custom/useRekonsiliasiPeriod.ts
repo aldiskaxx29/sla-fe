@@ -27,6 +27,7 @@ export const useRekonsiliasiPeriod = () => {
   const [week, setWeek] = useState("");
 
   const hasAppliedActivePeriod = useRef(false);
+  const [hasActivePeriod, setHasActivePeriod] = useState(false);
 
   const isMttrqParameter = MTTRQ_PARAMETERS.includes(parameter);
 
@@ -54,6 +55,7 @@ export const useRekonsiliasiPeriod = () => {
   useEffect(() => {
     if (!yearWeek || hasAppliedActivePeriod.current) return;
     hasAppliedActivePeriod.current = true;
+    setHasActivePeriod(true);
 
     const activeYear = String(yearWeek.active_yearweek ?? "").slice(0, 4);
     if (activeYear) setYear(activeYear);
@@ -120,6 +122,13 @@ export const useRekonsiliasiPeriod = () => {
     effectiveWeek,
     isMttrqParameter,
     isReady: !isYearWeekPending,
+    isSettled:
+      !isYearWeekPending &&
+      (!yearWeek ||
+        (hasActivePeriod &&
+          (isMttrqParameter ||
+            !selectedWeeks.length ||
+            selectedWeeks.includes(week)))),
     options: {
       parameter: PARAMETER_OPTIONS,
       siteType: SITE_TYPE_OPTIONS,

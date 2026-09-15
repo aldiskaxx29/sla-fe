@@ -10,6 +10,8 @@ import {
   useFbbMetricsOptionsQuery,
   useFbbNationMetricsQuery,
   useFbbYearWeekOptionsQuery,
+  useUrlPagination,
+  useUrlSearchState,
 } from "@/app/hooks";
 
 import { SelectMenu } from "@/app/components/molecules/SelectMenu";
@@ -27,8 +29,7 @@ import type {
 
 import { getStoredUserName, toInitials } from "@/app/utils/user.utils";
 
-type ViewTab = "maps" | "detail";
-
+const VIEW_PARAM = "view";
 const SUMMARY_PER_PAGE = 10;
 const DETAIL_PER_PAGE = 500;
 const DETAIL_REGION_PER_PAGE = 10;
@@ -49,16 +50,15 @@ const isLose = (row: FbbNationMetricRow) =>
 const FbbOnxPage = () => {
   const [filter, setFilter] = useState<FbbOnxFilterState>(DEFAULT_FILTER);
   const [summaryOpen, setSummaryOpen] = useState(true);
-  const [summaryPage, setSummaryPage] = useState({
-    page: 1,
-    perPage: SUMMARY_PER_PAGE,
-  });
-  const [view, setView] = useState<ViewTab>("maps");
+  const { searchParams, setParams } = useUrlSearchState();
+  const summaryPage = useUrlPagination({ defaultPerPage: SUMMARY_PER_PAGE });
+  const view = searchParams.get(VIEW_PARAM) === "detail" ? "detail" : "maps";
   const [viewKpi, setViewKpi] = useState("");
   const [expandedRegion, setExpandedRegion] = useState("");
-  const [detailRegionPage, setDetailRegionPage] = useState({
-    page: 1,
-    perPage: DETAIL_REGION_PER_PAGE,
+  const detailRegionPage = useUrlPagination({
+    defaultPerPage: DETAIL_REGION_PER_PAGE,
+    pageKey: "detail_page",
+    perPageKey: "detail_per_page",
   });
   const [detailPage, setDetailPage] = useState({
     page: 1,
@@ -167,15 +167,14 @@ const FbbOnxPage = () => {
   const handleFilterChange = (next: FbbOnxFilterState) => {
     setFilter(next);
     setExpandedRegion("");
-    setSummaryPage((current) => ({ ...current, page: 1 }));
-    setDetailRegionPage((current) => ({ ...current, page: 1 }));
+    setParams({ page: null, detail_page: null });
     setDetailPage((current) => ({ ...current, page: 1 }));
   };
 
   const handleViewKpiChange = (kpi: string) => {
     setViewKpi(kpi);
     setExpandedRegion("");
-    setDetailRegionPage((current) => ({ ...current, page: 1 }));
+    detailRegionPage.resetPage();
     setDetailPage((current) => ({ ...current, page: 1 }));
   };
 
@@ -238,7 +237,7 @@ const FbbOnxPage = () => {
                 meta={summary.data?.meta}
                 loading={summary.isFetching}
                 error={summary.isError}
-                onPageChange={(page, perPage) => setSummaryPage({ page, perPage })}
+                onPageChange={summaryPage.setPagination}
               />
             </div>
           </div>
@@ -271,7 +270,11 @@ const FbbOnxPage = () => {
                 <button
                   key={tab.key}
                   type="button"
-                  onClick={() => setView(tab.key)}
+                  onClick={() =>
+                    setParams({
+                      [VIEW_PARAM]: tab.key === "detail" ? "detail" : null,
+                    })
+                  }
                   className={`cursor-pointer rounded-[48px] px-3 py-1 text-sm font-medium transition-colors ${
                     view === tab.key
                       ? "bg-[#3b82f6] text-white"
@@ -305,7 +308,7 @@ const FbbOnxPage = () => {
               expandedRegion={expandedRegion}
               onToggleRegion={handleToggleRegion}
               onPageChange={(page, perPage) => {
-                setDetailRegionPage({ page, perPage });
+                detailRegionPage.setPagination(page, perPage);
                 setExpandedRegion("");
                 setDetailPage((current) => ({ ...current, page: 1 }));
               }}

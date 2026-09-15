@@ -1,4 +1,3 @@
-// React Router DOM
 import { Navigate } from "react-router-dom";
 import {
   getPostLoginRedirectPath,
@@ -6,7 +5,6 @@ import {
 } from "@/modules/auth/rtk/auth.rtk";
 import { RouteObject } from "react-router-dom";
 
-// Components
 import { AppLayoutEmpty } from "@/app/layout";
 
 const useAppRouter = (): RouteObject[] => {

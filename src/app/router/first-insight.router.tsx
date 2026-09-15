@@ -1,13 +1,8 @@
-// React
 import { lazy } from "react";
 
-// React Router DOM
 import { Navigate, RouteObject } from "react-router-dom";
-
-// Components
 import { AppRouteGuard } from "@/app/components";
 
-// Pages
 const HistorySlaPage = lazy(
   () => import("@/app/components/pages/HistorySlaPage"),
 );

@@ -32,7 +32,6 @@ const HEADERS = [
   "Benchmark Status",
   "Nearest Competitor",
   "Winner",
-  "Winner Value",
   "Gap to Winner",
 ];
 
@@ -175,9 +174,6 @@ export function FbbLoseRegionTable({
                       </td>
                       <td className={bodyCell}>{row.winner}</td>
                       <td className={`${bodyCell} tabular-nums`}>
-                        {win ? row.value_indihome : "-"}
-                      </td>
-                      <td className={`${bodyCell} tabular-nums`}>
                         {win ? "-" : formatGap(row.gap_to_winner)}
                       </td>
                     </tr>
@@ -242,9 +238,6 @@ export function FbbLoseRegionTable({
                               {child.nearest_comp || child.gap_to_nearest_comp || "-"}
                             </td>
                             <td className={bodyCell}>{child.winner}</td>
-                            <td className={`${bodyCell} tabular-nums`}>
-                              {childWin ? child.value_indihome : "-"}
-                            </td>
                             <td
                               className={`${bodyCell} tabular-nums ${
                                 childWin ? "" : "font-medium"
