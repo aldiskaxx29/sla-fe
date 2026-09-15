@@ -7,6 +7,7 @@ import {
   AppLayoutAuth,
   AppLayoutDefault,
   AppLayoutFbb,
+  AppLayoutFirstInsight,
   AppLayoutProfile,
 } from "@/app/layout";
 import { useAppRouter } from "@/app/router/app.router";
@@ -16,6 +17,7 @@ import { useDashboardRouter } from "@/modules/dashboard/router/dashboard.router"
 import { useSiteRouter } from "@/modules/site/router/site.router";
 import { useMondayRouter } from "@/app/router/monday.router";
 import { useFbbRouter } from "@/app/router/fbb.router";
+import { useFirstInsightRouter } from "@/app/router/first-insight.router";
 import { useEbisRouter } from "@/app/router/ebis.router";
 import { useLandingRouter } from "@/app/router/landing.router";
 import { useDailyMonitoringRouter } from "@/modules/daily-monitoring/router/dailyMonitoring.router";
@@ -43,6 +45,7 @@ const useRouter = () => {
   const rekonsiliasi = useRekonsiliasiRouter();
   const monday = useMondayRouter();
   const fbb = useFbbRouter();
+  const firstInsight = useFirstInsightRouter();
   const ebis = useEbisRouter();
   const landing = useLandingRouter();
   const dailyMonitoring = useDailyMonitoringRouter();
@@ -101,6 +104,11 @@ const useRouter = () => {
           path: "",
           element: <AppLayoutFbb />,
           children: [...fbb],
+        },
+        {
+          path: "",
+          element: <AppLayoutFirstInsight />,
+          children: [...firstInsight],
         },
         {
           // EBIS memakai shell yang sama dengan FBB, menunya KPI Enterprise.

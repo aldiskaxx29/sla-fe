@@ -1,7 +1,7 @@
 // React
 import { useMemo } from "react";
 import { useLocation } from "react-router-dom";
-import { LuTrendingUpDown } from "react-icons/lu";
+import { LuRadioTower } from "react-icons/lu";
 
 // Components
 import { AppRouteWrapper } from "@/app/components";
@@ -12,37 +12,37 @@ import AppShell from "@/app/layout/AppShell";
 // Organism
 import type { DashboardSidebarMenu } from "@/app/components/organism/navigation/DashboardSidebar";
 
-const EBIS_MENUS: DashboardSidebarMenu[] = [
+const FIRST_INSIGHT_MENUS: DashboardSidebarMenu[] = [
   {
-    key: "kpi",
-    label: "KPI Enterprise",
-    path: "/ebis/kpi",
-    icon: LuTrendingUpDown,
+    key: "history-sla",
+    label: "History SLA",
+    path: "/first-insight/history-sla",
+    icon: LuRadioTower,
   },
 ];
 
-/** Shell dashboard EBIS; menunya baru KPI Enterprise. */
-const AppLayoutEbis = () => {
+const AppLayoutFirstInsight = () => {
   const location = useLocation();
 
   const activeMenu = useMemo(
     () =>
-      EBIS_MENUS.find((menu) => location.pathname.startsWith(menu.path)) ??
-      EBIS_MENUS[0],
+      FIRST_INSIGHT_MENUS.find((menu) =>
+        location.pathname.startsWith(menu.path),
+      ) ?? FIRST_INSIGHT_MENUS[0],
     [location.pathname],
   );
 
   return (
     <AppShell
-      menus={EBIS_MENUS}
+      menus={FIRST_INSIGHT_MENUS}
       activeKey={activeMenu.key}
-      title="EBIS"
+      title={activeMenu.label}
     >
       <AppRouteWrapper />
     </AppShell>
   );
 };
 
-AppLayoutEbis.displayName = "AppLayoutEbis";
+AppLayoutFirstInsight.displayName = "AppLayoutFirstInsight";
 
-export { AppLayoutEbis };
+export { AppLayoutFirstInsight };
