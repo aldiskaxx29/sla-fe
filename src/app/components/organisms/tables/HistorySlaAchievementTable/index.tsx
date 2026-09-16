@@ -1,18 +1,15 @@
 import { Skeleton } from "@/app/components/atoms";
 
 import { EmptyState } from "@/app/components/molecules/EmptyState";
-import Pagination from "@/app/components/molecules/Pagination";
 
 import type {
   HistorySlaIndicator,
   HistorySlaQuarter,
-  HistorySlaTableMeta,
 } from "@/app/types/first-insight/historySla.types";
 
 const QUARTER_COUNT = 4;
 const MONTHS_PER_QUARTER = 3;
 const SKELETON_ROWS = 8;
-const PAGE_SIZE_OPTIONS = [10, 20, 50];
 
 const borderCell = "border-r border-b border-[#e2e8f0]";
 const stickyNo = "sticky left-0 w-12 min-w-12";
@@ -30,18 +27,14 @@ const PLACEHOLDER_QUARTERS = Array.from({ length: QUARTER_COUNT }, (_, index) =>
 
 interface HistorySlaAchievementTableProps {
   indicators: HistorySlaIndicator[];
-  meta?: HistorySlaTableMeta;
   loading?: boolean;
   error?: boolean;
-  onPageChange: (page: number, perPage: number) => void;
 }
 
 export function HistorySlaAchievementTable({
   indicators,
-  meta,
   loading = false,
   error = false,
-  onPageChange,
 }: HistorySlaAchievementTableProps) {
   const quarters = indicators[0]?.quarters ?? PLACEHOLDER_QUARTERS;
   const achievementColumns = quarters.reduce(
@@ -51,7 +44,7 @@ export function HistorySlaAchievementTable({
 
   return (
     <div className="flex flex-col">
-      <div className="max-h-[560px] overflow-auto rounded-lg border border-[#e2e8f0]">
+      <div className="overflow-x-auto rounded-lg border border-[#e2e8f0]">
         <table className="w-full min-w-[1400px] border-separate border-spacing-0 text-sm text-[#020617]">
           <thead className="sticky top-0 z-20">
             <tr>
@@ -163,18 +156,6 @@ export function HistorySlaAchievementTable({
           </tbody>
         </table>
       </div>
-
-      {meta && meta.total > 0 && (
-        <div className="pt-2">
-          <Pagination
-            current={meta.current_page}
-            pageSize={meta.per_page}
-            total={meta.total}
-            onChange={onPageChange}
-            pageSizeOptions={PAGE_SIZE_OPTIONS}
-          />
-        </div>
-      )}
     </div>
   );
 }

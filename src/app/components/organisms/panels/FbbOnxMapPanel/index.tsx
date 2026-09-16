@@ -13,7 +13,9 @@ import { StatusPill } from "@/app/components/atoms";
 
 import { useThrottledEvent } from "@/app/hooks/custom/pacer";
 
-import type { FbbMapRegionRow } from "@/app/types/fbb/onx.types";
+import { getProviderColor } from "@/app/config/providerColors.config";
+
+import type { FbbMapRegionRow, FbbMapViewMode } from "@/app/types/fbb/onx.types";
 
 const MAPBOX_TOKEN =
   import.meta.env.VITE_MAPBOX_ACCESS_TOKEN ??
@@ -148,6 +150,7 @@ const summarizeRegions = (rows: FbbMapRegionRow[]) => {
 interface FbbOnxMapPanelProps {
   rows: FbbMapRegionRow[];
   kpi: string;
+  viewMode?: FbbMapViewMode;
   loading?: boolean;
   error?: boolean;
 }
@@ -155,9 +158,11 @@ interface FbbOnxMapPanelProps {
 export function FbbOnxMapPanel({
   rows,
   kpi,
+  viewMode = "benchmark",
   loading = false,
   error = false,
 }: FbbOnxMapPanelProps) {
+  const isExperience = viewMode === "experience";
   const [activeRegionName, setActiveRegionName] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapRef | null>(null);
@@ -200,11 +205,29 @@ export function FbbOnxMapPanel({
 
   const summaries = useMemo(() => summarizeRegions(rows), [rows]);
 
+  const winnerLegend = useMemo(() => {
+    const legend: Record<string, string> = {};
+
+    Object.values(summaries).forEach((summary) => {
+      if (!summary.winner || summary.winner === "-") return;
+      legend[summary.winner] ??= getProviderColor(summary.winner);
+    });
+
+    return Object.entries(legend).map(([winner, color]) => ({ winner, color }));
+  }, [summaries]);
+
   const fillLayer = useMemo<LayerProps>(() => {
     const matchPairs: string[] = [];
 
     Object.entries(summaries).forEach(([region, summary]) => {
-      matchPairs.push(region, summary.win_status ? WIN_COLOR : LOSE_COLOR);
+      matchPairs.push(
+        region,
+        isExperience
+          ? getProviderColor(summary.winner)
+          : summary.win_status
+            ? WIN_COLOR
+            : LOSE_COLOR,
+      );
     });
 
     return {
@@ -214,10 +237,10 @@ export function FbbOnxMapPanel({
         "fill-color": matchPairs.length
           ? ["match", ["upcase", ["get", "REGION"]], ...matchPairs, "rgba(0,0,0,0)"]
           : "rgba(0,0,0,0)",
-        "fill-opacity": 0.5,
+        "fill-opacity": isExperience ? 0.7 : 0.5,
       },
     };
-  }, [summaries]);
+  }, [isExperience, summaries]);
 
   const borderLayer: LayerProps = {
     id: "fbb-onx-region-border",
@@ -299,6 +322,26 @@ export function FbbOnxMapPanel({
               : `KPI ${kpi || "-"}`}
         </span>
 
+        {isExperience ? (
+          winnerLegend.length > 0 && (
+            <div className="max-w-[200px] rounded-xl border border-[#e2e8f0] bg-white/95 px-3 py-2 text-xs text-[#020617]">
+              <p className="mb-1.5 text-[10px] font-semibold tracking-wider text-[#64748b] uppercase">
+                Winner
+              </p>
+              <div className="flex flex-col gap-1">
+                {winnerLegend.map((item) => (
+                  <span key={item.winner} className="flex items-center gap-2">
+                    <span
+                      className="size-3 shrink-0 rounded-full"
+                      style={{ backgroundColor: item.color }}
+                    />
+                    <span className="truncate">{item.winner}</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+          )
+        ) : (
         <span className="flex items-center gap-4 rounded-[24px] border border-[#e2e8f0] bg-white px-4 py-2 text-xs text-[#020617]">
           <span className="flex items-center gap-1">
             <span
@@ -323,6 +366,7 @@ export function FbbOnxMapPanel({
             Lose
           </span>
         </span>
+        )}
       </div>
 
       {activeRegion && (
@@ -350,7 +394,13 @@ export function FbbOnxMapPanel({
           <dl className="flex flex-col gap-1 border-t border-slate-100 pt-2 text-[11px] font-semibold text-slate-500">
             <div className="flex items-center justify-between gap-2">
               <dt>Winner</dt>
-              <dd className="truncate font-bold text-navy">
+              <dd className="flex min-w-0 items-center gap-1.5 truncate font-bold text-navy">
+                {isExperience && (
+                  <span
+                    className="size-2.5 shrink-0 rounded-full"
+                    style={{ backgroundColor: getProviderColor(activeRegion.winner) }}
+                  />
+                )}
                 {activeRegion.winner}
               </dd>
             </div>

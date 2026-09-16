@@ -52,6 +52,8 @@ export interface FbbNationMetricsResponse {
   meta: FbbOnxMeta;
 }
 
+export type FbbMapViewMode = "benchmark" | "experience";
+
 export interface FbbMapRegionRow {
   regions: string;
   winner: string;

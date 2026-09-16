@@ -86,8 +86,6 @@ export interface HistorySlaTableResponse {
 export interface HistorySlaTableParams {
   kpiCategory?: string;
   search?: string;
-  page?: number;
-  perPage?: number;
 }
 
 export interface HistorySlaMonthValue {

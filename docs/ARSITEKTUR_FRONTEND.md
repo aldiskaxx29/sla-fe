@@ -158,9 +158,8 @@ Pagination dan mode tampilan disimpan di query string supaya tidak hilang saat r
 
 | Halaman | Param |
 |---|---|
-| `/fbb/onx`, `/fbb/ookla` | `view=detail`, `page`, `per_page`, `detail_page`, `detail_per_page` |
+| `/fbb/onx`, `/fbb/ookla` | `view=detail`, `map_view=experience`, `page`, `per_page`, `detail_page`, `detail_per_page` |
 | `/input-site` | `page`, `per_page` |
-| `/first-insight/history-sla` | `page`, `per_page` |
 
 Nilai default (halaman 1, jumlah baris default, Map View) tidak ditulis ke URL.
 
@@ -328,7 +327,7 @@ export const FIRST_INSIGHT_ENDPOINTS = {
 } as const;
 
 export const getHistorySlaTable = (
-  { kpiCategory, search, page, perPage }: HistorySlaTableParams,
+  { kpiCategory, search }: HistorySlaTableParams,
   signal?: AbortSignal,
 ) =>
   apiRequest<HistorySlaTableResponse>({
@@ -337,8 +336,6 @@ export const getHistorySlaTable = (
     params: {
       ...(kpiCategory ? { kpi_category: kpiCategory } : {}),
       ...(search ? { search } : {}),
-      page: page ?? 1,
-      per_page: perPage ?? 10,
     },
     signal,
   });
@@ -452,6 +449,7 @@ Organism sebaiknya menerima **view model**, bukan response mentah. Dengan begitu
 
 - **`utils/*.utils.ts`**: fungsi murni tanpa React, misalnya `formatYearWeek`, `formatDecimal`, `summarizeAchievements`, `toInitials`.
 - **`config/*.ts`**: konstanta & opsi statis, misalnya `PACER_WAIT`, `PARAMETER_OPTIONS`, dan menu CNOP (`menuConfig.ts`).
+- **`config/providerColors.config.ts`**: warna tiap provider ISP untuk map mode Experience. Pakai `getProviderColor(nama)`.
 - Menu sidebar dashboard baru didefinisikan langsung di file layout-nya (`FBB_MENUS`, `EBIS_MENUS`, `FIRST_INSIGHT_MENUS`).
 
 ---

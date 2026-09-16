@@ -28,7 +28,7 @@ export const getHistorySlaTrend = (signal?: AbortSignal) =>
   });
 
 export const getHistorySlaTable = (
-  { kpiCategory, search, page, perPage }: HistorySlaTableParams,
+  { kpiCategory, search }: HistorySlaTableParams,
   signal?: AbortSignal,
 ) =>
   apiRequest<HistorySlaTableResponse>({
@@ -37,8 +37,6 @@ export const getHistorySlaTable = (
     params: {
       ...(kpiCategory ? { kpi_category: kpiCategory } : {}),
       ...(search ? { search } : {}),
-      page: page ?? 1,
-      per_page: perPage ?? 10,
     },
     signal,
   });

@@ -6,7 +6,6 @@ import {
   useHistorySlaHighlightSummaryQuery,
   useHistorySlaTableQuery,
   useHistorySlaTrendQuery,
-  useUrlPagination,
 } from "@/app/hooks";
 
 import { SectionCard } from "@/app/components/molecules/SectionCard";
@@ -20,12 +19,10 @@ import DashboardContentTemplate from "@/app/components/templates/DashboardConten
 
 const ALL_KPI = "";
 const ALL_KPI_LABEL = "All KPI";
-const TABLE_PER_PAGE = 10;
 
 const HistorySlaPage = () => {
   const [search, setSearch] = useState("");
   const [kpiCategory, setKpiCategory] = useState(ALL_KPI);
-  const pagination = useUrlPagination({ defaultPerPage: TABLE_PER_PAGE });
 
   const debouncedSearch = useDebouncedSearch(search.trim());
 
@@ -34,8 +31,6 @@ const HistorySlaPage = () => {
   const table = useHistorySlaTableQuery({
     kpiCategory,
     search: debouncedSearch,
-    page: pagination.page,
-    perPage: pagination.perPage,
   });
 
   const kpiOptions = useMemo(() => {
@@ -49,15 +44,6 @@ const HistorySlaPage = () => {
     ];
   }, [table.data?.categoryOptions]);
 
-  const handleSearchChange = (value: string) => {
-    setSearch(value);
-    pagination.resetPage();
-  };
-
-  const handleKpiCategoryChange = (value: string) => {
-    setKpiCategory(value);
-    pagination.resetPage();
-  };
 
   return (
     <DashboardContentTemplate>
@@ -85,7 +71,7 @@ const HistorySlaPage = () => {
               <input
                 type="search"
                 value={search}
-                onChange={(event) => handleSearchChange(event.target.value)}
+                onChange={(event) => setSearch(event.target.value)}
                 placeholder="Search"
                 className="w-full bg-transparent text-sm text-[#020617] outline-none placeholder:text-[#64748b]"
               />
@@ -94,22 +80,20 @@ const HistorySlaPage = () => {
             <SelectMenu
               value={kpiCategory}
               options={kpiOptions}
-              onChange={handleKpiCategoryChange}
+              onChange={setKpiCategory}
               className="relative z-50 [&_button]:h-10 [&_button]:w-[200px] [&_button]:rounded-full [&_button]:border-[#e2e8f0] [&_button]:px-4 [&_button]:text-sm [&_button]:text-[#020617]"
             />
           </div>
 
           <span className="flex h-9 shrink-0 items-center rounded-full bg-[#f1f5f9] px-3 text-sm font-medium text-[#64748b]">
-            Showing {table.data?.meta?.total ?? 0} entries
+            Showing {table.data?.rows.length ?? 0} entries
           </span>
         </div>
 
         <HistorySlaAchievementTable
           indicators={table.data?.rows ?? []}
-          meta={table.data?.meta}
           loading={table.isFetching}
           error={table.isError}
-          onPageChange={pagination.setPagination}
         />
       </SectionCard>
     </DashboardContentTemplate>

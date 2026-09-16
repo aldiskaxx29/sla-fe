@@ -26,6 +26,7 @@ import { FbbNationMetricsTable } from "@/app/components/organisms/tables/FbbNati
 import DashboardContentTemplate from "@/app/components/templates/DashboardContentTemplate";
 
 import type {
+  FbbMapViewMode,
   FbbNationMetricRow,
   FbbOnxFilterState,
 } from "@/app/types/fbb/onx.types";
@@ -33,6 +34,12 @@ import type {
 import { getStoredUserName, toInitials } from "@/app/utils/user.utils";
 
 const VIEW_PARAM = "view";
+const MAP_VIEW_PARAM = "map_view";
+
+const MAP_VIEW_OPTIONS: { label: string; value: FbbMapViewMode }[] = [
+  { label: "Benchmark", value: "benchmark" },
+  { label: "Experience", value: "experience" },
+];
 const SUMMARY_PER_PAGE = 10;
 const DETAIL_PER_PAGE = 500;
 const DETAIL_REGION_PER_PAGE = 10;
@@ -56,6 +63,8 @@ const FbbOnxPage = () => {
   const { searchParams, setParams } = useUrlSearchState();
   const summaryPage = useUrlPagination({ defaultPerPage: SUMMARY_PER_PAGE });
   const view = searchParams.get(VIEW_PARAM) === "detail" ? "detail" : "maps";
+  const mapView: FbbMapViewMode =
+    searchParams.get(MAP_VIEW_PARAM) === "experience" ? "experience" : "benchmark";
   const [viewKpi, setViewKpi] = useState("");
   const [expandedRegion, setExpandedRegion] = useState("");
   const detailRegionPage = useUrlPagination({
@@ -263,6 +272,20 @@ const FbbOnxPage = () => {
               className="[&>div]:w-[170px] [&_button]:h-9 [&_button]:w-[170px] [&_button]:justify-between [&_button]:rounded-full [&_button]:border-[#e2e8f0] [&_button]:bg-white [&_button]:px-4 [&_button]:text-sm [&_button]:font-medium [&_button]:text-[#0a0a0a] [&_button>span]:truncate"
             />
 
+            {view === "maps" && (
+              <SelectMenu
+                value={mapView}
+                options={MAP_VIEW_OPTIONS}
+                onChange={(value) =>
+                  setParams({
+                    [MAP_VIEW_PARAM]: value === "experience" ? "experience" : null,
+                  })
+                }
+                size="sm"
+                className="[&>div]:w-[150px] [&_button]:h-9 [&_button]:w-[150px] [&_button]:justify-between [&_button]:rounded-full [&_button]:border-[#e2e8f0] [&_button]:bg-white [&_button]:px-4 [&_button]:text-sm [&_button]:font-medium [&_button]:text-[#0a0a0a]"
+              />
+            )}
+
           </div>
 
           <div className="flex items-center rounded-[48px] border border-[#e2e8f0] bg-white p-1 shadow-[0px_1px_1.75px_0px_rgba(0,0,0,0.05)]">
@@ -297,6 +320,7 @@ const FbbOnxPage = () => {
             <FbbOnxMapPanel
               rows={mapRows}
               kpi={activeKpi}
+              viewMode={mapView}
               loading={mapStatus.isFetching}
               error={mapStatus.isError}
             />
