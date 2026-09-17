@@ -64,13 +64,18 @@ export const useRekonsiliasiPeriod = () => {
   }, [yearWeek]);
 
   useEffect(() => {
+    // Tunggu active period dari API diterapkan dulu, supaya active_week tidak
+    // tertimpa fallback (minggu pertama di bulan tsb) pada render yang sama.
     if (isMttrqParameter || !selectedWeeks.length) return;
+    if (yearWeek && !hasActivePeriod) return;
 
-    const fallbackWeek =
-      selectedWeeks.find((item) => item !== "all") ?? selectedWeeks[0];
+    const activeWeek = String(yearWeek?.active_week ?? "");
+    const fallbackWeek = selectedWeeks.includes(activeWeek)
+      ? activeWeek
+      : (selectedWeeks.find((item) => item !== "all") ?? selectedWeeks[0]);
 
     if (!week || !selectedWeeks.includes(week)) setWeek(fallbackWeek);
-  }, [isMttrqParameter, selectedWeeks, week]);
+  }, [hasActivePeriod, isMttrqParameter, selectedWeeks, week, yearWeek]);
 
   const yearOptions = useMemo(() => {
     const years = Array.from(

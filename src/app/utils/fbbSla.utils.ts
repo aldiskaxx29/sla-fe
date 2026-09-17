@@ -105,3 +105,41 @@ export const summarizeAchievements = (rows: SlaWsaItem[]) => {
     notAchieved: achievements.length - achieved,
   };
 };
+
+/**
+ * Parameter untuk endpoint detail region/kabupaten. API memakai kata kunci
+ * seperti "latency", "packetloss", atau "jitter"; nilainya diambil dari kolom
+ * `parameter`, dan kalau tidak cocok dicari dari nama indikator.
+ */
+export const resolveSlaParameter = (row?: {
+  parameter?: string;
+  performance_indicator?: string;
+} | null) => {
+  const source = `${row?.parameter ?? ""} ${row?.performance_indicator ?? ""}`
+    .toLowerCase()
+    .replace(/[^a-z]/g, "");
+
+  if (source.includes("packetloss")) return "packetloss";
+  if (source.includes("latency")) return "latency";
+  if (source.includes("jitter")) return "jitter";
+
+  return String(row?.parameter ?? "").trim().toLowerCase();
+};
+
+/**
+ * Nilai detail region/kabupaten dipotong (bukan dibulatkan) di 2 angka belakang
+ * koma, supaya 0.99664 tetap terbaca 0,99 dan tidak berubah jadi 1,00.
+ */
+export const formatSlaDetailValue = (value?: string | number | null) => {
+  if (value === undefined || value === null || value === "") return "-";
+
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return String(value);
+
+  const truncated = Math.trunc(numeric * 100) / 100;
+
+  return truncated.toLocaleString("id-ID", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+};

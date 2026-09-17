@@ -263,6 +263,7 @@ pages → templates → organisms → molecules → atoms
 | `FbbOoklaPage` | `/fbb/ookla` | `useFbbOokla*Query` |
 | `EbisKpiPage` | `/ebis/kpi` | data contoh `api/ebis/ebisKpi.sample.ts` |
 | `HistorySlaPage` | `/first-insight/history-sla` | `useHistorySla*Query` |
+| `PeHsiMonitoringPage` | `/network/pe-hsi` | data contoh `api/network/peHsi.sample.ts` |
 | `MondayPage` | `/monday` | query hook di dalam panel Monday |
 | `InputSitePage` | `/input-site` | `useRekonsiliasiPeriod` + `useRekonsiliasiTable` |
 | `OloPage` | `/olo` | coming soon |
@@ -303,7 +304,7 @@ api/
     └── index.ts
 ```
 
-Domain yang ada: `auth`, `fbb`, `first-insight`, `monday-monitoring`, `reconsiliation`, `ebis` (sample).
+Domain yang ada: `auth`, `fbb`, `first-insight`, `monday-monitoring`, `network`, `reconsiliation`, `ebis` (sample).
 
 ### 6.2 `apiRequest`
 

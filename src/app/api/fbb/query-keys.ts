@@ -4,6 +4,10 @@ export const fbbKeys = {
   slaWsa: (yearweek: string | null) =>
     [...fbbKeys.all, "sla-wsa", yearweek] as const,
   options: (name: string) => [...fbbKeys.all, "options", name] as const,
+  slaWsaRegion: (params: Record<string, unknown>) =>
+    [...fbbKeys.all, "sla-wsa", "region", params] as const,
+  slaWsaKabupaten: (params: Record<string, unknown>) =>
+    [...fbbKeys.all, "sla-wsa", "kabupaten", params] as const,
   nationMetrics: (params: Record<string, unknown>) =>
     [...fbbKeys.all, "onx", "nation-metrics-kpi", params] as const,
   ooklaNationMetrics: (params: Record<string, unknown>) =>

@@ -50,6 +50,7 @@ export const NETWORK_OPTIONS: MenuOption[] = [
   { label: "Core Perf", value: "network/core-perf" },
   { label: "CDN Perf", value: "network/cdn-perf" },
   { label: "Quality Healthiness", value: "network/quality-healthiness" },
+  { label: "Monitoring PE-HSI", value: "network/pe-hsi" },
 ];
 
 export const ONX_OPTIONS: MenuOption[] = [

@@ -2,6 +2,8 @@ import { apiRequest } from "@/app/api/base-url";
 
 import type {
   FbbYearWeekResponse,
+  SlaWsaDetailParams,
+  SlaWsaDetailResponse,
   SlaWsaResponse,
 } from "@/app/types/fbb/sla.types";
 import type {
@@ -20,6 +22,8 @@ import type {
 
 export const FBB_ENDPOINTS = {
   slaWsa: "fbb/sla/wsa",
+  slaWsaRegion: "fbb/sla/wsa/region",
+  slaWsaKabupaten: "fbb/sla/wsa/kabupaten",
   yearWeek: "onx-dashboard/yearweek",
   listYearWeek: "fbb/list-yearweek",
   listMetrics: "fbb/list-metrics",
@@ -46,6 +50,34 @@ export const getFbbSlaWsa = (yearweek?: string | null, signal?: AbortSignal) =>
     params: yearweek ? { "filter[yearweek]": yearweek } : {},
     signal,
   });
+
+const getFbbSlaDetail = (
+  url: string,
+  { yearweek, parameter, sumberData, region, showAll }: SlaWsaDetailParams,
+  signal?: AbortSignal,
+) =>
+  apiRequest<SlaWsaDetailResponse>({
+    method: "GET",
+    url,
+    params: {
+      ...(yearweek ? { yearweek } : {}),
+      ...(parameter ? { parameter } : {}),
+      ...(sumberData ? { sumber_data: sumberData } : {}),
+      ...(region ? { region } : {}),
+      show_all: showAll ? "true" : "false",
+    },
+    signal,
+  });
+
+export const getFbbSlaRegion = (
+  params: SlaWsaDetailParams,
+  signal?: AbortSignal,
+) => getFbbSlaDetail(FBB_ENDPOINTS.slaWsaRegion, params, signal);
+
+export const getFbbSlaKabupaten = (
+  params: SlaWsaDetailParams,
+  signal?: AbortSignal,
+) => getFbbSlaDetail(FBB_ENDPOINTS.slaWsaKabupaten, params, signal);
 
 export const getFbbYearWeek = (signal?: AbortSignal) =>
   apiRequest<FbbYearWeekResponse>({

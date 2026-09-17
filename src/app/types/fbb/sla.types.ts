@@ -37,3 +37,47 @@ export interface FbbYearWeekResponse {
   active_yearweek?: string;
   data: string[];
 }
+
+export interface SlaWsaDetailRow {
+  sla_names: string;
+  part: string;
+  region: string;
+  kabupaten?: string;
+  value: string;
+  trend: string;
+  target: string;
+  status_result: string;
+  capaian_pct_result: string;
+  gap_to_target_result: string;
+}
+
+export interface SlaWsaDetailMeta {
+  sumber_data?: string;
+  level?: string;
+  parameter?: string;
+  kpi?: string;
+  yearweek?: string;
+  provider?: string;
+  region?: string;
+  search?: string | null;
+  current_page: number;
+  per_page: number;
+  from: number | null;
+  to: number | null;
+  total: number;
+  last_page: number;
+}
+
+export interface SlaWsaDetailResponse {
+  status: boolean;
+  data: SlaWsaDetailRow[];
+  meta: SlaWsaDetailMeta;
+}
+
+export interface SlaWsaDetailParams {
+  yearweek?: string | null;
+  parameter?: string;
+  sumberData?: string;
+  region?: string;
+  showAll?: boolean;
+}

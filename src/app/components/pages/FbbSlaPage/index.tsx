@@ -8,6 +8,7 @@ import { SectionCard } from "@/app/components/molecules/SectionCard";
 import { SelectMenu } from "@/app/components/molecules/SelectMenu";
 
 import { FbbSlaSummaryPanel } from "@/app/components/organisms/panels/FbbSlaSummaryPanel";
+import { FbbSlaDetailModal } from "@/app/components/organisms/popup/FbbSlaDetailModal";
 import { FbbSlaIndicatorTable } from "@/app/components/organisms/tables/FbbSlaIndicatorTable";
 
 import DashboardContentTemplate from "@/app/components/templates/DashboardContentTemplate";
@@ -18,10 +19,15 @@ import {
   formatYearWeekShort,
   summarizeAchievements,
 } from "@/app/utils/fbbSla.utils";
+import type { SlaWsaItem } from "@/app/types/fbb/sla.types";
+
 import { getStoredUserName, toInitials } from "@/app/utils/user.utils";
 
 const FbbSlaPage = () => {
   const [yearweek, setYearweek] = useState<string | null>(null);
+  const [detailIndicator, setDetailIndicator] = useState<SlaWsaItem | null>(
+    null,
+  );
 
   const {
     data: yearWeeks,
@@ -115,8 +121,15 @@ const FbbSlaPage = () => {
           loading={isLoading}
           errorMessage={errorMessage}
           onRetry={refetch}
+          onAchievementClick={setDetailIndicator}
         />
       </SectionCard>
+
+      <FbbSlaDetailModal
+        indicator={detailIndicator}
+        yearweek={rows[0]?.yearweek ? String(rows[0].yearweek) : yearweek}
+        onClose={() => setDetailIndicator(null)}
+      />
     </DashboardContentTemplate>
   );
 };

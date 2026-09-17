@@ -7,3 +7,4 @@ export * from "./label";
 export * from "./popover";
 export * from "./skeleton";
 export * from "./sparkline";
+export * from "./switch";

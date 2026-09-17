@@ -19,6 +19,7 @@ interface FbbSlaIndicatorTableProps {
   loading?: boolean;
   errorMessage?: string | null;
   onRetry?: () => void;
+  onAchievementClick?: (row: SlaWsaItem) => void;
 }
 
 const COLUMNS = [
@@ -43,6 +44,7 @@ export function FbbSlaIndicatorTable({
   loading = false,
   errorMessage = null,
   onRetry,
+  onAchievementClick,
 }: FbbSlaIndicatorTableProps) {
   const groups = useMemo(() => {
     const result: { segmen: string; rows: SlaWsaItem[] }[] = [];
@@ -173,13 +175,26 @@ export function FbbSlaIndicatorTable({
                         <div
                           className={`flex h-full min-w-[110px] flex-1 items-center justify-center border-b border-[#cbd5e1] px-3 @[1500px]:min-w-[140px]`}
                         >
-                          <span
-                            className={`text-sm leading-[16px] font-normal ${
-                              onTarget ? "text-[#21a647]" : "text-[#c23837]"
-                            }`}
-                          >
-                            {formatAchievementLabel(row.capaian)}
-                          </span>
+                          {onAchievementClick ? (
+                            <button
+                              type="button"
+                              onClick={() => onAchievementClick(row)}
+                              title="Lihat detail region"
+                              className={`cursor-pointer text-sm leading-[16px] font-medium underline decoration-dotted underline-offset-4 transition-colors hover:opacity-80 ${
+                                onTarget ? "text-[#21a647]" : "text-[#c23837]"
+                              }`}
+                            >
+                              {formatAchievementLabel(row.capaian)}
+                            </button>
+                          ) : (
+                            <span
+                              className={`text-sm leading-[16px] font-normal ${
+                                onTarget ? "text-[#21a647]" : "text-[#c23837]"
+                              }`}
+                            >
+                              {formatAchievementLabel(row.capaian)}
+                            </span>
+                          )}
                         </div>
                       </div>
                     );

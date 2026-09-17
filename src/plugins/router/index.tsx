@@ -17,6 +17,7 @@ import { useSiteRouter } from "@/modules/site/router/site.router";
 import { useMondayRouter } from "@/app/router/monday.router";
 import { useFbbRouter } from "@/app/router/fbb.router";
 import { useFirstInsightRouter } from "@/app/router/first-insight.router";
+import { useNetworkPerformanceRouter } from "@/app/router/network.router";
 import { useEbisRouter } from "@/app/router/ebis.router";
 import { useLandingRouter } from "@/app/router/landing.router";
 import { useDailyMonitoringRouter } from "@/modules/daily-monitoring/router/dailyMonitoring.router";
@@ -44,6 +45,7 @@ const useRouter = () => {
   const monday = useMondayRouter();
   const fbb = useFbbRouter();
   const firstInsight = useFirstInsightRouter();
+  const networkPerformance = useNetworkPerformanceRouter();
   const ebis = useEbisRouter();
   const landing = useLandingRouter();
   const dailyMonitoring = useDailyMonitoringRouter();
@@ -124,6 +126,7 @@ const useRouter = () => {
             ...dailyMonitoring,
             ...one,
             ...elibrary,
+            ...networkPerformance,
             ...network,
             ...ticket,
             ...dashboardTA,
