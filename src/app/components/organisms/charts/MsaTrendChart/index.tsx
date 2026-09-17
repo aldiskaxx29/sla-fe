@@ -44,7 +44,8 @@ export function MsaTrendChart({
     const highest = values.length ? Math.max(...values) : 1;
 
     return {
-      grid: { top: 16, left: 8, right: 24, bottom: 56, containLabel: true },
+      /** Bawah dilebihkan supaya legend TREG/territory tidak menempel plot. */
+      grid: { top: 16, left: 8, right: 24, bottom: 78, containLabel: true },
       tooltip: {
         trigger: "axis",
         backgroundColor: "#ffffff",
@@ -53,7 +54,9 @@ export function MsaTrendChart({
         textStyle: { color: "#0f172a", fontSize: 12 },
       },
       legend: {
-        bottom: 24,
+        type: "scroll",
+        bottom: 28,
+        padding: [6, 8],
         icon: "roundRect",
         itemWidth: 14,
         itemHeight: 4,
