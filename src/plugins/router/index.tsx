@@ -15,12 +15,13 @@ import { useAuthConfirmRouter, useAuthRouter } from "@/app/router/auth.router";
 import { useDashboardRouter } from "@/modules/dashboard/router/dashboard.router";
 import { useSiteRouter } from "@/modules/site/router/site.router";
 import { useMondayRouter } from "@/app/router/monday.router";
+import { useMsaRouter } from "@/app/router/msa.router";
 import { useFbbRouter } from "@/app/router/fbb.router";
 import { useFirstInsightRouter } from "@/app/router/first-insight.router";
 import { useNetworkPerformanceRouter } from "@/app/router/network.router";
 import { useEbisRouter } from "@/app/router/ebis.router";
 import { useLandingRouter } from "@/app/router/landing.router";
-import { useDailyMonitoringRouter } from "@/modules/daily-monitoring/router/dailyMonitoring.router";
+import { useDailyMonitoringRouter } from "@/app/router/daily-monitoring.router";
 // import { useQualityHealthinessRouter } from "@/modules/quality-healthiness/router/quality-healthiness.router";
 import { useOneRouter } from "@/modules/one/router/one.router";
 import { useELibraryRouter } from "@/modules/elibrary/router/elibrary.router";
@@ -43,6 +44,7 @@ const useRouter = () => {
   const site = useSiteRouter();
   const rekonsiliasi = useRekonsiliasiRouter();
   const monday = useMondayRouter();
+  const msa = useMsaRouter();
   const fbb = useFbbRouter();
   const firstInsight = useFirstInsightRouter();
   const networkPerformance = useNetworkPerformanceRouter();
@@ -118,6 +120,9 @@ const useRouter = () => {
           element: <AppLayoutDefault />,
           children: [
             ...tutela,
+            // MSA didaftarkan sebelum dashboard karena dashboard memakai
+            // path dinamis `:menuId` yang juga cocok dengan "/msa".
+            ...msa,
             ...dashboard,
             // ...qualityHealthiness,
             ...site,

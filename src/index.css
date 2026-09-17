@@ -121,26 +121,6 @@ gap: 24;
     --dm-table-badge-size: 0.75rem;
     --dm-notes-size: 0.75rem;
   }
-
-  .daily-monitoring-modal .ant-table {
-    font-size: 0.75rem !important;
-  }
-  .daily-monitoring-modal .ant-table-thead > tr > th {
-    font-size: 0.75rem !important;
-    padding: 8px 6px !important;
-  }
-  .daily-monitoring-modal .ant-table-tbody > tr > td {
-    font-size: 0.75rem !important;
-    padding: 8px 6px !important;
-  }
-  .daily-monitoring-modal .ant-input {
-    font-size: 0.75rem !important;
-  }
-  .daily-monitoring-modal .ant-btn {
-    font-size: 0.75rem !important;
-    height: auto !important;
-    padding: 4px 8px !important;
-  }
 }
 
 

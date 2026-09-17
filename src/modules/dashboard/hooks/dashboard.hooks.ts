@@ -10,10 +10,6 @@ import {
   useLazyHistory_dataQuery,
   useLazyWitel_dataQuery,
   useLazyModal_detailQuery,
-  useLazyDashboard_complyQuery,
-  useLazyDetailsite_notclearQuery,
-  useLazyDetailsite_notclear_weekQuery,
-  useLazyWeeklyMonthQuery,
 } from "../rtk/dashboard.rtk";
 
 const useDashboard = () => {
@@ -112,44 +108,8 @@ const useDashboard = () => {
       data: dataModalDetail,
     },
   ] = useLazyModal_detailQuery();
-  const [
-    getComply,
-    {
-      isLoading: isLoadingComply,
-      isError: isErrorComply,
-      isSuccess: isSuccessComply,
-      data: dataComply,
-    },
-  ] = useLazyDashboard_complyQuery();
-  const [
-    getDetailsiteNotclear,
-    {
-      isLoading: isLoadingDetailsiteNotclear,
-      isError: isErrorDetailsiteNotclear,
-      isSuccess: isSuccessDetailsiteNotclear,
-      data: dataDetailsiteNotclear,
-    },
-  ] = useLazyDetailsite_notclearQuery();
 
-  const [
-    getDetailsiteNotclearWeek,
-    {
-      isLoading: isLoadingDetailsiteNotclearWeek,
-      isError: isErrorDetailsiteNotclearWeek,
-      isSuccess: isSuccessDetailsiteNotclearWeek,
-      data: dataDetailsiteNotclearWeek,
-    },
-  ] = useLazyDetailsite_notclear_weekQuery();
 
-  const [
-    getWeeklyMonth,
-    {
-      isLoading: isLoadingWeeklyMonth,
-      isError: isErrorWeeklyMonth,
-      isSuccess: isSuccessWeeklyMonth,
-      data: dataWeeklyMonth,
-    },
-  ] = useLazyWeeklyMonthQuery();
 
   return {
     getSC,
@@ -207,23 +167,6 @@ const useDashboard = () => {
     isErrorModalDetail,
     isSuccessModalDetail,
     dataModalDetail,
-    getComply,
-    isLoadingComply,
-    isErrorComply,
-    isSuccessComply,
-    dataComply,
-    getDetailsiteNotclear,
-    isLoadingDetailsiteNotclear,
-    isErrorDetailsiteNotclear,
-    isSuccessDetailsiteNotclear,
-    dataDetailsiteNotclear,
-    getDetailsiteNotclearWeek,
-    isLoadingDetailsiteNotclearWeek,
-    getWeeklyMonth,
-    isLoadingWeeklyMonth,
-    isErrorWeeklyMonth,
-    isSuccessWeeklyMonth,
-    dataWeeklyMonth,
   };
 };
 

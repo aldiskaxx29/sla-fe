@@ -25,7 +25,7 @@ export function PeHsiLatencyTrendChart({ trend }: PeHsiLatencyTrendChartProps) {
     );
 
     return {
-      grid: { top: 16, left: 8, right: 24, bottom: 8, containLabel: true },
+      grid: { top: 16, left: 8, right: 24, bottom: 48, containLabel: true },
       tooltip: {
         trigger: "axis",
         backgroundColor: "#ffffff",
@@ -38,6 +38,7 @@ export function PeHsiLatencyTrendChart({ trend }: PeHsiLatencyTrendChartProps) {
         icon: "roundRect",
         itemWidth: 14,
         itemHeight: 4,
+        itemGap: 20,
         textStyle: { color: "#475569", fontSize: 11 },
       },
       xAxis: {

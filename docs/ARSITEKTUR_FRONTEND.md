@@ -222,11 +222,11 @@ pages → templates → organisms → molecules → atoms
 | Kategori | Komponen |
 |---|---|
 | `navigation` | `DashboardSidebar`, `ScallopedTitleBar` (header), `UserMenu` |
-| `tables` | `FbbNationMetricsTable`, `FbbLoseRegionTable`, `FbbSlaIndicatorTable`, `HistorySlaAchievementTable`, `RekonsiliasiTable` |
+| `tables` | `FbbNationMetricsTable`, `FbbLoseRegionTable`, `FbbSlaIndicatorTable`, `HistorySlaAchievementTable`, `RekonsiliasiTable`, `DailyMonitoringPacketLossTable`, `MttrQualityTable` |
 | `panels` | `AccountPendingPanel`, `FbbOnxMapPanel`, `FbbSlaSummaryPanel`, `HistorySlaHighlightPanel`, panel Monday (`SlaPerformancePanel`, `TrendPerformancePanel`, dll.) |
 | `charts` | `HistorySlaTrendChart` |
 | `forms` | `FbbOnxFilterBar`, `RekonsiliasiFilterBar`, `LoginForm` |
-| `popup` | `ImportTemplateModal`, `RekonsiliasiEditModal`, `TwoFactorModal` |
+| `popup` | `ImportTemplateModal`, `RekonsiliasiEditModal`, `TwoFactorModal`, `PacketLossSiteDetailModal` |
 
 **Templates**
 
@@ -236,7 +236,7 @@ pages → templates → organisms → molecules → atoms
 | `DashboardContentTemplate` | `FbbSlaPage`, `EbisKpiPage`, `FbbOnxPage`, `FbbOoklaPage`, `HistorySlaPage` | Toolbar + kartu konten utama (radius 36px) |
 | `LandingTemplate` | `LandingPage`, `OloPage` | Header aksi + main + footer |
 | `AuthTemplate` | `AppLayoutAuth` | Background login + kartu putih di tengah |
-| `MondayTemplate`, `InputSiteTemplate` | `MondayPage`, `InputSitePage` | Kerangka halaman masing-masing |
+| `MondayTemplate`, `InputSiteTemplate`, `DailyMonitoringTemplate` | `MondayPage`, `InputSitePage`, `DailyMonitoringPage` | Kerangka halaman masing-masing |
 
 `DashboardContentTemplate` punya dua posisi toolbar:
 
@@ -264,6 +264,7 @@ pages → templates → organisms → molecules → atoms
 | `EbisKpiPage` | `/ebis/kpi` | data contoh `api/ebis/ebisKpi.sample.ts` |
 | `HistorySlaPage` | `/first-insight/history-sla` | `useHistorySla*Query` |
 | `PeHsiMonitoringPage` | `/network/pe-hsi` | data contoh `api/network/peHsi.sample.ts` |
+| `DailyMonitoringPage` | `/daily-monitoring` | `useDailyMonitoring*Query` |
 | `MondayPage` | `/monday` | query hook di dalam panel Monday |
 | `InputSitePage` | `/input-site` | `useRekonsiliasiPeriod` + `useRekonsiliasiTable` |
 | `OloPage` | `/olo` | coming soon |
@@ -304,7 +305,7 @@ api/
     └── index.ts
 ```
 
-Domain yang ada: `auth`, `fbb`, `first-insight`, `monday-monitoring`, `network`, `reconsiliation`, `ebis` (sample).
+Domain yang ada: `auth`, `daily-monitoring`, `fbb`, `first-insight`, `monday-monitoring`, `network`, `reconsiliation`, `ebis` (sample).
 
 ### 6.2 `apiRequest`
 
@@ -427,6 +428,7 @@ import { useDebouncedSearch } from "@/app/hooks/custom/pacer"; // pacer tidak di
 
 ```
 types/
+├── daily-monitoring/ dailyMonitoring.types.ts
 ├── fbb/              onx.types.ts, sla.types.ts
 ├── first-insight/    historySla.types.ts
 ├── monday/           *.types.ts
@@ -463,6 +465,7 @@ Organism sebaiknya menerima **view model**, bukan response mentah. Dengan begitu
 | Auth (login, 2FA, konfirmasi akun) | ✅ Atomic, `src/modules/auth` sudah dihapus |
 | Landing, FBB (SLA/ONX/Ookla), EBIS, First Insight, OLO | ✅ Atomic |
 | Monday, Input Site (Rekonsiliasi) | ✅ Atomic, dengan catatan di bawah |
+| Daily Monitoring (`/daily-monitoring`) | ✅ Atomic, tanpa Ant Design (`src/modules/daily-monitoring` sudah dihapus) |
 | `src/app/components/App*` (`AppTable`, `AppMenu`, `AppDropdown`, `AppInput`, `AppRadioGroup`) | ⏳ Legacy, masih dipakai modul lama |
 | `src/app/components/AppRouterGuard`, `AppRouterWrapper` | Infrastruktur router (bukan UI atomic) |
 | `src/modules/*` (dashboard, tutela, site, network, ticket, dll.) | ⏳ Belum dimigrasi |

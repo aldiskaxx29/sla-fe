@@ -2,13 +2,15 @@ import { useMemo, useState } from "react";
 import { LuSearch } from "react-icons/lu";
 import { toast } from "react-toastify";
 
+import { buildPeHsiLinkDetailSample } from "@/app/api/network/peHsi.sample";
 import {
-  buildPeHsiLinkDetailSample,
-  PE_HSI_SUMMARY_SAMPLE,
-} from "@/app/api/network/peHsi.sample";
-import { usePeHsiPivotQuery, usePeHsiTrendSummaryQuery } from "@/app/hooks";
+  usePeHsiLastUpdatedQuery,
+  usePeHsiListPeQuery,
+  usePeHsiPerformanceLinkQuery,
+  usePeHsiPivotQuery,
+  usePeHsiTrendSummaryQuery,
+} from "@/app/hooks";
 
-import { SampleDataBadge } from "@/app/components/molecules/SampleDataBadge";
 import { SectionCard } from "@/app/components/molecules/SectionCard";
 
 import { PeHsiTrendChart } from "@/app/components/organisms/charts/PeHsiTrendChart";
@@ -18,12 +20,27 @@ import { PeHsiGatewayTrendModal } from "@/app/components/organisms/popup/PeHsiGa
 import { PeHsiLinkDetailModal } from "@/app/components/organisms/popup/PeHsiLinkDetailModal";
 import { PeHsiPivotTable } from "@/app/components/organisms/tables/PeHsiPivotTable";
 
+import type { PeHsiGranularity } from "@/app/types/network/peHsi.types";
+
 const pad = (value: number) => String(value).padStart(2, "0");
 
 const toLocalInput = (date: Date) =>
   `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(
     date.getHours(),
   )}:00`;
+
+/**
+ * Data satu jam baru lengkap setelah jamnya berakhir, jadi default-nya adalah
+ * jam berjalan dikurangi satu (mis. pukul 12.56 → jam 11, pukul 13.00 → jam 12).
+ */
+const toDefaultSelectedAt = (now = new Date()) => {
+  const previousHour = new Date(now);
+
+  previousHour.setMinutes(0, 0, 0);
+  previousHour.setHours(previousHour.getHours() - 1);
+
+  return toLocalInput(previousHour);
+};
 
 const splitDateTime = (value: string) => {
   const [date = "", time = ""] = value.split("T");
@@ -34,16 +51,20 @@ const splitDateTime = (value: string) => {
 
 const PeHsiMonitoringPage = () => {
   const [search, setSearch] = useState("");
-  const [selectedAt, setSelectedAt] = useState(() => toLocalInput(new Date()));
+  const [selectedAt, setSelectedAt] = useState(toDefaultSelectedAt);
   const [gatewayTrendOpen, setGatewayTrendOpen] = useState(false);
   const [selectedPe, setSelectedPe] = useState("");
   const [linkDetailOpen, setLinkDetailOpen] = useState(false);
   const [detailPe, setDetailPe] = useState("");
+  const [trendRange, setTrendRange] = useState<PeHsiGranularity>("hourly");
 
   const { date, hour } = splitDateTime(selectedAt);
 
   const pivot = usePeHsiPivotQuery({ date, hour });
   const trend = usePeHsiTrendSummaryQuery({ date, hour });
+  const performance = usePeHsiPerformanceLinkQuery({ date, hour });
+  const lastUpdated = usePeHsiLastUpdatedQuery();
+  const listPe = usePeHsiListPeQuery();
 
   const areas = useMemo(() => {
     const keyword = search.trim().toLowerCase();
@@ -64,18 +85,15 @@ const PeHsiMonitoringPage = () => {
   }, [pivot.data, search]);
 
   const visiblePeCount = areas.reduce((total, area) => total + area.items.length, 0);
-  const totalLink = (pivot.data ?? []).reduce(
+  const pivotPeCount = (pivot.data ?? []).reduce(
     (total, area) => total + (area.pe_count ?? area.items.length),
     0,
   );
+  /** Angka resmi dari API, jatuh ke hitungan pivot kalau belum tersedia. */
+  const totalLink = performance.data?.totalLink ?? pivotPeCount;
 
-  const peOptions = useMemo(
-    () =>
-      (pivot.data ?? []).flatMap((area) =>
-        area.items.map((item) => item.pe_hsi),
-      ),
-    [pivot.data],
-  );
+  /** Dropdown popup memakai daftar resmi `pe-hsi/list-pe`. */
+  const peOptions = listPe.data ?? [];
 
   const openGatewayTrend = (peHsi = "") => {
     setSelectedPe(peHsi);
@@ -101,25 +119,18 @@ const PeHsiMonitoringPage = () => {
   return (
     <main className="flex flex-1 flex-col gap-4 p-6">
       <PeHsiToolbar
-        lastUpdated={PE_HSI_SUMMARY_SAMPLE.last_updated}
+        lastUpdated={lastUpdated.data ?? "-"}
         selectedAt={selectedAt}
         onSelectedAtChange={setSelectedAt}
         onExport={notAvailable}
       />
 
-      <div className="flex flex-wrap items-center gap-2">
-        <SampleDataBadge />
-        <span className="text-xs text-[#64748b]">
-          Jumlah Link & Issue Link masih data contoh.
-        </span>
-      </div>
-
       <PeHsiSummaryPanel
-        totalLink={totalLink || PE_HSI_SUMMARY_SAMPLE.total_link}
-        bestPath={PE_HSI_SUMMARY_SAMPLE.best_path}
-        issueLink={PE_HSI_SUMMARY_SAMPLE.issue_link}
-        issueBreakdown={PE_HSI_SUMMARY_SAMPLE.issue_breakdown}
-        loading={pivot.isFetching}
+        totalLink={totalLink}
+        bestPath={performance.data?.bestPath ?? []}
+        issueLink={performance.data?.issueLink ?? 0}
+        issueBreakdown={performance.data?.issueBreakdown ?? []}
+        loading={performance.isFetching}
       />
 
       <PeHsiTrendChart
@@ -168,6 +179,8 @@ const PeHsiMonitoringPage = () => {
         peOptions={peOptions}
         selectedPe={selectedPe}
         totalPe={totalLink}
+        range={trendRange}
+        onRangeChange={setTrendRange}
         onSelectedPeChange={setSelectedPe}
         onClose={() => setGatewayTrendOpen(false)}
       />

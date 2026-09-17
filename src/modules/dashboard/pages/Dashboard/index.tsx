@@ -9,7 +9,6 @@ import { useParams } from "react-router-dom";
 
 // Images
 
-import MSAmenu from "./components/MSAmenu";
 import CNOPmenu from "./components/CNOPmenu";
 import { toast } from "react-toastify";
 
@@ -47,11 +46,7 @@ function Dashboard() {
     key: "Monday",
   });
   const [historyType, setHistoryType] = useState("pl 5% ran to core");
-  const [type, setType] = useState("msa");
   const [trendData, setTrendData] = useState<Record<string, any>>({});
-  const [trendReady, setTrendReady] = useState(false);
-  const [slaMode, setSlaMode] = useState<"monthly" | "weekly">("monthly");
-  const [weeklyKpi, setWeeklyKpi] = useState("packetloss 1-5% ran to core");
 
   const effectiveTreg = treg === "all" ? "" : treg;
 
@@ -66,18 +61,16 @@ function Dashboard() {
     getSC,
     getTrend,
     getHistoryData,
-    isSuccessHistoryData,
     dataSC,
     isLoadingSC,
-    isLoadingHistoryData,
     dataHistoryData,
   } = useDashboard();
   const { menuId } = useParams();
 
   //// Methods
 
-  const isDashboardMenu = menuId === "msa" || menuId === "cnop";
-  const isMsaRoute = menuId === "msa";
+  // Halaman MSA sudah pindah ke `/msa` (atomic), jadi di sini tinggal CNOP.
+  const isDashboardMenu = menuId === "cnop";
 
   const fetchDashboard = useCallback(async (): Promise<void> => {
     setLoading(true);
@@ -102,32 +95,20 @@ function Dashboard() {
   const fetchHistory = useCallback(async (): Promise<void> => {
     setLoading(true);
     try {
-      if (slaMode === "weekly" && isMsaRoute) {
-        await getHistoryData({
-          query: {
-            type: "cnop",
-            kpi: weeklyKpi,
-            filter: "",
-            treg: effectiveTreg,
-            rekon: "before",
-          },
-        }).unwrap();
-      } else {
-        await getHistoryData({
-          query: {
-            type: menuId,
-            kpi: historyType,
-            filter: filter,
-            treg: effectiveTreg,
-          },
-        }).unwrap();
-      }
+      await getHistoryData({
+        query: {
+          type: menuId,
+          kpi: historyType,
+          filter: filter,
+          treg: effectiveTreg,
+        },
+      }).unwrap();
     } catch (err) {
       toast.error("Gagal memuat data history");
     } finally {
       setLoading(false);
     }
-  }, [effectiveTreg, menuId, historyType, filter, slaMode, isMsaRoute, weeklyKpi]);
+  }, [effectiveTreg, menuId, historyType, filter]);
 
   /**
    * @description Fetch customer list
@@ -149,7 +130,6 @@ function Dashboard() {
     ];
 
     try {
-      setTrendReady(false);
       setLoading(true);
       const trendPromises = trendParameters.map(async (param) => {
         const response = await getTrend({
@@ -169,10 +149,8 @@ function Dashboard() {
       // Merge all results into a single object
       const trendsMap = Object.assign({}, ...results);
       setTrendData(trendsMap);
-      setTrendReady(true);
     } catch (error) {
       console.error("Error fetching trends:", error);
-      setTrendReady(true);
     } finally {
       setLoading(false);
     }
@@ -189,9 +167,6 @@ function Dashboard() {
       const selectedMenu = menuOptions.find((item) => item.key === menuId);
       if (selectedMenu) {
         setMenu(selectedMenu);
-        setType(selectedMenu.key);
-        setSlaMode("monthly");
-        setWeeklyKpi("packetloss 1-5% ran to core");
       }
     }
   }, [menuId]);
@@ -204,7 +179,7 @@ function Dashboard() {
   useEffect(() => {
     if (!isDashboardMenu) return;
     fetchHistory();
-  }, [fetchHistory, historyType, isDashboardMenu, slaMode, weeklyKpi]);
+  }, [fetchHistory, historyType, isDashboardMenu]);
 
   useEffect(() => {
     if (!isDashboardMenu) return;
@@ -217,32 +192,7 @@ function Dashboard() {
 
   return (
     <div className="text-nowrap bg-white">
-      {loading && !isMsaRoute && (
-        <Spin fullscreen tip="Sedang Memuat Data..." />
-      )}
-
-      {isMsaRoute && (
-        <MSAmenu
-          handlefilter={handlefilter}
-          treg={treg}
-          handletreg={handletreg}
-          dataHistoryData={dataHistoryData}
-          dataSC={dataSC}
-          isLoadingSC={isLoadingSC}
-          isLoadingHistoryData={isLoadingHistoryData}
-          isTrendLoading={loading}
-          isTrendReady={trendReady}
-          isSuccessHistoryData={isSuccessHistoryData}
-          trendData={trendData}
-          level={level}
-          filter={filter}
-          setLevel={setLevel}
-          slaMode={slaMode}
-          setSlaMode={setSlaMode}
-          weeklyKpi={weeklyKpi}
-          setWeeklyKpi={setWeeklyKpi}
-        />
-      )}
+      {loading && <Spin fullscreen tip="Sedang Memuat Data..." />}
 
       {menu.key === "cnop" && dataSC ? (
         <CNOPmenu
@@ -251,6 +201,7 @@ function Dashboard() {
           handletreg={handletreg}
           dataHistoryData={dataHistoryData}
           dataSC={dataSC}
+          isLoadingSC={isLoadingSC}
           handleHistoryCNOP={handleHistoryCNOP}
           historyType={historyType}
           level={level}

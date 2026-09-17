@@ -1,15 +1,22 @@
-import { useMemo, useState } from "react";
-import { LuSearch } from "react-icons/lu";
+import { useMemo } from "react";
 
 import { Skeleton } from "@/app/components/atoms";
 
 import { EmptyState } from "@/app/components/molecules/EmptyState";
 import Modal from "@/app/components/molecules/Modal";
-import { SelectMenu } from "@/app/components/molecules/SelectMenu";
+import Select from "@/app/components/molecules/Select";
 
 import { PeHsiGatewayTrendCard } from "@/app/components/organisms/charts/PeHsiGatewayTrendCard";
 
 import { usePeHsiTrendVerifierQuery } from "@/app/hooks";
+
+import type { PeHsiGranularity } from "@/app/types/network/peHsi.types";
+
+const RANGE_OPTIONS: Array<{ label: string; value: PeHsiGranularity }> = [
+  { label: "Hourly", value: "hourly" },
+  { label: "Daily", value: "daily" },
+  { label: "Weekly", value: "weekly" },
+];
 
 interface PeHsiGatewayTrendModalProps {
   open: boolean;
@@ -18,6 +25,8 @@ interface PeHsiGatewayTrendModalProps {
   peOptions: string[];
   selectedPe: string;
   totalPe?: number;
+  range: PeHsiGranularity;
+  onRangeChange: (value: PeHsiGranularity) => void;
   onSelectedPeChange: (value: string) => void;
   onClose: () => void;
 }
@@ -29,13 +38,13 @@ export function PeHsiGatewayTrendModal({
   peOptions,
   selectedPe,
   totalPe,
+  range,
+  onRangeChange,
   onSelectedPeChange,
   onClose,
 }: PeHsiGatewayTrendModalProps) {
-  const [search, setSearch] = useState("");
-
   const verifierTrend = usePeHsiTrendVerifierQuery(
-    { date, hour, peHsi: selectedPe },
+    { date, hour, peHsi: selectedPe, filter: range },
     open,
   );
 
@@ -47,16 +56,7 @@ export function PeHsiGatewayTrendModal({
     [peOptions],
   );
 
-  const trends = useMemo(() => {
-    const keyword = search.trim().toLowerCase();
-    const list = verifierTrend.data ?? [];
-
-    if (!keyword) return list;
-
-    return list.filter((item) =>
-      item.verifier_name.toLowerCase().includes(keyword),
-    );
-  }, [search, verifierTrend.data]);
+  const trends = verifierTrend.data ?? [];
 
   return (
     <Modal open={open} onClose={onClose} width={1040} bodyClassName="p-6">
@@ -67,24 +67,32 @@ export function PeHsiGatewayTrendModal({
       </header>
 
       <div className="mb-4 flex flex-wrap items-center gap-3">
-        <label className="flex h-11 w-full items-center gap-2 rounded-full border border-[#e2e8f0] bg-white px-4 focus-within:border-[#cbd5e1] sm:w-[280px]">
-          <LuSearch className="size-4 shrink-0 text-[#64748b]" />
-          <input
-            type="search"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search"
-            className="w-full bg-transparent text-sm text-[#020617] outline-none placeholder:text-[#64748b]"
-          />
-        </label>
-
-        <SelectMenu
+        <Select
+          searchable
           value={selectedPe}
           options={options}
-          onChange={onSelectedPeChange}
+          onChange={(next) => onSelectedPeChange(String(next))}
           placeholder="Pilih PE"
-          className="[&>div]:w-[220px] [&_button]:h-11 [&_button]:w-[220px] [&_button]:justify-between [&_button]:rounded-full [&_button]:border-[#e2e8f0] [&_button]:px-4 [&_button]:text-sm [&_button]:text-[#0f172a] [&_button>span]:truncate"
+          className="w-full sm:w-[280px]"
+          triggerClassName="flex h-11 w-full cursor-pointer items-center gap-2 rounded-full border border-[#e2e8f0] bg-white px-4 text-left text-sm text-[#0f172a]"
         />
+
+        <div className="flex items-center gap-1 rounded-full bg-[#f1f5f9] p-1">
+          {RANGE_OPTIONS.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => onRangeChange(option.value)}
+              className={`cursor-pointer rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+                range === option.value
+                  ? "bg-[#2563eb] text-white"
+                  : "text-[#475569] hover:text-[#0f172a]"
+              }`}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="max-h-[62vh] overflow-y-auto pr-1">
@@ -119,7 +127,7 @@ export function PeHsiGatewayTrendModal({
             description={
               verifierTrend.isError
                 ? undefined
-                : "Tidak ada gateway yang cocok dengan pencarian ini."
+                : "Coba pilih PE atau rentang waktu yang lain."
             }
           />
         )}

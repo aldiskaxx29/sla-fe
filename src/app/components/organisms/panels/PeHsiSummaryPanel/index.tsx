@@ -55,7 +55,7 @@ export function PeHsiSummaryPanel({
                 <StatChip
                   key={item.path}
                   label={item.path}
-                  value={`${item.percentage}%`}
+                  value={item.percentage}
                 />
               ))}
             </div>

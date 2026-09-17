@@ -23,6 +23,30 @@ export interface PeHsiSummaryData {
   issue_breakdown: PeHsiIssueBreakdown[];
 }
 
+export interface PeHsiPerformanceLinkResponse {
+  jumlah_link: number;
+  /** Persentase best path per gateway, contoh: `{ BTC: 66 }`. */
+  best_path: Record<string, number>;
+  issue_link: number;
+  /** Jumlah issue per metrik, contoh: `{ "Packet Loss": 1 }`. */
+  breakdown: Record<string, number>;
+}
+
+export interface PeHsiDateTimeResponse {
+  datetime: string;
+}
+
+export interface PeHsiPerformanceLink {
+  totalLink: number;
+  bestPath: PeHsiBestPath[];
+  issueLink: number;
+  issueBreakdown: PeHsiIssueBreakdown[];
+}
+
+export interface PeHsiListPeResponse {
+  hostname: string;
+}
+
 export interface PeHsiPivotItem {
   pe_hsi: string;
   baseline_str: string;
@@ -58,6 +82,8 @@ export interface PeHsiParams {
 export interface PeHsiVerifierParams extends PeHsiParams {
   /** Nama PE/transit yang dipilih di popup. */
   peHsi?: string;
+  /** Rentang trend di popup: `hourly`, `daily`, atau `weekly`. */
+  filter?: PeHsiGranularity;
 }
 
 export interface PeHsiVerifierTrend {
