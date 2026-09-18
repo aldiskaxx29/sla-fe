@@ -12,11 +12,19 @@ import DashboardShellTemplate from "@/app/components/templates/DashboardShellTem
 // Organism
 import type { DashboardSidebarMenu } from "@/app/components/organisms/navigation/DashboardSidebar";
 
-const FBB_MENUS: DashboardSidebarMenu[] = [
+/**
+ * `hidden` menyembunyikan menu dari sidebar tanpa mematikan route-nya — halaman
+ * tetap bisa dibuka lewat URL langsung dan judulnya tetap kebaca.
+ */
+type FbbMenu = DashboardSidebarMenu & { hidden?: boolean };
+
+const FBB_MENUS: FbbMenu[] = [
   { key: "sla", label: "SLA WISA FBB", path: "/fbb/sla", icon: LuTrendingUpDown },
-  { key: "onx", label: "ONX Dashboard", path: "/fbb/onx", icon: LuRouter },
-  { key: "ookla", label: "Ookla Dashboard", path: "/fbb/ookla", icon: LuRadio },
+  { key: "onx", label: "ONX Dashboard", path: "/fbb/onx", icon: LuRouter, hidden: true },
+  { key: "ookla", label: "Ookla Dashboard", path: "/fbb/ookla", icon: LuRadio, hidden: true },
 ];
+
+const VISIBLE_FBB_MENUS = FBB_MENUS.filter((menu) => !menu.hidden);
 
 /** Shell dashboard FBB: sidebar menu FBB dan bar judul halaman. */
 const AppLayoutFbb = () => {
@@ -30,7 +38,11 @@ const AppLayoutFbb = () => {
   );
 
   return (
-    <DashboardShellTemplate menus={FBB_MENUS} activeKey={activeMenu.key} title={activeMenu.label}>
+    <DashboardShellTemplate
+      menus={VISIBLE_FBB_MENUS}
+      activeKey={activeMenu.key}
+      title={activeMenu.label}
+    >
       <AppRouteWrapper />
     </DashboardShellTemplate>
   );
