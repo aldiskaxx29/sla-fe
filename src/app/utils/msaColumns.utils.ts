@@ -221,18 +221,30 @@ export const buildMsaMonthColumns = (
 };
 
 /**
- * Warna sel: packetloss makin kecil makin baik, KPI lain sebaliknya.
- * Nilai tanpa target dibiarkan netral.
+ * Warna sel dibedakan per jenis kolom:
+ * - kolom achievement/minggu berisi persen compliance, jadi acuannya 100%
+ *   (>= 100 hijau) tanpa memandang arah KPI.
+ * - kolom realisasi berisi nilai KPI mentah, dibanding `target` dengan arah
+ *   KPI-nya (packetloss makin kecil makin baik).
+ * Nilai tanpa acuan dibiarkan netral.
  */
 export const resolveValueTone = (
   row: MsaRow,
   value: unknown,
+  kind?: MsaColumnKind,
 ): "good" | "bad" | "neutral" => {
-  const target = Number(row.target);
   const numeric = Number(value);
 
   if (!hasMeaningfulValue(value)) return "neutral";
-  if (!Number.isFinite(target) || !Number.isFinite(numeric)) return "neutral";
+  if (!Number.isFinite(numeric)) return "neutral";
+
+  if (kind === "week" || kind === "achievement") {
+    return numeric >= 100 ? "good" : "bad";
+  }
+
+  const target = Number(row.target);
+
+  if (!Number.isFinite(target)) return "neutral";
 
   const lowerIsBetter = isPacketlossRanToCore(row);
   const isGood = lowerIsBetter ? numeric <= target : numeric >= target;

@@ -23,8 +23,13 @@ const LINE_COLOR = "#7c3aed";
 const AREA_TOP = "rgba(124, 58, 237, 0.22)";
 const AREA_BOTTOM = "rgba(124, 58, 237, 0.01)";
 
-/** Maksimal link yang ditampilkan di tooltip supaya kartunya tidak kepanjangan. */
-const TOOLTIP_MAX_ITEMS = 4;
+/** Jumlah baris link yang terlihat di tooltip; sisanya bisa di-scroll. */
+const TOOLTIP_VISIBLE_ROWS = 4;
+const TOOLTIP_ROW_HEIGHT = 30;
+const TOOLTIP_ROW_GAP = 4;
+const TOOLTIP_LIST_MAX_HEIGHT =
+  TOOLTIP_VISIBLE_ROWS * TOOLTIP_ROW_HEIGHT +
+  (TOOLTIP_VISIBLE_ROWS - 1) * TOOLTIP_ROW_GAP;
 
 const escapeHtml = (value: string) =>
   value.replace(/[&<>"']/g, (char) => {
@@ -40,7 +45,7 @@ const escapeHtml = (value: string) =>
   });
 
 const renderUnachievedRow = (item: PeHsiUnachievedItem) => `
-  <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;border-radius:8px;background:#f4f4f6;padding:6px 10px;">
+  <div style="display:flex;flex:none;align-items:center;justify-content:space-between;gap:12px;height:${TOOLTIP_ROW_HEIGHT}px;border-radius:8px;background:#f4f4f6;padding:0 10px;">
     <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:#1f2937;">${escapeHtml(item.hostname)}</span>
     <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:${LINE_COLOR};">${escapeHtml(item.verifierid)}</span>
   </div>
@@ -79,10 +84,13 @@ export function PeHsiTrendChart({
       tooltip: {
         trigger: "axis",
         axisPointer: { type: "line", lineStyle: { color: "#e9d5ff", width: 2 } },
+        /** Bisa dimasuki kursor supaya daftar link panjang tetap bisa di-scroll. */
+        enterable: true,
+        appendToBody: true,
         backgroundColor: "transparent",
         borderWidth: 0,
         padding: 0,
-        extraCssText: "box-shadow:none;",
+        extraCssText: "box-shadow:none;padding:0;",
         formatter: (params) => {
           const first = Array.isArray(params) ? params[0] : params;
           const index = Number(first?.dataIndex ?? 0);
@@ -95,8 +103,7 @@ export function PeHsiTrendChart({
           const rangeLabel =
             RANGE_OPTIONS.find((option) => option.value === range)?.label ??
             "Hourly";
-          const visible = unachieved.slice(0, TOOLTIP_MAX_ITEMS);
-          const rest = unachieved.length - visible.length;
+          const isScrollable = unachieved.length > TOOLTIP_VISIBLE_ROWS;
 
           return `
             <div style="min-width:260px;border-radius:16px;border:1px solid #ece9f5;background:#ffffff;box-shadow:0 12px 28px rgba(15,23,42,0.12);padding:14px 16px;">
@@ -118,12 +125,12 @@ export function PeHsiTrendChart({
                     <div style="margin:10px 0 6px;font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:#94a3b8;">
                       PE Bermasalah &middot; ${unachieved.length} PE
                     </div>
-                    <div style="display:flex;flex-direction:column;gap:4px;">
-                      ${visible.map(renderUnachievedRow).join("")}
+                    <div style="display:flex;flex-direction:column;gap:${TOOLTIP_ROW_GAP}px;max-height:${TOOLTIP_LIST_MAX_HEIGHT}px;overflow-y:auto;padding-right:${isScrollable ? 6 : 0}px;">
+                      ${unachieved.map(renderUnachievedRow).join("")}
                     </div>
                     ${
-                      rest > 0
-                        ? `<div style="margin-top:6px;font-size:11px;color:#94a3b8;">+${rest} Link Lainnya</div>`
+                      isScrollable
+                        ? `<div style="margin-top:6px;font-size:11px;color:#94a3b8;">Scroll untuk melihat semua link</div>`
                         : ""
                     }
                   `

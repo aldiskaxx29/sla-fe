@@ -152,7 +152,7 @@ export function MsaAchievementTable({
   const renderLeafCell = (row: MsaRow, column: MsaLeafColumn) => {
     const value = row[column.key];
     const summary = isSummaryRow(row);
-    const tone = resolveValueTone(row, value);
+    const tone = resolveValueTone(row, value, column.kind);
     const label = formatCellValue(row, value);
 
     if (label === "-") return <span className="text-[#94a3b8]">-</span>;
