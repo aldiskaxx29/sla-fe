@@ -3,6 +3,7 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import {
   getPeHsiDateTime,
   getPeHsiListPe,
+  getPeHsiPeDetail,
   getPeHsiPerformanceLink,
   getPeHsiPivot,
   getPeHsiTrendSummary,
@@ -11,10 +12,14 @@ import {
 } from "@/app/api";
 
 import type {
+  PeHsiDetailParams,
+  PeHsiGatewayPerformance,
+  PeHsiLinkDetail,
   PeHsiParams,
   PeHsiPerformanceLink,
   PeHsiPivotArea,
   PeHsiTrendPoint,
+  PeHsiTrendSummaryParams,
   PeHsiVerifierParams,
   PeHsiVerifierTrend,
 } from "@/app/types/network/peHsi.types";
@@ -123,7 +128,7 @@ export const usePeHsiPivotQuery = (params: PeHsiParams) =>
       })),
   });
 
-export const usePeHsiTrendSummaryQuery = (params: PeHsiParams) =>
+export const usePeHsiTrendSummaryQuery = (params: PeHsiTrendSummaryParams) =>
   useQuery({
     queryKey: networkKeys.peHsiTrend({ ...params }),
     enabled: Boolean(params.date),
@@ -134,6 +139,7 @@ export const usePeHsiTrendSummaryQuery = (params: PeHsiParams) =>
       (response?.categories ?? []).map((label, index) => ({
         label,
         value: response?.series?.[index] ?? 0,
+        unachieved: response?.unachieved_list?.[index] ?? [],
       })),
   });
 
@@ -149,4 +155,58 @@ export const usePeHsiTrendVerifierQuery = (
     queryFn: ({ signal }) => getPeHsiTrendVerifier(params, signal),
     select: (response): PeHsiVerifierTrend[] =>
       Array.isArray(response) ? response : [],
+  });
+
+const isKnownPath = (value: string): value is PeHsiPath =>
+  BEST_PATH_ORDER.includes(value as PeHsiPath);
+
+/** Nama series datang sebagai `"BDS Latency"`, gateway-nya kata pertama. */
+const toTrendGateway = (name: string) => name.trim().split(/\s+/)[0] ?? "";
+
+export const usePeHsiPeDetailQuery = (
+  params: PeHsiDetailParams,
+  enabled = true,
+) =>
+  useQuery({
+    queryKey: networkKeys.peHsiPeDetail({ ...params }),
+    enabled: enabled && Boolean(params.date) && Boolean(params.peHsi),
+    staleTime: DATA_STALE_TIME,
+    placeholderData: keepPreviousData,
+    queryFn: ({ signal }) => getPeHsiPeDetail(params, signal),
+    select: (response): PeHsiLinkDetail => {
+      const gateways: PeHsiGatewayPerformance[] = (response?.overview ?? [])
+        .filter((item) => isKnownPath(String(item.gateway)))
+        .map((item) => ({
+          gateway: String(item.gateway) as PeHsiPath,
+          latency_ms: item.latency ?? null,
+          jitter_ms: item.jitter ?? null,
+          packet_loss: item.packet_loss ?? 0,
+          status: item.status ?? "-",
+          kpi: item.kpi ?? "-",
+        }));
+
+      const bestGateway = gateways
+        .filter((gateway) => gateway.latency_ms !== null)
+        .sort((a, b) => (a.latency_ms ?? 0) - (b.latency_ms ?? 0))[0];
+
+      const trend = response?.latency_trend;
+
+      return {
+        pe_hsi: params.peHsi,
+        best_path: bestGateway?.gateway,
+        best_path_status: bestGateway ? "OK" : "No Data",
+        link_degrade: response?.link_degrade ?? 0,
+        traceroute: [],
+        gateways,
+        latency_trend: {
+          categories: trend?.categories ?? [],
+          gateways: (trend?.series ?? [])
+            .filter((series) => isKnownPath(toTrendGateway(series.name)))
+            .map((series) => ({
+              gateway: toTrendGateway(series.name) as PeHsiPath,
+              series: (series.data ?? []).map((value) => Number(value) || 0),
+            })),
+        },
+      };
+    },
   });

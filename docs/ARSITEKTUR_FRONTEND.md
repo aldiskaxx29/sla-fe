@@ -113,7 +113,9 @@ Semua router digabung di `src/plugins/router/index.tsx`. Route yang butuh login 
 | `AppLayoutEbis` | `DashboardShellTemplate` | `ebis.router.tsx` | `/ebis` → `/ebis/kpi` |
 | `AppLayoutFirstInsight` | `DashboardShellTemplate` | `first-insight.router.tsx` | `/first-insight` → `/first-insight/history-sla` |
 | `AppLayoutProfile` | `DashboardShellTemplate` (tanpa menu) | modul profile | `/profile` |
-| `AppLayoutDefault` | layout CNOP lama | `monday.router.tsx`, `rekonsiliasi.router.tsx`, modul lama | `/monday`, `/input-site`, dll. |
+| `AppLayoutDefault` | layout CNOP lama | `monday.router.tsx`, `rekonsiliasi.router.tsx`, `msa.router.tsx`, `network.router.tsx`, modul lama | `/monday`, `/input-site`, `/msa`, `/network/pe-hsi`, dll. |
+
+> **Catatan urutan pendaftaran.** Di dalam `AppLayoutDefault`, `...msa` didaftarkan **sebelum** `...dashboard`, karena router dashboard lama memakai path dinamis `:menuId` yang juga cocok dengan `/msa`.
 
 ### 4.2 Format file router
 
@@ -198,6 +200,7 @@ pages → templates → organisms → molecules → atoms
 | `popover` | `Popover` (primitive portal) |
 | `skeleton` | `Skeleton` |
 | `sparkline` | `Sparkline` |
+| `switch` | `Switch` (toggle on/off) |
 
 **Molecules** (`components/molecules/<Nama>/index.tsx`)
 
@@ -210,6 +213,7 @@ pages → templates → organisms → molecules → atoms
 | `Select`, `FilterDropdown` | Dropdown berbasis `Popover` (bisa dicari) |
 | `SearchInput` | Input + tombol clear + tombol cari |
 | `Pagination` | Navigasi halaman + pilihan jumlah baris |
+| `DataTable` | Tabel generik: `columns` (`DataTableColumn<TRow>`) + `rows`, sudah menangani `loading` / `error` / kosong |
 | `ColumnFilterPopover`, `ColumnSearchPopover` | Filter/cari per kolom tabel |
 | `EmptyState`, `SampleDataBadge`, `NotchedCard` | Status & dekorasi |
 | `FileDropzone` | Area unggah file |
@@ -222,11 +226,11 @@ pages → templates → organisms → molecules → atoms
 | Kategori | Komponen |
 |---|---|
 | `navigation` | `DashboardSidebar`, `ScallopedTitleBar` (header), `UserMenu` |
-| `tables` | `FbbNationMetricsTable`, `FbbLoseRegionTable`, `FbbSlaIndicatorTable`, `HistorySlaAchievementTable`, `RekonsiliasiTable`, `DailyMonitoringPacketLossTable`, `MttrQualityTable` |
-| `panels` | `AccountPendingPanel`, `FbbOnxMapPanel`, `FbbSlaSummaryPanel`, `HistorySlaHighlightPanel`, panel Monday (`SlaPerformancePanel`, `TrendPerformancePanel`, dll.) |
-| `charts` | `HistorySlaTrendChart` |
-| `forms` | `FbbOnxFilterBar`, `RekonsiliasiFilterBar`, `LoginForm` |
-| `popup` | `ImportTemplateModal`, `RekonsiliasiEditModal`, `TwoFactorModal`, `PacketLossSiteDetailModal` |
+| `tables` | `RcaNotClearTable`, `ResumeRcaRegionTable`, `TopOldestTicketTable`, `MttrqActionPlanTable`, `MttrqDetailIssueTable`, `ReportSiteProfilingTable`, `FbbNationMetricsTable`, `FbbLoseRegionTable`, `FbbSlaIndicatorTable`, `HistorySlaAchievementTable`, `RekonsiliasiTable`, `DailyMonitoringPacketLossTable`, `MttrQualityTable`, `MsaAchievementTable`, `MsaHistoryTable`, `MsaHistoryWeeklyTable`, `PeHsiPivotTable` |
+| `panels` | `MttrResumePanel`, `RcaActionPlanPanel`, `ResumeRcaHighlightPanel`, `AccountPendingPanel`, `FbbOnxMapPanel`, `FbbSlaSummaryPanel`, `HistorySlaHighlightPanel`, `MsaPredictionPanel`, `PeHsiSummaryPanel`, panel Monday (`SlaPerformancePanel`, `TrendPerformancePanel`, `MonitoringCtiPanel`, `BaselinePerformancePanel`, `WinningBenchmarkPanel`) |
+| `charts` | `HistorySlaTrendChart`, `MsaTrendChart`, `PeHsiTrendChart`, `PeHsiLatencyTrendChart`, `PeHsiGatewayTrendCard` |
+| `forms` | `FbbOnxFilterBar`, `RekonsiliasiFilterBar`, `LoginForm`, `MsaToolbar`, `PeHsiToolbar` |
+| `popup` | `ImportTemplateModal`, `RekonsiliasiEditModal`, `TwoFactorModal`, `PacketLossSiteDetailModal`, `FbbSlaDetailModal`, `MsaRealisasiModal`, `MsaSiteWeekModal`, `MsaWeeklyDetailModal`, `PeHsiGatewayTrendModal`, `PeHsiLinkDetailModal` |
 
 **Templates**
 
@@ -236,7 +240,7 @@ pages → templates → organisms → molecules → atoms
 | `DashboardContentTemplate` | `FbbSlaPage`, `EbisKpiPage`, `FbbOnxPage`, `FbbOoklaPage`, `HistorySlaPage` | Toolbar + kartu konten utama (radius 36px) |
 | `LandingTemplate` | `LandingPage`, `OloPage` | Header aksi + main + footer |
 | `AuthTemplate` | `AppLayoutAuth` | Background login + kartu putih di tengah |
-| `MondayTemplate`, `InputSiteTemplate`, `DailyMonitoringTemplate` | `MondayPage`, `InputSitePage`, `DailyMonitoringPage` | Kerangka halaman masing-masing |
+| `MondayTemplate`, `InputSiteTemplate`, `DailyMonitoringTemplate`, `MsaTemplate` | `MondayPage`, `InputSitePage`, `DailyMonitoringPage`, `MsaPage` | Kerangka halaman masing-masing. `MsaTemplate` juga mengekspor `MsaSection` (judul + slot aksi per seksi) |
 
 `DashboardContentTemplate` punya dua posisi toolbar:
 
@@ -263,7 +267,8 @@ pages → templates → organisms → molecules → atoms
 | `FbbOoklaPage` | `/fbb/ookla` | `useFbbOokla*Query` |
 | `EbisKpiPage` | `/ebis/kpi` | data contoh `api/ebis/ebisKpi.sample.ts` |
 | `HistorySlaPage` | `/first-insight/history-sla` | `useHistorySla*Query` |
-| `PeHsiMonitoringPage` | `/network/pe-hsi` | data contoh `api/network/peHsi.sample.ts` |
+| `PeHsiMonitoringPage` | `/network/pe-hsi` | `usePeHsi*Query` |
+| `MsaPage` | `/msa` | `useMsa*Query` |
 | `DailyMonitoringPage` | `/daily-monitoring` | `useDailyMonitoring*Query` |
 | `MondayPage` | `/monday` | query hook di dalam panel Monday |
 | `InputSitePage` | `/input-site` | `useRekonsiliasiPeriod` + `useRekonsiliasiTable` |
@@ -305,7 +310,7 @@ api/
     └── index.ts
 ```
 
-Domain yang ada: `auth`, `daily-monitoring`, `fbb`, `first-insight`, `monday-monitoring`, `network`, `reconsiliation`, `ebis` (sample).
+Domain yang ada: `auth`, `daily-monitoring`, `fbb`, `first-insight`, `monday-monitoring`, `msa`, `network`, `reconsiliation`, `resume-rca`, `site`, `ebis` (sample, belum diekspor dari `api/index.ts`).
 
 ### 6.2 `apiRequest`
 
@@ -401,6 +406,7 @@ Aturan:
 | `useTwoFactorFlow({ open, pendingLogin, onSuccess })` | State machine 2FA: `EMAIL_OTP` → `SCAN_QR` / `AUTHENTICATOR`, serta reset via `EMAIL_RESET` |
 | `useRekonsiliasiPeriod()` | State periode Rekonsiliasi (tahun/bulan/minggu) + `isSettled` |
 | `useRekonsiliasiTable({ period })` | State tabel Rekonsiliasi (filter, search, pagination URL) |
+| `useMsaRowExpansion()`, `useMsaHistoryExpansion()` | State buka/tutup baris tabel MSA (belum diekspor dari `hooks/custom/index.ts`, import langsung dari file-nya) |
 
 > **Catatan `useUrlSearchState`:** `setSearchParams` bawaan React Router membaca param dari saat render. Kalau dipanggil dua kali dalam satu event, perubahan pertama hilang. `setParams` membaca `window.location.search` terbaru, jadi pakai hook ini, bukan `useSearchParams` langsung.
 
@@ -420,7 +426,10 @@ const handleKpiCategoryChange = (value: string) => {
 ```ts
 import { useHistorySlaTableQuery, useUrlPagination } from "@/app/hooks";
 import { useDebouncedSearch } from "@/app/hooks/custom/pacer"; // pacer tidak diekspor dari index
+import { useMsaRowExpansion } from "@/app/hooks/custom/useMsaRowExpansion"; // begitu juga hook ekspansi MSA
 ```
+
+Hook query Monday (`hooks/query/monday`) tidak punya `index.ts` dan tidak masuk `hooks/index.ts`, jadi di-import langsung dari file-nya.
 
 ---
 
@@ -428,10 +437,13 @@ import { useDebouncedSearch } from "@/app/hooks/custom/pacer"; // pacer tidak di
 
 ```
 types/
+├── auth/             auth.types.ts
 ├── daily-monitoring/ dailyMonitoring.types.ts
 ├── fbb/              onx.types.ts, sla.types.ts
 ├── first-insight/    historySla.types.ts
 ├── monday/           *.types.ts
+├── msa/              msa.types.ts
+├── network/          peHsi.types.ts
 ├── reconsiliation/   rekonsiliasi.types.ts
 └── table.types.ts
 ```
@@ -450,8 +462,9 @@ Organism sebaiknya menerima **view model**, bukan response mentah. Dengan begitu
 
 ## 9. Utils & Config
 
-- **`utils/*.utils.ts`**: fungsi murni tanpa React, misalnya `formatYearWeek`, `formatDecimal`, `summarizeAchievements`, `toInitials`.
-- **`config/*.ts`**: konstanta & opsi statis, misalnya `PACER_WAIT`, `PARAMETER_OPTIONS`, dan menu CNOP (`menuConfig.ts`).
+- **`utils/*.utils.ts`**: fungsi murni tanpa React, misalnya `formatYearWeek`, `formatDecimal`, `summarizeAchievements`, `toInitials`, `getDegradedPaths` (`peHsi.utils.ts`).
+- Utils ekspor (`dailyMonitoringExport.utils.ts`, `msaExport.utils.ts`) memegang unduhan file; dipanggil dari handler di page, bukan dari organism.
+- **`config/*.ts`**: konstanta & opsi statis, misalnya `PACER_WAIT`, `PARAMETER_OPTIONS`, `rekonsiliasi.config.ts`, dan menu CNOP (`menuConfig.ts`).
 - **`config/providerColors.config.ts`**: warna tiap provider ISP untuk map mode Experience. Pakai `getProviderColor(nama)`.
 - Menu sidebar dashboard baru didefinisikan langsung di file layout-nya (`FBB_MENUS`, `EBIS_MENUS`, `FIRST_INSIGHT_MENUS`).
 
@@ -465,7 +478,11 @@ Organism sebaiknya menerima **view model**, bukan response mentah. Dengan begitu
 | Auth (login, 2FA, konfirmasi akun) | ✅ Atomic, `src/modules/auth` sudah dihapus |
 | Landing, FBB (SLA/ONX/Ookla), EBIS, First Insight, OLO | ✅ Atomic |
 | Monday, Input Site (Rekonsiliasi) | ✅ Atomic, dengan catatan di bawah |
+| Report Reconsilation (`/report-site`) | ✅ Atomic, memakai `ReportSiteTemplate` sendiri di dalam shell `AppLayoutDefault` |
+| Resume RCA (`/resume-rca`) | ✅ Atomic, memakai `ResumeRcaTemplate`; data dari service qosmo PHP |
 | Daily Monitoring (`/daily-monitoring`) | ✅ Atomic, tanpa Ant Design (`src/modules/daily-monitoring` sudah dihapus) |
+| MSA (`/msa`) | ✅ Atomic, tapi masih memakai shell `AppLayoutDefault` + `MsaTemplate` sendiri |
+| PE-HSI (`/network/pe-hsi`) | ✅ Atomic, tapi page merender `<main>` langsung (belum punya template) |
 | `src/app/components/App*` (`AppTable`, `AppMenu`, `AppDropdown`, `AppInput`, `AppRadioGroup`) | ⏳ Legacy, masih dipakai modul lama |
 | `src/app/components/AppRouterGuard`, `AppRouterWrapper` | Infrastruktur router (bukan UI atomic) |
 | `src/modules/*` (dashboard, tutela, site, network, ticket, dll.) | ⏳ Belum dimigrasi |
@@ -473,10 +490,12 @@ Organism sebaiknya menerima **view model**, bukan response mentah. Dengan begitu
 **Pekerjaan lanjutan yang disarankan:**
 
 1. **Panel Monday masih fetch data sendiri.** `TrendPerformancePanel/TrendChartCard`, `SlaPerformancePanel`, `MonitoringCtiPanel`, `BaselinePerformancePanel`, dan `WinningBenchmarkPanel` memanggil query hook di dalam organism. Idealnya query dipindah ke `MondayPage`, lalu data dikirim lewat props seperti halaman FBB dan First Insight.
-2. **Pola layout Monday & Input Site belum seragam.** `MondayTemplate` dan `InputSiteTemplate` belum memakai `DashboardShellTemplate` / `DashboardContentTemplate`.
-3. **Komponen `App*` legacy.** Saat modul yang memakainya dimigrasi, ganti dengan atom/molecule yang sesuai lalu hapus.
-4. **Penamaan folder atom.** Folder atom masih huruf kecil dengan beberapa file per folder (`button/Button.tsx`). Level lain sudah memakai `<Nama>/index.tsx`.
-5. **`EbisKpiPage` masih memakai data contoh** (`api/ebis/ebisKpi.sample.ts`). Ganti dengan API + query hook saat endpoint tersedia.
+2. **Pola layout Monday, Input Site, MSA & PE-HSI belum seragam.** `MondayTemplate`, `InputSiteTemplate`, dan `MsaTemplate` belum memakai `DashboardShellTemplate` / `DashboardContentTemplate`. `PeHsiMonitoringPage` bahkan belum punya template — layout `<main>`-nya ditulis di page. Buat `PeHsiTemplate`, atau pindahkan ke `DashboardContentTemplate`.
+3. **Toolbar search PE-HSI masih inline di page.** Bagian search + badge "Showing N PE" ditulis dengan Tailwind langsung di `PeHsiMonitoringPage`, padahal `SearchInput` sudah ada di molecules.
+4. **Komponen `App*` legacy.** Saat modul yang memakainya dimigrasi, ganti dengan atom/molecule yang sesuai lalu hapus.
+5. **Penamaan folder atom.** Folder atom masih huruf kecil dengan beberapa file per folder (`button/Button.tsx`). Level lain sudah memakai `<Nama>/index.tsx`.
+6. **Barrel belum lengkap.** `hooks/query/monday`, `hooks/custom/useMsa*Expansion`, `hooks/custom/pacer`, dan `types/*` (kecuali `reconsiliation`) belum punya/masuk `index.ts`, jadi import-nya masih menunjuk file.
+7. **`EbisKpiPage` masih memakai data contoh** (`api/ebis/ebisKpi.sample.ts`). Ganti dengan API + query hook saat endpoint tersedia.
 
 ---
 

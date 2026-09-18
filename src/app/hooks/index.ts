@@ -6,3 +6,5 @@ export * from "./query/first-insight";
 export * from "./query/msa";
 export * from "./query/network";
 export * from "./query/reconsiliation";
+export * from "./query/resume-rca";
+export * from "./query/site";

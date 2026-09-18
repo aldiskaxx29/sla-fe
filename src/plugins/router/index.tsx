@@ -13,7 +13,8 @@ import { useAppRouter } from "@/app/router/app.router";
 import { useRekonsiliasiRouter } from "@/app/router/rekonsiliasi.router";
 import { useAuthConfirmRouter, useAuthRouter } from "@/app/router/auth.router";
 import { useDashboardRouter } from "@/modules/dashboard/router/dashboard.router";
-import { useSiteRouter } from "@/modules/site/router/site.router";
+import { useSiteRouter } from "@/app/router/site.router";
+import { useReportSupportRouter } from "@/modules/site/router/site.router";
 import { useMondayRouter } from "@/app/router/monday.router";
 import { useMsaRouter } from "@/app/router/msa.router";
 import { useFbbRouter } from "@/app/router/fbb.router";
@@ -33,7 +34,7 @@ import { useUserRouter } from "@/modules/user/router/user.router";
 import { useApproverRouter } from "@/modules/approver/router/approver.router";
 import { useProfileRouter } from "@/modules/profile/router/profile.router";
 import { useAccessPredictionRouter } from "@/modules/vaccess/router/prediction.router";
-import { useResumeRCARouter } from "@/modules/vaccess/router/resumerca.router";
+import { useResumeRcaRouter } from "@/app/router/resume-rca.router";
 import { useTutelaRouter } from "@/modules/tutela/router/tutela.router";
 
 const useRouter = () => {
@@ -42,6 +43,7 @@ const useRouter = () => {
   const authConfirm = useAuthConfirmRouter();
   const dashboard = useDashboardRouter();
   const site = useSiteRouter();
+  const reportSupport = useReportSupportRouter();
   const rekonsiliasi = useRekonsiliasiRouter();
   const monday = useMondayRouter();
   const msa = useMsaRouter();
@@ -61,7 +63,7 @@ const useRouter = () => {
   const approver = useApproverRouter();
   const profile = useProfileRouter();
   const acessprediction = useAccessPredictionRouter();
-  const resumerca = useResumeRCARouter();
+  const resumerca = useResumeRcaRouter();
   const tutela = useTutelaRouter();
 
   const routes = useRoutes([
@@ -126,6 +128,7 @@ const useRouter = () => {
             ...dashboard,
             // ...qualityHealthiness,
             ...site,
+            ...reportSupport,
             ...rekonsiliasi,
             ...monday,
             ...dailyMonitoring,

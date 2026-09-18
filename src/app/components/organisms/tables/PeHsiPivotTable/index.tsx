@@ -9,20 +9,22 @@ import type {
   PeHsiPath,
   PeHsiPivotArea,
 } from "@/app/types/network/peHsi.types";
+import { getDegradedPaths } from "@/app/utils/peHsi.utils";
 
 const PATHS: PeHsiPath[] = ["BTC", "BDS", "PNK", "JT2"];
 const SKELETON_ROWS = 6;
-
-const DANGER_THRESHOLD = 100;
 
 const headCell =
   "h-11 border-b border-[#e2e8f0] bg-white px-3 text-sm font-medium text-[#334155]";
 const bodyCell = "h-10 border-b border-[#e2e8f0] px-3 text-sm";
 
-const valueToneClass = (value: number | null | undefined) => {
+/** Merah kalau gateway-nya terdaftar di `status`, selain itu hijau. */
+const valueToneClass = (value: number | null | undefined, degraded: boolean) => {
   if (value === null || value === undefined) return "text-[#94a3b8]";
 
-  return value > DANGER_THRESHOLD ? "text-[#dc2626]" : "text-[#16a34a]";
+  return degraded
+    ? "bg-[#fef2f2] text-[#dc2626]"
+    : "text-[#16a34a]";
 };
 
 interface PeHsiPivotTableProps {
@@ -119,54 +121,61 @@ export function PeHsiPivotTable({
                   </tr>
 
                   {!collapsed &&
-                    group.rows.map((row) => (
-                      <tr key={row.pe_hsi} className="hover:bg-[#f8fafc]">
-                        <td
-                          className={`${bodyCell} border-r text-center text-[#020617] tabular-nums`}
-                        >
-                          {row.no}
-                        </td>
-                        <td
-                          className={`${bodyCell} border-r text-center text-[#020617]`}
-                        >
-                          {row.pe_hsi}
-                        </td>
-                        <td
-                          className={`${bodyCell} border-r text-center text-[#475569] tabular-nums`}
-                        >
-                          {row.baseline_str || "-"}
-                        </td>
-                        {PATHS.map((path) => {
-                          const value = row[path];
-                          const label =
-                            value === null || value === undefined
-                              ? "-"
-                              : `${value} ms`;
+                    group.rows.map((row) => {
+                      const degradedPaths = getDegradedPaths(row);
 
-                          return (
-                            <td
-                              key={path}
-                              className={`${bodyCell} border-r text-center font-medium tabular-nums last:border-r-0 ${valueToneClass(
-                                value,
-                              )}`}
-                            >
-                              {onValueClick ? (
-                                <button
-                                  type="button"
-                                  onClick={() => onValueClick(row.pe_hsi)}
-                                  title="Lihat detail link"
-                                  className="cursor-pointer underline decoration-dotted underline-offset-4 transition-opacity hover:opacity-80"
-                                >
-                                  {label}
-                                </button>
-                              ) : (
-                                label
-                              )}
-                            </td>
-                          );
-                        })}
-                      </tr>
-                    ))}
+                      return (
+                        <tr key={row.pe_hsi} className="hover:bg-[#f8fafc]">
+                          <td
+                            className={`${bodyCell} border-r text-center text-[#020617] tabular-nums`}
+                          >
+                            {row.no}
+                          </td>
+                          <td
+                            className={`${bodyCell} border-r text-center text-[#020617]`}
+                          >
+                            {row.pe_hsi}
+                          </td>
+                          <td
+                            className={`${bodyCell} border-r text-center text-[#475569] tabular-nums`}
+                          >
+                            {row.baseline_str || "-"}
+                          </td>
+
+                          {PATHS.map((path) => {
+                            const value = row[path];
+                            const label =
+                              value === null || value === undefined
+                                ? "-"
+                                : `${value} ms`;
+
+                            return (
+                              <td
+                                key={path}
+                                className={`${bodyCell} border-r text-center font-medium tabular-nums last:border-r-0 ${valueToneClass(
+                                  value,
+                                  degradedPaths.has(path),
+                                )}`}
+                              >
+                                {onValueClick ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => onValueClick(row.pe_hsi)}
+                                    title="Lihat detail link"
+                                    className="cursor-pointer underline decoration-dotted underline-offset-4 transition-opacity hover:opacity-80"
+                                  >
+                                    {label}
+                                  </button>
+                                ) : (
+                                  label
+                                )}
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      );
+                    })}
+
                 </Fragment>
               );
             })}

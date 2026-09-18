@@ -2,10 +2,10 @@ import { useMemo, useState } from "react";
 import { LuSearch } from "react-icons/lu";
 import { toast } from "react-toastify";
 
-import { buildPeHsiLinkDetailSample } from "@/app/api/network/peHsi.sample";
 import {
   usePeHsiLastUpdatedQuery,
   usePeHsiListPeQuery,
+  usePeHsiPeDetailQuery,
   usePeHsiPerformanceLinkQuery,
   usePeHsiPivotQuery,
   usePeHsiTrendSummaryQuery,
@@ -57,11 +57,17 @@ const PeHsiMonitoringPage = () => {
   const [linkDetailOpen, setLinkDetailOpen] = useState(false);
   const [detailPe, setDetailPe] = useState("");
   const [trendRange, setTrendRange] = useState<PeHsiGranularity>("hourly");
+  const [summaryRange, setSummaryRange] =
+    useState<PeHsiGranularity>("hourly");
 
   const { date, hour } = splitDateTime(selectedAt);
 
   const pivot = usePeHsiPivotQuery({ date, hour });
-  const trend = usePeHsiTrendSummaryQuery({ date, hour });
+  const trend = usePeHsiTrendSummaryQuery({
+    date,
+    hour,
+    filter: summaryRange,
+  });
   const performance = usePeHsiPerformanceLinkQuery({ date, hour });
   const lastUpdated = usePeHsiLastUpdatedQuery();
   const listPe = usePeHsiListPeQuery();
@@ -105,13 +111,10 @@ const PeHsiMonitoringPage = () => {
     setLinkDetailOpen(true);
   };
 
-  const linkDetail = useMemo(() => {
-    const item = (pivot.data ?? [])
-      .flatMap((area) => area.items)
-      .find((row) => row.pe_hsi === detailPe);
-
-    return item ? buildPeHsiLinkDetailSample(item) : undefined;
-  }, [detailPe, pivot.data]);
+  const linkDetail = usePeHsiPeDetailQuery(
+    { date, hour, peHsi: detailPe },
+    linkDetailOpen,
+  );
 
   const notAvailable = () =>
     toast.info("Fitur ini belum tersedia.", { position: "top-right" });
@@ -135,6 +138,9 @@ const PeHsiMonitoringPage = () => {
 
       <PeHsiTrendChart
         points={trend.data ?? []}
+        totalLink={totalLink}
+        range={summaryRange}
+        onRangeChange={setSummaryRange}
         loading={trend.isFetching}
         error={trend.isError}
         onViewDetail={() => openGatewayTrend()}
@@ -187,7 +193,9 @@ const PeHsiMonitoringPage = () => {
 
       <PeHsiLinkDetailModal
         open={linkDetailOpen}
-        detail={linkDetail}
+        detail={linkDetail.data}
+        loading={linkDetail.isFetching}
+        error={linkDetail.isError}
         peOptions={peOptions}
         selectedPe={detailPe}
         onSelectedPeChange={setDetailPe}

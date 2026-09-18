@@ -8,7 +8,6 @@ import { RouteObject } from "react-router-dom";
 import { AppRouteGuard } from "@/app/components";
 
 // UI
-const ReportSite = lazy(() => import("@/modules/site/pages/ReportSitePage"));
 const ReportSupportNeeded = lazy(
   () => import("@/modules/site/pages/ReportSupportNeededPage")
 );
@@ -16,16 +15,8 @@ const ReportSupportBreakdown = lazy(
   () => import("@/modules/site/pages/ReportSupportBreakdownPage")
 );
 
-const useSiteRouter = (): RouteObject[] => {
+const useReportSupportRouter = (): RouteObject[] => {
   return [
-    {
-      path: "report-site",
-      element: (
-        <AppRouteGuard>
-          <ReportSite />
-        </AppRouteGuard>
-      ),
-    },
     {
       path: "report-support-needed",
       element: (
@@ -45,4 +36,4 @@ const useSiteRouter = (): RouteObject[] => {
   ];
 };
 
-export { useSiteRouter };
+export { useReportSupportRouter };

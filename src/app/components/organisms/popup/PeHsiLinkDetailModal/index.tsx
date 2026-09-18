@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
 import { LuCircleCheck, LuTriangleAlert } from "react-icons/lu";
 
+import { Skeleton } from "@/app/components/atoms";
+
 import { EmptyState } from "@/app/components/molecules/EmptyState";
 import Modal from "@/app/components/molecules/Modal";
 import Select from "@/app/components/molecules/Select";
@@ -29,6 +31,8 @@ const formatMs = (value: number | null) =>
 interface PeHsiLinkDetailModalProps {
   open: boolean;
   detail?: PeHsiLinkDetail;
+  loading?: boolean;
+  error?: boolean;
   peOptions: string[];
   selectedPe: string;
   onSelectedPeChange: (value: string) => void;
@@ -38,6 +42,8 @@ interface PeHsiLinkDetailModalProps {
 export function PeHsiLinkDetailModal({
   open,
   detail,
+  loading = false,
+  error = false,
   peOptions,
   selectedPe,
   onSelectedPeChange,
@@ -72,16 +78,16 @@ export function PeHsiLinkDetailModal({
         />
       </div>
 
-      {detail ? (
+      {detail && !loading ? (
         <div className="flex flex-col gap-4">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="flex items-center justify-between rounded-xl border border-[#e2e8f0] bg-white px-4 py-3">
               <span className="flex items-center gap-2 text-sm font-medium text-[#0f172a]">
                 <LuCircleCheck className="size-4 text-[#2563eb]" />
-                Traceroute
+                Best Path
               </span>
               <span className="text-sm font-semibold text-[#16a34a]">
-                {detail.best_path_status}
+                {detail.best_path ?? "-"}
               </span>
             </div>
 
@@ -102,9 +108,11 @@ export function PeHsiLinkDetailModal({
                 <h3 className="text-sm font-semibold text-[#0f172a]">
                   Traceroute
                 </h3>
-                <span className="rounded-full bg-[#eff6ff] px-3 py-1 text-xs font-semibold text-[#2563eb]">
-                  {detail.best_path}
-                </span>
+                {detail.best_path ? (
+                  <span className="rounded-full bg-[#eff6ff] px-3 py-1 text-xs font-semibold text-[#2563eb]">
+                    {detail.best_path}
+                  </span>
+                ) : null}
               </div>
 
               <div className="overflow-hidden rounded-lg border border-[#e2e8f0]">
@@ -126,6 +134,14 @@ export function PeHsiLinkDetailModal({
                         <td className={bodyCell}>{formatMs(hop.latency_ms)}</td>
                       </tr>
                     ))}
+
+                    {!detail.traceroute.length && (
+                      <tr>
+                        <td colSpan={3}>
+                          <EmptyState title="Data traceroute belum tersedia" />
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -144,7 +160,7 @@ export function PeHsiLinkDetailModal({
                       <th className={`${headCell} border-r`}>Latency</th>
                       <th className={`${headCell} border-r`}>Jitter</th>
                       <th className={`${headCell} border-r`}>Packet Loss</th>
-                      <th className={headCell}>Status</th>
+                      <th className={`${headCell} border-r`}>Status</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -168,7 +184,7 @@ export function PeHsiLinkDetailModal({
                           {gateway.packet_loss}%
                         </td>
                         <td
-                          className={`${gatewayBodyCell} font-medium ${statusToneClass(
+                          className={`${gatewayBodyCell} border-r font-medium ${statusToneClass(
                             gateway.status,
                           )}`}
                         >
@@ -179,7 +195,7 @@ export function PeHsiLinkDetailModal({
 
                     {!gateways.length && (
                       <tr>
-                        <td colSpan={5}>
+                        <td colSpan={6}>
                           <EmptyState title="Gateway tidak ditemukan" />
                         </td>
                       </tr>
@@ -224,7 +240,7 @@ export function PeHsiLinkDetailModal({
                   <thead className="sticky top-0 z-10">
                     <tr className="bg-[#f8fafc]">
                       <th className={`${headCell} border-r bg-[#f8fafc]`}>
-                        Tanggal
+                        Jam
                       </th>
                       {detail.latency_trend.gateways.map((gateway) => (
                         <th
@@ -258,10 +274,26 @@ export function PeHsiLinkDetailModal({
             )}
           </section>
         </div>
+      ) : loading ? (
+        <div className="flex flex-col gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Skeleton height={56} />
+            <Skeleton height={56} />
+          </div>
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <Skeleton height={260} />
+            <Skeleton height={260} />
+          </div>
+          <Skeleton height={280} />
+        </div>
       ) : (
         <EmptyState
-          title="Detail belum tersedia"
-          description="Pilih PE-HSI lain untuk melihat detail link."
+          title={
+            error ? "Gagal memuat detail PE-HSI." : "Detail belum tersedia"
+          }
+          description={
+            error ? undefined : "Pilih PE-HSI lain untuk melihat detail link."
+          }
         />
       )}
     </Modal>

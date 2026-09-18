@@ -64,7 +64,7 @@ export function SlaPerformancePanel() {
   return (
     <NotchedCard title="SLA Performance">
       <header className="flex flex-col gap-2 shrink-0 mt-4">
-        <div className="flex flex-nowrap items-center justify-between gap-x-2 text-[10.5px] font-semibold text-slate-600 bg-white rounded-lg border border-slate-200 p-2 px-2.5 shadow-2xs w-full overflow-hidden select-none">
+        <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1 text-[10.5px] font-semibold text-slate-600 bg-white rounded-lg border border-slate-200 p-2 px-2.5 shadow-2xs w-full select-none">
           <div className="flex items-center gap-1 shrink-0 whitespace-nowrap">
             <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full bg-green-500 text-white shrink-0">
               <LuCheck size={8} />
@@ -122,7 +122,7 @@ export function SlaPerformancePanel() {
       )}
 
       {!isPending && !isError && (
-        <div className="mt-4 grid grid-cols-2 gap-3 flex-1">
+        <div className="mt-4 grid grid-cols-1 gap-3 flex-1 sm:grid-cols-2">
           <div className="flex flex-col border border-slate-200 bg-slate-50 rounded-3xl shadow-xs overflow-hidden min-h-full">
             {metrics
               .filter((m) => m.title === "Packet Loss" || m.title === "Jitter")
@@ -158,7 +158,7 @@ export function SlaPerformancePanel() {
                           onClick={() =>
                             card.detail && setActiveDetail(card.detail)
                           }
-                          className={`flex flex-col justify-start pt-1.5 px-2.5 bg-white shadow-[0_-3px_6px_rgba(0,0,0,0.04)] border-t border-slate-100 relative transition-colors ${
+                          className={`@container flex flex-col justify-start pt-1.5 px-2.5 bg-white shadow-[0_-3px_6px_rgba(0,0,0,0.04)] border-t border-slate-100 relative transition-colors ${
                             card.detail
                               ? "cursor-pointer hover:bg-slate-50/70"
                               : ""
@@ -190,18 +190,18 @@ export function SlaPerformancePanel() {
                           </header>
 
                           {card.beforeValue || card.currentValue ? (
-                            <div className="mt-2 grid grid-cols-2 gap-2 text-center shrink-0">
-                              <div className="flex flex-col items-center">
-                                <span className="text-xl font-extrabold text-navy leading-none">
+                            <div className="mt-2 grid grid-cols-2 gap-x-1 gap-y-2 text-center shrink-0">
+                              <div className="flex min-w-0 flex-col items-center">
+                                <span className="max-w-full text-[clamp(0.65rem,9.5cqw,1.25rem)] font-extrabold text-navy leading-none tabular-nums break-words">
                                   {card.beforeValue}
                                 </span>
                                 <span className="text-[8px] font-bold text-slate-400 mt-0.5">
                                   {card.beforeLabel ?? "(Before)"}
                                 </span>
                               </div>
-                              <div className="flex flex-col items-center">
-                                <div className="flex items-baseline justify-center gap-0.5">
-                                  <span className="text-xl font-extrabold text-navy leading-none">
+                              <div className="flex min-w-0 flex-col items-center">
+                                <div className="flex max-w-full flex-wrap items-baseline justify-center gap-0.5">
+                                  <span className="text-[clamp(0.65rem,9.5cqw,1.25rem)] font-extrabold text-navy leading-none tabular-nums break-words">
                                     {card.currentValue}
                                   </span>
                                   {card.trend && (
@@ -229,7 +229,7 @@ export function SlaPerformancePanel() {
                           {card.nestedData &&
                             card.nestedData.total !== undefined && (
                               <div className="mt-2 flex flex-col gap-1.5 text-[8px] font-bold leading-4 text-slate-500 border-t border-slate-100 pt-2 shrink-0">
-                                <div className="flex items-center justify-between gap-3">
+                                <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
                                   <span className="whitespace-nowrap">
                                     {card.nestedData.totalLabel ?? "T"}:{" "}
                                     {card.nestedData.total} Site
@@ -302,7 +302,7 @@ export function SlaPerformancePanel() {
                           onClick={() =>
                             card.detail && setActiveDetail(card.detail)
                           }
-                          className={`flex flex-col justify-start pt-1.5 px-2.5 bg-white shadow-[0_-3px_6px_rgba(0,0,0,0.04)] border-t border-slate-100 relative transition-colors ${
+                          className={`@container flex flex-col justify-start pt-1.5 px-2.5 bg-white shadow-[0_-3px_6px_rgba(0,0,0,0.04)] border-t border-slate-100 relative transition-colors ${
                             card.detail
                               ? "cursor-pointer hover:bg-slate-50/70"
                               : ""
@@ -334,18 +334,18 @@ export function SlaPerformancePanel() {
                           </header>
 
                           {card.beforeValue || card.currentValue ? (
-                            <div className="mt-2 grid grid-cols-2 gap-2 text-center shrink-0">
-                              <div className="flex flex-col items-center">
-                                <span className="text-xl font-extrabold text-navy leading-none">
+                            <div className="mt-2 grid grid-cols-2 gap-x-1 gap-y-2 text-center shrink-0">
+                              <div className="flex min-w-0 flex-col items-center">
+                                <span className="max-w-full text-[clamp(0.65rem,9.5cqw,1.25rem)] font-extrabold text-navy leading-none tabular-nums break-words">
                                   {card.beforeValue}
                                 </span>
                                 <span className="text-[8px] font-bold text-slate-400 mt-0.5">
                                   {card.beforeLabel ?? "(Before)"}
                                 </span>
                               </div>
-                              <div className="flex flex-col items-center">
-                                <div className="flex items-baseline justify-center gap-0.5">
-                                  <span className="text-xl font-extrabold text-navy leading-none">
+                              <div className="flex min-w-0 flex-col items-center">
+                                <div className="flex max-w-full flex-wrap items-baseline justify-center gap-0.5">
+                                  <span className="text-[clamp(0.65rem,9.5cqw,1.25rem)] font-extrabold text-navy leading-none tabular-nums break-words">
                                     {card.currentValue}
                                   </span>
                                   {card.trend && (

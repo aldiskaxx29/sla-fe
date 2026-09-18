@@ -2,11 +2,14 @@ import { apiRequest } from "@/app/api/base-url";
 
 import type {
   PeHsiDateTimeResponse,
+  PeHsiDetailParams,
+  PeHsiDetailResponse,
   PeHsiListPeResponse,
   PeHsiParams,
   PeHsiPerformanceLinkResponse,
   PeHsiPivotResponse,
   PeHsiTrendResponse,
+  PeHsiTrendSummaryParams,
   PeHsiVerifierParams,
   PeHsiVerifierTrendResponse,
 } from "@/app/types/network/peHsi.types";
@@ -16,6 +19,7 @@ export const PE_HSI_ENDPOINTS = {
   performanceLink: "pe-hsi/performance-link",
   dateTime: "pe-hsi/date-time",
   listPe: "pe-hsi/list-pe",
+  peDetail: "pe-hsi/pe-detail",
   trendSummary: "pe-hsi/trend-summary",
   trendVerifier: "pe-hsi/trend-verifier",
 } as const;
@@ -58,14 +62,28 @@ export const getPeHsiListPe = (signal?: AbortSignal) =>
     signal,
   });
 
+export const getPeHsiPeDetail = (
+  { peHsi, ...params }: PeHsiDetailParams,
+  signal?: AbortSignal,
+) =>
+  apiRequest<PeHsiDetailResponse>({
+    method: "GET",
+    url: PE_HSI_ENDPOINTS.peDetail,
+    params: { ...toParams(params), pe_hsi: peHsi },
+    signal,
+  });
+
 export const getPeHsiTrendSummary = (
-  params: PeHsiParams,
+  { filter, ...params }: PeHsiTrendSummaryParams,
   signal?: AbortSignal,
 ) =>
   apiRequest<PeHsiTrendResponse>({
     method: "GET",
     url: PE_HSI_ENDPOINTS.trendSummary,
-    params: toParams(params),
+    params: {
+      ...toParams(params),
+      ...(filter ? { filter } : {}),
+    },
     signal,
   });
 
