@@ -28,6 +28,7 @@ import { useOneRouter } from "@/modules/one/router/one.router";
 import { useELibraryRouter } from "@/modules/elibrary/router/elibrary.router";
 import { useNetworkRouter } from "@/modules/network/router/network.router";
 import { useTicketRouter } from "@/modules/ticket/router/ticket.router";
+import { useTicketQualityRouter } from "@/app/router/ticket.router";
 import { AuthRouteGuard } from "../hooks/AuthenticationGuard";
 import { useDashboardTARouter } from "@/modules/dashboard-ta/router/dashboardTA.router";
 import { useUserRouter } from "@/modules/user/router/user.router";
@@ -58,6 +59,7 @@ const useRouter = () => {
   const network = useNetworkRouter();
   const one = useOneRouter();
   const ticket = useTicketRouter();
+  const ticketQuality = useTicketQualityRouter();
   const dashboardTA = useDashboardTARouter();
   const user = useUserRouter();
   const approver = useApproverRouter();
@@ -136,6 +138,7 @@ const useRouter = () => {
             ...elibrary,
             ...networkPerformance,
             ...network,
+            ...ticketQuality,
             ...ticket,
             ...dashboardTA,
             ...user,

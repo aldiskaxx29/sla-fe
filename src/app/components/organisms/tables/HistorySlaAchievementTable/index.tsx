@@ -11,7 +11,17 @@ const QUARTER_COUNT = 4;
 const MONTHS_PER_QUARTER = 3;
 const SKELETON_ROWS = 8;
 
+/** Tinggi viewport tabel: 15 baris data (44px) + 3 baris header (36px). */
+const VISIBLE_ROWS = 15;
+const ROW_HEIGHT = 44;
+const HEADER_HEIGHT = 36 * 3;
+const MAX_BODY_HEIGHT = VISIBLE_ROWS * ROW_HEIGHT + HEADER_HEIGHT;
+
 const borderCell = "border-r border-b border-[#e2e8f0]";
+/** 3 baris header saling menumpuk: 0px, 36px, 72px dari atas viewport tabel. */
+const headRow1 = "sticky top-0 z-30";
+const headRow2 = "sticky top-9 z-30";
+const headRow3 = "sticky top-[72px] z-30";
 const stickyNo = "sticky left-0 w-12 min-w-12";
 const stickyIndicator = "sticky left-12 w-[320px] min-w-[320px]";
 const stickyThreshold = "sticky left-[368px] w-[100px] min-w-[100px]";
@@ -44,31 +54,34 @@ export function HistorySlaAchievementTable({
 
   return (
     <div className="flex flex-col">
-      <div className="overflow-x-auto rounded-lg border border-[#e2e8f0]">
+      <div
+        className="overflow-auto rounded-lg border border-[#e2e8f0]"
+        style={{ maxHeight: MAX_BODY_HEIGHT }}
+      >
         <table className="w-full min-w-[1400px] border-separate border-spacing-0 text-sm text-[#020617]">
-          <thead className="sticky top-0 z-20">
+          <thead>
             <tr>
               <th
                 rowSpan={3}
-                className={`${stickyNo} ${borderCell} z-10 bg-[#f3f7fd] px-3 font-medium text-[#334155]`}
+                className={`${stickyNo} ${borderCell} sticky top-0 z-40 bg-[#f3f7fd] px-3 font-medium text-[#334155]`}
               >
                 No
               </th>
               <th
                 rowSpan={3}
-                className={`${stickyIndicator} ${borderCell} z-10 bg-[#f3f7fd] px-4 font-medium text-[#334155]`}
+                className={`${stickyIndicator} ${borderCell} sticky top-0 z-40 bg-[#f3f7fd] px-4 font-medium text-[#334155]`}
               >
                 Performance Indicator
               </th>
               <th
                 rowSpan={3}
-                className={`${stickyThreshold} ${borderCell} z-10 bg-[#f3f7fd] px-3 font-medium text-[#334155]`}
+                className={`${stickyThreshold} ${borderCell} sticky top-0 z-40 bg-[#f3f7fd] px-3 font-medium text-[#334155]`}
               >
                 Threshold
               </th>
               <th
                 colSpan={achievementColumns}
-                className="h-9 border-b border-[#e2e8f0] bg-[#eaf2fc] font-medium text-[#334155]"
+                className={`${headRow1} h-9 border-b border-[#e2e8f0] bg-[#eaf2fc] font-medium text-[#334155]`}
               >
                 Achievement
               </th>
@@ -79,7 +92,7 @@ export function HistorySlaAchievementTable({
                 <th
                   key={quarter.key}
                   colSpan={quarter.months.length + 1}
-                  className={`h-9 border-b border-[#e2e8f0] bg-[#d9e8fa] font-medium text-[#334155] ${
+                  className={`${headRow2} h-9 border-b border-[#e2e8f0] bg-[#d9e8fa] font-medium text-[#334155] ${
                     index !== quarters.length - 1 ? "border-r" : ""
                   }`}
                 >
@@ -116,17 +129,17 @@ export function HistorySlaAchievementTable({
               indicators.map((row) => (
                 <tr key={`${row.no}-${row.indicator}`} className="group">
                   <td
-                    className={`${stickyNo} ${borderCell} h-11 bg-white px-3 text-center group-hover:bg-[#f8fafc]`}
+                    className={`${stickyNo} ${borderCell} z-10 h-11 bg-white px-3 text-center group-hover:bg-[#f8fafc]`}
                   >
                     {row.no}
                   </td>
                   <td
-                    className={`${stickyIndicator} ${borderCell} bg-white px-4 font-medium group-hover:bg-[#f8fafc]`}
+                    className={`${stickyIndicator} ${borderCell} z-10 bg-white px-4 font-medium group-hover:bg-[#f8fafc]`}
                   >
                     {row.indicator}
                   </td>
                   <td
-                    className={`${stickyThreshold} ${borderCell} bg-white px-3 text-center whitespace-nowrap group-hover:bg-[#f8fafc]`}
+                    className={`${stickyThreshold} ${borderCell} z-10 bg-white px-3 text-center whitespace-nowrap group-hover:bg-[#f8fafc]`}
                   >
                     {row.threshold || "-"}
                   </td>
@@ -163,13 +176,13 @@ export function HistorySlaAchievementTable({
 function QuarterHeader({ months }: { months: string[] }) {
   return (
     <>
-      <th className="h-9 min-w-[88px] border-r border-b border-[#1e3a5f] bg-[#1e3a5f] px-2 font-medium whitespace-nowrap text-white">
+      <th className={`${headRow3} h-9 min-w-[88px] border-r border-b border-[#1e3a5f] bg-[#1e3a5f] px-2 font-medium whitespace-nowrap text-white`}>
         Target
       </th>
       {months.map((month, index) => (
         <th
           key={`${month}-${index}`}
-          className={`${borderCell} h-9 min-w-[88px] bg-[#bcd6f5] px-2 font-medium whitespace-nowrap text-[#1e293b]`}
+          className={`${headRow3} ${borderCell} h-9 min-w-[88px] bg-[#bcd6f5] px-2 font-medium whitespace-nowrap text-[#1e293b]`}
         >
           {month}
         </th>

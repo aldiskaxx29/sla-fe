@@ -53,3 +53,16 @@ export const formatMondayWeekLabel = (yearWeek?: string | null) => {
  */
 export const formatMonitoringHour = (date: Date = new Date()) =>
   `${String(date.getHours()).padStart(2, "0")}:00`;
+
+/**
+ * Yearweek periode Jumat s/d Kamis terakhir yang sudah selesai. Dipakai untuk
+ * label "Last Updated" supaya tetap benar walau asset accessPl minggu itu
+ * belum terbit. Contoh: Jumat 18 September 2026 -> "202637" (11 s/d 17 Sep).
+ */
+export const getLatestCompletedMondayYearWeek = (date: dayjs.Dayjs = dayjs()) => {
+  const cursor = date
+    .subtract(WEEK_START_OFFSET_DAYS, "day")
+    .subtract(1, "week");
+
+  return `${cursor.isoWeekYear()}${String(cursor.isoWeek()).padStart(2, "0")}`;
+};

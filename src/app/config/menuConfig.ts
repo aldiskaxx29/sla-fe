@@ -53,6 +53,10 @@ export const NETWORK_OPTIONS: MenuOption[] = [
   { label: "Monitoring PE-HSI", value: "network/pe-hsi" },
 ];
 
+export const TICKET_OPTIONS: MenuOption[] = [
+  { label: "Dashboard", value: "ticket/dashboard" },
+];
+
 export const ONX_OPTIONS: MenuOption[] = [
   { label: "Dashboard", value: "onx" },
   { label: "City Performance", value: "onx/city-performance" },
@@ -118,10 +122,10 @@ export const MENU_CONFIG: MenuConfigItem[] = [
   {
     key: "ticket",
     label: "Ticket Quality",
-    path: "ticket",
-    type: "button",
-    activePaths: ["ticket"],
+    type: "dropdown",
+    activePaths: ["ticket", "ticket/dashboard"],
     allowedRoles: ALL_MAIN_MENU_ROLES,
+    options: TICKET_OPTIONS,
   },
   {
     key: "elibrary",

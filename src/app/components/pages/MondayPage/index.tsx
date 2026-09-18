@@ -1,7 +1,5 @@
 import { LuCalendar } from "react-icons/lu";
 
-import { useLatestPacketLossWeekQuery } from "@/app/hooks/query/monday/slaPerformance";
-
 import { SlaPerformancePanel } from "@/app/components/organisms/panels/SlaPerformancePanel";
 import { TrendPerformancePanel } from "@/app/components/organisms/panels/TrendPerformancePanel";
 import { BaselinePerformancePanel } from "@/app/components/organisms/panels/BaselinePerformancePanel";
@@ -9,18 +7,20 @@ import { WinningBenchmarkPanel } from "@/app/components/organisms/panels/Winning
 
 import MondayTemplate from "@/app/components/templates/MondayTemplate";
 
-import { formatMondayWeekLabel } from "@/app/utils/monday.utils";
+import {
+  formatMondayWeekLabel,
+  getLatestCompletedMondayYearWeek,
+} from "@/app/utils/monday.utils";
 
 const MondayPage = () => {
-  const { data: latestWeek } = useLatestPacketLossWeekQuery();
+  // Label periode dihitung dari kalender (Jumat s/d Kamis terakhir yang sudah
+  // selesai), bukan dari asset accessPl — asset kerap terbit terlambat
+  // sehingga labelnya ketinggalan satu minggu.
+  const latestWeek = getLatestCompletedMondayYearWeek();
   const weekLabel = formatMondayWeekLabel(latestWeek);
 
-  const prevWeek = latestWeek
-    ? (() => {
-        const week = Number(String(latestWeek).slice(4));
-        return Number.isFinite(week) && week > 1 ? week - 1 : null;
-      })()
-    : null;
+  const week = Number(String(latestWeek).slice(4));
+  const prevWeek = Number.isFinite(week) && week > 1 ? week - 1 : null;
 
   const leftContent = (
     <div className="flex shrink-0 items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-[10px] font-medium text-slate-500">

@@ -8,7 +8,7 @@ const Ticket = lazy(() => import("@/modules/ticket/pages/TicketPage"));
 const useTicketRouter = (): RouteObject[] => {
   return [
     {
-      path: "ticket",
+      path: "ticket/dashboard",
       element: (
         <AppRouteGuard>
           <Ticket />
